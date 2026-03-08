@@ -19,8 +19,6 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { TbReportSearch } from "react-icons/tb";
 import { FaHandshake } from "react-icons/fa";
 
-
-
 function FloatingItem({
   src,
   label,
@@ -480,27 +478,37 @@ export default function Home() {
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-number">01</div>
-            <div className="step-icon"><TbReportSearch /></div>
+            <div className="step-icon">
+              <TbReportSearch />
+            </div>
             <h3 className="step-title">Report It</h3>
             <p className="step-body">
               Found something? Submit it in seconds — snap a photo, pick a
               category, and drop the location. It goes live instantly.
             </p>
           </div>
-          <div className="step-connector" aria-hidden="true">→</div>
+          <div className="step-connector" aria-hidden="true">
+            →
+          </div>
           <div className="step-card">
             <div className="step-number">02</div>
-            <div className="step-icon"><FaSearch /></div>
+            <div className="step-icon">
+              <FaSearch />
+            </div>
             <h3 className="step-title">Search & Match</h3>
             <p className="step-body">
               Lost something? Browse the board, filter by type and location, or
               get notified when something matching your item shows up.
             </p>
           </div>
-          <div className="step-connector" aria-hidden="true">→</div>
+          <div className="step-connector" aria-hidden="true">
+            →
+          </div>
           <div className="step-card">
             <div className="step-number">03</div>
-            <div className="step-icon"><FaHandshake /></div>
+            <div className="step-icon">
+              <FaHandshake />
+            </div>
             <h3 className="step-title">Get It Back</h3>
             <p className="step-body">
               Message the finder directly through Findr, confirm it's yours, and
@@ -558,39 +566,61 @@ export default function Home() {
         <div className="footer-inner">
           <div className="footer-brand">
             <span className="footer-logo">Findr</span>
-            <p className="footer-tagline">
-              Lost & found, built for schools.
-            </p>
+            <p className="footer-tagline">Lost & found, built for schools.</p>
           </div>
 
           <div className="footer-links">
             <div className="footer-col">
               <span className="footer-col-heading">Navigate</span>
               {isSignedIn ? (
-                <button className="footer-link" onClick={() => router.push("/dashboard")}>Dashboard</button>
+                <button
+                  className="footer-link"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  Dashboard
+                </button>
               ) : (
                 <SignInButton mode="modal">
                   <button className="footer-link">Sign In</button>
                 </SignInButton>
               )}
-              {isSignedIn ? (
-                <button className="footer-link" onClick={() => router.push("/messages")}>Messages</button>
-              ) : null}
+              {isSignedIn && (
+                <button
+                  className="footer-link"
+                  onClick={() => router.push("/messages")}
+                >
+                  Messages
+                </button>
+              )}
+              {isSignedIn && (
+                <button
+                  className="footer-link"
+                  onClick={() => router.push("/help")}
+                >
+                  Help
+                </button>
+              )}
+              {isSignedIn && (
+                <button
+                  className="footer-link"
+                  onClick={() => router.push("/settings")}
+                >
+                  Settings
+                </button>
+              )}
             </div>
             <div className="footer-col">
               <span className="footer-col-heading">Contact</span>
-              <a
-                className="footer-link"
-                href="mailto:srivatsav4ever@gmail.com"
-              >
-                <FaEnvelope style={{ display: "inline", marginRight: 6, fontSize: 12 }} />
+              <a className="footer-link" href="mailto:srivatsav4ever@gmail.com">
+                <FaEnvelope
+                  style={{ display: "inline", marginRight: 6, fontSize: 12 }}
+                />
                 srivatsav4ever@gmail.com
               </a>
-              <a
-                className="footer-link"
-                href="mailto:bavu.ramki@gmail.com"
-              >
-                <FaEnvelope style={{ display: "inline", marginRight: 6, fontSize: 12 }} />
+              <a className="footer-link" href="mailto:bavu.ramki@gmail.com">
+                <FaEnvelope
+                  style={{ display: "inline", marginRight: 6, fontSize: 12 }}
+                />
                 bavu.ramki@gmail.com
               </a>
             </div>
@@ -598,7 +628,9 @@ export default function Home() {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Findr. Built for students, by students.</span>
+          <span>
+            © {new Date().getFullYear()} Findr. Built for students, by students.
+          </span>
         </div>
       </footer>
     </div>
