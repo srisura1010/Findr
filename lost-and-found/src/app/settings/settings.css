@@ -108,44 +108,24 @@ body.high-contrast {
 
 /* ═══════════════════════════════════════════
    COLORBLIND MODE
-   — Optimised for deuteranopia / protanopia
-     (red-green), tritanopia (blue-yellow),
-     and achromatopsia (no colour).
-
-   Strategy:
-   • Avoid hue as the only differentiator.
-   • Use dark navy (#002244) for all body text
-     → contrast ≥ 7:1 on white (WCAG AAA).
-   • Secondary / muted text uses clearly
-     distinct lightness steps, not just hue.
-   • Accent uses a deep orange (#c45000) —
-     distinguishable from navy across all major
-     colorblind types, including blue-weakness.
-   • Active / selected states add a bold border
-     + underline (non-colour cues) in addition
-     to the fill change (see button rules below).
 ═══════════════════════════════════════════ */
 body.colorblind {
-  /* Backgrounds — very low saturation, lightness-based */
   --bg-page:        #f2f4f7;
   --bg-card:        #ffffff;
   --bg-input:       #eef1f6;
   --bg-hover:       #e2e7f0;
   --bg-active:      #d6dff0;
 
-  /* Borders — dark enough to see without relying on colour */
   --border-default: #9aaabe;
   --border-input:   #7a90aa;
   --border-focus:   #002244;
 
-  /* Text — high-contrast navy hierarchy */
-  --text-primary:   #002244;   /* 9.7:1 on white — WCAG AAA */
-  --text-secondary: #2a4a72;   /* 6.2:1 on white — WCAG AA large */
-  --text-muted:     #4e6a8a;   /* 4.6:1 on white — WCAG AA */
+  --text-primary:   #002244;
+  --text-secondary: #2a4a72;
+  --text-muted:     #4e6a8a;
   --text-active:    #002244;
 
-  /* Accent — deep orange, safe across all colorblind types */
-  --accent:         #c45000;   /* 4.8:1 on white — WCAG AA */
+  --accent:         #c45000;
   --accent-hover:   #a33e00;
   --accent-light:   #fde8d8;
   --accent-border:  #c45000;
@@ -161,8 +141,6 @@ body.colorblind {
   --scrollbar-thumb: #7a90aa;
 }
 
-/* Active theme button: add underline + thicker border
-   so the selection is never communicated by colour alone */
 body.colorblind .theme-options button.active {
   background: var(--accent);
   border-color: var(--accent);
@@ -174,7 +152,6 @@ body.colorblind .theme-options button.active {
   outline-offset: 2px;
 }
 
-/* Focus visible — thick navy outline for keyboard nav */
 body.colorblind *:focus-visible {
   outline: 3px solid #002244;
   outline-offset: 3px;
@@ -193,7 +170,6 @@ body.colorblind *:focus-visible {
 
 /* ═══════════════════════════════════════════
    PAGE WRAPPER
-   — no transition: avoids dark→light sweep on mount
 ═══════════════════════════════════════════ */
 .settings-page {
   min-height: 100vh;
@@ -206,7 +182,6 @@ body.colorblind *:focus-visible {
 
 /* ═══════════════════════════════════════════
    MAIN CARD
-   — no transition: avoids dark→light sweep on mount
 ═══════════════════════════════════════════ */
 .settings-card {
   width: 650px;
@@ -217,8 +192,6 @@ body.colorblind *:focus-visible {
   padding: 40px;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--border-default);
-
-  /* Accent line at top */
   position: relative;
   overflow: hidden;
 }
@@ -257,7 +230,6 @@ body.colorblind *:focus-visible {
   border-top: 1px solid var(--divider);
 }
 
-/* Section heading */
 .settings-section h3 {
   font-family: "Ubuntu", sans-serif;
   font-size: 10px;
@@ -306,6 +278,10 @@ body.colorblind *:focus-visible {
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
   transform: translateY(-1px);
+}
+
+body.light .theme-options button.active {
+  box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
 }
 
 body.high-contrast .theme-options button.active {
@@ -459,6 +435,10 @@ body.high-contrast .theme-options button.active {
   background: var(--accent-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+body.light .settings-save-btn:hover {
+  box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
 }
 
 body.high-contrast .settings-save-btn {

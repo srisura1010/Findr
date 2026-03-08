@@ -5,40 +5,40 @@
 ═══════════════════════════════════════════ */
 :root,
 body.dark {
-  --msg-bg-page:       #0f172a;
-  --msg-bg-sidebar:    #0f172a;
+  --msg-bg-page:       #0b1120;
+  --msg-bg-sidebar:    #0b1120;
   --msg-bg-card:       #131d30;
   --msg-bg-input:      #1a2540;
   --msg-bg-hover:      #1e2d45;
-  --msg-bg-active:     #0d1f3c;
-  --msg-bg-chat:       #0f172a;
-  --msg-bg-header:     #0f172a;
-  --msg-bg-bubble-own: #2f80ed;
+  --msg-bg-active:     #1e1545;
+  --msg-bg-chat:       #0b1120;
+  --msg-bg-header:     #0b1120;
+  --msg-bg-bubble-own: #7c3aed;
   --msg-bg-bubble-other: #1a2540;
 
-  --msg-border:        #1e3a8a;
-  --msg-border-active: #2f80ed;
-  --msg-border-input:  #2353d7;
+  --msg-border:        #1e2d45;
+  --msg-border-active: #7c3aed;
+  --msg-border-input:  #253352;
 
   --msg-text-primary:  #e8edf5;
   --msg-text-secondary:#8899bb;
   --msg-text-muted:    #4a5a7a;
-  --msg-text-active:   #6789f8;
+  --msg-text-active:   #a78bfa;
 
-  --msg-accent:        #2f80ed;
-  --msg-accent-light:  #0d1f3c;
+  --msg-accent:        #7c3aed;
+  --msg-accent-light:  #1e1545;
   --msg-accent-blue:   #2563eb;
-  --msg-accent-blue-light: #0d1f3c;
+  --msg-accent-blue-light: #1e1545;
 
-  --msg-unread-dot:    #2f80ed;
-  --msg-admin-grad:    linear-gradient(135deg, #2563eb, #2f80ed);
-  --msg-avatar-bg:     #2f80ed;
+  --msg-unread-dot:    #7c3aed;
+  --msg-admin-grad:    linear-gradient(135deg, #2563eb, #7c3aed);
+  --msg-avatar-bg:     #7c3aed;
 
-  --msg-send-active:   #2f80ed;
-  --msg-send-inactive: #1e3a8a;
+  --msg-send-active:   #7c3aed;
+  --msg-send-inactive: #253352;
   --msg-send-icon-inactive: #4a5a7a;
 
-  --msg-shadow-bubble: 0 2px 8px rgba(35,83,215,0.35);
+  --msg-shadow-bubble: 0 2px 8px rgba(124,58,237,0.35);
   --msg-shadow-other:  0 1px 4px rgba(0,0,0,0.3);
 }
 
@@ -48,35 +48,35 @@ body.light {
   --msg-bg-card:       #ffffff;
   --msg-bg-input:      #f8fafc;
   --msg-bg-hover:      #f1f5f9;
-  --msg-bg-active:     #ede9fe;
+  --msg-bg-active:     #dbeafe;
   --msg-bg-chat:       #f0f2f8;
   --msg-bg-header:     #ffffff;
-  --msg-bg-bubble-own: #7c3aed;
+  --msg-bg-bubble-own: #2f80ed;
   --msg-bg-bubble-other: #ffffff;
 
   --msg-border:        #e8eaf0;
-  --msg-border-active: #7c3aed;
+  --msg-border-active: #2f80ed;
   --msg-border-input:  #e2e8f0;
 
   --msg-text-primary:  #0f172a;
   --msg-text-secondary:#64748b;
   --msg-text-muted:    #94a3b8;
-  --msg-text-active:   #6d28d9;
+  --msg-text-active:   #285ebb;
 
-  --msg-accent:        #7c3aed;
-  --msg-accent-light:  #ede9fe;
+  --msg-accent:        #2f80ed;
+  --msg-accent-light:  #dbeafe;
   --msg-accent-blue:   #2563eb;
   --msg-accent-blue-light: #eff6ff;
 
-  --msg-unread-dot:    #7c3aed;
-  --msg-admin-grad:    linear-gradient(135deg, #2563eb, #7c3aed);
-  --msg-avatar-bg:     #7c3aed;
+  --msg-unread-dot:    #2f80ed;
+  --msg-admin-grad:    linear-gradient(135deg, #2563eb, #2f80ed);
+  --msg-avatar-bg:     #2f80ed;
 
-  --msg-send-active:   #7c3aed;
+  --msg-send-active:   #2f80ed;
   --msg-send-inactive: #e2e8f0;
   --msg-send-icon-inactive: #94a3b8;
 
-  --msg-shadow-bubble: 0 2px 8px rgba(124,58,237,0.2);
+  --msg-shadow-bubble: 0 2px 8px rgba(47,128,237,0.2);
   --msg-shadow-other:  0 1px 4px rgba(0,0,0,0.07);
 }
 
@@ -870,9 +870,6 @@ body.high-contrast .admin-select-avatar {
 
 /* ═══════════════════════════════════════════
    MOBILE  (≤ 640px)
-   Pattern: sidebar fills screen by default.
-   When a conversation is open, chat slides
-   over the top (position: absolute, full size).
 ═══════════════════════════════════════════ */
 @media (max-width: 640px) {
 
@@ -881,45 +878,37 @@ body.high-contrast .admin-select-avatar {
     overflow: hidden;
   }
 
-  /* Sidebar takes full width, always rendered */
   .messages-sidebar {
     width: 100%;
     flex-shrink: 0;
     border-right: none;
   }
 
-  /* Chat pane sits on top of the sidebar when active */
   .messages-chat {
     position: absolute;
     inset: 0;
     width: 100%;
-    /* Hidden by default — slid off to the right */
     transform: translateX(100%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 20;
   }
 
-  /* When a conversation is selected, slide chat in */
   .messages-chat--open {
     transform: translateX(0);
   }
 
-  /* Show the back button on mobile */
   .messages-chat__back {
     display: flex;
   }
 
-  /* Slightly larger touch targets for conv rows */
   .messages-conv-row {
     padding: 16px;
   }
 
-  /* Prevent iOS zoom on textarea focus */
   .messages-chat__textarea {
     font-size: 16px;
   }
 
-  /* Report modal slides up from bottom on mobile */
   .report-modal-overlay {
     align-items: flex-end;
     padding: 0;
@@ -932,7 +921,6 @@ body.high-contrast .admin-select-avatar {
     padding: 20px 20px 32px;
   }
 
-  /* Drag handle pill on bottom-sheet modals */
   .report-modal::before {
     content: '';
     display: block;
@@ -943,19 +931,16 @@ body.high-contrast .admin-select-avatar {
     margin: 0 auto 16px;
   }
 
-  /* Slightly tighter header on mobile */
   .messages-chat__header {
     padding: 12px 14px;
   }
 
-  /* Make send button a touch-friendly size */
   .messages-chat__send {
     width: 42px;
     height: 42px;
     font-size: 20px;
   }
 
-  /* Bottom padding so content clears the device home indicator */
   .messages-chat__input-row {
     padding: 10px 12px 20px;
   }

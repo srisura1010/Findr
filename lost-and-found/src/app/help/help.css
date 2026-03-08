@@ -40,17 +40,17 @@ body.light {
   --help-text-primary: #0f172a;
   --help-text-muted:   #64748b;
   --help-text-faint:   #94a3b8;
-  --help-accent:       #7c3aed;
-  --help-accent-light: #ede9fe;
-  --help-accent-text:  #6d28d9;
+  --help-accent:       #2f80ed;
+  --help-accent-light: #dbeafe;
+  --help-accent-text:  #285ebb;
   --help-step-num-bg:  #f1f5f9;
   --help-step-num-txt: #475569;
-  --help-active-bg:    #7c3aed;
+  --help-active-bg:    #2f80ed;
   --help-active-text:  #ffffff;
-  --help-active-border:#7c3aed;
-  --help-dot:          #7c3aed;
-  --help-arrow:        #7c3aed;
-  --help-send-active:  #7c3aed;
+  --help-active-border:#2f80ed;
+  --help-dot:          #2f80ed;
+  --help-arrow:        #2f80ed;
+  --help-send-active:  #2f80ed;
   --help-shadow:       0 20px 40px rgba(0,0,0,0.08);
 }
 
@@ -135,7 +135,6 @@ body.colorblind {
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-/* Purple top accent line matching dashboard cards */
 .help-card::before {
   content: "";
   position: absolute;

@@ -38,8 +38,8 @@ body.light {
   --sa-text-primary: #0f172a;
   --sa-text-muted:   #64748b;
   --sa-text-faint:   #94a3b8;
-  --sa-accent:       #7c3aed;
-  --sa-accent-light: #ede9fe;
+  --sa-accent:       #2f80ed;
+  --sa-accent-light: #dbeafe;
   --sa-shadow:       0 20px 40px rgba(0,0,0,0.08);
   --sa-danger:       #dc2626;
   --sa-danger-bg:    #fff1f2;
