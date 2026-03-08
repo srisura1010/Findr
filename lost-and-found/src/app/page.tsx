@@ -16,6 +16,9 @@ import { useSettings } from "@/context/SettingsContext";
 import { useUser, SignInButton } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import { TbReportSearch } from "react-icons/tb";
+import { FaHandshake } from "react-icons/fa";
+
 
 
 function FloatingItem({
@@ -477,7 +480,7 @@ export default function Home() {
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-number">01</div>
-            <div className="step-icon">📋</div>
+            <div className="step-icon"><TbReportSearch /></div>
             <h3 className="step-title">Report It</h3>
             <p className="step-body">
               Found something? Submit it in seconds — snap a photo, pick a
@@ -487,7 +490,7 @@ export default function Home() {
           <div className="step-connector" aria-hidden="true">→</div>
           <div className="step-card">
             <div className="step-number">02</div>
-            <div className="step-icon">🔍</div>
+            <div className="step-icon"><FaSearch /></div>
             <h3 className="step-title">Search & Match</h3>
             <p className="step-body">
               Lost something? Browse the board, filter by type and location, or
@@ -497,7 +500,7 @@ export default function Home() {
           <div className="step-connector" aria-hidden="true">→</div>
           <div className="step-card">
             <div className="step-number">03</div>
-            <div className="step-icon">🤝</div>
+            <div className="step-icon"><FaHandshake /></div>
             <h3 className="step-title">Get It Back</h3>
             <p className="step-body">
               Message the finder directly through Findr, confirm it's yours, and

@@ -10,7 +10,7 @@
 //
 // USAGE in dashboard.tsx:
 //   1. Add "inbox" to TabId union
-//   2. Add { id: "inbox", label: "Inbox", icon: "📨", adminOnly: true } to SIDEBAR_TABS
+//   2. Add { id: "inbox", label: "Inbox", icon: "", adminOnly: true } to SIDEBAR_TABS
 //   3. Add case "inbox": return isAdmin ? <AdminInboxPanel adminId={adminId} adminName={adminName} adminEmail={adminEmail} /> : null;
 //   4. After admin login succeeds, store the admin's UUID:
 //        localStorage.setItem("findr_admin_id", data.id);
@@ -22,6 +22,8 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { FaShieldHalved } from "react-icons/fa6";
+import { BsMailbox } from "react-icons/bs";
+
 
 interface DBMessage {
   id: number;
@@ -200,7 +202,7 @@ export function AdminInboxPanel({
         <div style={{ flex: 1, overflowY: "auto" }}>
           {convs.length === 0 && (
             <div style={{ padding: 28, textAlign: "center", color: "#94a3b8", fontSize: 13 }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+              <div style={{ fontSize: 32, marginBottom: 8 }}><BsMailbox /></div>
               No messages yet
             </div>
           )}
