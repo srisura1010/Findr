@@ -9,31 +9,31 @@ body.light {
   --bg-card:        #ffffff;
   --bg-input:       #f8fafc;
   --bg-hover:       #f1f5f9;
-  --bg-active:      #ede9fe;
+  --bg-active:      #dbeafe;
 
   --border-default: #e8eaf0;
   --border-input:   #e2e8f0;
-  --border-focus:   #7c3aed;
+  --border-focus:   #2f80ed;
 
   --text-primary:   #0f172a;
   --text-secondary: #64748b;
   --text-muted:     #94a3b8;
-  --text-active:    #6d28d9;
+  --text-active:    #285ebb;
 
-  --accent:         #7c3aed;
-  --accent-hover:   #6d28d9;
-  --accent-light:   #ede9fe;
-  --accent-border:  #c4b5fd;
+  --accent:         #2f80ed;
+  --accent-hover:   #285ebb;
+  --accent-light:   #dbeafe;
+  --accent-border:  #93c5fd;
 
-  --card-shadow:    0 4px 24px rgba(0,0,0,0.07);
+  --card-shadow:    0 4px 24px rgba(47,128,237,0.08);
   --divider:        #e8eaf0;
 
   --toggle-off:     #cbd5e1;
-  --toggle-on:      #7c3aed;
+  --toggle-on:      #2f80ed;
   --toggle-knob:    #ffffff;
 
   --scrollbar-track: #f1f5f9;
-  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb: #93c5fd;
 }
 
 /* ═══════════════════════════════════════════
