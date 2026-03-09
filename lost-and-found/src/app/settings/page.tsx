@@ -36,27 +36,27 @@ const SettingsPage = () => {
   const [largeText, setLargeText] = useState("Large");
   const [extraLargeText, setExtraLargeText] = useState("Extra Large");
 
-
+  // ── Ban check ──
   useEffect(() => {
     if (!isLoaded) return;
-    if (!user) {setBanChecked(true);return;}
+    if (!user) { setBanChecked(true); return; }
     const checkBan = async () => {
-      const { data } = await supabase.
-      from("banned_users").
-      select("email, suspended_until").
-      eq("email", user.primaryEmailAddress?.emailAddress).
-      single();
+      const { data } = await supabase
+        .from("banned_users")
+        .select("email, suspended_until")
+        .eq("email", user.primaryEmailAddress?.emailAddress)
+        .single();
       if (data) {
         const isPermanent = !data.suspended_until;
         const isSuspended = data.suspended_until && new Date(data.suspended_until) > new Date();
-        if (isPermanent || isSuspended) {router.push("/banned");return;}
+        if (isPermanent || isSuspended) { router.push("/banned"); return; }
       }
       setBanChecked(true);
     };
     checkBan();
   }, [user, isLoaded]);
 
-
+  // ── Translations ──
   useEffect(() => {
     if (language === "en") {
       setSettingsTitleText("Settings");
@@ -81,32 +81,32 @@ const SettingsPage = () => {
     }
     const translateAndCache = async () => {
       const translations = [
-      { key: "Settings", setter: setSettingsTitleText, cacheKey: "settings_title" },
-      { key: "Appearance", setter: setAppearanceText, cacheKey: "settings_appearance" },
-      { key: "Language", setter: setLanguageText, cacheKey: "settings_language" },
-      { key: "Light", setter: setLightText, cacheKey: "settings_light" },
-      { key: "Dark", setter: setDarkText, cacheKey: "settings_dark" },
-      { key: "High Contrast", setter: setHighContrastText, cacheKey: "settings_highContrast" },
-      { key: "Colorblind Mode", setter: setColorblindText, cacheKey: "settings_colorblind" },
-      { key: "Text-to-Speech", setter: setTTSText, cacheKey: "settings_tts" },
-      { key: "Enable TTS", setter: setEnableTTSText, cacheKey: "settings_enableTTS" },
-      { key: "Disable TTS", setter: setDisableTTSText, cacheKey: "settings_disableTTS" },
-      { key: "Speed", setter: setTTSSpeedText, cacheKey: "settings_ttsSpeed" },
-      { key: "Font", setter: setFontText, cacheKey: "settings_font" },
-      { key: "Font Size", setter: setFontSizeText, cacheKey: "settings_fontSize" },
-      { key: "Small", setter: setSmallText, cacheKey: "settings_small" },
-      { key: "Medium", setter: setMediumText, cacheKey: "settings_medium" },
-      { key: "Large", setter: setLargeText, cacheKey: "settings_large" },
-      { key: "Extra Large", setter: setExtraLargeText, cacheKey: "settings_extraLarge" }];
-
+        { key: "Settings",        setter: setSettingsTitleText, cacheKey: "settings_title" },
+        { key: "Appearance",      setter: setAppearanceText,    cacheKey: "settings_appearance" },
+        { key: "Language",        setter: setLanguageText,      cacheKey: "settings_language" },
+        { key: "Light",           setter: setLightText,         cacheKey: "settings_light" },
+        { key: "Dark",            setter: setDarkText,          cacheKey: "settings_dark" },
+        { key: "High Contrast",   setter: setHighContrastText,  cacheKey: "settings_highContrast" },
+        { key: "Colorblind Mode", setter: setColorblindText,    cacheKey: "settings_colorblind" },
+        { key: "Text-to-Speech",  setter: setTTSText,           cacheKey: "settings_tts" },
+        { key: "Enable TTS",      setter: setEnableTTSText,     cacheKey: "settings_enableTTS" },
+        { key: "Disable TTS",     setter: setDisableTTSText,    cacheKey: "settings_disableTTS" },
+        { key: "Speed",           setter: setTTSSpeedText,      cacheKey: "settings_ttsSpeed" },
+        { key: "Font",            setter: setFontText,          cacheKey: "settings_font" },
+        { key: "Font Size",       setter: setFontSizeText,      cacheKey: "settings_fontSize" },
+        { key: "Small",           setter: setSmallText,         cacheKey: "settings_small" },
+        { key: "Medium",          setter: setMediumText,        cacheKey: "settings_medium" },
+        { key: "Large",           setter: setLargeText,         cacheKey: "settings_large" },
+        { key: "Extra Large",     setter: setExtraLargeText,    cacheKey: "settings_extraLarge" },
+      ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
-        if (cached) {setter(cached);continue;}
+        if (cached) { setter(cached); continue; }
         try {
           const res = await fetch("/api/translate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: key, target: language })
+            body: JSON.stringify({ text: key, target: language }),
           });
           if (res.ok) {
             const data = await res.json();
@@ -114,7 +114,7 @@ const SettingsPage = () => {
             setter(translated);
             localStorage.setItem(`${cacheKey}_${language}`, translated);
           }
-        } catch {}
+        } catch { /* keep default */ }
       }
       setIsReady(true);
     };
@@ -173,28 +173,28 @@ const SettingsPage = () => {
             <span>{ttsEnabled ? disableTTSText : enableTTSText}</span>
             <div
               className={`toggle-switch ${ttsEnabled ? "active" : ""}`}
-              onClick={() => setTTSEnabled(!ttsEnabled)}>
-              
+              onClick={() => setTTSEnabled(!ttsEnabled)}
+            >
               <div className="toggle-knob" />
             </div>
           </label>
-          {ttsEnabled &&
-          <label className="tts-rate">
+          {ttsEnabled && (
+            <label className="tts-rate">
               <span>{ttsSpeedText}: {ttsRate}x</span>
               <input
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={ttsRate}
-              onChange={(e) => setTTSRate(parseFloat(e.target.value))} />
-            
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={ttsRate}
+                onChange={(e) => setTTSRate(parseFloat(e.target.value))}
+              />
             </label>
-          }
+          )}
         </section>
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default SettingsPage;
