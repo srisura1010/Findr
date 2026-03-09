@@ -9,6 +9,7 @@ import { useSettings } from "@/context/SettingsContext";
 import { useEffect, useState, useRef } from "react";
 import { getConversationId } from "@/app/components/MessagingSystem";
 import { FaFlag } from "react-icons/fa6";
+import { FaUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
@@ -20,10 +21,6 @@ import { FaClipboard } from "react-icons/fa";
 import { IoMdMailOpen } from "react-icons/io";
 import { MdFlagCircle } from "react-icons/md";
 import { CiLogin } from "react-icons/ci";
-
-
-
-
 
 
 interface Message {
@@ -84,7 +81,7 @@ interface BannedUser {
   banned_by: string;
 }
 
-type TabId = "items" | "add-item" | "report-lost" | "become-admin" | "admin-login" | "reports" | "ban-management" | "inbox";
+type TabId = "items" | "add-item" | "report-lost" | "my-items" | "become-admin" | "admin-login" | "reports" | "ban-management" | "inbox";
 
 const REPORT_REASONS = [
   "Inappropriate content",
@@ -98,6 +95,7 @@ const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; adminOnly
   { id: "items",          label: "Items",             icon: <HiOutlineSearch /> },
   { id: "add-item",       label: "Report Found Item",  icon: <IoAddSharp /> },
   { id: "report-lost",    label: "Report Lost Item",   icon: <FaExclamationTriangle /> },
+  { id: "my-items",       label: "My Items",           icon: <FaUser /> },
   { id: "become-admin",   label: "Become an Admin",    icon: <FaClipboard /> },
   { id: "admin-login",    label: "Admin",              icon: <CiLogin /> },
   { id: "reports",        label: "Reports",            icon: <MdFlagCircle />, adminOnly: true },
@@ -711,6 +709,7 @@ export default function DashboardPage() {
   const [reportingItem, setReportingItem] = useState<any | null>(null);
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
   const [reportsTab, setReportsTab] = useState<"items" | "users">("items");
+  const [myItemsTab, setMyItemsTab] = useState<"found" | "lost">("found");
 
   const [banChecked, setBanChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -1079,6 +1078,152 @@ export default function DashboardPage() {
           </div>
         );
 
+      case "my-items": {
+        const myFoundItems = (items ?? []).filter(
+          (item) => item.authorId === user?.id && item.status !== "claimed"
+        );
+        const myLostItems = (lostItems ?? []).filter(
+          (item) => item.authorId === user?.id
+        );
+        const totalCount = myFoundItems.length + myLostItems.length;
+
+        return (
+          <>
+            <div style={{
+              display: "flex", gap: "8px",
+              padding: "16px 20px 0",
+              borderBottom: "1px solid var(--border-default)",
+            }}>
+              <button
+                onClick={() => setMyItemsTab("found")}
+                style={{
+                  padding: "8px 20px", borderRadius: "8px 8px 0 0", border: "none",
+                  cursor: "pointer", fontWeight: 600, fontSize: "0.9rem",
+                  fontFamily: "Poppins, sans-serif",
+                  background: myItemsTab === "found" ? "#f97316" : "var(--bg-page)",
+                  color: myItemsTab === "found" ? "#fff" : "var(--text-muted)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                Found Items I Posted ({myFoundItems.length})
+              </button>
+              <button
+                onClick={() => setMyItemsTab("lost")}
+                style={{
+                  padding: "8px 20px", borderRadius: "8px 8px 0 0", border: "none",
+                  cursor: "pointer", fontWeight: 600, fontSize: "0.9rem",
+                  fontFamily: "Poppins, sans-serif",
+                  background: myItemsTab === "lost" ? "#f97316" : "var(--bg-page)",
+                  color: myItemsTab === "lost" ? "#fff" : "var(--text-muted)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                Lost Items I Reported ({myLostItems.length})
+              </button>
+            </div>
+
+            <div className="main-panel-content">
+              <div className="main-panel-section-title">My Items</div>
+
+              {totalCount === 0 && (
+                <p className="panel-empty">You haven't posted any items yet.</p>
+              )}
+
+              {myItemsTab === "found" && (
+                <>
+                  {myFoundItems.length === 0 ? (
+                    <p className="panel-empty">You haven't posted any found items.</p>
+                  ) : (
+                    <div className="panel-item-list">
+                      {myFoundItems.map((item) => (
+                        <div key={item.id} className="reported-card">
+                          {item.image && (
+                            <img src={item.image} alt={item.name} className="reported-card__img" />
+                          )}
+                          <div className="reported-card__body">
+                            <p className="reported-card__name">{item.name}</p>
+                            <p className="reported-card__reason">{item.description}</p>
+                            <p className="reported-card__meta">
+                              Status:{" "}
+                              <strong style={{ color: item.status === "pending" ? "var(--accent)" : "var(--text-secondary)" }}>
+                                {item.status === "pending" ? "Claim pending confirmation" : "Waiting to be claimed"}
+                              </strong>
+                            </p>
+                          </div>
+                          <div className="reported-card__actions">
+                            {item.status === "pending" && (
+                              <button
+                                className="confirm-button"
+                                style={{ fontSize: "0.8rem", padding: "6px 12px" }}
+                                onClick={() => handleConfirmClaimed(item.id)}
+                              >
+                                Confirm Claimed
+                              </button>
+                            )}
+                            <button
+                              className="reported-card__delete"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {myItemsTab === "lost" && (
+                <>
+                  {myLostItems.length === 0 ? (
+                    <p className="panel-empty">You haven't reported any lost items.</p>
+                  ) : (
+                    <div className="panel-item-list">
+                      {myLostItems.map((item) => (
+                        <div key={item.id} className="reported-card">
+                          {item.image ? (
+                            <img src={item.image} alt={item.name} className="reported-card__img" />
+                          ) : (
+                            <div className="reported-card__img" style={{
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              background: "var(--bg-input)", color: "var(--text-muted)",
+                              fontSize: "1.5rem", flexShrink: 0,
+                            }}>?</div>
+                          )}
+                          <div className="reported-card__body">
+                            <p className="reported-card__name">{item.name}</p>
+                            <p className="reported-card__reason">{item.description}</p>
+                            <p className="reported-card__meta">
+                              Status: <strong style={{ color: "var(--text-secondary)" }}>Still looking</strong>
+                            </p>
+                          </div>
+                          <div className="reported-card__actions">
+                            <button
+                              className="confirm-button"
+                              style={{ fontSize: "0.8rem", padding: "6px 12px" }}
+                              onClick={() => handleMarkFound(item.id)}
+                            >
+                              Mark as Found
+                            </button>
+                            <button
+                              className="reported-card__delete"
+                              onClick={() => handleDeleteLostItem(item.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </>
+        );
+      }
+
       case "become-admin":
         return <AdminPanel />;
 
@@ -1127,7 +1272,7 @@ export default function DashboardPage() {
     }
   };
 
-if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
+  if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
 
   return (
     <div className="dashboard-layout">
