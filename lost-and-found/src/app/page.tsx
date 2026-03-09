@@ -114,7 +114,7 @@ const TYPING_PHRASES = [
   "Lost a Backpack?",
   "Found a Phone?",
   "Lost a Jacket?",
-  "Found an ID?",
+  "Found an ID Card?",
   "Lost Earbuds?",
 ];
 
