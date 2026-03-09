@@ -21,9 +21,9 @@ body.colorblind     { background-color: #e6f0ff; }
 
 
 .navbar {
-  position: sticky;
+  position: relative; /* This keeps it in the document flow so it pushes content down */
   top: 12px;
-  margin: 0 auto;
+  margin: 0 auto; /* This centers it naturally without needing transforms */
   width: 95vw;
   max-width: 1400px;
   display: flex;
