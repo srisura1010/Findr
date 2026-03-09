@@ -107,6 +107,17 @@ function FloatingItem({
   );
 }
 
+const TYPING_PHRASES = [
+  "Lost Your Keys?",
+  "Lost a Wallet?",
+  "Found AirPods?",
+  "Lost a Backpack?",
+  "Found a Phone?",
+  "Lost a Jacket?",
+  "Found an ID?",
+  "Lost Earbuds?",
+];
+
 export default function Home() {
   const { language } = useSettings();
   const router = useRouter();
@@ -114,7 +125,12 @@ export default function Home() {
   const [isReady, setIsReady] = useState(false);
   const [banChecked, setBanChecked] = useState(false);
 
-  const [lostText, setLostText] = useState("Lost Something?");
+  // Typing effect state
+  const [displayText, setDisplayText] = useState("");
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
   const [connectingText, setConnectingText] = useState(
     "Connecting student, staff, and schools and reuniting them with their lost items",
@@ -146,6 +162,30 @@ export default function Home() {
     "Only your school community sees your items, keeping reports private and protected.",
   );
 
+  // Typing effect
+  useEffect(() => {
+    const current = TYPING_PHRASES[phraseIndex];
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        setDisplayText(current.slice(0, charIndex + 1));
+        setCharIndex((c) => c + 1);
+        if (charIndex + 1 === current.length) {
+          setTimeout(() => setIsDeleting(true), 1400);
+        }
+      } else {
+        setDisplayText(current.slice(0, charIndex - 1));
+        setCharIndex((c) => c - 1);
+        if (charIndex - 1 === 0) {
+          setIsDeleting(false);
+          setPhraseIndex((p) => (p + 1) % TYPING_PHRASES.length);
+        }
+      }
+    }, isDeleting ? 45 : 85);
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, phraseIndex]);
+
+  // Ban check
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) {
@@ -172,9 +212,9 @@ export default function Home() {
     checkBan();
   }, [user, isLoaded]);
 
+  // Translations
   useEffect(() => {
     if (language === "en") {
-      setLostText("Lost Something?");
       setDontPanicText("Don't Panic.");
       setConnectingText(
         "Connecting student, staff, and schools and reuniting them with their lost items",
@@ -210,57 +250,20 @@ export default function Home() {
     }
     const translateAndCache = async () => {
       const translations = [
-        { key: "Lost Something?", setter: setLostText, cacheKey: "home_lost" },
-        {
-          key: "Don't Panic.",
-          setter: setDontPanicText,
-          cacheKey: "home_panic",
-        },
+        { key: "Don't Panic.", setter: setDontPanicText, cacheKey: "home_panic" },
         {
           key: "Connecting student, staff, and schools and reuniting them with their lost items",
           setter: setConnectingText,
           cacheKey: "home_connecting",
         },
-        {
-          key: "Browse Lost Items",
-          setter: setBrowseText,
-          cacheKey: "home_browse",
-        },
-        {
-          key: "Report a Lost Item",
-          setter: setReportText,
-          cacheKey: "home_report",
-        },
-        {
-          key: "One Place for Everything",
-          setter: setCard1Title,
-          cacheKey: "home_card1Title",
-        },
-        {
-          key: "Designed for Campuses",
-          setter: setCard2Title,
-          cacheKey: "home_card2Title",
-        },
-        {
-          key: "Find Items Faster",
-          setter: setCard3Title,
-          cacheKey: "home_card3Title",
-        },
-        {
-          key: "Search What Matters",
-          setter: setCard4Title,
-          cacheKey: "home_card4Title",
-        },
-        {
-          key: "Students Helping Students",
-          setter: setCard5Title,
-          cacheKey: "home_card5Title",
-        },
-        {
-          key: "Secure by Design",
-          setter: setCard6Title,
-          cacheKey: "home_card6Title",
-        },
+        { key: "Browse Lost Items", setter: setBrowseText, cacheKey: "home_browse" },
+        { key: "Report a Lost Item", setter: setReportText, cacheKey: "home_report" },
+        { key: "One Place for Everything", setter: setCard1Title, cacheKey: "home_card1Title" },
+        { key: "Designed for Campuses", setter: setCard2Title, cacheKey: "home_card2Title" },
+        { key: "Find Items Faster", setter: setCard3Title, cacheKey: "home_card3Title" },
+        { key: "Search What Matters", setter: setCard4Title, cacheKey: "home_card4Title" },
+        { key: "Students Helping Students", setter: setCard5Title, cacheKey: "home_card5Title" },
+        { key: "Secure by Design", setter: setCard6Title, cacheKey: "home_card6Title" },
         {
           key: "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
           setter: setCard1Body,
@@ -331,18 +334,8 @@ export default function Home() {
           { src: "/items/airpods.png", label: "AirPods", x: 60, y: 120 },
           { src: "/items/keys.png", label: "Keys", x: 1320, y: 120 },
           { src: "/items/wallet.png", label: "Wallet", x: 140, y: 500 },
-          {
-            src: "/items/water-bottle.png",
-            label: "Water Bottle",
-            x: 1400,
-            y: 380,
-          },
-          {
-            src: "/items/red_backpack_image.png",
-            label: "Backpack",
-            x: 250,
-            y: 350,
-          },
+          { src: "/items/water-bottle.png", label: "Water Bottle", x: 1400, y: 380 },
+          { src: "/items/red_backpack_image.png", label: "Backpack", x: 250, y: 350 },
           { src: "/items/phone.png", label: "Phone", x: 1250, y: 510 },
         ].map((item, i) => (
           <FloatingItem key={i} {...item} animDelay={i * 0.6} />
@@ -351,7 +344,10 @@ export default function Home() {
 
       <div className="hero-card relative z-[15]">
         <h1>
-          <span className="lostHero">{lostText}</span>
+          <span className="lostHero">
+            {displayText}
+            <span className="typing-cursor">|</span>
+          </span> <br />
           <span className="panicHero">{dontPanicText}</span>
         </h1>
         <p>{connectingText}</p>
@@ -378,86 +374,62 @@ export default function Home() {
       <div className="carousel relative z-10">
         <div className="track">
           <div className="card">
-            <span className="card-icon">
-              <IoFolder className="text-blue-500" />
-            </span>
+            <span className="card-icon"><IoFolder className="text-blue-500" /></span>
             <h3 className="card-title">{card1Title}</h3>
             <p className="card-body">{card1Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaSchool className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaSchool className="text-blue-500" /></span>
             <h3 className="card-title">{card2Title}</h3>
             <p className="card-body">{card2Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaSearch className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaSearch className="text-blue-500" /></span>
             <h3 className="card-title">{card3Title}</h3>
             <p className="card-body">{card3Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaSlidersH className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaSlidersH className="text-blue-500" /></span>
             <h3 className="card-title">{card4Title}</h3>
             <p className="card-body">{card4Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaHandsHelping className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaHandsHelping className="text-blue-500" /></span>
             <h3 className="card-title">{card5Title}</h3>
             <p className="card-body">{card5Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaShieldAlt className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaShieldAlt className="text-blue-500" /></span>
             <h3 className="card-title">{card6Title}</h3>
             <p className="card-body">{card6Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <IoFolder className="text-blue-500" />
-            </span>
+            <span className="card-icon"><IoFolder className="text-blue-500" /></span>
             <h3 className="card-title">{card1Title}</h3>
             <p className="card-body">{card1Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaSchool className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaSchool className="text-blue-500" /></span>
             <h3 className="card-title">{card2Title}</h3>
             <p className="card-body">{card2Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaSearch className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaSearch className="text-blue-500" /></span>
             <h3 className="card-title">{card3Title}</h3>
             <p className="card-body">{card3Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaSlidersH className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaSlidersH className="text-blue-500" /></span>
             <h3 className="card-title">{card4Title}</h3>
             <p className="card-body">{card4Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaHandsHelping className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaHandsHelping className="text-blue-500" /></span>
             <h3 className="card-title">{card5Title}</h3>
             <p className="card-body">{card5Body}</p>
           </div>
           <div className="card">
-            <span className="card-icon">
-              <FaShieldAlt className="text-blue-500" />
-            </span>
+            <span className="card-icon"><FaShieldAlt className="text-blue-500" /></span>
             <h3 className="card-title">{card6Title}</h3>
             <p className="card-body">{card6Body}</p>
           </div>
@@ -472,37 +444,27 @@ export default function Home() {
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-number">01</div>
-            <div className="step-icon">
-              <TbReportSearch />
-            </div>
+            <div className="step-icon"><TbReportSearch /></div>
             <h3 className="step-title">Report It</h3>
             <p className="step-body">
               Found something? Submit it in seconds — snap a photo, pick a
               category, and drop the location. It goes live instantly.
             </p>
           </div>
-          <div className="step-connector" aria-hidden="true">
-            →
-          </div>
+          <div className="step-connector" aria-hidden="true">→</div>
           <div className="step-card">
             <div className="step-number">02</div>
-            <div className="step-icon">
-              <FaSearch />
-            </div>
+            <div className="step-icon"><FaSearch /></div>
             <h3 className="step-title">Search & Match</h3>
             <p className="step-body">
               Lost something? Browse the board, filter by type and location, or
               get notified when something matching your item shows up.
             </p>
           </div>
-          <div className="step-connector" aria-hidden="true">
-            →
-          </div>
+          <div className="step-connector" aria-hidden="true">→</div>
           <div className="step-card">
             <div className="step-number">03</div>
-            <div className="step-icon">
-              <FaHandshake />
-            </div>
+            <div className="step-icon"><FaHandshake /></div>
             <h3 className="step-title">Get It Back</h3>
             <p className="step-body">
               Message the finder directly through Findr, confirm it's yours, and
@@ -536,12 +498,10 @@ export default function Home() {
         </div>
       </section>
 
-
       <section className="cta-strip relative z-10">
         <h2 className="cta-title">Ready to find what you lost?</h2>
         <p className="cta-sub">
-          Join your school community on Findr today — it only takes a moment to
-          sign up.
+          Join your school community on Findr today — it only takes a moment to sign up.
         </p>
         {isSignedIn ? (
           <button className="cta-btn" onClick={() => router.push("/dashboard")}>
@@ -554,76 +514,47 @@ export default function Home() {
         )}
       </section>
 
-
       <footer className="site-footer relative z-10">
         <div className="footer-inner">
           <div className="footer-brand">
             <span className="footer-logo">Findr</span>
             <p className="footer-tagline">Lost & found, built for schools.</p>
           </div>
-
           <div className="footer-links">
             <div className="footer-col">
               <span className="footer-col-heading">Navigate</span>
               {isSignedIn ? (
-                <button
-                  className="footer-link"
-                  onClick={() => router.push("/dashboard")}
-                >
-                  Dashboard
-                </button>
+                <button className="footer-link" onClick={() => router.push("/dashboard")}>Dashboard</button>
               ) : (
                 <SignInButton mode="modal">
                   <button className="footer-link">Sign In</button>
                 </SignInButton>
               )}
               {isSignedIn && (
-                <button
-                  className="footer-link"
-                  onClick={() => router.push("/messages")}
-                >
-                  Messages
-                </button>
+                <button className="footer-link" onClick={() => router.push("/messages")}>Messages</button>
               )}
               {isSignedIn && (
-                <button
-                  className="footer-link"
-                  onClick={() => router.push("/help")}
-                >
-                  Help
-                </button>
+                <button className="footer-link" onClick={() => router.push("/help")}>Help</button>
               )}
               {isSignedIn && (
-                <button
-                  className="footer-link"
-                  onClick={() => router.push("/settings")}
-                >
-                  Settings
-                </button>
+                <button className="footer-link" onClick={() => router.push("/settings")}>Settings</button>
               )}
             </div>
             <div className="footer-col">
               <span className="footer-col-heading">Contact</span>
               <a className="footer-link" href="mailto:srivatsav4ever@gmail.com">
-                <FaEnvelope
-                  style={{ display: "inline", marginRight: 6, fontSize: 12 }}
-                />
+                <FaEnvelope style={{ display: "inline", marginRight: 6, fontSize: 12 }} />
                 srivatsav4ever@gmail.com
               </a>
               <a className="footer-link" href="mailto:bavu.ramki@gmail.com">
-                <FaEnvelope
-                  style={{ display: "inline", marginRight: 6, fontSize: 12 }}
-                />
+                <FaEnvelope style={{ display: "inline", marginRight: 6, fontSize: 12 }} />
                 bavu.ramki@gmail.com
               </a>
             </div>
           </div>
         </div>
-
         <div className="footer-bottom">
-          <span>
-            © {new Date().getFullYear()} Findr. Built for students, by students.
-          </span>
+          <span>© {new Date().getFullYear()} Findr. Built for students, by students.</span>
         </div>
       </footer>
     </div>

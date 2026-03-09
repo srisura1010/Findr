@@ -59,7 +59,7 @@ html, body {
 .hero-card {
   position: relative;
   border-radius: 20px;
-  padding: 2.5rem 2.5rem 3rem 2.5rem;
+  padding: 2rem 2rem 3rem 2.5rem;
   max-width: 650px;
   text-align: center;
   font-weight: 200;
@@ -82,6 +82,7 @@ html, body {
   font-size: 1.1rem;
   margin: 0 0 2rem 0;
   line-height: 1.4;
+  padding-bottom: 5px;
 }
 
 .hero-card .report,
@@ -120,6 +121,19 @@ html, body {
   background-color: #2f80ed;
   color: white;
   transform: translateY(-2px);
+}
+
+.typing-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  font-weight: 300;
+  animation: blink 0.75s step-end infinite;
+}
+
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 
