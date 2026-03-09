@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ===== RESET ===== */
+
 *,
 *::before,
 *::after {
@@ -19,7 +19,7 @@ body.dark           { background-color: #0b1120; }
 body.high-contrast  { background-color: #000000; }
 body.colorblind     { background-color: #e6f0ff; }
 
-/* ===== NAVBAR ===== */
+
 .navbar {
   position: sticky;
   top: 12px;
@@ -37,7 +37,7 @@ body.colorblind     { background-color: #e6f0ff; }
   z-index: 1000;
 }
 
-/* ===== LOGO ===== */
+
 .logo {
   text-decoration: none;
   margin: 0;
@@ -60,7 +60,7 @@ body.colorblind     { background-color: #e6f0ff; }
 
 .logo:hover { opacity: 0.85; }
 
-/* ===== NAV LINKS (desktop) ===== */
+
 .nav-links {
   list-style: none;
   display: flex;
@@ -70,7 +70,7 @@ body.colorblind     { background-color: #e6f0ff; }
   padding: 0;
 }
 
-/* ===== DASHBOARD LINK ===== */
+
 .nav-links .dashboard-link {
   font-family: "Ubuntu", sans-serif;
   color: rgba(255, 255, 255, 0.85);
@@ -93,7 +93,7 @@ body.colorblind     { background-color: #e6f0ff; }
   transform: translateY(-1px);
 }
 
-/* ===== SIGN UP BUTTON ===== */
+
 .nav-links .sign-up {
   font-family: "Ubuntu", sans-serif;
   padding: 0.42rem 0.9rem;
@@ -115,7 +115,7 @@ body.colorblind     { background-color: #e6f0ff; }
   box-shadow: 0 4px 12px rgba(255, 216, 20, 0.25);
 }
 
-/* ===== ADD ITEM BUTTON ===== */
+
 .add-btn {
   background-color: #2e7d32;
   color: white;
@@ -126,7 +126,7 @@ body.colorblind     { background-color: #e6f0ff; }
   font-weight: bold;
 }
 
-/* ===== MODAL ===== */
+
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -180,7 +180,7 @@ body.colorblind     { background-color: #e6f0ff; }
   transform: translateY(-1px);
 }
 
-/* ===== SETTINGS ICON BUTTON ===== */
+
 .settings-icon-btn {
   background: transparent;
   border: none;
@@ -201,7 +201,7 @@ body.colorblind     { background-color: #e6f0ff; }
 
 .settings-icon-btn:active { transform: scale(0.95); }
 
-/* ===== SETTINGS OVERLAY ===== */
+
 .settings-dropdown {
   position: fixed;
   inset: 0;
@@ -212,7 +212,7 @@ body.colorblind     { background-color: #e6f0ff; }
   z-index: 2000;
 }
 
-/* ===== SETTINGS CARD ===== */
+
 .settings-panel {
   background: #ffffff;
   width: 800px;
@@ -262,14 +262,14 @@ body.colorblind     { background-color: #e6f0ff; }
   to   { opacity: 1; }
 }
 
-/* ===== SIDEBAR LAYOUT WRAPPER ===== */
+
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
   background: #f8fafc;
 }
 
-/* ===== ADD ITEM SIDEBAR ===== */
+
 .add-item-sidebar {
   width: 300px;
   min-width: 300px;
@@ -408,7 +408,7 @@ body.colorblind     { background-color: #e6f0ff; }
 .add-item-sidebar__submit:hover:not(:disabled) { background: #1d4ed8; }
 .add-item-sidebar__submit:disabled { background: #93c5fd; cursor: not-allowed; }
 
-/* ===== FLOATING ADD BUTTON ===== */
+
 .add-item-fab {
   position: fixed;
   bottom: 28px;
@@ -438,7 +438,7 @@ body.colorblind     { background-color: #e6f0ff; }
 
 .add-item-fab__icon { font-size: 18px; line-height: 1; }
 
-/* ===== SEARCH BAR ===== */
+
 .search-bar-wrapper {
   width: 100%;
   max-width: 600px;
@@ -486,10 +486,10 @@ body.colorblind     { background-color: #e6f0ff; }
   font-family: "Poppins", sans-serif;
 }
 
-/* ===== DASHBOARD MAIN CONTENT ===== */
+
 .dashboard-main { flex: 1; min-width: 0; }
 
-/* ===== LIGHT MODE ===== */
+
 body.light .navbar {
   background-color: white;
   color: #1f2937;
@@ -518,7 +518,7 @@ body.light .navbar .add-btn:hover { background-color: #22c55e; }
 body.light .navbar .settings-icon-btn { color: #1f2937; }
 body.light .navbar .settings-icon-btn:hover { background-color: rgba(0, 0, 0, 0.05); }
 
-/* ===== HIGH CONTRAST MODE ===== */
+
 body.high-contrast .navbar {
   background-color: black;
   color: yellow;
@@ -535,7 +535,7 @@ body.high-contrast .navbar .add-btn:hover { background-color: black; color: yell
 body.high-contrast .navbar .settings-icon-btn { color: yellow; }
 body.high-contrast .navbar .settings-icon-btn:hover { background-color: rgba(255, 255, 0, 0.2); }
 
-/* ===== COLORBLIND MODE ===== */
+
 body.colorblind .navbar { background-color: #0b3d91; color: #ffdd44; box-shadow: none; }
 body.colorblind .navbar .logo { color: #ffdd44; }
 body.colorblind .navbar .dashboard-link { color: #ffdd44; border: 1px solid #ffdd44; background-color: #004080; }
@@ -547,7 +547,7 @@ body.colorblind .navbar .add-btn:hover { background-color: #004c99; }
 body.colorblind .navbar .settings-icon-btn { color: #ffdd44; }
 body.colorblind .navbar .settings-icon-btn:hover { background-color: rgba(255, 221, 68, 0.15); }
 
-/* ===== MESSAGES NAV ITEM (unread badge) ===== */
+
 .messages-nav-item { position: relative; }
 
 .unread-badge {
@@ -567,19 +567,16 @@ body.colorblind .navbar .settings-icon-btn:hover { background-color: rgba(255, 2
   pointer-events: none;
 }
 
-/* ════════════════════════════════════════════
-   MOBILE — hamburger + slide-in sidebar
-   (hidden on desktop, shown below 768px)
-════════════════════════════════════════════ */
 
-/* Right-side cluster shown on mobile only */
+
+
 .navbar-mobile-right {
   display: none;
   align-items: center;
   gap: 10px;
 }
 
-/* Hamburger button */
+
 .navbar-hamburger {
   display: flex;
   flex-direction: column;
@@ -610,25 +607,25 @@ body.colorblind .navbar .settings-icon-btn:hover { background-color: rgba(255, 2
   transform-origin: center;
 }
 
-/* Animate to X when open */
+
 .navbar-hamburger__bar.open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .navbar-hamburger__bar.open:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .navbar-hamburger__bar.open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* Light mode hamburger */
+
 body.light .navbar-hamburger { border-color: #e2e8f0; }
 body.light .navbar-hamburger:hover { background: #f1f5f9; border-color: #c4b5fd; }
 body.light .navbar-hamburger__bar { background: #1f2937; }
 
-/* High-contrast hamburger */
+
 body.high-contrast .navbar-hamburger { border-color: yellow; }
 body.high-contrast .navbar-hamburger__bar { background: yellow; }
 
-/* Colorblind hamburger */
+
 body.colorblind .navbar-hamburger { border-color: #ffdd44; background: #004080; }
 body.colorblind .navbar-hamburger__bar { background: #ffdd44; }
 
-/* ── Dim overlay ── */
+
 .mobile-overlay {
   position: fixed;
   inset: 0;
@@ -638,7 +635,7 @@ body.colorblind .navbar-hamburger__bar { background: #ffdd44; }
   animation: fadeIn 0.2s ease;
 }
 
-/* ── Slide-in panel ── */
+
 .mobile-sidebar {
   position: fixed;
   top: 0;
@@ -657,7 +654,7 @@ body.colorblind .navbar-hamburger__bar { background: #ffdd44; }
 
 .mobile-sidebar--open { transform: translateX(0); }
 
-/* Sidebar header */
+
 .mobile-sidebar__header {
   display: flex;
   align-items: center;
@@ -694,7 +691,7 @@ body.colorblind .navbar-hamburger__bar { background: #ffdd44; }
   color: white;
 }
 
-/* Nav items */
+
 .mobile-sidebar__nav {
   display: flex;
   flex-direction: column;
@@ -730,7 +727,7 @@ body.colorblind .navbar-hamburger__bar { background: #ffdd44; }
 
 .mobile-sidebar__item--icon { gap: 10px; }
 
-/* Sign Up in sidebar */
+
 .mobile-sidebar__signup {
   font-family: "Ubuntu", sans-serif;
   font-size: 0.9rem;
@@ -752,7 +749,7 @@ body.colorblind .navbar-hamburger__bar { background: #ffdd44; }
   color: #ffd814;
 }
 
-/* ── Theme overrides for sidebar ── */
+
 body.light .mobile-sidebar {
   background: #ffffff;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
@@ -802,7 +799,7 @@ body.colorblind .mobile-sidebar__item:hover { background: rgba(255,221,68,0.12);
 body.colorblind .mobile-sidebar__signup { background: #ffdd44; color: #0b3d91; }
 body.colorblind .mobile-sidebar__signup:hover { background: #0b3d91; color: #ffdd44; border: 1px solid #ffdd44; }
 
-/* ── Show/hide desktop vs mobile ── */
+
 @media (max-width: 768px) {
   .nav-links          { display: none; }
   .navbar-mobile-right { display: flex; }

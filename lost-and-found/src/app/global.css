@@ -1,4 +1,4 @@
-/* ── Themes ── */
+
 body.light         { --bg: #ffffff; --fg: #0f0f0f; }
 body.dark          { --bg: #0f0f0f; --fg: #f5f5f5; }
 body.high-contrast { --bg: #000000; --fg: #ffff00; }
@@ -9,12 +9,12 @@ body {
   color: var(--fg);
 }
 
-/* ── Font family ── */
+
 html[data-font-family="sans"] * { font-family: ui-sans-serif, system-ui, sans-serif !important; }
 html[data-font-family="serif"] * { font-family: ui-serif, Georgia, serif !important; }
 html[data-font-family="mono"] * { font-family: ui-monospace, "Cascadia Code", monospace !important; }
 
-/* ── Font size ── */
+
 html[data-font-size="sm"] { font-size: 14px; }
 html[data-font-size="md"] { font-size: 16px; }
 html[data-font-size="lg"] { font-size: 18px; }

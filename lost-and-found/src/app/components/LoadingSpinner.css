@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════════════
-   LOADING SPINNER — inherits theme CSS vars
-═══════════════════════════════════════════ */
+
 
 .spinner-overlay {
   position: fixed;
@@ -20,7 +18,7 @@
   mix-blend-mode: multiply;
 }
 
-/* High contrast */
+
 body.high-contrast .spinner-gif {
   mix-blend-mode: normal;
 }

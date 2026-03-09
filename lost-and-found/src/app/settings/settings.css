@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ═══════════════════════════════════════════
-   CSS VARIABLES — LIGHT MODE (default)
-═══════════════════════════════════════════ */
+
 :root,
 body.light {
   --bg-page:        #f0f2f8;
@@ -36,9 +34,7 @@ body.light {
   --scrollbar-thumb: #93c5fd;
 }
 
-/* ═══════════════════════════════════════════
-   DARK MODE
-═══════════════════════════════════════════ */
+
 body.dark {
   --bg-page:        #0b1120;
   --bg-card:        #131d30;
@@ -71,9 +67,7 @@ body.dark {
   --scrollbar-thumb: #253352;
 }
 
-/* ═══════════════════════════════════════════
-   HIGH CONTRAST MODE
-═══════════════════════════════════════════ */
+
 body.high-contrast {
   --bg-page:        #000000;
   --bg-card:        #000000;
@@ -106,9 +100,7 @@ body.high-contrast {
   --scrollbar-thumb: #ffff00;
 }
 
-/* ═══════════════════════════════════════════
-   COLORBLIND MODE
-═══════════════════════════════════════════ */
+
 body.colorblind {
   --bg-page:        #f2f4f7;
   --bg-card:        #ffffff;
@@ -157,9 +149,7 @@ body.colorblind *:focus-visible {
   outline-offset: 3px;
 }
 
-/* ═══════════════════════════════════════════
-   SCROLLBAR
-═══════════════════════════════════════════ */
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -168,9 +158,7 @@ body.colorblind *:focus-visible {
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 
-/* ═══════════════════════════════════════════
-   PAGE WRAPPER
-═══════════════════════════════════════════ */
+
 .settings-page {
   min-height: 100vh;
   background: var(--bg-page);
@@ -180,9 +168,7 @@ body.colorblind *:focus-visible {
   padding: 60px 20px;
 }
 
-/* ═══════════════════════════════════════════
-   MAIN CARD
-═══════════════════════════════════════════ */
+
 .settings-card {
   width: 650px;
   max-width: 95%;
@@ -206,9 +192,7 @@ body.colorblind *:focus-visible {
   background: linear-gradient(90deg, var(--accent), transparent);
 }
 
-/* ═══════════════════════════════════════════
-   PAGE TITLE
-═══════════════════════════════════════════ */
+
 .settings-card h1 {
   font-family: "Ubuntu", sans-serif;
   font-size: 1.9rem;
@@ -218,9 +202,7 @@ body.colorblind *:focus-visible {
   letter-spacing: -0.3px;
 }
 
-/* ═══════════════════════════════════════════
-   SECTION
-═══════════════════════════════════════════ */
+
 .settings-section {
   margin-bottom: 0;
   padding: 28px 0;
@@ -240,9 +222,7 @@ body.colorblind *:focus-visible {
   margin-bottom: 16px;
 }
 
-/* ═══════════════════════════════════════════
-   THEME OPTIONS
-═══════════════════════════════════════════ */
+
 .theme-options {
   display: flex;
   gap: 10px;
@@ -291,9 +271,7 @@ body.high-contrast .theme-options button.active {
   box-shadow: none;
 }
 
-/* ═══════════════════════════════════════════
-   TOGGLE SWITCH (TTS)
-═══════════════════════════════════════════ */
+
 .tts-toggle {
   display: flex;
   align-items: center;
@@ -350,9 +328,7 @@ body.high-contrast .theme-options button.active {
   transform: translateX(20px);
 }
 
-/* ═══════════════════════════════════════════
-   TTS RATE SLIDER
-═══════════════════════════════════════════ */
+
 .tts-rate {
   display: flex;
   flex-direction: column;
@@ -381,9 +357,7 @@ body.high-contrast .theme-options button.active {
   border-radius: 2px;
 }
 
-/* ═══════════════════════════════════════════
-   LANGUAGE SELECT (if present)
-═══════════════════════════════════════════ */
+
 .settings-select {
   width: 100%;
   padding: 10px 13px;
@@ -410,9 +384,7 @@ body.high-contrast .theme-options button.active {
   background: var(--bg-card);
 }
 
-/* ═══════════════════════════════════════════
-   SAVE / ACTION BUTTON
-═══════════════════════════════════════════ */
+
 .settings-save-btn {
   display: inline-flex;
   align-items: center;
@@ -446,9 +418,7 @@ body.high-contrast .settings-save-btn {
   box-shadow: none;
 }
 
-/* ═══════════════════════════════════════════
-   SECTION DESCRIPTION TEXT
-═══════════════════════════════════════════ */
+
 .settings-section p,
 .settings-description {
   font-family: "Poppins", sans-serif;
@@ -458,9 +428,7 @@ body.high-contrast .settings-save-btn {
   line-height: 1.5;
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE RESPONSIVE
-═══════════════════════════════════════════ */
+
 @media (max-width: 768px) {
   .settings-page {
     padding: 20px 10px;

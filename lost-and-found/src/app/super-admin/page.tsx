@@ -22,9 +22,9 @@ interface AdminRequest {
 
 function generatePassword(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  return Array.from(crypto.getRandomValues(new Uint8Array(10)))
-    .map((b) => chars[b % chars.length])
-    .join("");
+  return Array.from(crypto.getRandomValues(new Uint8Array(10))).
+  map((b) => chars[b % chars.length]).
+  join("");
 }
 
 export default function SuperAdminPage() {
@@ -50,10 +50,10 @@ export default function SuperAdminPage() {
 
   const fetchRequests = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("admin_requests")
-      .select("*")
-      .order("submitted_at", { ascending: false });
+    const { data, error } = await supabase.
+    from("admin_requests").
+    select("*").
+    order("submitted_at", { ascending: false });
     if (!error && data) setRequests(data);
     setLoading(false);
   };
@@ -61,11 +61,11 @@ export default function SuperAdminPage() {
   const handleApprove = async (request: AdminRequest) => {
     setApprovingId(request.id);
     try {
-      const { data: existing } = await supabase
-        .from("admins")
-        .select("id")
-        .eq("email", request.email)
-        .maybeSingle();
+      const { data: existing } = await supabase.
+      from("admins").
+      select("id").
+      eq("email", request.email).
+      maybeSingle();
 
       if (existing) {
         alert("This person is already an admin.");
@@ -77,7 +77,7 @@ export default function SuperAdminPage() {
       const { error: insertError } = await supabase.from("admins").insert({
         name: request.name,
         email: request.email,
-        password,
+        password
       });
       if (insertError) throw insertError;
 
@@ -103,13 +103,13 @@ export default function SuperAdminPage() {
   const handleReject = async (id: string) => {
     setRejectingId(id);
     try {
-      const { error } = await supabase
-        .from("admin_requests")
-        .update({ status: "rejected" })
-        .eq("id", id);
+      const { error } = await supabase.
+      from("admin_requests").
+      update({ status: "rejected" }).
+      eq("id", id);
       if (error) throw error;
       setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: "rejected" } : r))
+      prev.map((r) => r.id === id ? { ...r, status: "rejected" } : r)
       );
     } catch (err) {
       console.error("Failed to reject:", err);
@@ -121,17 +121,17 @@ export default function SuperAdminPage() {
 
   const handleRemoveAdmin = async (email: string, requestId: string) => {
     if (!confirm(`Remove admin access for ${email}? Their password will stop working immediately.`))
-      return;
+    return;
     setRemovingId(requestId);
     try {
       const { error } = await supabase.from("admins").delete().eq("email", email);
       if (error) throw error;
-      await supabase
-        .from("admin_requests")
-        .update({ status: "removed" })
-        .eq("id", requestId);
+      await supabase.
+      from("admin_requests").
+      update({ status: "removed" }).
+      eq("id", requestId);
       setRequests((prev) =>
-        prev.map((r) => (r.id === requestId ? { ...r, status: "removed" } : r))
+      prev.map((r) => r.id === requestId ? { ...r, status: "removed" } : r)
       );
       alert(`✅ Admin access removed for ${email}`);
     } catch (err) {
@@ -144,7 +144,7 @@ export default function SuperAdminPage() {
 
   if (!isLoaded || !isSuperAdmin) return null;
 
-  const pending  = requests.filter((r) => r.status === "pending");
+  const pending = requests.filter((r) => r.status === "pending");
   const reviewed = requests.filter((r) => r.status !== "pending");
 
   return (
@@ -161,46 +161,46 @@ export default function SuperAdminPage() {
             Pending
             <span className="sa-badge">{pending.length}</span>
           </h2>
-          {loading ? (
-            <p className="sa-empty">Loading...</p>
-          ) : pending.length === 0 ? (
-            <p className="sa-empty">No pending requests 🎉</p>
-          ) : (
-            pending.map((r) => (
-              <RequestCard
-                key={r.id}
-                request={r}
-                onApprove={() => handleApprove(r)}
-                onReject={() => handleReject(r.id)}
-                approving={approvingId === r.id}
-                rejecting={rejectingId === r.id}
-              />
-            ))
-          )}
+          {loading ?
+          <p className="sa-empty">Loading...</p> :
+          pending.length === 0 ?
+          <p className="sa-empty">No pending requests 🎉</p> :
+
+          pending.map((r) =>
+          <RequestCard
+            key={r.id}
+            request={r}
+            onApprove={() => handleApprove(r)}
+            onReject={() => handleReject(r.id)}
+            approving={approvingId === r.id}
+            rejecting={rejectingId === r.id} />
+
+          )
+          }
         </section>
 
-        {reviewed.length > 0 && (
-          <section className="sa-section">
+        {reviewed.length > 0 &&
+        <section className="sa-section">
             <h2 className="sa-section-title">Reviewed</h2>
-            {reviewed.map((r) => (
-              <RequestCard
-                key={r.id}
-                request={r}
-                reviewed
-                onRemove={
-                  r.status === "approved"
-                    ? () => handleRemoveAdmin(r.email, r.id)
-                    : undefined
-                }
-                removing={removingId === r.id}
-              />
-            ))}
+            {reviewed.map((r) =>
+          <RequestCard
+            key={r.id}
+            request={r}
+            reviewed
+            onRemove={
+            r.status === "approved" ?
+            () => handleRemoveAdmin(r.email, r.id) :
+            undefined
+            }
+            removing={removingId === r.id} />
+
+          )}
           </section>
-        )}
+        }
 
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 function RequestCard({
@@ -211,22 +211,22 @@ function RequestCard({
   rejecting,
   reviewed,
   onRemove,
-  removing,
-}: {
-  request: AdminRequest;
-  onApprove?: () => void;
-  onReject?: () => void;
-  approving?: boolean;
-  rejecting?: boolean;
-  reviewed?: boolean;
-  onRemove?: () => void;
-  removing?: boolean;
-}) {
+  removing
+
+
+
+
+
+
+
+
+
+}: {request: AdminRequest;onApprove?: () => void;onReject?: () => void;approving?: boolean;rejecting?: boolean;reviewed?: boolean;onRemove?: () => void;removing?: boolean;}) {
   const statusClass =
-    request.status === "approved" ? "sa-status--approved"
-    : request.status === "rejected" ? "sa-status--rejected"
-    : request.status === "removed"  ? "sa-status--removed"
-    : "sa-status--pending";
+  request.status === "approved" ? "sa-status--approved" :
+  request.status === "rejected" ? "sa-status--rejected" :
+  request.status === "removed" ? "sa-status--removed" :
+  "sa-status--pending";
 
   return (
     <div className="sa-card">
@@ -241,67 +241,67 @@ function RequestCard({
       </div>
 
       <div className="sa-card-details">
-        <Detail label="School"     value={request.school} />
+        <Detail label="School" value={request.school} />
         <Detail label="Teacher ID" value={request.teacher_id} />
-        {request.extra_info && (
-          <Detail label="Extra Info" value={request.extra_info} />
-        )}
+        {request.extra_info &&
+        <Detail label="Extra Info" value={request.extra_info} />
+        }
         <Detail
           label="Submitted"
-          value={new Date(request.submitted_at).toLocaleDateString()}
-        />
+          value={new Date(request.submitted_at).toLocaleDateString()} />
+        
       </div>
 
-      {request.id_image_url && (
-        <a
-          href={request.id_image_url}
-          target="_blank"
-          rel="noreferrer"
-          className="sa-image-link"
-        >
+      {request.id_image_url &&
+      <a
+        href={request.id_image_url}
+        target="_blank"
+        rel="noreferrer"
+        className="sa-image-link">
+        
           View ID Photo ↗
         </a>
-      )}
+      }
 
-      {!reviewed && (
-        <div className="sa-card-actions">
+      {!reviewed &&
+      <div className="sa-card-actions">
           <button
-            className="sa-btn sa-btn--approve"
-            onClick={onApprove}
-            disabled={approving}
-          >
+          className="sa-btn sa-btn--approve"
+          onClick={onApprove}
+          disabled={approving}>
+          
             {approving ? "Approving..." : "✓ Approve"}
           </button>
           <button
-            className="sa-btn sa-btn--reject"
-            onClick={onReject}
-            disabled={rejecting}
-          >
+          className="sa-btn sa-btn--reject"
+          onClick={onReject}
+          disabled={rejecting}>
+          
             {rejecting ? "Rejecting..." : "✕ Reject"}
           </button>
         </div>
-      )}
+      }
 
-      {reviewed && onRemove && (
-        <div className="sa-card-actions">
+      {reviewed && onRemove &&
+      <div className="sa-card-actions">
           <button
-            className="sa-btn sa-btn--remove"
-            onClick={onRemove}
-            disabled={removing}
-          >
+          className="sa-btn sa-btn--remove"
+          onClick={onRemove}
+          disabled={removing}>
+          
             {removing ? "Removing..." : "✕ Remove Admin"}
           </button>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: {label: string;value: string;}) {
   return (
     <div className="sa-detail">
       <span className="sa-detail-label">{label}:</span>
       <span className="sa-detail-value">{value}</span>
-    </div>
-  );
+    </div>);
+
 }

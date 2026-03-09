@@ -5,7 +5,6 @@ export async function sendAdminEmail(name: string, email: string, password: stri
     process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
     process.env.NEXT_PUBLIC_EMAILJS_ADMIN_TEMPLATE_ID!,
     { name, email, password },
-    process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+    process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
   );
 }
-

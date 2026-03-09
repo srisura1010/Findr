@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ═══════════════════════════════════════════
-   CSS VARIABLES — LIGHT MODE (default)
-═══════════════════════════════════════════ */
+
 :root,
 body.light {
   --bg-page:         #f0f2f8;
@@ -45,9 +43,7 @@ body.light {
   --scrollbar-thumb: #93c5fd;
 }
 
-/* ═══════════════════════════════════════════
-   DARK MODE — purples
-═══════════════════════════════════════════ */
+
 body.dark {
   --bg-page:         #0b1120;
   --bg-sidebar:      #0b1120;
@@ -89,9 +85,7 @@ body.dark {
   --scrollbar-thumb: #253352;
 }
 
-/* ═══════════════════════════════════════════
-   HIGH CONTRAST MODE
-═══════════════════════════════════════════ */
+
 body.high-contrast {
   --bg-page:         #000000;
   --bg-sidebar:      #000000;
@@ -133,9 +127,7 @@ body.high-contrast {
   --scrollbar-thumb: #ffff00;
 }
 
-/* ═══════════════════════════════════════════
-   COLORBLIND MODE
-═══════════════════════════════════════════ */
+
 body.colorblind {
   --bg-page:         #e6f0ff;
   --bg-sidebar:      #ffffff;
@@ -177,9 +169,7 @@ body.colorblind {
   --scrollbar-thumb: #93c5fd;
 }
 
-/* ═══════════════════════════════════════════
-   SCROLLBAR
-═══════════════════════════════════════════ */
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -188,9 +178,7 @@ body.colorblind {
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 
-/* ═══════════════════════════════════════════
-   DASHBOARD LAYOUT
-═══════════════════════════════════════════ */
+
 .dashboard-layout {
   display: flex;
   min-height: calc(100vh - 80px);
@@ -198,9 +186,7 @@ body.colorblind {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* ═══════════════════════════════════════════
-   LEFT SIDEBAR
-═══════════════════════════════════════════ */
+
 .dashboard-sidebar {
   width: 256px;
   min-width: 256px;
@@ -226,7 +212,7 @@ body.colorblind {
   flex-shrink: 0;
 }
 
-/* ── Tab nav strip ── */
+
 .sidebar-tabs {
   display: flex;
   flex-direction: column;
@@ -302,9 +288,7 @@ body.colorblind {
   to   { transform: scale(1); opacity: 1; }
 }
 
-/* ═══════════════════════════════════════════
-   MAIN CONTENT AREA
-═══════════════════════════════════════════ */
+
 .dashboard-main {
   flex: 1;
   min-width: 0;
@@ -355,7 +339,7 @@ body.colorblind {
   margin-bottom: 4px;
 }
 
-/* ── Panel search ── */
+
 .panel-search {
   display: flex;
   align-items: center;
@@ -409,7 +393,7 @@ body.colorblind {
   margin: 0;
 }
 
-/* ── Panel item chips ── */
+
 .panel-item-list {
   display: flex;
   flex-direction: column;
@@ -482,9 +466,7 @@ body.colorblind {
   margin: 0;
 }
 
-/* ═══════════════════════════════════════════
-   ADD ITEM FORM
-═══════════════════════════════════════════ */
+
 .panel-form {
   display: flex;
   flex-direction: column;
@@ -723,9 +705,7 @@ body.colorblind {
   font-family: "Poppins", sans-serif;
 }
 
-/* ═══════════════════════════════════════════
-   ITEM CARDS GRID
-═══════════════════════════════════════════ */
+
 .items-container {
   max-width: 960px;
   width: 100%;
@@ -838,9 +818,7 @@ body.colorblind {
   overflow: hidden;
 }
 
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
+
 .button-group {
   display: flex;
   flex-direction: column;
@@ -946,9 +924,7 @@ body.colorblind {
   transform: translateY(-1px);
 }
 
-/* ═══════════════════════════════════════════
-   EMPTY STATE
-═══════════════════════════════════════════ */
+
 .empty-state {
   text-align: center;
   padding: 60px 0;
@@ -959,9 +935,7 @@ body.colorblind {
 .empty-state p { margin: 0 0 4px; font-size: 14px; }
 .empty-state p + p { font-size: 12px; opacity: 0.7; }
 
-/* ═══════════════════════════════════════════
-   CHAT MODAL
-═══════════════════════════════════════════ */
+
 .chat-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1138,9 +1112,7 @@ body.colorblind {
   background: var(--accent-hover);
 }
 
-/* ═══════════════════════════════════════════
-   APPROVE CARDS
-═══════════════════════════════════════════ */
+
 .approve-list {
   display: flex;
   flex-direction: column;
@@ -1191,9 +1163,7 @@ body.colorblind {
   border: 1px solid var(--border-default);
 }
 
-/* ═══════════════════════════════════════════
-   ADMIN BANNER
-═══════════════════════════════════════════ */
+
 .admin-banner {
   display: flex;
   align-items: center;
@@ -1240,9 +1210,7 @@ body.dark .admin-banner__exit:hover { background: #5c4500; }
 .item-card--admin { border-color: #fecaca; }
 body.dark .item-card--admin { border-color: #7f1d1d; }
 
-/* ═══════════════════════════════════════════
-   ADMIN LOGIN HELPERS
-═══════════════════════════════════════════ */
+
 .admin-login__hint {
   font-size: 12px;
   color: var(--text-secondary);
@@ -1261,9 +1229,7 @@ body.dark .item-card--admin { border-color: #7f1d1d; }
   border-radius: 7px;
 }
 
-/* ═══════════════════════════════════════════
-   REPORT FLAG BUTTON
-═══════════════════════════════════════════ */
+
 .report-flag {
   position: absolute;
   top: 10px;
@@ -1326,9 +1292,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 
 .report-flag:hover .report-flag__tooltip { opacity: 1; }
 
-/* ═══════════════════════════════════════════
-   REPORT MODAL
-═══════════════════════════════════════════ */
+
 .report-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1462,9 +1426,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   transform: none;
 }
 
-/* ═══════════════════════════════════════════
-   REPORTED ITEMS PANEL
-═══════════════════════════════════════════ */
+
 .reported-card {
   background: var(--bg-card);
   border: 1.5px solid color-mix(in srgb, var(--danger) 30%, var(--border-default));
@@ -1556,9 +1518,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   transform: translateY(-1px);
 }
 
-/* ═══════════════════════════════════════════
-   MESSAGES REPORT BUTTON
-═══════════════════════════════════════════ */
+
 .msg-report-btn {
   display: flex;
   align-items: center;
@@ -1582,9 +1542,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   border-color: var(--danger);
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE  (≤ 768px)
-═══════════════════════════════════════════ */
+
 @media (max-width: 768px) {
   .dashboard-layout { flex-direction: column; }
 

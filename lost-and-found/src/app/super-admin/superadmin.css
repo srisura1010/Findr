@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ═══════════════════════════════════════════
-   CSS VARIABLES
-═══════════════════════════════════════════ */
+
 :root,
 body.dark {
   --sa-bg-page:      #0b1120;
@@ -96,9 +94,7 @@ body.colorblind {
   --sa-link:         #003366;
 }
 
-/* ═══════════════════════════════════════════
-   PAGE
-═══════════════════════════════════════════ */
+
 .sa-page {
   min-height: 100vh;
   background: var(--sa-bg-page);
@@ -112,9 +108,7 @@ body.colorblind {
   margin: 0 auto;
 }
 
-/* ═══════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════ */
+
 .sa-header {
   margin-bottom: 36px;
 }
@@ -134,9 +128,7 @@ body.colorblind {
   margin: 0;
 }
 
-/* ═══════════════════════════════════════════
-   SECTION
-═══════════════════════════════════════════ */
+
 .sa-section {
   margin-bottom: 44px;
 }
@@ -172,9 +164,7 @@ body.colorblind {
   padding: 12px 0;
 }
 
-/* ═══════════════════════════════════════════
-   REQUEST CARD
-═══════════════════════════════════════════ */
+
 .sa-card {
   background: var(--sa-bg-card);
   border: 1px solid var(--sa-border);
@@ -186,7 +176,7 @@ body.colorblind {
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-/* Thin left accent line matching dashboard active tabs */
+
 .sa-card::before {
   content: "";
   position: absolute;
@@ -218,7 +208,7 @@ body.colorblind {
   margin: 0;
 }
 
-/* Status pill */
+
 .sa-status {
   font-family: "Ubuntu", sans-serif;
   font-size: 10px;
@@ -237,7 +227,7 @@ body.colorblind {
 
 body.dark .sa-status--pending { background: #2a1f00; border-color: #92400e; }
 
-/* Details */
+
 .sa-card-details {
   display: flex;
   flex-direction: column;
@@ -261,7 +251,7 @@ body.dark .sa-status--pending { background: #2a1f00; border-color: #92400e; }
   color: var(--sa-text-primary);
 }
 
-/* ID photo link */
+
 .sa-image-link {
   display: inline-block;
   font-size: 13px;
@@ -275,14 +265,14 @@ body.dark .sa-status--pending { background: #2a1f00; border-color: #92400e; }
 
 .sa-image-link:hover { opacity: 0.75; text-decoration: underline; }
 
-/* Actions */
+
 .sa-card-actions {
   display: flex;
   gap: 8px;
   margin-top: 6px;
 }
 
-/* Shared button base */
+
 .sa-btn {
   font-family: "Ubuntu", sans-serif;
   font-size: 13px;

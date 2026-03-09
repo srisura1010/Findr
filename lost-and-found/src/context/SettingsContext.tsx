@@ -22,10 +22,10 @@ const SettingsContext = createContext<SettingsContextType | null>(null);
 
 function getInitial<T extends string>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
-  return (localStorage.getItem(key) as T) ?? fallback;
+  return localStorage.getItem(key) as T ?? fallback;
 }
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
+export function SettingsProvider({ children }: {children: React.ReactNode;}) {
   const [theme, setTheme] = useState<Theme>("light");
   const [fontSize, setFontSize] = useState<FontSize>("md");
   const [fontFamily, setFontFamily] = useState<FontFamily>("sans");
@@ -56,8 +56,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   return (
     <SettingsContext.Provider value={{ theme, fontSize, fontFamily, language, setTheme, setFontSize, setFontFamily, setLanguage }}>
       {children}
-    </SettingsContext.Provider>
-  );
+    </SettingsContext.Provider>);
+
 }
 
 export const useSettings = () => {

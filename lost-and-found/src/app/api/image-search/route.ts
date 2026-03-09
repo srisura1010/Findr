@@ -1,6 +1,6 @@
-// Place at: src/app/api/image-search/route.ts
-// npm install groq-sdk
-// Add to .env.local: GROQ_API_KEY=your_key_here
+
+
+
 
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
@@ -15,24 +15,24 @@ export async function POST(req: NextRequest) {
     const response = await groq.chat.completions.create({
       model: "meta-llama/llama-4-scout-17b-16e-instruct",
       messages: [
+      {
+        role: "user",
+        content: [
         {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: { url: `data:${mimeType || "image/jpeg"};base64,${imageBase64}` },
-            },
-            {
-              type: "text",
-              text: `Look at this image of a found item and return ONLY a comma-separated list of search keywords.
+          type: "image_url",
+          image_url: { url: `data:${mimeType || "image/jpeg"};base64,${imageBase64}` }
+        },
+        {
+          type: "text",
+          text: `Look at this image of a found item and return ONLY a comma-separated list of search keywords.
 Include: object type, color, brand if visible, model name, material, size, any distinctive features.
 Example: iPhone 17, Apple, smartphone, orange, mobile phone, iOS device
-Maximum 20 words. No extra text, just the keywords.`,
-            },
-          ],
-        },
-      ],
-      max_tokens: 100,
+Maximum 20 words. No extra text, just the keywords.`
+        }]
+
+      }],
+
+      max_tokens: 100
     });
 
     const keywords = response.choices[0]?.message?.content?.trim() ?? "";

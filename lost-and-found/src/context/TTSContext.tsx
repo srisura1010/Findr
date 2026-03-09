@@ -13,8 +13,8 @@ interface TTSContextType {
 
 const TTSContext = createContext<TTSContextType | undefined>(undefined);
 
-export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
+export const TTSProvider: React.FC<{children: React.ReactNode;}> = ({
+  children
 }) => {
   const pathname = usePathname();
 
@@ -41,7 +41,7 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const speechRef = useRef<SpeechSynthesis>(
-    typeof window !== "undefined" ? window.speechSynthesis : null,
+    typeof window !== "undefined" ? window.speechSynthesis : null
   );
   const queueRef = useRef<string[]>([]);
   const speakingRef = useRef<boolean>(false);
@@ -64,10 +64,10 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
     if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
 
-    const childrenText = Array.from(node.childNodes)
-      .map((child) => extractText(child))
-      .filter(Boolean)
-      .join(" ");
+    const childrenText = Array.from(node.childNodes).
+    map((child) => extractText(child)).
+    filter(Boolean).
+    join(" ");
 
     return childrenText;
   };
@@ -82,7 +82,7 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
 
     speakingRef.current = true;
     const utterance = new SpeechSynthesisUtterance(
-      next.trim().replace(/\s+/g, " "),
+      next.trim().replace(/\s+/g, " ")
     );
     utterance.rate = rateRef.current;
     utterance.pitch = 1;
@@ -106,17 +106,17 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!enabled) return;
 
     const containers: HTMLElement[] = [
-      document.querySelector("#main-content"),
-      document.querySelector("#settings-page"),
-      document.querySelector("#messages-container"),
-      ...Array.from(document.querySelectorAll(".carousel")),
-    ].filter(Boolean) as HTMLElement[];
+    document.querySelector("#main-content"),
+    document.querySelector("#settings-page"),
+    document.querySelector("#messages-container"),
+    ...Array.from(document.querySelectorAll(".carousel"))].
+    filter(Boolean) as HTMLElement[];
 
     containers.forEach((container) => {
       let text = "";
       if (container.classList.contains("carousel")) {
         const visibleSlide = container.querySelector(
-          ".slide:not([style*='display: none'])",
+          ".slide:not([style*='display: none'])"
         );
         if (visibleSlide) text = extractText(visibleSlide);
       } else {
@@ -130,11 +130,11 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!enabled) return;
 
     const containers: HTMLElement[] = [
-      document.querySelector("#main-content"),
-      document.querySelector("#settings-page"),
-      document.querySelector("#messages-container"),
-      ...Array.from(document.querySelectorAll(".carousel")),
-    ].filter(Boolean) as HTMLElement[];
+    document.querySelector("#main-content"),
+    document.querySelector("#settings-page"),
+    document.querySelector("#messages-container"),
+    ...Array.from(document.querySelectorAll(".carousel"))].
+    filter(Boolean) as HTMLElement[];
 
     const observers: MutationObserver[] = containers.map((container) => {
       const observer = new MutationObserver((mutations) => {
@@ -146,7 +146,7 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
               const carousel = element.closest?.(".carousel");
               if (carousel) {
                 const visibleSlide = carousel.querySelector(
-                  ".slide:not([style*='display: none'])",
+                  ".slide:not([style*='display: none'])"
                 );
                 if (visibleSlide) text = extractText(visibleSlide);
               } else {
@@ -167,11 +167,11 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <TTSContext.Provider
-      value={{ enabled, setEnabled, rate, setRate, announce, cancelSpeech }}
-    >
+      value={{ enabled, setEnabled, rate, setRate, announce, cancelSpeech }}>
+      
       {children}
-    </TTSContext.Provider>
-  );
+    </TTSContext.Provider>);
+
 };
 
 export const useTTS = (): TTSContextType => {

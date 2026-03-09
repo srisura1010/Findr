@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ═══════════════════════════════════════════
-   CSS VARIABLES
-═══════════════════════════════════════════ */
+
 :root,
 body.dark {
   --help-bg-page:      #0b1120;
@@ -104,9 +102,7 @@ body.colorblind {
   --help-shadow:       0 20px 40px rgba(0,51,102,0.1);
 }
 
-/* ═══════════════════════════════════════════
-   PAGE WRAPPER
-═══════════════════════════════════════════ */
+
 .help-page {
   min-height: 100vh;
   background: var(--help-bg-page);
@@ -118,9 +114,7 @@ body.colorblind {
   transition: background 0.2s ease;
 }
 
-/* ═══════════════════════════════════════════
-   MAIN CARD
-═══════════════════════════════════════════ */
+
 .help-card {
   width: 750px;
   max-width: 95%;
@@ -147,9 +141,7 @@ body.colorblind {
 body.high-contrast .help-card::before { background: #ffff00; }
 body.colorblind .help-card::before    { background: #003366; }
 
-/* ═══════════════════════════════════════════
-   PAGE TITLE
-═══════════════════════════════════════════ */
+
 .help-card h1 {
   font-family: "Ubuntu", sans-serif;
   font-size: 1.9rem;
@@ -166,9 +158,7 @@ body.colorblind .help-card::before    { background: #003366; }
   line-height: 1.5;
 }
 
-/* ═══════════════════════════════════════════
-   NAV TABS
-═══════════════════════════════════════════ */
+
 .help-nav {
   display: flex;
   gap: 8px;
@@ -203,9 +193,7 @@ body.colorblind .help-card::before    { background: #003366; }
   font-weight: 700;
 }
 
-/* ═══════════════════════════════════════════
-   SECTION
-═══════════════════════════════════════════ */
+
 .help-section {
   margin-bottom: 40px;
 }
@@ -225,9 +213,7 @@ body.colorblind .help-card::before    { background: #003366; }
   border-top: 1px solid var(--help-border);
 }
 
-/* ═══════════════════════════════════════════
-   GUIDE STEPS
-═══════════════════════════════════════════ */
+
 .guide-steps {
   display: flex;
   flex-direction: column;
@@ -275,7 +261,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   color: var(--help-text-muted);
 }
 
-/* Tips list */
+
 .guide-tips {
   list-style: none;
   margin: 0;
@@ -301,9 +287,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   color: var(--help-arrow);
 }
 
-/* ═══════════════════════════════════════════
-   FAQ CATEGORIES
-═══════════════════════════════════════════ */
+
 .faq-categories {
   display: flex;
   flex-wrap: wrap;
@@ -341,9 +325,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   font-weight: 700;
 }
 
-/* ═══════════════════════════════════════════
-   FAQ ACCORDION
-═══════════════════════════════════════════ */
+
 .faq-item {
   border-bottom: 1px solid var(--help-border);
 }
@@ -388,9 +370,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   color: var(--help-text-muted);
 }
 
-/* ═══════════════════════════════════════════
-   CHATBOT INTRO
-═══════════════════════════════════════════ */
+
 .chatbot-intro {
   font-size: 0.875rem;
   line-height: 1.6;
@@ -402,9 +382,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   color: var(--help-text-muted);
 }
 
-/* ═══════════════════════════════════════════
-   CHATBOT
-═══════════════════════════════════════════ */
+
 .chatbot {
   border-radius: 14px;
   border: 1px solid var(--help-border);
@@ -523,7 +501,7 @@ body.colorblind .chatbot__key-save    { color: #ffffff; }
 
 .chatbot__key-note a:hover { text-decoration: underline; }
 
-/* Messages */
+
 .chatbot__messages {
   flex: 1;
   overflow-y: auto;
@@ -584,7 +562,7 @@ body.high-contrast .chatbot__avatar { color: #000000; }
 
 body.high-contrast .chatbot__bubble--user { color: #000000; }
 
-/* Typing dots */
+
 .chatbot__bubble--typing {
   display: flex;
   gap: 5px;
@@ -607,7 +585,7 @@ body.high-contrast .chatbot__bubble--user { color: #000000; }
   40%           { transform: translateY(-6px); opacity: 1; }
 }
 
-/* Input row */
+
 .chatbot__input-row {
   display: flex;
   gap: 8px;
@@ -667,9 +645,7 @@ body.colorblind .chatbot__send--active    { color: #ffffff; }
 
 .chatbot__send:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ═══════════════════════════════════════════
-   MOBILE
-═══════════════════════════════════════════ */
+
 @media (max-width: 768px) {
   .help-page {
     padding: 20px 10px;

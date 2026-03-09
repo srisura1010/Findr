@@ -55,7 +55,7 @@ async function translateText(text: string, target: string): Promise<string> {
     const res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, target }),
+      body: JSON.stringify({ text, target })
     });
     if (res.ok) {
       const data = await res.json();
@@ -64,7 +64,7 @@ async function translateText(text: string, target: string): Promise<string> {
       return translated;
     }
   } catch {
-    // fall through
+
   }
   return text;
 }
@@ -74,15 +74,15 @@ async function translateItems(rawItems: RawItem[], language: string): Promise<It
   return Promise.all(
     rawItems.map(async (item) => {
       const [name, description] = await Promise.all([
-        translateText(item.name, language),
-        translateText(item.description, language),
-      ]);
+      translateText(item.name, language),
+      translateText(item.description, language)]
+      );
       return { ...item, name, description };
     })
   );
 }
 
-export const ItemsProvider = ({ children }: { children: ReactNode }) => {
+export const ItemsProvider = ({ children }: {children: ReactNode;}) => {
   const [rawItems, setRawItems] = useState<RawItem[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [lostItems, setLostItems] = useState<LostItem[]>([]);
@@ -90,11 +90,11 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const { data, error } = await supabase
-        .from("items")
-        .select("*")
-        .order("id", { ascending: false });
-      if (error) { console.error("Failed to fetch items:", error.message); return; }
+      const { data, error } = await supabase.
+      from("items").
+      select("*").
+      order("id", { ascending: false });
+      if (error) {console.error("Failed to fetch items:", error.message);return;}
       const formatted: RawItem[] = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -106,7 +106,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
         authorId: item.author_id,
         authorEmail: item.author_email,
         claimerEmail: item.claimer_email,
-        aiKeywords: item.ai_keywords || "",
+        aiKeywords: item.ai_keywords || ""
       }));
       setRawItems(formatted);
     };
@@ -115,12 +115,12 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchLostItems = async () => {
-      const { data, error } = await supabase
-        .from("lost_items")
-        .select("*")
-        .eq("status", "looking")
-        .order("id", { ascending: false });
-      if (error) { console.error("Failed to fetch lost items:", error.message); return; }
+      const { data, error } = await supabase.
+      from("lost_items").
+      select("*").
+      eq("status", "looking").
+      order("id", { ascending: false });
+      if (error) {console.error("Failed to fetch lost items:", error.message);return;}
       const formatted: LostItem[] = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -131,45 +131,45 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
         authorId: item.author_id,
         authorEmail: item.author_email,
         status: item.status,
-        created_at: item.created_at,
+        created_at: item.created_at
       }));
       setLostItems(formatted);
     };
     fetchLostItems();
   }, []);
 
-  // ── Real-time item updates ──
-  useEffect(() => {
-    const channel = supabase
-      .channel("items-realtime")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "items" },
-        (payload) => {
-          const updated = payload.new;
-          setRawItems((prev) =>
-            prev.map((item) =>
-              item.id === updated.id
-                ? {
-                    ...item,
-                    status: updated.status,
-                    claimerEmail: updated.claimer_email,
-                  }
-                : item
-            )
-          );
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "items" },
-        (payload) => {
-          setRawItems((prev) => prev.filter((item) => item.id !== payload.old.id));
-        }
-      )
-      .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+  useEffect(() => {
+    const channel = supabase.
+    channel("items-realtime").
+    on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "items" },
+      (payload) => {
+        const updated = payload.new;
+        setRawItems((prev) =>
+        prev.map((item) =>
+        item.id === updated.id ?
+        {
+          ...item,
+          status: updated.status,
+          claimerEmail: updated.claimer_email
+        } :
+        item
+        )
+        );
+      }
+    ).
+    on(
+      "postgres_changes",
+      { event: "DELETE", schema: "public", table: "items" },
+      (payload) => {
+        setRawItems((prev) => prev.filter((item) => item.id !== payload.old.id));
+      }
+    ).
+    subscribe();
+
+    return () => {supabase.removeChannel(channel);};
   }, []);
 
   useEffect(() => {
@@ -191,26 +191,26 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
 
   const updateItemStatus = (id: number, newStatus: string, claimerEmail?: string) => {
     setRawItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: newStatus, claimerEmail: claimerEmail || item.claimerEmail }
-          : item
-      )
+    prev.map((item) =>
+    item.id === id ?
+    { ...item, status: newStatus, claimerEmail: claimerEmail || item.claimerEmail } :
+    item
+    )
     );
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: newStatus, claimerEmail: claimerEmail || item.claimerEmail }
-          : item
-      )
+    prev.map((item) =>
+    item.id === id ?
+    { ...item, status: newStatus, claimerEmail: claimerEmail || item.claimerEmail } :
+    item
+    )
     );
   };
 
   return (
     <ItemsContext.Provider value={{ items, lostItems, addItem, addLostItem, updateItemStatus, removeLostItem }}>
       {children}
-    </ItemsContext.Provider>
-  );
+    </ItemsContext.Provider>);
+
 };
 
 export const useItems = () => {

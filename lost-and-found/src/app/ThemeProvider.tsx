@@ -10,23 +10,23 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps>({
   theme: "light",
-  setTheme: () => {},
+  setTheme: () => {}
 });
 
-const THEME_STYLES: Record<Theme, { spinner: string; track: string }> = {
-  "light":         { spinner: "#7c3aed", track: "#e8eaf0" },
-  "dark":          { spinner: "#7c3aed", track: "#1e2d45" },
+const THEME_STYLES: Record<Theme, {spinner: string;track: string;}> = {
+  "light": { spinner: "#7c3aed", track: "#e8eaf0" },
+  "dark": { spinner: "#7c3aed", track: "#1e2d45" },
   "high-contrast": { spinner: "#ffff00", track: "#333300" },
-  "colorblind":    { spinner: "#003366", track: "#bfdbfe" },
+  "colorblind": { spinner: "#003366", track: "#bfdbfe" }
 };
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
-  return (localStorage.getItem("theme") as Theme) || "light";
+  return localStorage.getItem("theme") as Theme || "light";
 }
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Read localStorage synchronously — no flash, no re-render needed
+export const ThemeProvider = ({ children }: {children: ReactNode;}) => {
+
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [mounted, setMounted] = useState(false);
 
@@ -45,13 +45,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      {/* Show themed spinner only before mount, then render children */}
+      {}
       {children}
-    </ThemeContext.Provider>
-  );
+    </ThemeContext.Provider>);
+
 };
 
-function ThemedLoader({ theme }: { theme: Theme }) {
+function ThemedLoader({ theme }: {theme: Theme;}) {
   const { spinner, track } = THEME_STYLES[theme] ?? THEME_STYLES["light"];
 
   return (
@@ -61,7 +61,7 @@ function ThemedLoader({ theme }: { theme: Theme }) {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      zIndex: 9999,
+      zIndex: 9999
     }}>
       <div style={{
         width: 40,
@@ -69,11 +69,11 @@ function ThemedLoader({ theme }: { theme: Theme }) {
         borderRadius: "50%",
         border: `3px solid ${track}`,
         borderTopColor: spinner,
-        animation: "spin 0.65s linear infinite",
+        animation: "spin 0.65s linear infinite"
       }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  );
+    </div>);
+
 }
 
 export const useTheme = () => useContext(ThemeContext);

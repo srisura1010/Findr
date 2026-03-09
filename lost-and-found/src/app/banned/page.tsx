@@ -15,7 +15,7 @@ export default function BannedPage() {
       background: "var(--bg, #0f0f0f)",
       color: "var(--text, #fff)",
       textAlign: "center",
-      padding: "2rem",
+      padding: "2rem"
     }}>
       <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>🚫</div>
       <h1 style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "0.5rem" }}>
@@ -35,11 +35,11 @@ export default function BannedPage() {
           color: "white",
           border: "none",
           cursor: "pointer",
-          fontSize: "0.9rem",
-        }}
-      >
+          fontSize: "0.9rem"
+        }}>
+        
         Go Home
       </button>
-    </div>
-  );
+    </div>);
+
 }

@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ═══════════════════════════════════════════
-   CSS VARIABLES — inherit from body class
-═══════════════════════════════════════════ */
+
 :root,
 body.dark {
   --msg-bg-page:       #0b1120;
@@ -156,9 +154,7 @@ body.colorblind {
   --msg-shadow-other:  0 1px 4px rgba(0,51,102,0.08);
 }
 
-/* ═══════════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════════ */
+
 .messages-layout {
   display: flex;
   height: calc(100vh - 60px);
@@ -168,9 +164,7 @@ body.colorblind {
   overflow: hidden;
 }
 
-/* ═══════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════ */
+
 .messages-sidebar {
   width: 300px;
   margin-top: 16px;
@@ -205,7 +199,7 @@ body.colorblind {
   letter-spacing: -0.2px;
 }
 
-/* Contact admin button */
+
 .messages-sidebar__admin-btn-wrap {
   padding: 10px 12px;
   border-bottom: 1px solid var(--msg-border);
@@ -239,7 +233,7 @@ body.colorblind {
   flex-shrink: 0;
 }
 
-/* Conversation list */
+
 .messages-sidebar__list {
   flex: 1;
   overflow-y: auto;
@@ -259,7 +253,7 @@ body.colorblind {
   margin-bottom: 8px;
 }
 
-/* Conversation row */
+
 .messages-conv-row {
   width: 100%;
   padding: 14px 16px;
@@ -285,7 +279,7 @@ body.colorblind {
   border-left-color: var(--msg-border-active);
 }
 
-/* Avatar */
+
 .messages-conv-avatar {
   width: 38px;
   height: 38px;
@@ -309,7 +303,7 @@ body.high-contrast .messages-conv-avatar {
   color: #000000;
 }
 
-/* Conv info */
+
 .messages-conv-info {
   flex: 1;
   min-width: 0;
@@ -373,9 +367,7 @@ body.high-contrast .messages-conv-avatar {
   color: var(--msg-text-primary);
 }
 
-/* ═══════════════════════════════════════════
-   CHAT AREA
-═══════════════════════════════════════════ */
+
 .messages-chat {
   flex: 1;
   display: flex;
@@ -385,7 +377,7 @@ body.high-contrast .messages-conv-avatar {
   transition: background 0.2s ease;
 }
 
-/* Empty state */
+
 .messages-chat__empty {
   flex: 1;
   display: flex;
@@ -407,7 +399,7 @@ body.high-contrast .messages-conv-avatar {
   color: var(--msg-text-muted);
 }
 
-/* Chat header */
+
 .messages-chat__header {
   padding: 14px 18px;
   border-bottom: 1px solid var(--msg-border);
@@ -448,7 +440,7 @@ body.high-contrast .messages-conv-avatar {
   font-family: "Ubuntu", sans-serif;
 }
 
-/* Back button — hidden on desktop, shown on mobile */
+
 .messages-chat__back {
   display: none;
   width: 34px;
@@ -470,7 +462,7 @@ body.high-contrast .messages-conv-avatar {
   color: var(--msg-accent);
 }
 
-/* Report button */
+
 .msg-report-btn {
   display: flex;
   align-items: center;
@@ -511,7 +503,7 @@ body.high-contrast .msg-report-btn:hover {
   border-color: var(--msg-border);
 }
 
-/* Message bubbles area */
+
 .messages-chat__bubbles {
   flex: 1;
   overflow-y: auto;
@@ -548,7 +540,7 @@ body.high-contrast .msg-report-btn:hover {
   opacity: 0.6;
 }
 
-/* Individual message row */
+
 .msg-row {
   display: flex;
   flex-direction: column;
@@ -597,7 +589,7 @@ body.high-contrast .msg-bubble--own {
   margin-top: 2px;
 }
 
-/* Input row */
+
 .messages-chat__input-row {
   display: flex;
   gap: 8px;
@@ -664,9 +656,7 @@ body.high-contrast .messages-chat__send--active {
   color: #000000;
 }
 
-/* ═══════════════════════════════════════════
-   REPORT MODAL
-═══════════════════════════════════════════ */
+
 .report-modal-overlay {
   position: fixed;
   inset: 0;
@@ -788,7 +778,7 @@ body.high-contrast .report-modal__submit {
   color: #000000;
 }
 
-/* Success state */
+
 .panel-success {
   display: flex;
   flex-direction: column;
@@ -805,7 +795,7 @@ body.high-contrast .report-modal__submit {
   color: #22c55e;
 }
 
-/* Contact admin modal */
+
 .admin-select-btn {
   display: flex;
   align-items: center;
@@ -877,9 +867,7 @@ body.high-contrast .admin-select-avatar {
   font-size: 14px;
 }
 
-/* ═══════════════════════════════════════════
-   MOBILE  (≤ 640px)
-═══════════════════════════════════════════ */
+
 @media (max-width: 640px) {
 
   .messages-layout {

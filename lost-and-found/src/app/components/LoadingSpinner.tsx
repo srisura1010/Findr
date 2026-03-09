@@ -9,10 +9,10 @@ const LoadingSpinner = () => {
       <img
         src="/loading.gif"
         alt="Loading..."
-        className="spinner-gif"
-      />
-    </div>
-  );
+        className="spinner-gif" />
+      
+    </div>);
+
 };
 
 export default LoadingSpinner;

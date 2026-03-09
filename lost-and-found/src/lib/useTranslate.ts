@@ -16,17 +16,17 @@ export function useTranslate() {
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, target: language }),
+        body: JSON.stringify({ text, target: language })
       });
 
-      // Check if response is ok before parsing
+
       if (!res.ok) {
         console.error(`Translation API error: ${res.status} ${res.statusText}`);
         setLoading(false);
-        return text; // Return original text on error
+        return text;
       }
 
-      // Check if response has content
+
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         console.error("Translation API did not return JSON");
@@ -41,7 +41,7 @@ export function useTranslate() {
     } catch (error) {
       console.error("Translation error:", error);
       setLoading(false);
-      return text; // Fallback to original text
+      return text;
     }
   };
 

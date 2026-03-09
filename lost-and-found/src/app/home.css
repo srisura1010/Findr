@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
-/* ===== GRID BACKGROUNDS ===== */
+
 body.dark .grid-background,
 body.light .grid-background-light {
   position: absolute;
@@ -47,7 +47,7 @@ body.colorblind .grid-background-light {
   mask-image: radial-gradient(ellipse 80% 50% at 50% 25%, #000 70%, transparent 110%);
 }
 
-/* ===== GLOBAL ===== */
+
 html, body {
   width: 100%;
   min-height: 100vh;
@@ -55,7 +55,7 @@ html, body {
   font-family: "Poppins", sans-serif;
 }
 
-/* ===== HERO CARD ===== */
+
 .hero-card {
   position: relative;
   border-radius: 20px;
@@ -122,7 +122,7 @@ html, body {
   transform: translateY(-2px);
 }
 
-/* ===== CAROUSEL ===== */
+
 .carousel {
   position: relative;
   width: 90%;
@@ -139,7 +139,7 @@ html, body {
   animation: scroll 15s linear infinite;
 }
 
-/* ===== CARD ===== */
+
 .card {
   flex: 0 0 18rem;
   height: 16rem;
@@ -199,7 +199,7 @@ html, body {
   100% { transform: translateX(-50%); }
 }
 
-/* ===== SHARED SECTION STYLES ===== */
+
 .section-title {
   font-size: 2rem;
   font-weight: 800;
@@ -217,7 +217,7 @@ html, body {
   opacity: 0.75;
 }
 
-/* ===== HOW IT WORKS ===== */
+
 .how-it-works {
   width: 90%;
   max-width: 1000px;
@@ -319,7 +319,7 @@ html, body {
   color: #2f80ed;
 }
 
-/* ===== STATS BANNER ===== */
+
 .stats-banner {
   width: 90%;
   max-width: 900px;
@@ -369,7 +369,7 @@ html, body {
   flex-shrink: 0;
 }
 
-/* ===== CTA STRIP ===== */
+
 .cta-strip {
   width: 90%;
   max-width: 700px;
@@ -411,7 +411,7 @@ html, body {
   opacity: 0.92;
 }
 
-/* ===== FOOTER ===== */
+
 .site-footer {
   width: 100%;
   border-top: 1px solid;
@@ -503,9 +503,7 @@ html, body {
   opacity: 0.4;
 }
 
-/* ═══════════════════════════
-   LIGHT MODE
-═══════════════════════════ */
+
 body.light {
   background-color: #f5f7fb;
   color: #1f2937;
@@ -568,9 +566,7 @@ body.light .site-footer {
 body.light .footer-link { color: #1f2937; }
 body.light .footer-bottom { border-color: #e5e7eb; color: #1f2937; }
 
-/* ═══════════════════════════
-   DARK MODE
-═══════════════════════════ */
+
 body.dark {
   background-color: #0f172a;
   color: #ffffff;
@@ -622,9 +618,7 @@ body.dark .site-footer {
 body.dark .footer-link { color: #e8edf5; }
 body.dark .footer-bottom { border-color: #1e3a8a; color: #e8edf5; }
 
-/* ═══════════════════════════
-   HIGH CONTRAST MODE
-═══════════════════════════ */
+
 body.high-contrast {
   background-color: #000000;
   color: #ffff00;
@@ -716,9 +710,7 @@ body.high-contrast .footer-logo { color: #ffff00; }
 body.high-contrast .footer-link { color: #ffff00; }
 body.high-contrast .footer-bottom { border-color: #ffff00; color: #ffff00; }
 
-/* ═══════════════════════════
-   COLORBLIND MODE
-═══════════════════════════ */
+
 body.colorblind {
   background-color: #ffffff;
   color: #003366;
@@ -812,7 +804,7 @@ body.colorblind .footer-tagline { color: #ffdd44; }
 body.colorblind .footer-link { color: #ffdd44; }
 body.colorblind .footer-bottom { border-color: #ffdd44; color: #ffdd44; }
 
-/* ===== MOBILE RESPONSIVE ===== */
+
 @media (max-width: 768px) {
   .hero-card {
     padding: 30px 20px;
@@ -867,7 +859,7 @@ body.colorblind .footer-bottom { border-color: #ffdd44; color: #ffdd44; }
   .stat-number { font-size: 1.6rem; }
 }
 
-/* ===== FLOATING ITEMS ===== */
+
 .floating-items {
   position: absolute;
   top: 0;
