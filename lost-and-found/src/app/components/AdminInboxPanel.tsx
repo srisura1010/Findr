@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -24,7 +5,21 @@ import { supabase } from "@/lib/supabaseClient";
 import { FaShieldHalved } from "react-icons/fa6";
 import { BsMailbox } from "react-icons/bs";
 
+// AdminInboxPanel
+//
+// This component provides a simple admin-facing messaging inbox.
+// It:
+// - fetches conversations involving the current admin (sent + received)
+// - creates a conversation summary list (last message + unread indicator)
+// - fetches the active conversation's messages
+// - subscribes to Supabase realtime INSERT events so new messages appear live
+// - marks messages as read when the admin opens a conversation
+//
+// It is intentionally self-contained and uses inline styles to keep layout
+// predictable across admin pages.
 
+// Row shape from the `chat_messages` table.
+// This mirrors the database schema, not the UI-facing shape.
 interface DBMessage {
   id: number;
   conversation_id: string;
@@ -41,6 +36,8 @@ interface DBMessage {
   read: boolean;
 }
 
+// Aggregated summary shown in the left sidebar for each conversation.
+// This is derived from the most recent message per `conversation_id`.
 interface ConvSummary {
   conversation_id: string;
   otherUserId: string;
@@ -54,40 +51,53 @@ export function AdminInboxPanel({
   adminId,
   adminName,
   adminEmail
-
-
-
-
-}: {adminId: string;adminName: string;adminEmail: string;}) {
+}: { adminId: string; adminName: string; adminEmail: string }) {
+  // List of conversations (left column).
   const [convs, setConvs] = useState<ConvSummary[]>([]);
+
+  // Selected conversation.
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
+
+  // Messages for the selected conversation.
   const [messages, setMessages] = useState<DBMessage[]>([]);
+
+  // Draft text for the reply composer.
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+
+  // Used to auto-scroll the message list when new messages arrive.
   const bottomRef = useRef<HTMLDivElement>(null);
 
-
+  // Fetch and summarize all conversations involving the admin.
+  //
+  // We query messages where the admin is sender and where the admin is receiver,
+  // merge them, and then keep only the newest message per conversation.
   const fetchConvs = async () => {
     const [{ data: sent }, { data: received }] = await Promise.all([
-    supabase.from("chat_messages").select("*").eq("sender_id", adminId).order("created_at", { ascending: false }),
-    supabase.from("chat_messages").select("*").eq("receiver_id", adminId).order("created_at", { ascending: false })]
-    );
+      supabase.from("chat_messages").select("*").eq("sender_id", adminId).order("created_at", { ascending: false }),
+      supabase.from("chat_messages").select("*").eq("receiver_id", adminId).order("created_at", { ascending: false })
+    ]);
 
     const all: DBMessage[] = [...(sent ?? []), ...(received ?? [])];
     all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     const map = new Map<string, ConvSummary>();
     for (const msg of all) {
+      // The first time we see a conversation_id in this sorted list is the most
+      // recent message for that conversation.
       if (!map.has(msg.conversation_id)) {
         const isOwn = msg.sender_id === adminId;
         map.set(msg.conversation_id, {
           conversation_id: msg.conversation_id,
           otherUserId: isOwn ? msg.receiver_id : msg.sender_id,
           otherUserName: isOwn ?
-          msg.receiver_name || msg.receiver_email || msg.receiver_id :
-          msg.sender_name || msg.sender_email || msg.sender_id,
+            msg.receiver_name || msg.receiver_email || msg.receiver_id :
+            msg.sender_name || msg.sender_email || msg.sender_id,
           lastMessage: msg.text,
           lastMessageAt: msg.created_at,
+
+          // A conversation is unread if the latest message is addressed to the
+          // admin and is still marked unread.
           unread: !msg.read && msg.receiver_id === adminId
         });
       }
@@ -96,56 +106,64 @@ export function AdminInboxPanel({
   };
 
   useEffect(() => {
+    // Initial load + realtime updates for new messages received by this admin.
     fetchConvs();
     const ch = supabase.
-    channel("admin-inbox-convos").
-    on("postgres_changes", {
-      event: "INSERT", schema: "public", table: "chat_messages",
-      filter: `receiver_id=eq.${adminId}`
-    }, () => fetchConvs()).
-    subscribe();
-    return () => {supabase.removeChannel(ch);};
+      channel("admin-inbox-convos").
+      on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "chat_messages",
+        filter: `receiver_id=eq.${adminId}`
+      }, () => fetchConvs()).
+      subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [adminId]);
-
 
   useEffect(() => {
     if (!activeConvId) return;
 
     const fetch = async () => {
+      // Fetch the full message history for the active conversation.
       const { data } = await supabase.
-      from("chat_messages").select("*").
-      eq("conversation_id", activeConvId).
-      order("created_at", { ascending: true });
+        from("chat_messages").select("*").
+        eq("conversation_id", activeConvId).
+        order("created_at", { ascending: true });
       if (data) setMessages(data);
 
-
+      // Mark all messages in this conversation as read where the admin is the receiver.
       await supabase.from("chat_messages").update({ read: true }).
-      eq("conversation_id", activeConvId).eq("receiver_id", adminId);
+        eq("conversation_id", activeConvId).eq("receiver_id", adminId);
 
+      // Update local conversation summary so the unread dot/count disappears immediately.
       setConvs((prev) =>
-      prev.map((c) => c.conversation_id === activeConvId ? { ...c, unread: false } : c)
+        prev.map((c) => c.conversation_id === activeConvId ? { ...c, unread: false } : c)
       );
     };
     fetch();
 
+    // Realtime subscription for messages in the active conversation.
+    // This ensures the chat panel updates live.
     const ch = supabase.
-    channel(`admin-inbox-chat:${activeConvId}`).
-    on("postgres_changes", {
-      event: "INSERT", schema: "public", table: "chat_messages",
-      filter: `conversation_id=eq.${activeConvId}`
-    }, (payload) => {
-      const m = payload.new as DBMessage;
-      setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m]);
-      if (m.receiver_id === adminId) {
-        supabase.from("chat_messages").update({ read: true }).eq("id", m.id);
-      }
-    }).
-    subscribe();
+      channel(`admin-inbox-chat:${activeConvId}`).
+      on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "chat_messages",
+        filter: `conversation_id=eq.${activeConvId}`
+      }, (payload) => {
+        const m = payload.new as DBMessage;
+        setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m]);
 
-    return () => {supabase.removeChannel(ch);};
+        // If the new message is addressed to the admin, mark it read right away
+        // since the conversation is currently open.
+        if (m.receiver_id === adminId) {
+          supabase.from("chat_messages").update({ read: true }).eq("id", m.id);
+        }
+      }).
+      subscribe();
+
+    return () => { supabase.removeChannel(ch); };
   }, [activeConvId, adminId]);
 
   useEffect(() => {
+    // Keep the latest message in view.
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -156,6 +174,9 @@ export function AdminInboxPanel({
     setSending(true);
     const trimmed = text.trim();
     setText("");
+
+    // Insert a new message row.
+    // Conversation metadata is duplicated in each row to simplify querying.
     await supabase.from("chat_messages").insert({
       conversation_id: activeConvId,
       sender_id: adminId,
@@ -171,16 +192,16 @@ export function AdminInboxPanel({
     setSending(false);
   };
 
+  // Enter sends; Shift+Enter inserts newline.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {e.preventDefault();handleSend();}
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  // Used for the unread badge in the header.
   const totalUnread = convs.filter((c) => c.unread).length;
 
   return (
     <div style={{ display: "flex", height: "calc(100vh - 120px)", fontFamily: "system-ui, sans-serif" }}>
-
-      {}
       <div style={{
         width: 280, flexShrink: 0, background: "#fff",
         borderRight: "1px solid #e2e8f0", display: "flex", flexDirection: "column",
@@ -258,7 +279,6 @@ export function AdminInboxPanel({
         </div>
       </div>
 
-      {}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "#f8fafc" }}>
         {!activeConvId ?
         <div style={{
@@ -270,7 +290,6 @@ export function AdminInboxPanel({
           </div> :
 
         <>
-            {}
             <div style={{
             padding: "12px 16px", borderBottom: "1px solid #e2e8f0",
             background: "#fff", display: "flex", alignItems: "center", gap: 10
@@ -288,7 +307,6 @@ export function AdminInboxPanel({
               </div>
             </div>
 
-            {}
             <div style={{
             flex: 1, overflowY: "auto", padding: 16,
             display: "flex", flexDirection: "column", gap: 4
@@ -325,7 +343,6 @@ export function AdminInboxPanel({
               <div ref={bottomRef} />
             </div>
 
-            {}
             <div style={{
             display: "flex", gap: 8, padding: "12px 16px",
             borderTop: "1px solid #e2e8f0", background: "#fff", alignItems: "flex-end"

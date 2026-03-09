@@ -12,18 +12,31 @@ import { SUPER_ADMINS } from "@/lib/superAdmin";
 
 
 export default function Navbar() {
+  // Auth state from Clerk.
   const { isSignedIn, user, isLoaded } = useUser();
+
+  // Language preference is used to translate a few UI labels.
   const { language } = useSettings();
   const router = useRouter();
 
+  // `mounted` is used to avoid SSR/client hydration mismatches when reading
+  // values that only exist on the client (like `user` and localStorage translations).
   const [mounted, setMounted] = useState(false);
+
+  // Number of unread messages for the current user.
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Mobile sidebar open/closed state.
   const [mobileOpen, setMobileOpen] = useState(false);
 
 
+  // Super-admins are determined by email allowlist.
+  // We gate it behind `mounted` + `isLoaded` so SSR doesn't guess incorrectly.
   const isSuperAdmin = mounted && isLoaded && SUPER_ADMINS.includes(
     user?.primaryEmailAddress?.emailAddress ?? ""
   );
+
+  // Convenience flag for showing signed-in UI only when the client has mounted.
   const showSignedIn = mounted && isSignedIn;
 
   useEffect(() => {
@@ -31,6 +44,8 @@ export default function Navbar() {
   }, []);
 
 
+  // Helper used by the mobile sidebar.
+  // Always closes the sidebar before navigating.
   const navigate = (path: string) => {
     setMobileOpen(false);
     router.push(path);
@@ -38,12 +53,15 @@ export default function Navbar() {
 
 
   useEffect(() => {
+    // Prevent background scroll when the mobile sidebar is open.
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {document.body.style.overflow = "";};
   }, [mobileOpen]);
 
   useEffect(() => {
     if (!user) return;
+
+    // Initial unread count fetch.
     const fetchUnread = async () => {
       const { count } = await supabase.
       from("chat_messages").
@@ -53,6 +71,9 @@ export default function Navbar() {
       setUnreadCount(count ?? 0);
     };
     fetchUnread();
+
+    // Realtime listener for new incoming messages.
+    // This only listens for INSERTs addressed to the current user.
     const channel = supabase.
     channel("navbar-unread").
     on("postgres_changes", {
@@ -65,6 +86,8 @@ export default function Navbar() {
 
 
 
+  // Translated UI labels (small subset used in the navbar).
+  // Values are cached in localStorage with a language-specific key.
   const [dashboardText, setDashboardText] = useState("Dashboard");
   const [signUpText, setSignUpText] = useState("Sign Up");
   const [helpText, setHelpText] = useState("Help");
@@ -72,6 +95,8 @@ export default function Navbar() {
 
 
   useEffect(() => {
+    // On mount, try to read cached translations for the active language.
+    // This keeps the navbar snappy without waiting for the translate API.
     if (language === "en") return;
     setDashboardText(localStorage.getItem(`nav_dashboard_${language}`) || "Dashboard");
     setSignUpText(localStorage.getItem(`nav_signUp_${language}`) || "Sign Up");
@@ -79,6 +104,9 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    // When the user changes language:
+    // - reset to English immediately
+    // - otherwise translate the fixed labels and cache them
     if (language === "en") {
       setDashboardText("Dashboard");
       setSignUpText("Sign Up");
@@ -93,6 +121,7 @@ export default function Navbar() {
 
       for (const { key, setter, cacheKey } of translations) {
         try {
+          // Delegate translation to the server route.
           const res = await fetch("/api/translate", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: key, target: language })
