@@ -19,6 +19,7 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { TbReportSearch } from "react-icons/tb";
 import { FaHandshake } from "react-icons/fa";
 
+// draggable floating item that bounces around in the hero zone
 function FloatingItem({
   src,
   label,
@@ -37,8 +38,9 @@ function FloatingItem({
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
-  const [, forceUpdate] = useState(0);
+  const [, forceUpdate] = useState(0); // just used to trigger a re-render on drag
 
+  // get bounds of the floating zone so items don't escape
   const getHeroBounds = () => {
     const zone = document.getElementById("floating-zone");
     if (!zone) return null;
@@ -70,6 +72,7 @@ function FloatingItem({
       if (!b) return;
       let nx = e.clientX - offset.current.x;
       let ny = e.clientY - offset.current.y;
+      // clamp so item stays inside the hero zone
       nx = clamp(nx, b.minX, b.maxX);
       ny = clamp(ny, b.minY, b.maxY);
       pos.current = { x: nx, y: ny };
@@ -94,6 +97,7 @@ function FloatingItem({
         left: pos.current.x,
         top: pos.current.y,
         animationDelay: `${animDelay}s`,
+        // pause animation while dragging
         animationPlayState: dragging.current ? "paused" : "running",
         cursor: dragging.current ? "grabbing" : "grab",
       }}
@@ -107,6 +111,7 @@ function FloatingItem({
   );
 }
 
+// phrases that cycle through in the hero typing animation
 const TYPING_PHRASES = [
   "Lost Your Keys?",
   "Lost a Wallet?",
@@ -125,12 +130,13 @@ export default function Home() {
   const [isReady, setIsReady] = useState(false);
   const [banChecked, setBanChecked] = useState(false);
 
-  // Typing effect state
+  // typing effect state
   const [displayText, setDisplayText] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // all the translatable strings on this page
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
   const [connectingText, setConnectingText] = useState(
     "Connecting student, staff, and schools and reuniting them with their lost items",
@@ -162,7 +168,7 @@ export default function Home() {
     "Only your school community sees your items, keeping reports private and protected.",
   );
 
-  // Typing effect
+  // typing animation — types out phrase, waits, then deletes it
   useEffect(() => {
     const current = TYPING_PHRASES[phraseIndex];
     const timeout = setTimeout(() => {
@@ -170,6 +176,7 @@ export default function Home() {
         setDisplayText(current.slice(0, charIndex + 1));
         setCharIndex((c) => c + 1);
         if (charIndex + 1 === current.length) {
+          // pause before starting to delete
           setTimeout(() => setIsDeleting(true), 1400);
         }
       } else {
@@ -185,7 +192,7 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, phraseIndex]);
 
-  // Ban check
+  // check if the user is banned before showing anything
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) {
@@ -212,7 +219,7 @@ export default function Home() {
     checkBan();
   }, [user, isLoaded]);
 
-  // Translations
+  // handle translations — english just sets defaults, other languages hit the api
   useEffect(() => {
     if (language === "en") {
       setDontPanicText("Don't Panic.");
@@ -249,6 +256,7 @@ export default function Home() {
       return;
     }
     const translateAndCache = async () => {
+      // list of everything we need to translate on this page
       const translations = [
         { key: "Don't Panic.", setter: setDontPanicText, cacheKey: "home_panic" },
         {
@@ -296,6 +304,7 @@ export default function Home() {
         },
       ];
       for (const { key, setter, cacheKey } of translations) {
+        // use cached version if we have it so we don't spam the translate api
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
         if (cached) {
           setter(cached);
@@ -314,7 +323,7 @@ export default function Home() {
             localStorage.setItem(`${cacheKey}_${language}`, translated);
           }
         } catch {
-          /* keep cached */
+          // just keep whatever was already set
         }
       }
       setIsReady(true);
@@ -322,6 +331,7 @@ export default function Home() {
     translateAndCache();
   }, [language]);
 
+  // don't render until auth + ban check + translations are done
   if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
 
   return (
@@ -329,6 +339,7 @@ export default function Home() {
       <div className="grid-background dark:block light:hidden" />
       <div className="grid-background-light dark:hidden light:block" />
 
+      {/* floating item icons in the hero — aria-hidden so screen readers skip them */}
       <div className="floating-items" id="floating-zone" aria-hidden="true">
         {[
           { src: "/items/airpods.png", label: "AirPods", x: 60, y: 120 },
@@ -351,6 +362,7 @@ export default function Home() {
           <span className="panicHero">{dontPanicText}</span>
         </h1>
         <p>{connectingText}</p>
+        {/* show dashboard link if signed in, otherwise open sign in modal */}
         {isSignedIn ? (
           <button className="browse" onClick={() => router.push("/dashboard")}>
             {browseText}
@@ -371,6 +383,7 @@ export default function Home() {
         )}
       </div>
 
+      {/* scrolling feature card carousel — duplicated so the loop looks seamless */}
       <div className="carousel relative z-10">
         <div className="track">
           <div className="card">
@@ -403,6 +416,7 @@ export default function Home() {
             <h3 className="card-title">{card6Title}</h3>
             <p className="card-body">{card6Body}</p>
           </div>
+          {/* duplicate set for infinite scroll effect */}
           <div className="card">
             <span className="card-icon"><IoFolder className="text-blue-500" /></span>
             <h3 className="card-title">{card1Title}</h3>
