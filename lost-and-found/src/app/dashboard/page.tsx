@@ -8,11 +8,10 @@ import emailjs from "@emailjs/browser";
 import { useSettings } from "@/context/SettingsContext";
 import { useEffect, useState, useRef } from "react";
 import { getConversationId } from "@/app/components/MessagingSystem";
-import { FaFlag } from "react-icons/fa6";
+import { FaFlag, FaMessage, FaTrash } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-import { FaTrash } from "react-icons/fa";
 
 
 interface Message {
@@ -757,7 +756,7 @@ export default function DashboardPage() {
   const [foundByText, setFoundByText] = useState("Found by:");
   const [retrieveText, setRetrieveText] = useState("Retrieve");
   const [confirmText, setConfirmText] = useState("Confirm Claimed");
-  const [pendingText, setPendingText] = useState("Item Claimed (Pending Confirmation)");
+  const [pendingText, setPendingText] = useState("Claimed (Pending Confirmation)");
   const [signInText, setSignInText] = useState("Please sign in to retrieve items");
   const [requestSentText, setRequestSentText] = useState("Request sent! The owner has been notified.");
   const [markedClaimedText, setMarkedClaimedText] = useState("Item officially marked as claimed!");
@@ -767,7 +766,7 @@ export default function DashboardPage() {
       setAddItemText("+ Add Item"); setReportFoundText("Report Found Item"); setItemNameText("Item Name");
       setDescriptionText("Description (location, time, etc)"); setCancelText("Cancel"); setPostItemText("Post Item");
       setUploadingText("Uploading..."); setFoundByText("Found by:"); setRetrieveText("Retrieve");
-      setConfirmText("Confirm Claimed"); setPendingText("Item Claimed (Pending Confirmation)");
+      setConfirmText("Confirm Claimed"); setPendingText("Claimed (Pending Confirmation)");
       setSignInText("Please sign in to retrieve items"); setRequestSentText("Request sent! The owner has been notified.");
       setMarkedClaimedText("Item officially marked as claimed!"); setIsReady(true); return;
     }
@@ -783,7 +782,7 @@ export default function DashboardPage() {
         { key: "Found by:", setter: setFoundByText, cacheKey: "dash_foundBy" },
         { key: "Retrieve", setter: setRetrieveText, cacheKey: "dash_retrieve" },
         { key: "Confirm Claimed", setter: setConfirmText, cacheKey: "dash_confirm" },
-        { key: "Item Claimed (Pending Confirmation)", setter: setPendingText, cacheKey: "dash_pending" },
+        { key: "Claimed (Pending Confirmation)", setter: setPendingText, cacheKey: "dash_pending" },
         { key: "Please sign in to retrieve items", setter: setSignInText, cacheKey: "dash_signIn" },
         { key: "Request sent! The owner has been notified.", setter: setRequestSentText, cacheKey: "dash_requestSent" },
         { key: "Item officially marked as claimed!", setter: setMarkedClaimedText, cacheKey: "dash_markedClaimed" },
@@ -1158,9 +1157,11 @@ export default function DashboardPage() {
                                 {confirmText}
                               </button>
                             )}
-                            <button className="delete-button" onClick={() => handleDelete(item.id)}>
-                              <FaTrash />
-                            </button>
+                            <div className="button-group__row">
+                              <button className="delete-button" onClick={() => handleDelete(item.id)}>
+                                <FaTrash />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1197,9 +1198,11 @@ export default function DashboardPage() {
                             <button className="confirm-button" onClick={() => handleMarkFound(item.id)}>
                               Mark as Found
                             </button>
-                            <button className="delete-button" onClick={() => handleDeleteLostItem(item.id)}>
-                              Delete
-                            </button>
+                            <div className="button-group__row">
+                              <button className="delete-button" onClick={() => handleDeleteLostItem(item.id)}>
+                                <FaTrash />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1278,6 +1281,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
+            {/* ── FOUND ITEMS BOARD ── */}
             {boardTab === "found" && (
               <div className="items-container">
                 {filteredItems.filter((i) => i.status !== "claimed").map((item) => {
@@ -1301,6 +1305,7 @@ export default function DashboardPage() {
                         <p>{item.description}</p>
                       </div>
                       <div className="button-group">
+                        {/* Primary action: full-width text button */}
                         {currentStatus === "waiting" && !isItemOwner && (
                           <button className="retrieve-button" onClick={() => handleRetrieve(item)}>{retrieveText}</button>
                         )}
@@ -1311,12 +1316,27 @@ export default function DashboardPage() {
                             <button className="pending-button" disabled>{pendingText}</button>
                           )
                         )}
-                        {!isItemOwner && (
-                          <button className="message-finder-button" onClick={() => handleOpenChat(item)}>Message Finder</button>
-                        )}
-                        {isAdmin && (
-                          <button className="delete-button" onClick={() => handleDelete(item.id)}>Delete Item</button>
-                        )}
+                        {/* Icon row: message + optional trash */}
+                        <div className="button-group__row">
+                          {!isItemOwner && (
+                            <button
+                              className="message-finder-button"
+                              onClick={() => handleOpenChat(item)}
+                              title="Message Finder"
+                            >
+                              <FaMessage />
+                            </button>
+                          )}
+                          {isAdmin && (
+                            <button
+                              className="delete-button"
+                              onClick={() => handleDelete(item.id)}
+                              title="Delete Item"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -1330,6 +1350,7 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {/* ── LOST ITEMS BOARD ── */}
             {boardTab === "lost" && (
               <div className="items-container">
                 {filteredLostItems.map((item) => {
@@ -1356,8 +1377,13 @@ export default function DashboardPage() {
                         <p>{item.description}</p>
                       </div>
                       <div className="button-group">
+                        {/* Primary action */}
                         {!isItemOwner && (
-                          <button className="retrieve-button" style={{ background: "#f97316" }} onClick={() => handleOpenChat(item, true)}>
+                          <button
+                            className="retrieve-button"
+                            style={{ background: "#f97316" }}
+                            onClick={() => handleOpenChat(item, true)}
+                          >
                             I Found This!
                           </button>
                         )}
@@ -1366,14 +1392,27 @@ export default function DashboardPage() {
                             Mark as Found
                           </button>
                         )}
-                        {!isItemOwner && (
-                          <button className="message-finder-button" onClick={() => handleOpenChat(item, true)}>
-                            Message Owner
-                          </button>
-                        )}
-                        {isAdmin && (
-                          <button className="delete-button" onClick={() => handleDeleteLostItem(item.id)}>Delete</button>
-                        )}
+                        {/* Icon row */}
+                        <div className="button-group__row">
+                          {!isItemOwner && (
+                            <button
+                              className="message-finder-button"
+                              onClick={() => handleOpenChat(item, true)}
+                              title="Message Owner"
+                            >
+                              <FaMessage />
+                            </button>
+                          )}
+                          {isAdmin && (
+                            <button
+                              className="delete-button"
+                              onClick={() => handleDeleteLostItem(item.id)}
+                              title="Delete Item"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -1408,6 +1447,6 @@ export default function DashboardPage() {
           />
         )}
       </main>
-    </div>  
+    </div>
   );
 }
