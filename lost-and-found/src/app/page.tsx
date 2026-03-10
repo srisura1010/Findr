@@ -371,8 +371,8 @@ export default function Home() {
           <SignInButton mode="modal">
             <button className="browse">{browseText}</button>
           </SignInButton>
-        )}
-        {isSignedIn ? (
+        )} 
+        {isSignedIn ? (/* boolean for sign state */
           <button className="report" onClick={() => router.push("/dashboard")}>
             {reportText}
           </button>
