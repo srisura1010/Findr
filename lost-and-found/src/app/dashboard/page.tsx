@@ -12,7 +12,14 @@ import { FaFlag, FaMessage, FaTrash } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-
+import { HiOutlineSearch } from "react-icons/hi";
+import { IoAddSharp } from "react-icons/io5";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { ImHammer2 } from "react-icons/im";
+import { FaClipboard } from "react-icons/fa";
+import { IoMdMailOpen } from "react-icons/io";
+import { MdFlagCircle } from "react-icons/md";
+import { CiLogin } from "react-icons/ci";
 
 interface Message {
   id: number;
@@ -83,15 +90,15 @@ const REPORT_REASONS = [
 ];
 
 const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
-  { id: "items",          label: "Items",             icon: "" },
-  { id: "my-items",       label: "My Items",           icon: "" },
-  { id: "add-item",       label: "Report Found Item",  icon: "" },
-  { id: "report-lost",    label: "Report Lost Item",   icon: "" },
-  { id: "become-admin",   label: "Become an Admin",    icon: "" },
-  { id: "admin-login",    label: "Admin",              icon: "" },
-  { id: "reports",        label: "Reports",            icon: "", adminOnly: true },
-  { id: "ban-management", label: "Ban Management",     icon: "", adminOnly: true },
-  { id: "inbox",          label: "Inbox",              icon: "", adminOnly: true },
+  { id: "items",          label: "Items",             icon: <HiOutlineSearch /> },
+  { id: "my-items",       label: "My Items",           icon: <FaClipboard /> },
+  { id: "add-item",       label: "Report Found Item",  icon: <FaFlag /> },
+  { id: "report-lost",    label: "Report Lost Item",   icon: <FaExclamationTriangle /> },
+  { id: "become-admin",   label: "Become an Admin",    icon: <FaClipboard  /> },
+  { id: "admin-login",    label: "Admin",              icon: <CiLogin /> },
+  { id: "reports",        label: "Reports",            icon: <MdFlagCircle />, adminOnly: true },
+  { id: "ban-management", label: "Ban Management",     icon: <ImHammer2 />, adminOnly: true },
+  { id: "inbox",          label: "Inbox",              icon: <IoMdMailOpen />, adminOnly: true },
 ];
 
 function ReportModal({
