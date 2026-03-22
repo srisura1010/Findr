@@ -113,4 +113,4 @@ findr/
 
 ## Contributors
 
-Built by Sri and Srinath — Hillcrest High School
+Built by Srivatsav and Srinath Ramakrishnan — Hillcrest High School
