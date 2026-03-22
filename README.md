@@ -27,6 +27,8 @@ Most school lost and founds are a cardboard box in the front office that nobody 
 
 **Backend:** Node.js, Supabase, Clerk, EmailJS, MyMemory, Groq
 
+<img width="6000" height="3375" alt="Tech Stack" src="https://github.com/user-attachments/assets/d7b3487a-af88-42b6-829c-6da011246683" />
+
 ---
 
 ## Design Decisions
