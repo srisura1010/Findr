@@ -4,48 +4,14 @@ import "./dashboard.css";
 import { useItems } from "@/context/ItemsContext";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
-import emailjs from "@emailjs/browser";
 import { useSettings } from "@/context/SettingsContext";
-import { useEffect, useState, useRef } from "react";
-import { getConversationId } from "@/app/components/MessagingSystem";
-import { FaFlag, FaMessage, FaTrash } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { FaTrash } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-import { HiOutlineSearch } from "react-icons/hi";
-import { IoAddSharp } from "react-icons/io5";
-import { FaExclamationTriangle } from "react-icons/fa";
-import { ImHammer2 } from "react-icons/im";
-import { FaClipboard } from "react-icons/fa";
-import { IoMdMailOpen } from "react-icons/io";
-import { MdFlagCircle } from "react-icons/md";
-import { CiLogin } from "react-icons/ci";
 
-interface Message {
-  id: number;
-  conversation_id: string;
-  sender_id: string;
-  sender_name: string;
-  receiver_id: string;
-  item_id: string;
-  item_title: string;
-  text: string;
-  created_at: string;
-}
-interface ChatUser {
-  uid: string;
-  displayName: string;
-}
-interface ChatItem {
-  id: number;
-  name: string;
-  [key: string]: unknown;
-}
-interface ActiveChat {
-  conversationId: string;
-  item: ChatItem;
-  otherUser: ChatUser;
-}
+
 interface Report {
   id: number;
   item_id: number;
@@ -81,193 +47,17 @@ interface BannedUser {
 
 type TabId = "items" | "my-items" | "add-item" | "report-lost" | "become-admin" | "admin-login" | "reports" | "ban-management" | "inbox";
 
-const REPORT_REASONS = [
-  "Inappropriate content",
-  "Spam or duplicate",
-  "Misleading information",
-  "Already claimed / resolved",
-  "Other",
-];
-
 const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
-  { id: "items",          label: "Items",             icon: <HiOutlineSearch /> },
-  { id: "my-items",       label: "My Items",           icon: <FaClipboard /> },
-  { id: "add-item",       label: "Report Found Item",  icon: <FaFlag /> },
-  { id: "report-lost",    label: "Report Lost Item",   icon: <FaExclamationTriangle /> },
-  { id: "become-admin",   label: "Become an Admin",    icon: <FaClipboard  /> },
-  { id: "admin-login",    label: "Admin",              icon: <CiLogin /> },
-  { id: "reports",        label: "Reports",            icon: <MdFlagCircle />, adminOnly: true },
-  { id: "ban-management", label: "Ban Management",     icon: <ImHammer2 />, adminOnly: true },
-  { id: "inbox",          label: "Inbox",              icon: <IoMdMailOpen />, adminOnly: true },
+  { id: "items",          label: "Items",             icon: "" },
+  { id: "my-items",       label: "My Items",           icon: "" },
+  { id: "add-item",       label: "Report Found Item",  icon: "" },
+  { id: "report-lost",    label: "Report Lost Item",   icon: "" },
+  { id: "become-admin",   label: "Become an Admin",    icon: "" },
+  { id: "admin-login",    label: "Admin",              icon: "" },
+  { id: "reports",        label: "Reports",            icon: "", adminOnly: true },
+  { id: "ban-management", label: "Ban Management",     icon: "", adminOnly: true },
+  { id: "inbox",          label: "Inbox",              icon: "", adminOnly: true },
 ];
-
-function ReportModal({
-  item, currentUser, onClose, onSubmitted,
-}: {
-  item: any;
-  currentUser: { uid: string; displayName: string; email: string };
-  onClose: () => void;
-  onSubmitted: () => void;
-}) {
-  const [selectedReason, setSelectedReason] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!selectedReason || submitting) return;
-    setSubmitting(true);
-    await supabase.from("reports").insert({
-      item_id: item.id,
-      item_name: item.name,
-      item_image: item.image || null,
-      reporter_id: currentUser.uid,
-      reporter_name: currentUser.displayName,
-      reporter_email: currentUser.email,
-      reason: selectedReason,
-    });
-    setDone(true);
-    setSubmitting(false);
-    setTimeout(() => { onSubmitted(); onClose(); }, 1200);
-  };
-
-  return (
-    <div className="report-modal-overlay" onClick={onClose}>
-      <div className="report-modal" onClick={(e) => e.stopPropagation()}>
-        {done ? (
-          <div className="panel-success">
-            <span className="panel-success__icon">✓</span>
-            <p>Report submitted</p>
-          </div>
-        ) : (
-          <>
-            <p className="report-modal__title">Report "{item.name}"</p>
-            <p className="report-modal__subtitle">Why are you reporting this item?</p>
-            <div className="report-modal__reasons">
-              {REPORT_REASONS.map((reason) => (
-                <button
-                  key={reason}
-                  className={`report-modal__reason${selectedReason === reason ? " report-modal__reason--selected" : ""}`}
-                  onClick={() => setSelectedReason(reason)}
-                >
-                  {reason}
-                </button>
-              ))}
-            </div>
-            <div className="report-modal__actions">
-              <button className="report-modal__cancel" onClick={onClose}>Cancel</button>
-              <button className="report-modal__submit" onClick={handleSubmit} disabled={!selectedReason || submitting}>
-                {submitting ? "Submitting..." : "Submit Report"}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ChatModal({
-  conversationId, item, currentUser, otherUser, onClose,
-}: {
-  conversationId: string;
-  item: ChatItem;
-  currentUser: ChatUser;
-  otherUser: ChatUser;
-  onClose: () => void;
-}) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const { data: messages } = await supabase
-        .from("chat_messages")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
-      if (messages) setMessages(messages);
-    };
-    fetchMessages();
-    const channel = supabase
-      .channel(`chat:${conversationId}`)
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "chat_messages",
-        filter: `conversation_id=eq.${conversationId}`,
-      }, (payload) =>
-        setMessages((prev) =>
-          prev.some((m) => m.id === (payload.new as Message).id)
-            ? prev : [...prev, payload.new as Message],
-        ),
-      ).subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [conversationId]);
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
-  const handleSend = async () => {
-    if (!text.trim() || sending) return;
-    setSending(true);
-    const trimmed = text.trim();
-    setText("");
-    setMessages((prev) => [...prev, {
-      id: Date.now(), conversation_id: conversationId,
-      sender_id: currentUser.uid, sender_name: currentUser.displayName,
-      receiver_id: otherUser.uid, item_id: String(item.id),
-      item_title: item.name, text: trimmed, created_at: new Date().toISOString(),
-    }]);
-    await supabase.from("chat_messages").insert({
-      conversation_id: conversationId,
-      sender_id: currentUser.uid, sender_name: currentUser.displayName,
-      receiver_id: otherUser.uid, receiver_name: otherUser.displayName,
-      item_id: String(item.id), item_title: item.name, text: trimmed, read: false,
-    });
-    setSending(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
-  };
-
-  return (
-    <div className="chat-modal-overlay" onClick={onClose}>
-      <div className="chat-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="chat-modal__header">
-          <div className="chat-modal__avatar">{otherUser.displayName?.[0]?.toUpperCase() ?? "?"}</div>
-          <div className="chat-modal__header-info">
-            <div className="chat-modal__name">{otherUser.displayName}</div>
-            <div className="chat-modal__item">{item.name}</div>
-          </div>
-          <button className="chat-modal__close" onClick={onClose}>×</button>
-        </div>
-        <div className="chat-modal__messages">
-          {messages.length === 0 && (
-            <div className="chat-modal__empty"><p>Say hi about <strong>{item.name}</strong></p></div>
-          )}
-          {messages.map((msg) => {
-            const isOwn = msg.sender_id === currentUser.uid;
-            return (
-              <div key={msg.id} className={`chat-bubble-wrapper${isOwn ? " chat-bubble-wrapper--own" : ""}`}>
-                <div className={`chat-bubble${isOwn ? " chat-bubble--own" : " chat-bubble--other"}`}>{msg.text}</div>
-                <span className="chat-bubble__time">
-                  {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-            );
-          })}
-          <div ref={bottomRef} />
-        </div>
-        <div className="chat-modal__input-row">
-          <textarea rows={1} value={text} onChange={(e) => setText(e.target.value)}
-            onKeyDown={handleKeyDown} placeholder="Type a message..." className="chat-modal__textarea" />
-          <button onClick={handleSend} disabled={!text.trim() || sending}
-            className={`chat-modal__send${text.trim() ? " chat-modal__send--active" : ""}`}>↑</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function AdminPanel() {
   const { user } = useUser();
@@ -702,9 +492,7 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>("items");
   const [isReady, setIsReady] = useState(false);
-  const [activeChat, setActiveChat] = useState<ActiveChat | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [reportingItem, setReportingItem] = useState<any | null>(null);
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
   const [reportsTab, setReportsTab] = useState<"items" | "users">("items");
 
@@ -741,18 +529,19 @@ export default function DashboardPage() {
     checkBan();
   }, [user, isLoaded]);
 
-  const [lostItemName, setLostItemName] = useState("");
-  const [lostItemDesc, setLostItemDesc] = useState("");
-  const [lostItemUploading, setLostItemUploading] = useState(false);
-  const [lostItemSuccess, setLostItemSuccess] = useState(false);
-  const [lostSelectedFile, setLostSelectedFile] = useState<File | null>(null);
-
   const [newItemName, setNewItemName] = useState("");
   const [newItemDesc, setNewItemDesc] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
+  const [lostItemName, setLostItemName] = useState("");
+  const [lostItemDesc, setLostItemDesc] = useState("");
+  const [lostSelectedFiles, setLostSelectedFiles] = useState<File[]>([]);
+  const [lostItemUploading, setLostItemUploading] = useState(false);
+  const [lostItemSuccess, setLostItemSuccess] = useState(false);
+
+  // ── i18n strings ──
   const [addItemText, setAddItemText] = useState("+ Add Item");
   const [reportFoundText, setReportFoundText] = useState("Report Found Item");
   const [itemNameText, setItemNameText] = useState("Item Name");
@@ -761,21 +550,13 @@ export default function DashboardPage() {
   const [postItemText, setPostItemText] = useState("Post Item");
   const [uploadingText, setUploadingText] = useState("Uploading...");
   const [foundByText, setFoundByText] = useState("Found by:");
-  const [retrieveText, setRetrieveText] = useState("Retrieve");
-  const [confirmText, setConfirmText] = useState("Confirm Claimed");
-  const [pendingText, setPendingText] = useState("Claimed (Pending Confirmation)");
-  const [signInText, setSignInText] = useState("Please sign in to retrieve items");
-  const [requestSentText, setRequestSentText] = useState("Request sent! The owner has been notified.");
-  const [markedClaimedText, setMarkedClaimedText] = useState("Item officially marked as claimed!");
 
   useEffect(() => {
     if (language === "en") {
       setAddItemText("+ Add Item"); setReportFoundText("Report Found Item"); setItemNameText("Item Name");
       setDescriptionText("Description (location, time, etc)"); setCancelText("Cancel"); setPostItemText("Post Item");
-      setUploadingText("Uploading..."); setFoundByText("Found by:"); setRetrieveText("Retrieve");
-      setConfirmText("Confirm Claimed"); setPendingText("Claimed (Pending Confirmation)");
-      setSignInText("Please sign in to retrieve items"); setRequestSentText("Request sent! The owner has been notified.");
-      setMarkedClaimedText("Item officially marked as claimed!"); setIsReady(true); return;
+      setUploadingText("Uploading..."); setFoundByText("Found by:");
+      setIsReady(true); return;
     }
     const translateAndCache = async () => {
       const translations = [
@@ -787,12 +568,6 @@ export default function DashboardPage() {
         { key: "Post Item", setter: setPostItemText, cacheKey: "nav_postItem" },
         { key: "Uploading...", setter: setUploadingText, cacheKey: "nav_uploading" },
         { key: "Found by:", setter: setFoundByText, cacheKey: "dash_foundBy" },
-        { key: "Retrieve", setter: setRetrieveText, cacheKey: "dash_retrieve" },
-        { key: "Confirm Claimed", setter: setConfirmText, cacheKey: "dash_confirm" },
-        { key: "Claimed (Pending Confirmation)", setter: setPendingText, cacheKey: "dash_pending" },
-        { key: "Please sign in to retrieve items", setter: setSignInText, cacheKey: "dash_signIn" },
-        { key: "Request sent! The owner has been notified.", setter: setRequestSentText, cacheKey: "dash_requestSent" },
-        { key: "Item officially marked as claimed!", setter: setMarkedClaimedText, cacheKey: "dash_markedClaimed" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
@@ -807,41 +582,10 @@ export default function DashboardPage() {
     translateAndCache();
   }, [language]);
 
-  const filteredItems = searchQuery.trim()
-    ? (items ?? []).filter((item) => {
-        const q = searchQuery.toLowerCase();
-        const haystack = `${item.name} ${item.description} ${(item as any).aiKeywords ?? ""}`.toLowerCase();
-        return haystack.includes(q) || q.split(/\s+/).some((word) => haystack.includes(word));
-      })
-    : (items ?? []);
-
-  const filteredLostItems = searchQuery.trim()
-    ? (lostItems ?? []).filter((item) => {
-        const q = searchQuery.toLowerCase();
-        const haystack = `${item.name} ${item.description}`.toLowerCase();
-        return haystack.includes(q) || q.split(/\s+/).some((word) => haystack.includes(word));
-      })
-    : (lostItems ?? []);
-
-  const handleRetrieve = async (item: any) => {
-    if (!user) return alert(signInText);
-    const { error } = await supabase.from("items").update({
-      status: "pending", claimer_email: user.primaryEmailAddress?.emailAddress,
-    }).eq("id", item.id);
-    if (error) { console.error(error.message); return; }
-    emailjs.send(
-      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-      { author_name: item.authorName || "Owner", item_name: item.name, retriever_name: user.fullName || "A user", retriever_email: user.primaryEmailAddress?.emailAddress, to_email: item.authorEmail },
-      process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
-    ).catch(console.error);
-    updateItemStatus(item.id, "pending", user.primaryEmailAddress?.emailAddress);
-    alert(requestSentText);
-  };
-
+  // ── My Items panel handlers (owner still needs these) ──
   const handleConfirmClaimed = async (itemId: number) => {
     const { error } = await supabase.from("items").delete().eq("id", itemId);
-    if (!error) { updateItemStatus(itemId, "claimed"); alert(markedClaimedText); }
+    if (!error) { updateItemStatus(itemId, "claimed"); }
   };
 
   const handleDelete = async (itemId: number) => {
@@ -854,21 +598,6 @@ export default function DashboardPage() {
     if (!confirm("Delete this lost item report permanently?")) return;
     const { error } = await supabase.from("lost_items").delete().eq("id", itemId);
     if (!error) removeLostItem(itemId);
-  };
-
-  const handleOpenChat = (item: any, isLost = false) => {
-    if (!user) return alert(signInText);
-    if (user.id === item.authorId) return;
-    const conversationId = getConversationId(
-      { id: String(item.id) + (isLost ? "_lost" : ""), title: item.name },
-      { uid: user.id, displayName: user.fullName || "Me" },
-      { uid: item.authorId, displayName: item.authorName || (isLost ? "Owner" : "Finder") },
-    );
-    setActiveChat({
-      conversationId,
-      item,
-      otherUser: { uid: item.authorId, displayName: item.authorName || (isLost ? "Owner" : "Finder") },
-    });
   };
 
   const handleMarkFound = async (itemId: number) => {
@@ -893,32 +622,67 @@ export default function DashboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItemName || !newItemDesc || !selectedFile || !user) return;
+    if (!newItemName || !newItemDesc || selectedFiles.length === 0 || !user) return;
     setIsUploading(true);
     try {
-      const fileName = `${Date.now()}_${selectedFile.name}`;
-      const [uploadResult, aiKeywords] = await Promise.all([
-        supabase.storage.from("item-images").upload(fileName, selectedFile),
-        extractKeywords(selectedFile),
-      ]);
-      if (uploadResult.error) { console.error("Upload error:", uploadResult.error.message); return; }
-      const { data: urlData } = supabase.storage.from("item-images").getPublicUrl(fileName);
-      const imageUrl = urlData.publicUrl;
+      const imageUrls: string[] = [];
+      const aiKeywordsArray: string[] = [];
+      
+      for (const file of selectedFiles.slice(0, 3)) {
+        const fileName = `${Date.now()}_${Math.random()}_${file.name}`;
+        const uploadResult = await supabase.storage.from("item-images").upload(fileName, file);
+        
+        if (uploadResult.error) {
+          console.error("Upload error:", uploadResult.error.message);
+          continue;
+        }
+        
+        const { data: urlData } = supabase.storage.from("item-images").getPublicUrl(fileName);
+        imageUrls.push(urlData.publicUrl);
+        
+        const keywords = await extractKeywords(file);
+        if (keywords) aiKeywordsArray.push(keywords);
+      }
+      
+      if (imageUrls.length === 0) {
+        console.error("No images uploaded successfully");
+        return;
+      }
+      
       const { data: insertedItem, error: insertError } = await supabase.from("items").insert([{
-        name: newItemName, description: newItemDesc, image_url: imageUrl,
-        author_name: user.fullName || user.username || "Anonymous", author_avatar: user.imageUrl,
-        author_id: user.id, author_email: user.primaryEmailAddress?.emailAddress,
-        status: "waiting", ai_keywords: aiKeywords,
+        name: newItemName,
+        description: newItemDesc,
+        image_url: imageUrls[0],
+        image_urls: imageUrls,
+        author_name: user.fullName || user.username || "Anonymous",
+        author_avatar: user.imageUrl,
+        author_id: user.id,
+        author_email: user.primaryEmailAddress?.emailAddress,
+        status: "waiting",
+        ai_keywords: aiKeywordsArray.join(", "),
+        date_found: new Date().toISOString(),
       }]).select().single();
+      
       if (insertError) { console.error("Insert error:", insertError.message); return; }
+      
       addItem({
-        id: insertedItem.id, name: insertedItem.name, description: insertedItem.description,
-        image: insertedItem.image_url, authorName: insertedItem.author_name,
-        authorAvatar: insertedItem.author_avatar, status: insertedItem.status,
-        authorId: insertedItem.author_id, authorEmail: insertedItem.author_email || "",
+        id: insertedItem.id,
+        name: insertedItem.name,
+        description: insertedItem.description,
+        image: insertedItem.image_url,
+        images: imageUrls,
+        authorName: insertedItem.author_name,
+        authorAvatar: insertedItem.author_avatar,
+        status: insertedItem.status,
+        authorId: insertedItem.author_id,
+        authorEmail: insertedItem.author_email || "",
         aiKeywords: insertedItem.ai_keywords || "",
       } as any);
-      setNewItemName(""); setNewItemDesc(""); setSelectedFile(null); setUploadSuccess(true);
+      
+      setNewItemName("");
+      setNewItemDesc("");
+      setSelectedFiles([]);
+      setUploadSuccess(true);
       setTimeout(() => { setUploadSuccess(false); setActiveTab("items"); }, 1500);
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -932,30 +696,53 @@ export default function DashboardPage() {
     if (!lostItemName || !lostItemDesc || !user) return;
     setLostItemUploading(true);
     try {
-      let imageUrl = "";
-      if (lostSelectedFile) {
-        const fileName = `lost_${Date.now()}_${lostSelectedFile.name}`;
-        const { error: uploadError } = await supabase.storage.from("item-images").upload(fileName, lostSelectedFile);
-        if (uploadError) { console.error("Upload error:", uploadError.message); }
-        else {
-          const { data: urlData } = supabase.storage.from("item-images").getPublicUrl(fileName);
-          imageUrl = urlData.publicUrl;
+      const imageUrls: string[] = [];
+      
+      for (const file of lostSelectedFiles.slice(0, 3)) {
+        const fileName = `lost_${Date.now()}_${Math.random()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage.from("item-images").upload(fileName, file);
+        
+        if (uploadError) {
+          console.error("Upload error:", uploadError.message);
+          continue;
         }
+        
+        const { data: urlData } = supabase.storage.from("item-images").getPublicUrl(fileName);
+        imageUrls.push(urlData.publicUrl);
       }
+      
       const { data: insertedItem, error: insertError } = await supabase.from("lost_items").insert([{
-        name: lostItemName, description: lostItemDesc, image_url: imageUrl || null,
-        author_name: user.fullName || user.username || "Anonymous", author_avatar: user.imageUrl,
-        author_id: user.id, author_email: user.primaryEmailAddress?.emailAddress, status: "looking",
+        name: lostItemName,
+        description: lostItemDesc,
+        image_url: imageUrls[0] || null,
+        image_urls: imageUrls.length > 0 ? imageUrls : null,
+        author_name: user.fullName || user.username || "Anonymous",
+        author_avatar: user.imageUrl,
+        author_id: user.id,
+        author_email: user.primaryEmailAddress?.emailAddress,
+        status: "looking",
       }]).select().single();
+      
       if (insertError) { console.error("Insert error:", insertError.message); return; }
+      
       addLostItem({
-        id: insertedItem.id, name: insertedItem.name, description: insertedItem.description,
-        image: insertedItem.image_url || "", authorName: insertedItem.author_name,
-        authorAvatar: insertedItem.author_avatar, authorId: insertedItem.author_id,
-        authorEmail: insertedItem.author_email || "", status: insertedItem.status,
+        id: insertedItem.id,
+        name: insertedItem.name,
+        description: insertedItem.description,
+        image: imageUrls[0] || "",
+        images: imageUrls,
+        authorName: insertedItem.author_name,
+        authorAvatar: insertedItem.author_avatar,
+        authorId: insertedItem.author_id,
+        authorEmail: insertedItem.author_email || "",
+        status: insertedItem.status,
         created_at: insertedItem.created_at,
       });
-      setLostItemName(""); setLostItemDesc(""); setLostSelectedFile(null); setLostItemSuccess(true);
+      
+      setLostItemName("");
+      setLostItemDesc("");
+      setLostSelectedFiles([]);
+      setLostItemSuccess(true);
       setTimeout(() => { setLostItemSuccess(false); setActiveTab("items"); setBoardTab("lost"); }, 1500);
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -963,6 +750,22 @@ export default function DashboardPage() {
       setLostItemUploading(false);
     }
   };
+
+  const filteredItems = searchQuery.trim()
+    ? (items ?? []).filter((item) => {
+        const q = searchQuery.toLowerCase();
+        const haystack = `${item.name} ${item.description} ${(item as any).aiKeywords ?? ""}`.toLowerCase();
+        return haystack.includes(q) || q.split(/\s+/).some((word) => haystack.includes(word));
+      })
+    : (items ?? []);
+
+  const filteredLostItems = searchQuery.trim()
+    ? (lostItems ?? []).filter((item) => {
+        const q = searchQuery.toLowerCase();
+        const haystack = `${item.name} ${item.description}`.toLowerCase();
+        return haystack.includes(q) || q.split(/\s+/).some((word) => haystack.includes(word));
+      })
+    : (lostItems ?? []);
 
   const renderMainContent = () => {
     switch (activeTab) {
@@ -982,11 +785,11 @@ export default function DashboardPage() {
                 <textarea placeholder={descriptionText} value={newItemDesc}
                   onChange={(e) => setNewItemDesc(e.target.value)} required className="panel-form__textarea" />
 
-                <label className="panel-form__label">Photo</label>
+       <label className="panel-form__label">Photos (up to 3)</label>
                 <label className="panel-form__file-label" htmlFor="found-file-upload">
                   <span className="panel-form__file-icon">+</span>
                   <span className="panel-form__file-text">
-                    {selectedFile ? selectedFile.name : "Upload a photo"}
+                    {selectedFiles.length > 0 ? `${selectedFiles.length} photo(s) selected` : "Upload photos"}
                   </span>
                 </label>
                 <input
@@ -994,21 +797,37 @@ export default function DashboardPage() {
                   className="panel-form__file"
                   type="file"
                   accept="image/*"
+                  multiple
                   required
-                  onChange={(e) => { if (e.target.files?.[0]) setSelectedFile(e.target.files[0]); }}
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      const files = Array.from(e.target.files).slice(0, 3);
+                      setSelectedFiles(files);
+                    }
+                  }}
                 />
-                <p className="panel-form__file-hint">PNG, JPG up to 10MB</p>
+                <p className="panel-form__file-hint">PNG, JPG up to 10MB each. Upload up to 3 photos.</p>
 
-                {selectedFile && (
+                {selectedFiles.length > 0 && (
                   <div className="panel-form__preview-wrap">
-                    <img src={URL.createObjectURL(selectedFile)} alt="preview" className="panel-form__preview" />
-                    <button type="button" className="panel-form__preview-remove" onClick={() => setSelectedFile(null)}>×</button>
+                    {selectedFiles.map((file, idx) => (
+                      <div key={idx} style={{ position: "relative", display: "inline-block", marginRight: "8px", marginBottom: "8px" }}>
+                        <img src={URL.createObjectURL(file)} alt={`preview ${idx + 1}`} className="panel-form__preview" />
+                        <button
+                          type="button"
+                          className="panel-form__preview-remove"
+                          onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== idx))}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 <div className="panel-form__actions">
                   <button type="button" className="panel-form__cancel"
-                    onClick={() => { setNewItemName(""); setNewItemDesc(""); setSelectedFile(null); setActiveTab("items"); }}>
+                    onClick={() => { setNewItemName(""); setNewItemDesc(""); setSelectedFiles([]); setActiveTab("items"); }}>
                     {cancelText}
                   </button>
                   <button type="submit" className="panel-form__submit" disabled={isUploading}>
@@ -1037,12 +856,12 @@ export default function DashboardPage() {
                   onChange={(e) => setLostItemDesc(e.target.value)} required className="panel-form__textarea" />
 
                 <label className="panel-form__label">
-                  Photo <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 400 }}>(optional)</span>
+                  Photos <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 400 }}>(optional, up to 3)</span>
                 </label>
                 <label className="panel-form__file-label" htmlFor="lost-file-upload">
                   <span className="panel-form__file-icon">+</span>
                   <span className="panel-form__file-text">
-                    {lostSelectedFile ? lostSelectedFile.name : "Upload a photo (optional)"}
+                    {lostSelectedFiles.length > 0 ? `${lostSelectedFiles.length} photo(s) selected` : "Upload photos (optional)"}
                   </span>
                 </label>
                 <input
@@ -1050,20 +869,36 @@ export default function DashboardPage() {
                   className="panel-form__file"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => { if (e.target.files?.[0]) setLostSelectedFile(e.target.files[0]); }}
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      const files = Array.from(e.target.files).slice(0, 3);
+                      setLostSelectedFiles(files);
+                    }
+                  }}
                 />
-                <p className="panel-form__file-hint">PNG, JPG up to 10MB</p>
+                <p className="panel-form__file-hint">PNG, JPG up to 10MB each. Upload up to 3 photos (optional).</p>
 
-                {lostSelectedFile && (
+                {lostSelectedFiles.length > 0 && (
                   <div className="panel-form__preview-wrap">
-                    <img src={URL.createObjectURL(lostSelectedFile)} alt="preview" className="panel-form__preview" />
-                    <button type="button" className="panel-form__preview-remove" onClick={() => setLostSelectedFile(null)}>×</button>
+                    {lostSelectedFiles.map((file, idx) => (
+                      <div key={idx} style={{ position: "relative", display: "inline-block", marginRight: "8px", marginBottom: "8px" }}>
+                        <img src={URL.createObjectURL(file)} alt={`preview ${idx + 1}`} className="panel-form__preview" />
+                        <button
+                          type="button"
+                          className="panel-form__preview-remove"
+                          onClick={() => setLostSelectedFiles(lostSelectedFiles.filter((_, i) => i !== idx))}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 <div className="panel-form__actions">
                   <button type="button" className="panel-form__cancel"
-                    onClick={() => { setLostItemName(""); setLostItemDesc(""); setLostSelectedFile(null); setActiveTab("items"); }}>
+                    onClick={() => { setLostItemName(""); setLostItemDesc(""); setLostSelectedFiles([]); setActiveTab("items"); }}>
                     {cancelText}
                   </button>
                   <button type="submit" className="panel-form__submit" disabled={lostItemUploading}>
@@ -1161,7 +996,7 @@ export default function DashboardPage() {
                           <div className="button-group">
                             {item.status === "pending" && (
                               <button className="confirm-button" onClick={() => handleConfirmClaimed(item.id)}>
-                                {confirmText}
+                                Confirm Claimed
                               </button>
                             )}
                             <div className="button-group__row">
@@ -1291,63 +1126,33 @@ export default function DashboardPage() {
             {/* ── FOUND ITEMS BOARD ── */}
             {boardTab === "found" && (
               <div className="items-container">
-                {filteredItems.filter((i) => i.status !== "claimed").map((item) => {
-                  const currentStatus = item.status || "waiting";
-                  const isItemOwner = user?.id === item.authorId;
-                  return (
-                    <div key={item.id} id={`item-${item.id}`} className={`item-card${isAdmin ? " item-card--admin" : ""}`}>
-                      <button className="report-flag" onClick={() => setReportingItem(item)}>
-                        <FaFlag />
-                        <span className="report-flag__tooltip">Report</span>
-                      </button>
-                      <div className="item-image-wrapper">
-                        <img className="item-image" src={item.image} alt={item.name} />
-                      </div>
-                      <div className="item-info">
-                        <h3>{item.name}</h3>
-                        <div className="posted-by">
-                          {item.authorAvatar && <img src={item.authorAvatar} alt="User" className="posted-by__avatar" />}
-                          <span>{foundByText} {item.authorName || "Anonymous"}</span>
-                        </div>
-                        <p>{item.description}</p>
-                      </div>
-                      <div className="button-group">
-                        {/* Primary action: full-width text button */}
-                        {currentStatus === "waiting" && !isItemOwner && (
-                          <button className="retrieve-button" onClick={() => handleRetrieve(item)}>{retrieveText}</button>
-                        )}
-                        {currentStatus === "pending" && (
-                          isItemOwner ? (
-                            <button className="confirm-button" onClick={() => handleConfirmClaimed(item.id)}>{confirmText}</button>
-                          ) : (
-                            <button className="pending-button" disabled>{pendingText}</button>
-                          )
-                        )}
-                        {/* Icon row: message + optional trash */}
-                        <div className="button-group__row">
-                          {!isItemOwner && (
-                            <button
-                              className="message-finder-button"
-                              onClick={() => handleOpenChat(item)}
-                              title="Message Finder"
-                            >
-                              <FaMessage />
-                            </button>
-                          )}
-                          {isAdmin && (
-                            <button
-                              className="delete-button"
-                              onClick={() => handleDelete(item.id)}
-                              title="Delete Item"
-                            >
-                              <FaTrash />
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                {filteredItems.filter((i) => i.status !== "claimed").map((item) => (
+                  <div
+                    key={item.id}
+                    id={`item-${item.id}`}
+                    className="item-card item-card--clickable"
+                    onClick={() => router.push(`/items/${item.id}`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/items/${item.id}`); }}
+                  >
+                    <div className="item-image-wrapper">
+                      <img className="item-image" src={item.image} alt={item.name} />
                     </div>
-                  );
-                })}
+                    <div className="item-info item-info--card">
+                      <h3>{item.name}</h3>
+                      <div className="posted-by">
+                        {item.authorAvatar && <img src={item.authorAvatar} alt="User" className="posted-by__avatar" />}
+                        <span>{foundByText} {item.authorName || "Anonymous"}</span>
+                      </div>
+                      {item.status === "pending" && (
+                        <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--accent)", fontFamily: "Poppins, sans-serif", marginTop: 4 }}>
+                          ⏳ Claim pending
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
                 {filteredItems.filter((i) => i.status !== "claimed").length === 0 && (
                   <div className="empty-state">
                     <p>{searchQuery ? `No items found for "${searchQuery}"` : "No found items posted yet."}</p>
@@ -1360,70 +1165,37 @@ export default function DashboardPage() {
             {/* ── LOST ITEMS BOARD ── */}
             {boardTab === "lost" && (
               <div className="items-container">
-                {filteredLostItems.map((item) => {
-                  const isItemOwner = user?.id === item.authorId;
-                  return (
-                    <div key={item.id} id={`lost-item-${item.id}`} className={`item-card${isAdmin ? " item-card--admin" : ""}`}>
-                      <button className="report-flag" onClick={() => setReportingItem({ ...item, image: item.image || "" })}>
-                        <FaFlag />
-                        <span className="report-flag__tooltip">Report</span>
-                      </button>
-                      <div className="item-image-wrapper">
-                        {item.image ? (
-                          <img className="item-image" src={item.image} alt={item.name} />
-                        ) : (
-                          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-input)", color: "var(--text-muted)", fontSize: "2rem", fontFamily: "Poppins, sans-serif" }}>?</div>
-                        )}
-                      </div>
-                      <div className="item-info">
-                        <h3>{item.name}</h3>
-                        <div className="posted-by">
-                          {item.authorAvatar && <img src={item.authorAvatar} alt="User" className="posted-by__avatar" />}
-                          <span>Lost by: {item.authorName || "Anonymous"}</span>
-                        </div>
-                        <p>{item.description}</p>
-                      </div>
-                      <div className="button-group">
-                        {/* Primary action */}
-                        {!isItemOwner && (
-                          <button
-                            className="retrieve-button"
-                            style={{ background: "#f97316" }}
-                            onClick={() => handleOpenChat(item, true)}
-                          >
-                            I Found This!
-                          </button>
-                        )}
-                        {isItemOwner && (
-                          <button className="confirm-button" onClick={() => handleMarkFound(item.id)}>
-                            Mark as Found
-                          </button>
-                        )}
-                        {/* Icon row */}
-                        <div className="button-group__row">
-                          {!isItemOwner && (
-                            <button
-                              className="message-finder-button"
-                              onClick={() => handleOpenChat(item, true)}
-                              title="Message Owner"
-                            >
-                              <FaMessage />
-                            </button>
-                          )}
-                          {isAdmin && (
-                            <button
-                              className="delete-button"
-                              onClick={() => handleDeleteLostItem(item.id)}
-                              title="Delete Item"
-                            >
-                              <FaTrash />
-                            </button>
-                          )}
-                        </div>
+                {filteredLostItems.map((item) => (
+                  <div
+                    key={item.id}
+                    id={`lost-item-${item.id}`}
+                    className="item-card item-card--clickable"
+                    onClick={() => router.push(`/items/${item.id}`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/items/${item.id}`); }}
+                  >
+                    <div className="item-image-wrapper">
+                      {item.image ? (
+                        <img className="item-image" src={item.image} alt={item.name} />
+                      ) : (
+                        <div style={{
+                          width: "100%", height: "100%", display: "flex",
+                          alignItems: "center", justifyContent: "center",
+                          background: "var(--bg-input)", color: "var(--text-muted)",
+                          fontSize: "2rem", fontFamily: "Poppins, sans-serif",
+                        }}>?</div>
+                      )}
+                    </div>
+                    <div className="item-info item-info--card">
+                      <h3>{item.name}</h3>
+                      <div className="posted-by">
+                        {item.authorAvatar && <img src={item.authorAvatar} alt="User" className="posted-by__avatar" />}
+                        <span>Lost by: {item.authorName || "Anonymous"}</span>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
                 {filteredLostItems.length === 0 && (
                   <div className="empty-state">
                     <p>{searchQuery ? `No lost items found for "${searchQuery}"` : "No lost item reports yet."}</p>
@@ -1433,25 +1205,6 @@ export default function DashboardPage() {
               </div>
             )}
           </>
-        )}
-
-        {reportingItem && user && (
-          <ReportModal
-            item={reportingItem}
-            currentUser={{ uid: user.id, displayName: user.fullName || "Me", email: user.primaryEmailAddress?.emailAddress || "" }}
-            onClose={() => setReportingItem(null)}
-            onSubmitted={() => setReportingItem(null)}
-          />
-        )}
-
-        {activeChat && user && (
-          <ChatModal
-            conversationId={activeChat.conversationId}
-            item={activeChat.item}
-            currentUser={{ uid: user.id, displayName: user.fullName || "Me" }}
-            otherUser={activeChat.otherUser}
-            onClose={() => setActiveChat(null)}
-          />
         )}
       </main>
     </div>

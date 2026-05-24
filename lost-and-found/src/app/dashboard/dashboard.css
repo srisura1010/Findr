@@ -1603,3 +1603,21 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   .retrieve-button, .confirm-button, .pending-button { font-size: 0.68rem; padding: 0.45rem 3px; }
   .message-finder-button, .delete-button { font-size: 0.8rem; }
 }
+
+/* ═══════════════════════════════════════════
+   CLICKABLE CARD (append to dashboard.css)
+═══════════════════════════════════════════ */
+.item-card--clickable {
+  cursor: pointer;
+  outline: none;
+  text-decoration: none;
+}
+
+.item-card--clickable:focus-visible {
+  box-shadow: 0 0 0 3px var(--accent);
+}
+
+/* Remove bottom padding since there's no button-group anymore */
+.item-info--card {
+  padding-bottom: 14px;
+}

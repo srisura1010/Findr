@@ -13,6 +13,7 @@ export interface Item {
   name: string;
   description: string;
   image: string;
+  images: string[];
   authorName: string;
   authorAvatar?: string;
   status: string;
@@ -29,12 +30,20 @@ export interface LostItem {
   name: string;
   description: string;
   image: string;
+  images: string[];
   authorName: string;
   authorAvatar?: string;
   authorId: string;
   authorEmail: string;
   status: string;
   created_at: string;
+}
+
+// Helper function to normalize image URL(s) to array
+function normalizeImages(imageData: any): string[] {
+  if (Array.isArray(imageData)) return imageData.filter(url => url && typeof url === 'string');
+  if (typeof imageData === 'string' && imageData) return [imageData];
+  return [];
 }
 
 // RawItem represents the stored values fetched from Supabase.
@@ -121,19 +130,23 @@ export const ItemsProvider = ({ children }: { children: ReactNode; }) => {
         .select("*")
         .order("id", { ascending: false });
       if (error) { console.error("Failed to fetch items:", error.message); return; }
-      const formatted: RawItem[] = data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        image: item.image_url,
-        authorName: item.author_name,
-        authorAvatar: item.author_avatar,
-        status: item.status,
-        authorId: item.author_id,
-        authorEmail: item.author_email,
-        claimerEmail: item.claimer_email,
-        aiKeywords: item.ai_keywords || ""
-      }));
+      const formatted: RawItem[] = data.map((item) => {
+        const imageArray = normalizeImages(item.image_urls || item.image_url);
+        return {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          image: imageArray[0] || "",
+          images: imageArray,
+          authorName: item.author_name,
+          authorAvatar: item.author_avatar,
+          status: item.status,
+          authorId: item.author_id,
+          authorEmail: item.author_email,
+          claimerEmail: item.claimer_email,
+          aiKeywords: item.ai_keywords || ""
+        };
+      });
       setRawItems(formatted);
     };
     fetchItems();
@@ -148,18 +161,22 @@ export const ItemsProvider = ({ children }: { children: ReactNode; }) => {
         .eq("status", "looking")
         .order("id", { ascending: false });
       if (error) { console.error("Failed to fetch lost items:", error.message); return; }
-      const formatted: LostItem[] = data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        image: item.image_url || "",
-        authorName: item.author_name,
-        authorAvatar: item.author_avatar,
-        authorId: item.author_id,
-        authorEmail: item.author_email,
-        status: item.status,
-        created_at: item.created_at
-      }));
+      const formatted: LostItem[] = data.map((item) => {
+        const imageArray = normalizeImages(item.image_urls || item.image_url);
+        return {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          image: imageArray[0] || "",
+          images: imageArray,
+          authorName: item.author_name,
+          authorAvatar: item.author_avatar,
+          authorId: item.author_id,
+          authorEmail: item.author_email,
+          status: item.status,
+          created_at: item.created_at
+        };
+      });
       setLostItems(formatted);
     };
     fetchLostItems();
