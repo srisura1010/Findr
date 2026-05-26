@@ -283,6 +283,8 @@ export default function Navbar() {
           }
         </nav>
       </div>
+      /* The mobile sidebar is rendered in the DOM at all times (for accessibility and to avoid remounting issues),
+         but it is visually hidden off-canvas when closed. */
     </>);
 
 }

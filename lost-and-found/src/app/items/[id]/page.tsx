@@ -346,12 +346,20 @@ export default function ItemDetailPage() {
           {/* Title */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between"}}>
             <h1 className="detail-title">{item.name}</h1>
-            {!isItemOwner && (
-              <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={() => setShowReport(true)} style={{ whiteSpace: "nowrap" }}>
-                <FaFlag style={{ marginRight: 6 }} />
-                Report
-              </button>
-            )}
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {!isItemOwner && (
+                <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={() => setShowReport(true)} style={{ whiteSpace: "nowrap" }}>
+                  <FaFlag style={{ marginRight: 6 }} />
+                  Report
+                </button>
+              )}
+              {isItemOwner && (
+                <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete}>
+                  <FaTrash style={{ marginRight: 6 }} />
+                  Delete My Post
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Posted by */}
@@ -464,12 +472,6 @@ export default function ItemDetailPage() {
               <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete}>
                 <FaTrash style={{ marginRight: 6 }} />
                 Delete (Admin)
-              </button>
-            )}
-            {isItemOwner && (
-              <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete}>
-                <FaTrash style={{ marginRight: 6 }} />
-                Delete My Post
               </button>
             )}
           </div>
