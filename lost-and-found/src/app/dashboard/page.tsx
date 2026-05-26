@@ -1257,7 +1257,7 @@ export default function DashboardPage() {
                   className="panel-form__textarea"
                 />
 
-                <label className="panel-form__label">Photos (up to 3)</label>
+                <label className="panel-form__label">Photos (optional, up to 3)</label>
                 <label
                   className="panel-form__file-label"
                   htmlFor="found-file-upload"
@@ -1360,7 +1360,7 @@ export default function DashboardPage() {
                 <label className="panel-form__label">What did you lose?</label>
                 <input
                   type="text"
-                  placeholder="e.g. Black North Face backpack"
+                  placeholder="Item Name"
                   value={lostItemName}
                   onChange={(e) => setLostItemName(e.target.value)}
                   required
@@ -1369,7 +1369,7 @@ export default function DashboardPage() {
 
                 <label className="panel-form__label">Description</label>
                 <textarea
-                  placeholder="Where did you lose it? Any identifying features?"
+                  placeholder="Description (location, time, etc)"
                   value={lostItemDesc}
                   onChange={(e) => setLostItemDesc(e.target.value)}
                   required
@@ -1378,15 +1378,8 @@ export default function DashboardPage() {
 
                 <label className="panel-form__label">
                   Photos{" "}
-                  <span
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "var(--text-muted)",
-                      fontWeight: 400,
-                    }}
-                  >
+                  
                     (optional, up to 3)
-                  </span>
                 </label>
                 <label
                   className="panel-form__file-label"
@@ -1396,7 +1389,7 @@ export default function DashboardPage() {
                   <span className="panel-form__file-text">
                     {lostSelectedFiles.length > 0
                       ? `${lostSelectedFiles.length} photo(s) selected`
-                      : "Upload photos (optional)"}
+                      : "Upload photos"}
                   </span>
                 </label>
                 <input
@@ -1413,7 +1406,7 @@ export default function DashboardPage() {
                   }}
                 />
                 <p className="panel-form__file-hint">
-                  PNG, JPG up to 10MB each. Upload up to 3 photos (optional).
+                  PNG, JPG up to 10MB each. Upload up to 3 photos.
                 </p>
 
                 {lostSelectedFiles.length > 0 && (
