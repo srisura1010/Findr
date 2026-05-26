@@ -344,7 +344,15 @@ export default function ItemDetailPage() {
           </div>
 
           {/* Title */}
-          <h1 className="detail-title">{item.name}</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+            <h1 className="detail-title">{item.name}</h1>
+            {!isItemOwner && (
+              <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={() => setShowReport(true)} style={{ whiteSpace: "nowrap" }}>
+                <FaFlag style={{ marginRight: 6 }} />
+                Report
+              </button>
+            )}
+          </div>
 
           {/* Posted by */}
           <div className="detail-poster">
@@ -452,12 +460,6 @@ export default function ItemDetailPage() {
 
           {/* SECONDARY ACTIONS */}
           <div className="detail-secondary-actions">
-            {!isItemOwner && (
-              <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={() => setShowReport(true)}>
-                <FaFlag style={{ marginRight: 6 }} />
-                Report Item
-              </button>
-            )}
             {isAdmin && (
               <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete}>
                 <FaTrash style={{ marginRight: 6 }} />
