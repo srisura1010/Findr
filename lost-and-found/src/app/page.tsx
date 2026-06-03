@@ -372,7 +372,7 @@ export default function Home() {
             <button className="browse">{browseText}</button>
           </SignInButton>
         )} 
-        {isSignedIn ? (/* boolean for sign state */
+        {isSignedIn ? (/* boolean for sign states */
           <button className="report" onClick={() => router.push("/dashboard")}>
             {reportText}
           </button>
@@ -556,13 +556,9 @@ export default function Home() {
             </div>
             <div className="footer-col">
               <span className="footer-col-heading">Contact</span>
-              <a className="footer-link" href="mailto:srivatsav4ever@gmail.com">
+              <a className="footer-link" href="mailto:findr.support@gmail.com">
                 <FaEnvelope style={{ display: "inline", marginRight: 6, fontSize: 12 }} />
-                srivatsav4ever@gmail.com
-              </a>
-              <a className="footer-link" href="mailto:bavu.ramki@gmail.com">
-                <FaEnvelope style={{ display: "inline", marginRight: 6, fontSize: 12 }} />
-                bavu.ramki@gmail.com
+                findr.support@gmail.com
               </a>
             </div>
           </div>
