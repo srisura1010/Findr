@@ -202,6 +202,22 @@ export default function Navbar() {
               </button>
             </li>
           )}
+
+          <li>
+            {showSignedIn ? (
+              <button
+                className="dashboard-link"
+                onClick={() => router.push("/schools")}
+              >
+                {schoolsText}
+              </button>
+            ) : (
+              <SignInButton mode="modal">
+                <button className="dashboard-link">{schoolsText}</button>
+              </SignInButton>
+            )}
+          </li>
+
           <li>
             <button
               className="dashboard-link"
@@ -221,15 +237,6 @@ export default function Navbar() {
               </button>
             </li>
           )}
-
-          <li>
-            <button
-              className="dashboard-link"
-              onClick={() => router.push("/schools")}
-            >
-              {schoolsText}
-            </button>
-          </li>
 
           {showSignedIn ? (
             <li>
@@ -322,6 +329,24 @@ export default function Navbar() {
             </button>
           )}
 
+          {showSignedIn ? (
+            <button
+              className="mobile-sidebar__item"
+              onClick={() => navigate("/schools")}
+            >
+              {schoolsText}
+            </button>
+          ) : (
+            <SignInButton mode="modal">
+              <button
+                className="mobile-sidebar__item"
+                onClick={() => setMobileOpen(false)}
+              >
+                {schoolsText}
+              </button>
+            </SignInButton>
+          )}
+
           <button
             className="mobile-sidebar__item"
             onClick={() => navigate("/help")}
@@ -337,13 +362,6 @@ export default function Navbar() {
               Super Admin
             </button>
           )}
-
-          <button
-            className="mobile-sidebar__item"
-            onClick={() => navigate("/schools")}
-          >
-            {schoolsText}
-          </button>
 
           <button
             className="mobile-sidebar__item mobile-sidebar__item--icon"
