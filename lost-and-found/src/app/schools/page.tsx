@@ -82,22 +82,22 @@ function AboutPanel({ onEnterCode }: { onEnterCode: () => void }) {
       <div className="sc-about__features">
         {[
           {
-            icon: "🔒",
+            icon: "",
             title: "Private & Scoped",
             desc: "Items posted inside a school are only visible to members of that school.",
           },
           {
-            icon: "⚡",
+            icon: "",
             title: "Instant Notifications",
             desc: "Get real-time updates when something matching your lost item is posted.",
           },
           {
-            icon: "🛡️",
+            icon: "",
             title: "School-Scoped Admins",
             desc: "Designate trusted staff as admins — they manage only your school's board.",
           },
           {
-            icon: "🎨",
+            icon: "",
             title: "Branded Experience",
             desc: "Your school's colors and logo make the board feel like home.",
           },
@@ -184,7 +184,7 @@ function EnterCodePanel({
     if (joinErr) {
       setError("Something went wrong. Try again.");
     } else {
-      setSuccess(`You've joined ${school.name}! 🎉`);
+      setSuccess(`You've joined ${school.name}!`);
       onJoined(school as School);
       setCode("");
     }
@@ -318,7 +318,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
     return (
       <div className="sc-panel-content">
         <div className="sc-success">
-          <span className="sc-success__icon">✓</span>
+          <span className="sc-success__icon"></span>
           <p>Registration submitted!</p>
           <p className="sc-success__sub">
             A Findr super-admin will review within 48 hours and email you the
@@ -442,7 +442,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
               className={`sc-theme-btn${form.theme === t ? " sc-theme-btn--active" : ""}`}
               onClick={() => setForm((p) => ({ ...p, theme: t }))}
             >
-              {t === "light" ? "☀️ Light" : "🌙 Dark"}
+              {t === "light" ? "Light" : "Dark"}
             </button>
           ))}
         </div>
@@ -583,11 +583,11 @@ function SchoolBoard({
     label: string;
     icon: string;
   }[] = [
-    { id: "items", label: "Items", icon: "🔍" },
-    { id: "add-item", label: "Report Found", icon: "📌" },
-    { id: "report-lost", label: "Report Lost", icon: "⚠️" },
-    { id: "become-admin", label: "Become Admin", icon: "📋" },
-    { id: "admin-login", label: "Admin", icon: "🔐" },
+    { id: "items", label: "Items", icon: "" },
+    { id: "add-item", label: "Report Found", icon: "" },
+    { id: "report-lost", label: "Report Lost", icon: "" },
+    { id: "become-admin", label: "Become Admin", icon: "" },
+    { id: "admin-login", label: "Admin", icon: "" },
   ];
 
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
@@ -860,7 +860,7 @@ function SchoolBoard({
         </div>
         {isSchoolAdmin && (
           <div className="sc-admin-badge">
-            🛡️ School Admin
+            School Admin
             <button
               className="sc-admin-badge__exit"
               onClick={() => {
@@ -959,7 +959,7 @@ function SchoolBoard({
                               className="sc-item-card__img"
                             />
                           ) : (
-                            <div className="sc-item-card__no-img">📦</div>
+                            <div className="sc-item-card__no-img">No image</div>
                           )}
                         </div>
                         <div className="sc-item-card__info">
@@ -972,7 +972,7 @@ function SchoolBoard({
                           </p>
                           {item.status === "pending" && (
                             <span className="sc-item-card__status sc-item-card__status--pending">
-                              ⏳ Claim Pending
+                              Claim Pending
                             </span>
                           )}
                         </div>
@@ -1014,7 +1014,7 @@ function SchoolBoard({
                             className="sc-item-card__img"
                           />
                         ) : (
-                          <div className="sc-item-card__no-img">❓</div>
+                          <div className="sc-item-card__no-img">No image</div>
                         )}
                       </div>
                       <div className="sc-item-card__info">
@@ -1058,7 +1058,7 @@ function SchoolBoard({
               <div className="sc-section-title">Report Found Item</div>
               {foundSuccess ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
+                  <span className="sc-success__icon"></span>
                   <p>Item posted!</p>
                 </div>
               ) : (
@@ -1155,7 +1155,7 @@ function SchoolBoard({
               <div className="sc-section-title">Report Lost Item</div>
               {lostSuccess ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
+                  <span className="sc-success__icon"></span>
                   <p>Lost item reported!</p>
                 </div>
               ) : (
@@ -1256,7 +1256,7 @@ function SchoolBoard({
               </div>
               {reqDone ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
+                  <span className="sc-success__icon"></span>
                   <p>Request submitted!</p>
                   <p className="sc-success__sub">
                     The school's super-admin will review your request.
@@ -1333,7 +1333,7 @@ function SchoolBoard({
               <div className="sc-section-title">School Admin Access</div>
               {adminUnlocked ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
+                  <span className="sc-success__icon"></span>
                   <p>Admin view unlocked!</p>
                   <p className="sc-success__sub">
                     You can now delete items and manage this school's board.
