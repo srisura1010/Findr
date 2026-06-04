@@ -2,6 +2,172 @@
    SCHOOLS — schools.css
 ═══════════════════════════════════════════════════════════════ */
 
+:root,
+body.light {
+  --bg-page: #f0f2f8;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f8fafc;
+  --bg-chip: #f8fafc;
+  --bg-hover: #f1f5f9;
+  --bg-active-tab: #dbeafe;
+
+  --border-default: #e8eaf0;
+  --border-input: #e2e8f0;
+  --border-focus: #2f80ed;
+
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-active-tab: #285ebb;
+
+  --accent: #2f80ed;
+  --accent-hover: #285ebb;
+  --accent-light: #dbeafe;
+  --accent-border: #93c5fd;
+
+  --success: #10b981;
+  --success-hover: #059669;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --warning: #ffd814;
+  --warning-text: #0f1111;
+
+  --sidebar-shadow: 2px 0 20px rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --card-hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+  --chip-hover-bg: #dbeafe;
+  --chip-hover-border: #93c5fd;
+
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #93c5fd;
+}
+
+body.dark {
+  --bg-page: #0b1120;
+  --bg-sidebar: #0b1120;
+  --bg-card: #131d30;
+  --bg-input: #1a2540;
+  --bg-chip: #1a2540;
+  --bg-hover: #1e2d45;
+  --bg-active-tab: #1e1545;
+
+  --border-default: #1e2d45;
+  --border-input: #253352;
+  --border-focus: #7c3aed;
+
+  --text-primary: #e8edf5;
+  --text-secondary: #8899bb;
+  --text-muted: #4a5a7a;
+  --text-active-tab: #a78bfa;
+
+  --accent: #7c3aed;
+  --accent-hover: #8b5cf6;
+  --accent-light: #1e1545;
+  --accent-border: #3d2080;
+
+  --success: #10b981;
+  --success-hover: #059669;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --warning: #ffd814;
+  --warning-text: #0f1111;
+
+  --sidebar-shadow: 2px 0 24px rgba(0, 0, 0, 0.4);
+  --card-shadow: 0 2px 16px rgba(124, 58, 237, 0.15);
+  --card-hover-shadow:
+    0 0 20px rgba(124, 58, 237, 0.35), 0 0 40px rgba(124, 58, 237, 0.15);
+
+  --chip-hover-bg: #1e1545;
+  --chip-hover-border: #3d2080;
+
+  --scrollbar-track: #0b1120;
+  --scrollbar-thumb: #253352;
+}
+
+body.high-contrast {
+  --bg-page: #000000;
+  --bg-sidebar: #000000;
+  --bg-card: #000000;
+  --bg-input: #000000;
+  --bg-chip: #000000;
+  --bg-hover: #111111;
+  --bg-active-tab: #1a1a00;
+
+  --border-default: #ffff00;
+  --border-input: #ffff00;
+  --border-focus: #ffff00;
+
+  --text-primary: #ffff00;
+  --text-secondary: #ffff00;
+  --text-muted: #cccc00;
+  --text-active-tab: #ffff00;
+
+  --accent: #ffff00;
+  --accent-hover: #ffd700;
+  --accent-light: #1a1a00;
+  --accent-border: #ffff00;
+
+  --success: #00ff00;
+  --success-hover: #00cc00;
+  --danger: #ff4444;
+  --danger-hover: #cc0000;
+  --warning: #ffff00;
+  --warning-text: #000000;
+
+  --sidebar-shadow: none;
+  --card-shadow: none;
+  --card-hover-shadow: 0 0 0 2px #ffff00;
+
+  --chip-hover-bg: #1a1a00;
+  --chip-hover-border: #ffff00;
+
+  --scrollbar-track: #000;
+  --scrollbar-thumb: #ffff00;
+}
+
+body.colorblind {
+  --bg-page: #e6f0ff;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f0f6ff;
+  --bg-chip: #f0f6ff;
+  --bg-hover: #dbeafe;
+  --bg-active-tab: #003366;
+
+  --border-default: #bfdbfe;
+  --border-input: #93c5fd;
+  --border-focus: #003366;
+
+  --text-primary: #003366;
+  --text-secondary: #1e4d8c;
+  --text-muted: #5b7fa6;
+  --text-active-tab: #ffdd44;
+
+  --accent: #003366;
+  --accent-hover: #002244;
+  --accent-light: #dbeafe;
+  --accent-border: #ffdd44;
+
+  --success: #005c2e;
+  --success-hover: #003d1f;
+  --danger: #cc3300;
+  --danger-hover: #991f00;
+  --warning: #ffdd44;
+  --warning-text: #003366;
+
+  --sidebar-shadow: 2px 0 20px rgba(0, 51, 102, 0.1);
+  --card-shadow: 0 2px 12px rgba(0, 51, 102, 0.1);
+  --card-hover-shadow: 0 12px 32px rgba(0, 51, 102, 0.2);
+
+  --chip-hover-bg: #dbeafe;
+  --chip-hover-border: #003366;
+
+  --scrollbar-track: #dbeafe;
+  --scrollbar-thumb: #93c5fd;
+}
+
 /* ── Page shell ── */
 .sc-page {
   min-height: calc(100vh - 80px);
@@ -70,7 +236,12 @@
   content: "";
   display: block;
   height: 3px;
-  background: linear-gradient(90deg, #2f80ed, #7c3aed, transparent);
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    var(--accent-hover),
+    transparent
+  );
   flex-shrink: 0;
 }
 
@@ -142,8 +313,8 @@
 }
 
 .sc-sidebar__tab--active {
-  background: rgba(47, 128, 237, 0.12);
-  color: #2f80ed;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -155,7 +326,7 @@
   height: 60%;
   width: 3px;
   border-radius: 0 2px 2px 0;
-  background: #2f80ed;
+  background: var(--accent);
 }
 
 .sc-sidebar__tab-icon {
@@ -169,7 +340,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2f80ed;
+  background: var(--accent);
   flex-shrink: 0;
   margin-left: auto;
   animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -521,8 +692,8 @@
   height: 7rem;
   background: radial-gradient(
     circle,
-    rgba(47, 128, 237, 1),
-    rgba(47, 128, 237, 0.05) 70%
+    var(--accent),
+    color-mix(in srgb, var(--accent) 5%, transparent) 70%
   );
 }
 
@@ -532,8 +703,8 @@
   height: 9rem;
   background: radial-gradient(
     circle,
-    rgba(124, 58, 237, 1),
-    rgba(124, 58, 237, 0.05) 70%
+    var(--accent-hover),
+    color-mix(in srgb, var(--accent-hover) 5%, transparent) 70%
   );
   animation-delay: -2s;
 }
@@ -1007,9 +1178,9 @@
 
 .sc-form__input:focus,
 .sc-form__textarea:focus {
-  border-color: #2f80ed;
+  border-color: var(--accent);
   background: var(--bg-card);
-  box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .sc-form__input::placeholder,

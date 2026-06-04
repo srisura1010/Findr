@@ -12,6 +12,7 @@ import { FaLock } from "react-icons/fa6";
 import { FaSchool } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { useSettings } from "@/context/SettingsContext";
 
 const ABOUT_CAROUSEL_ITEMS: { icon: ReactNode; title: string; body: string }[] =
   [
@@ -370,13 +371,13 @@ function EnterCodePanel({
 
 // ─── Register School Panel ────────────────────────────────────────────────────
 function RegisterSchoolPanel({ user }: { user: any }) {
+  const { theme } = useSettings();
   const [form, setForm] = useState({
     name: "",
     websiteUrl: "",
     repRole: "",
     extraInfo: "",
     color: "#2f80ed",
-    theme: "light",
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
@@ -411,7 +412,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
       logo_url: logoUrl || null,
       doc_url: docUrl || null,
       color: form.color,
-      theme: form.theme,
+      theme,
       rep_name: user.fullName || user.username || "Unknown",
       rep_email: user.primaryEmailAddress?.emailAddress || "",
       rep_user_id: user.id,
@@ -543,19 +544,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
           />
         </div>
 
-        <label className="sc-form__label">Board Theme</label>
-        <div className="sc-theme-toggle">
-          {(["light", "dark"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              className={`sc-theme-btn${form.theme === t ? " sc-theme-btn--active" : ""}`}
-              onClick={() => setForm((p) => ({ ...p, theme: t }))}
-            >
-              {t === "light" ? "Light" : "Dark"}
-            </button>
-          ))}
-        </div>
+        <input type="hidden" value={theme} readOnly />
 
         <label className="sc-form__label">Anything else?</label>
         <textarea
