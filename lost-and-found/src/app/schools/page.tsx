@@ -17,22 +17,22 @@ import { useSettings } from "@/context/SettingsContext";
 const ABOUT_CAROUSEL_ITEMS: { icon: ReactNode; title: string; body: string }[] =
   [
     {
-      icon: <FaShieldAlt></FaShieldAlt>,
+      icon: <FaShieldAlt />,
       title: "Private by design",
       body: "Campus boards stay scoped to each school and its verified members.",
     },
     {
-      icon: <BsLightningFill></BsLightningFill>,
+      icon: <BsLightningFill />,
       title: "Fast item matching",
       body: "Post found items quickly and surface likely matches before they disappear.",
     },
     {
-      icon: <FaSchool></FaSchool>,
+      icon: <FaSchool />,
       title: "One board per school",
       body: "Keep messages, items, and admin tools organized around the right campus.",
     },
     {
-      icon: <FaLock></FaLock>,
+      icon: <FaLock />,
       title: "Trusted access",
       body: "School codes and admin tools keep the whole experience clean and secure.",
     },
@@ -45,6 +45,9 @@ interface School {
   code: string;
   logo_url: string | null;
   color: string;
+  secondary_color: string;
+  bg_image_url: string | null;
+  gradient_mode: number;
   theme: string;
   website_url: string | null;
   rep_name: string;
@@ -83,6 +86,7 @@ interface SchoolLostItem {
   created_at: string;
 }
 
+// ─── Cache helpers ────────────────────────────────────────────────────────────
 const SCHOOLS_CACHE_TTL_MS = 5 * 60 * 1000;
 const SCHOOL_BOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -111,18 +115,7 @@ function writeMySchoolsCache(userId: string, schools: School[]) {
       getMySchoolsCacheKey(userId),
       JSON.stringify({ timestamp: Date.now(), schools }),
     );
-  } catch {
-    // ignore storage quota / privacy errors
-  }
-}
-
-function removeMySchoolsCache(userId: string) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem(getMySchoolsCacheKey(userId));
-  } catch {
-    // ignore storage errors
-  }
+  } catch {}
 }
 
 function getSchoolBoardCacheKey(schoolId: string) {
@@ -143,9 +136,8 @@ function readSchoolBoardCache(schoolId: string) {
       !parsed?.timestamp ||
       !Array.isArray(parsed.found) ||
       !Array.isArray(parsed.lost)
-    ) {
+    )
       return null;
-    }
     if (Date.now() - parsed.timestamp > SCHOOL_BOARD_CACHE_TTL_MS) return null;
     return parsed;
   } catch {
@@ -164,9 +156,25 @@ function writeSchoolBoardCache(
       getSchoolBoardCacheKey(schoolId),
       JSON.stringify({ timestamp: Date.now(), found, lost }),
     );
-  } catch {
-    // ignore storage quota / privacy errors
-  }
+  } catch {}
+}
+
+// ─── Gradient helpers ─────────────────────────────────────────────────────────
+function hexToRgba(hex: string, a: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function gradStyles(hex: string): string[] {
+  return [
+    `linear-gradient(to top, ${hexToRgba(hex, 0.97)} 0%, ${hexToRgba(hex, 0.72)} 40%, ${hexToRgba(hex, 0.2)} 75%, transparent 100%)`,
+    `linear-gradient(to right, ${hexToRgba(hex, 0.95)} 0%, ${hexToRgba(hex, 0.65)} 50%, ${hexToRgba(hex, 0.1)} 100%)`,
+    `linear-gradient(135deg, ${hexToRgba(hex, 0.92)} 0%, ${hexToRgba(hex, 0.5)} 55%, transparent 100%)`,
+    `linear-gradient(to bottom, ${hexToRgba(hex, 0.85)} 0%, ${hexToRgba(hex, 0.55)} 100%)`,
+  ];
 }
 
 // ─── About / Landing Panel ────────────────────────────────────────────────────
@@ -244,10 +252,9 @@ function AboutPanel({
 
       <section className="sc-about__carousel-section">
         <div className="sc-section-title">Built to feel alive</div>
-        <div></div>
         <p className="sc-hint sc-about__carousel-hint">
-          Smooth motion, bold cards, and a campus-first layout that helps you reconnect
-          with your lost items <b>and</b> your community.
+          Smooth motion, bold cards, and a campus-first layout that helps you
+          reconnect with your lost items <b>and</b> your community.
         </p>
         <div className="sc-carousel">
           <div className="sc-carousel__track">
@@ -279,22 +286,22 @@ function AboutPanel({
       <div className="sc-about__features">
         {[
           {
-            icon: <FaGraduationCap></FaGraduationCap>,
+            icon: <FaGraduationCap />,
             title: "Branded campus space",
             desc: "Each school can feel unique with its own color, logo, and tone.",
           },
           {
-            icon: <BsLightningFill></BsLightningFill>,
+            icon: <BsLightningFill />,
             title: "Real-time momentum",
             desc: "Fast posting and scanning keep the board moving instead of stale.",
           },
           {
-            icon: <FaShieldAlt></FaShieldAlt>,
+            icon: <FaShieldAlt />,
             title: "School-scoped privacy",
             desc: "Members only see the board that belongs to their campus.",
           },
           {
-            icon: <FaLock></FaLock>,
+            icon: <FaLock />,
             title: "Admin controls",
             desc: "Trusted staff manage their own board without affecting others.",
           },
@@ -465,11 +472,30 @@ function RegisterSchoolPanel({ user }: { user: any }) {
     repRole: "",
     extraInfo: "",
     color: "#2f80ed",
+    secondaryColor: "#f5c842",
+    gradientMode: 0,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bgFile, setBgFile] = useState<File | null>(null);
+  const [bgPreviewUrl, setBgPreviewUrl] = useState<string | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+
+  // Revoke object URL on unmount / bg change to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (bgPreviewUrl) URL.revokeObjectURL(bgPreviewUrl);
+    };
+  }, [bgPreviewUrl]);
+
+  const handleBgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (bgPreviewUrl) URL.revokeObjectURL(bgPreviewUrl);
+    setBgFile(file);
+    setBgPreviewUrl(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -478,12 +504,24 @@ function RegisterSchoolPanel({ user }: { user: any }) {
 
     let logoUrl = "";
     let docUrl = "";
+    let bgImageUrl = "";
 
     if (logoFile) {
       const fn = `school_logo_${Date.now()}_${logoFile.name}`;
       await supabase.storage.from("item-images").upload(fn, logoFile);
       const { data } = supabase.storage.from("item-images").getPublicUrl(fn);
       logoUrl = data.publicUrl;
+    }
+
+    if (bgFile) {
+      const fn = `school_bg_${Date.now()}_${bgFile.name}`;
+      const { error: bgErr } = await supabase.storage
+        .from("item-images")
+        .upload(fn, bgFile);
+      console.log("bg upload error:", bgErr);
+      const { data } = supabase.storage.from("item-images").getPublicUrl(fn);
+      console.log("bg image url:", data.publicUrl);
+      bgImageUrl = data.publicUrl;
     }
 
     if (docFile) {
@@ -499,6 +537,9 @@ function RegisterSchoolPanel({ user }: { user: any }) {
       logo_url: logoUrl || null,
       doc_url: docUrl || null,
       color: form.color,
+      secondary_color: form.secondaryColor,
+      bg_image_url: bgImageUrl || null,
+      gradient_mode: form.gradientMode,
       theme,
       rep_name: user.fullName || user.username || "Unknown",
       rep_email: user.primaryEmailAddress?.emailAddress || "",
@@ -516,7 +557,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
     return (
       <div className="sc-panel-content">
         <div className="sc-success">
-          <span className="sc-success__icon"></span>
+          <span className="sc-success__icon">✓</span>
           <p>Registration submitted!</p>
           <p className="sc-success__sub">
             A Findr super-admin will review within 48 hours and email you the
@@ -527,6 +568,8 @@ function RegisterSchoolPanel({ user }: { user: any }) {
     );
   }
 
+  const gradOpts = gradStyles(form.color);
+
   return (
     <div className="sc-panel-content" id="register-anchor">
       <div className="sc-section-title">Register Your School</div>
@@ -535,6 +578,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
         approve your school, then send you a unique access code.
       </p>
       <form className="sc-form" onSubmit={handleSubmit}>
+        {/* ── Basic info ── */}
         <label className="sc-form__label">School / Institution Name *</label>
         <input
           className="sc-form__input"
@@ -582,6 +626,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
           readOnly
         />
 
+        {/* ── Logo ── */}
         <label className="sc-form__label">School Logo</label>
         <label className="sc-form__file-label" htmlFor="school-logo-upload">
           <span className="sc-form__file-icon">+</span>
@@ -597,6 +642,119 @@ function RegisterSchoolPanel({ user }: { user: any }) {
           }
         />
 
+        {/* ── Primary color ── */}
+        <label className="sc-form__label">School Primary Brand Color</label>
+        <div className="sc-color-row">
+          <input
+            type="color"
+            className="sc-color-picker"
+            value={form.color}
+            onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
+          />
+          <span className="sc-color-value">{form.color}</span>
+          <div
+            className="sc-color-preview"
+            style={{ background: form.color }}
+          />
+        </div>
+
+        {/* ── Secondary color ── */}
+        <label className="sc-form__label">Secondary / Accent Color</label>
+        <div className="sc-color-row">
+          <input
+            type="color"
+            className="sc-color-picker"
+            value={form.secondaryColor}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, secondaryColor: e.target.value }))
+            }
+          />
+          <span className="sc-color-value">{form.secondaryColor}</span>
+          <div
+            className="sc-color-preview"
+            style={{ background: form.secondaryColor }}
+          />
+        </div>
+
+        {/* ── Campus background photo ── */}
+        <label className="sc-form__label">Campus Background Photo</label>
+        <p className="sc-form__hint">
+          Upload a campus photo — your primary color gradient will be overlaid
+          on the board header automatically.
+        </p>
+        <label className="sc-form__file-label" htmlFor="school-bg-upload">
+          <span className="sc-form__file-icon">+</span>
+          <span>{bgFile ? bgFile.name : "Upload campus photo"}</span>
+        </label>
+        <input
+          id="school-bg-upload"
+          className="sc-form__file"
+          type="file"
+          accept="image/*"
+          onChange={handleBgChange}
+        />
+
+        {/* ── Gradient style picker ── */}
+        <label className="sc-form__label">Gradient Style</label>
+        <p className="sc-form__hint">
+          Pick how your primary color fades over the campus photo.
+        </p>
+        <div className="sc-gradient-row">
+          {gradOpts.map((grad, n) => (
+            <button
+              key={n}
+              type="button"
+              className={`sc-gradient-opt${form.gradientMode === n ? " sc-gradient-opt--active" : ""}`}
+              style={{
+                backgroundImage: bgPreviewUrl
+                  ? `${grad}, url(${bgPreviewUrl})`
+                  : grad,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundColor: form.color,
+                borderColor: form.gradientMode === n ? form.color : undefined,
+              }}
+              onClick={() => setForm((p) => ({ ...p, gradientMode: n }))}
+              title={["Bottom-up", "Left sweep", "Diagonal", "Top-down"][n]}
+            />
+          ))}
+        </div>
+
+        {/* ── Live mini preview ── */}
+        {(bgPreviewUrl || form.name) && (
+          <>
+            <label className="sc-form__label">Header Preview</label>
+            <div
+              className="sc-register__preview"
+              style={{
+                backgroundImage: bgPreviewUrl
+                  ? `${gradOpts[form.gradientMode]}, url(${bgPreviewUrl})`
+                  : gradOpts[form.gradientMode],
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div
+                className="sc-register__preview-badge"
+                style={{
+                  background: hexToRgba(form.secondaryColor, 0.25),
+                  border: `1px solid ${hexToRgba(form.secondaryColor, 0.6)}`,
+                  color: "#fff",
+                }}
+              >
+                Findr Campus
+              </div>
+              <p className="sc-register__preview-name">
+                {form.name || "Your School Name"}
+              </p>
+              <p className="sc-register__preview-code">
+                {form.websiteUrl || "campus board"}
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* ── Verification doc ── */}
         <label className="sc-form__label">
           Verification Document (optional)
         </label>
@@ -616,23 +774,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
           onChange={(e) => e.target.files?.[0] && setDocFile(e.target.files[0])}
         />
 
-        <label className="sc-form__label">School Brand Color</label>
-        <div className="sc-color-row">
-          <input
-            type="color"
-            className="sc-color-picker"
-            value={form.color}
-            onChange={(e) => setForm((p) => ({ ...p, color: e.target.value }))}
-          />
-          <span className="sc-color-value">{form.color}</span>
-          <div
-            className="sc-color-preview"
-            style={{ background: form.color }}
-          />
-        </div>
-
-        <input type="hidden" value={theme} readOnly />
-
+        {/* ── Extra info ── */}
         <label className="sc-form__label">Anything else?</label>
         <textarea
           className="sc-form__textarea"
@@ -647,6 +789,7 @@ function RegisterSchoolPanel({ user }: { user: any }) {
           type="submit"
           className="sc-btn sc-btn--primary sc-form__submit"
           disabled={submitting || !user}
+          style={{ background: form.color, borderColor: form.color }}
         >
           {submitting ? "Submitting..." : "Submit Registration"}
         </button>
@@ -697,11 +840,18 @@ function MySchoolsPanel({
           <div
             key={school.id}
             className="sc-school-card"
-            style={{ "--sc-color": school.color } as React.CSSProperties}
+            style={
+              {
+                "--sc-color": school.color,
+                "--sc-color-2": school.secondary_color ?? "#f5c842",
+              } as React.CSSProperties
+            }
           >
             <div
               className="sc-school-card__accent"
-              style={{ background: school.color }}
+              style={{
+                background: `linear-gradient(90deg, ${school.color}, ${school.secondary_color ?? school.color})`,
+              }}
             />
             <div className="sc-school-card__body">
               <div className="sc-school-card__top">
@@ -764,11 +914,7 @@ function SchoolBoard({
     | "become-admin"
     | "admin-login";
 
-  const BOARD_TABS: {
-    id: BoardTab;
-    label: string;
-    icon: string;
-  }[] = [
+  const BOARD_TABS: { id: BoardTab; label: string; icon: string }[] = [
     { id: "items", label: "Items", icon: "" },
     { id: "add-item", label: "Report Found", icon: "" },
     { id: "report-lost", label: "Report Lost", icon: "" },
@@ -779,20 +925,22 @@ function SchoolBoard({
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
   const [searchQuery, setSearchQuery] = useState("");
-
   const [items, setItems] = useState<SchoolItem[]>([]);
   const [lostItems, setLostItems] = useState<SchoolLostItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
-
   const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
+
+  // Derived branding
+  const color = school.color;
+  const color2 = school.secondary_color ?? "#f5c842";
+  const gradOverlay = gradStyles(color)[school.gradient_mode ?? 0];
+  const hasBg = !!school.bg_image_url;
 
   useEffect(() => {
     setIsSchoolAdmin(
       localStorage.getItem(`findr_school_admin_${school.id}`) === "true",
     );
   }, [school.id]);
-
-  const color = school.color;
 
   useEffect(() => {
     const cachedBoard = readSchoolBoardCache(school.id);
@@ -827,7 +975,7 @@ function SchoolBoard({
     fetchItems();
   }, [school.id]);
 
-  // ── Add Found Item ─────────────────────────────────────────────────────────
+  // ── Add Found Item ──────────────────────────────────────────────────────────
   const [foundName, setFoundName] = useState("");
   const [foundDesc, setFoundDesc] = useState("");
   const [foundFiles, setFoundFiles] = useState<File[]>([]);
@@ -873,7 +1021,7 @@ function SchoolBoard({
     setFoundUploading(false);
   };
 
-  // ── Add Lost Item ──────────────────────────────────────────────────────────
+  // ── Add Lost Item ───────────────────────────────────────────────────────────
   const [lostName, setLostName] = useState("");
   const [lostDesc, setLostDesc] = useState("");
   const [lostFiles, setLostFiles] = useState<File[]>([]);
@@ -920,7 +1068,7 @@ function SchoolBoard({
     setLostUploading(false);
   };
 
-  // ── Admin login ────────────────────────────────────────────────────────────
+  // ── Admin login ─────────────────────────────────────────────────────────────
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
   const [adminChecking, setAdminChecking] = useState(false);
@@ -931,7 +1079,6 @@ function SchoolBoard({
     setAdminChecking(true);
     setAdminError("");
 
-    // Check 1: rep-level password stored on the school itself (set by super admin on approval)
     const { data: schoolRow } = await supabase
       .from("schools")
       .select("password")
@@ -941,7 +1088,6 @@ function SchoolBoard({
     const repMatch =
       schoolRow?.password && schoolRow.password === adminPassword;
 
-    // Check 2: per-staff password in school_admins (set when a "Become Admin" request is approved)
     const { data: staffRow } = repMatch
       ? { data: null }
       : await supabase
@@ -962,7 +1108,7 @@ function SchoolBoard({
     setAdminChecking(false);
   };
 
-  // ── Become admin ───────────────────────────────────────────────────────────
+  // ── Become admin ────────────────────────────────────────────────────────────
   const [reqForm, setReqForm] = useState({ teacherId: "", extraInfo: "" });
   const [reqFile, setReqFile] = useState<File | null>(null);
   const [reqSubmitting, setReqSubmitting] = useState(false);
@@ -993,7 +1139,7 @@ function SchoolBoard({
     setReqSubmitting(false);
   };
 
-  // ── Admin delete / status actions ──────────────────────────────────────────
+  // ── Admin delete / status actions ───────────────────────────────────────────
   const handleDeleteFound = async (id: number) => {
     if (!confirm("Delete this item permanently?")) return;
     await supabase.from("school_items").delete().eq("id", id);
@@ -1031,11 +1177,35 @@ function SchoolBoard({
   return (
     <div
       className="sc-board"
-      style={{ "--sc-color": color } as React.CSSProperties}
+      style={
+        {
+          "--sc-color": color,
+          "--sc-color-2": color2,
+        } as React.CSSProperties
+      }
     >
-      {/* School header banner */}
-      <div className="sc-board__header" style={{ borderBottomColor: color }}>
-        <button className="sc-board__back" onClick={onBack}>
+      
+      {/* ── School header banner ── */}
+      <div
+        className="sc-board__header"
+        style={{
+          borderBottomColor: color,
+          ...(hasBg ? { minHeight: 120, height: 120 } : {}),
+        }}
+      >
+        <button
+          className="sc-board__back"
+          onClick={onBack}
+          style={
+            hasBg
+              ? {
+                  background: "rgba(0,0,0,0.3)",
+                  color: "#fff",
+                  borderColor: "rgba(255,255,255,0.3)",
+                }
+              : {}
+          }
+        >
           ← Back
         </button>
         <div className="sc-board__identity">
@@ -1051,12 +1221,33 @@ function SchoolBoard({
             </div>
           )}
           <div>
-            <p className="sc-board__name">{school.name}</p>
-            <p className="sc-board__code">{school.code}</p>
+            <p
+              className="sc-board__name"
+              style={
+                hasBg
+                  ? { color: "#fff", textShadow: "0 1px 6px rgba(0,0,0,0.5)" }
+                  : {}
+              }
+            >
+              {school.name}
+            </p>
+            <p
+              className="sc-board__code"
+              style={hasBg ? { color: "rgba(255,255,255,0.75)" } : {}}
+            >
+              {school.code}
+            </p>
           </div>
         </div>
         {isSchoolAdmin && (
-          <div className="sc-admin-badge">
+          <div
+            className="sc-admin-badge"
+            style={{
+              background: hexToRgba(color2, 0.2),
+              borderColor: color2,
+              color: hasBg ? "#fff" : undefined,
+            }}
+          >
             School Admin
             <button
               className="sc-admin-badge__exit"
@@ -1071,7 +1262,7 @@ function SchoolBoard({
         )}
       </div>
 
-      {/* Board layout: sidebar + main */}
+      {/* ── Board layout: sidebar + main ── */}
       <div className="sc-board__layout">
         <aside className="sc-board__sidebar">
           {BOARD_TABS.map((tab) => (
@@ -1088,14 +1279,26 @@ function SchoolBoard({
               {activeTab === tab.id && (
                 <span
                   className="sc-board__tab-pip"
-                  style={{ background: color }}
+                  style={{ background: color2 }}
                 />
               )}
             </button>
           ))}
         </aside>
 
-        <main className="sc-board__main">
+        <main
+          className="sc-board__main"
+          style={
+            hasBg
+              ? {
+                  backgroundImage: `${gradOverlay}, url(${school.bg_image_url})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : {}
+          }
+        >
+          {" "}
           {/* ── ITEMS TAB ── */}
           {activeTab === "items" && (
             <>
@@ -1248,14 +1451,13 @@ function SchoolBoard({
               )}
             </>
           )}
-
           {/* ── ADD FOUND ITEM ── */}
           {activeTab === "add-item" && (
             <div className="sc-panel-content">
               <div className="sc-section-title">Report Found Item</div>
               {foundSuccess ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon"></span>
+                  <span className="sc-success__icon">✓</span>
                   <p>Item posted!</p>
                 </div>
               ) : (
@@ -1345,14 +1547,13 @@ function SchoolBoard({
               )}
             </div>
           )}
-
           {/* ── REPORT LOST ── */}
           {activeTab === "report-lost" && (
             <div className="sc-panel-content">
               <div className="sc-section-title">Report Lost Item</div>
               {lostSuccess ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon"></span>
+                  <span className="sc-success__icon">✓</span>
                   <p>Lost item reported!</p>
                 </div>
               ) : (
@@ -1444,7 +1645,6 @@ function SchoolBoard({
               )}
             </div>
           )}
-
           {/* ── BECOME ADMIN ── */}
           {activeTab === "become-admin" && (
             <div className="sc-panel-content">
@@ -1453,7 +1653,7 @@ function SchoolBoard({
               </div>
               {reqDone ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon"></span>
+                  <span className="sc-success__icon">✓</span>
                   <p>Request submitted!</p>
                   <p className="sc-success__sub">
                     The school's super-admin will review your request.
@@ -1523,14 +1723,13 @@ function SchoolBoard({
               )}
             </div>
           )}
-
           {/* ── ADMIN LOGIN ── */}
           {activeTab === "admin-login" && (
             <div className="sc-panel-content">
               <div className="sc-section-title">School Admin Access</div>
               {adminUnlocked ? (
                 <div className="sc-success">
-                  <span className="sc-success__icon"></span>
+                  <span className="sc-success__icon">✓</span>
                   <p>Admin view unlocked!</p>
                   <p className="sc-success__sub">
                     You can now delete items and manage this school's board.
@@ -1576,7 +1775,6 @@ export default function SchoolsPage() {
   const [mounted, setMounted] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // ── Translated strings ──────────────────────────────────────────────────────
   const [aboutText, setAboutText] = useState("About");
   const [enterCodeText, setEnterCodeText] = useState("Enter Code");
   const [mySchoolsText, setMySchoolsText] = useState("My Schools");
@@ -1638,7 +1836,6 @@ export default function SchoolsPage() {
     fetchMySchools();
   }, [user]);
 
-  // ── Translation effect ──────────────────────────────────────────────────────
   useEffect(() => {
     if (language === "en") {
       setAboutText("About");
@@ -1697,9 +1894,7 @@ export default function SchoolsPage() {
             setter(t);
             localStorage.setItem(`${cacheKey}_${language}`, t);
           }
-        } catch {
-          /* keep default */
-        }
+        } catch {}
       }
       setIsReady(true);
     };
@@ -1732,7 +1927,6 @@ export default function SchoolsPage() {
     localStorage.removeItem(`findr_school_admin_${school.id}`);
   };
 
-  // ── TOP_TABS now consumes translated state vars ──────────────────────────────
   const TOP_TABS: { id: TopTab; label: string; icon: ReactNode }[] = [
     { id: "about", label: aboutText, icon: <FaGraduationCap /> },
     { id: "enter-code", label: enterCodeText, icon: "#" },
@@ -1743,7 +1937,6 @@ export default function SchoolsPage() {
   if (!mounted || !isLoaded || loadingSchools || !isReady)
     return <LoadingSpinner />;
 
-  // Full board view
   if (selectedSchool) {
     return (
       <SchoolBoard
@@ -1757,12 +1950,10 @@ export default function SchoolsPage() {
   return (
     <div className="sc-page">
       <div className="sc-layout">
-        {/* Left sidebar */}
         <aside className="sc-sidebar">
           <div className="sc-sidebar__brand">
             <span className="sc-sidebar__icon">
-              {" "}
-              <FaGraduationCap></FaGraduationCap>
+              <FaGraduationCap />
             </span>
             <div>
               <p className="sc-sidebar__title">Findr Campus</p>
@@ -1786,7 +1977,6 @@ export default function SchoolsPage() {
             ))}
           </div>
 
-          {/* Quick school switcher */}
           {mySchools.length > 0 && (
             <div className="sc-sidebar__schools">
               <p className="sc-sidebar__schools-label">{yourSchoolsText}</p>
@@ -1818,7 +2008,6 @@ export default function SchoolsPage() {
           )}
         </aside>
 
-        {/* Main content */}
         <main className="sc-main">
           <section
             className="sc-tab-panel"
