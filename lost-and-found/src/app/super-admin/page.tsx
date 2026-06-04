@@ -27,6 +27,9 @@ interface SchoolRequest {
   logo_url: string | null;
   doc_url: string | null;
   color: string;
+  secondary_color: string | null;
+  bg_image_url: string | null;
+  gradient_mode: number | null;
   theme: string;
   rep_name: string;
   rep_email: string;
@@ -218,6 +221,9 @@ export default function SuperAdminPage() {
         password,
         logo_url: request.logo_url ?? null,
         color: request.color,
+        secondary_color: request.secondary_color ?? "#f5c842",
+        bg_image_url: request.bg_image_url ?? null,
+        gradient_mode: request.gradient_mode ?? 0,
         theme: request.theme,
         website_url: request.website_url ?? null,
         rep_name: request.rep_name,
