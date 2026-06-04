@@ -83,6 +83,92 @@ interface SchoolLostItem {
   created_at: string;
 }
 
+const SCHOOLS_CACHE_TTL_MS = 5 * 60 * 1000;
+const SCHOOL_BOARD_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getMySchoolsCacheKey(userId: string) {
+  return `findr_my_schools_${userId}`;
+}
+
+function readMySchoolsCache(userId: string) {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(getMySchoolsCacheKey(userId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { timestamp: number; schools: School[] };
+    if (!parsed?.timestamp || !Array.isArray(parsed.schools)) return null;
+    if (Date.now() - parsed.timestamp > SCHOOLS_CACHE_TTL_MS) return null;
+    return parsed.schools;
+  } catch {
+    return null;
+  }
+}
+
+function writeMySchoolsCache(userId: string, schools: School[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(
+      getMySchoolsCacheKey(userId),
+      JSON.stringify({ timestamp: Date.now(), schools }),
+    );
+  } catch {
+    // ignore storage quota / privacy errors
+  }
+}
+
+function removeMySchoolsCache(userId: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(getMySchoolsCacheKey(userId));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function getSchoolBoardCacheKey(schoolId: string) {
+  return `findr_school_board_${schoolId}`;
+}
+
+function readSchoolBoardCache(schoolId: string) {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(getSchoolBoardCacheKey(schoolId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      timestamp: number;
+      found: SchoolItem[];
+      lost: SchoolLostItem[];
+    };
+    if (
+      !parsed?.timestamp ||
+      !Array.isArray(parsed.found) ||
+      !Array.isArray(parsed.lost)
+    ) {
+      return null;
+    }
+    if (Date.now() - parsed.timestamp > SCHOOL_BOARD_CACHE_TTL_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeSchoolBoardCache(
+  schoolId: string,
+  found: SchoolItem[],
+  lost: SchoolLostItem[],
+) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(
+      getSchoolBoardCacheKey(schoolId),
+      JSON.stringify({ timestamp: Date.now(), found, lost }),
+    );
+  } catch {
+    // ignore storage quota / privacy errors
+  }
+}
+
 // ─── About / Landing Panel ────────────────────────────────────────────────────
 function AboutPanel({
   onEnterCode,
@@ -708,8 +794,16 @@ function SchoolBoard({
   const color = school.color;
 
   useEffect(() => {
-    const fetchItems = async () => {
+    const cachedBoard = readSchoolBoardCache(school.id);
+    if (cachedBoard) {
+      setItems(cachedBoard.found);
+      setLostItems(cachedBoard.lost);
+      setLoadingItems(false);
+    } else {
       setLoadingItems(true);
+    }
+
+    const fetchItems = async () => {
       const [{ data: found }, { data: lost }] = await Promise.all([
         supabase
           .from("school_items")
@@ -722,8 +816,11 @@ function SchoolBoard({
           .eq("school_id", school.id)
           .order("created_at", { ascending: false }),
       ]);
-      if (found) setItems(found);
-      if (lost) setLostItems(lost);
+      const nextFound = (found ?? []) as SchoolItem[];
+      const nextLost = (lost ?? []) as SchoolLostItem[];
+      setItems(nextFound);
+      setLostItems(nextLost);
+      writeSchoolBoardCache(school.id, nextFound, nextLost);
       setLoadingItems(false);
     };
     fetchItems();
@@ -1495,14 +1592,28 @@ export default function SchoolsPage() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-    const fetchMySchools = async () => {
+    if (!user) {
+      setMySchools([]);
+      setLoadingSchools(false);
+      return;
+    }
+
+    const cachedSchools = readMySchoolsCache(user.id);
+    if (cachedSchools) {
+      setMySchools(cachedSchools);
+      setLoadingSchools(false);
+    } else {
       setLoadingSchools(true);
+    }
+
+    const fetchMySchools = async () => {
       const { data: memberships } = await supabase
         .from("user_schools")
         .select("school_id")
         .eq("user_id", user.id);
       if (!memberships || memberships.length === 0) {
+        setMySchools([]);
+        writeMySchoolsCache(user.id, []);
         setLoadingSchools(false);
         return;
       }
@@ -1512,14 +1623,24 @@ export default function SchoolsPage() {
         .select("*")
         .in("id", ids)
         .eq("status", "approved");
-      if (schools) setMySchools(schools as School[]);
+      if (schools) {
+        const nextSchools = schools as School[];
+        setMySchools(nextSchools);
+        writeMySchoolsCache(user.id, nextSchools);
+      }
       setLoadingSchools(false);
     };
     fetchMySchools();
   }, [user]);
 
   const handleJoined = (school: School) => {
-    setMySchools((prev) => [...prev, school]);
+    setMySchools((prev) => {
+      const nextSchools = prev.some((s) => s.id === school.id)
+        ? prev
+        : [...prev, school];
+      if (user?.id) writeMySchoolsCache(user.id, nextSchools);
+      return nextSchools;
+    });
   };
 
   const handleLeave = async (school: School) => {
@@ -1529,7 +1650,11 @@ export default function SchoolsPage() {
       .delete()
       .eq("user_id", user!.id)
       .eq("school_id", school.id);
-    setMySchools((prev) => prev.filter((s) => s.id !== school.id));
+    setMySchools((prev) => {
+      const nextSchools = prev.filter((s) => s.id !== school.id);
+      if (user?.id) writeMySchoolsCache(user.id, nextSchools);
+      return nextSchools;
+    });
     if (selectedSchool?.id === school.id) setSelectedSchool(null);
     localStorage.removeItem(`findr_school_admin_${school.id}`);
   };
@@ -1613,36 +1738,46 @@ export default function SchoolsPage() {
 
         {/* Main content */}
         <main className="sc-main">
-          {activeTab === "about" && (
+          <section
+            className="sc-tab-panel"
+            hidden={activeTab !== "about"}
+            aria-hidden={activeTab !== "about"}
+          >
             <AboutPanel
               onEnterCode={() => setActiveTab("enter-code")}
-              onRegister={() => {
-                setActiveTab("register");
-                // ensure the register panel anchor is visible after tab switch
-                setTimeout(() => {
-                  document
-                    .querySelector("#register-anchor")
-                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }, 180);
-              }}
+              onRegister={() => setActiveTab("register")}
             />
-          )}
-          {activeTab === "enter-code" && (
+          </section>
+          <section
+            className="sc-tab-panel"
+            hidden={activeTab !== "enter-code"}
+            aria-hidden={activeTab !== "enter-code"}
+          >
             <EnterCodePanel
               user={user}
               mySchools={mySchools}
               onJoined={handleJoined}
             />
-          )}
-          {activeTab === "my-schools" && (
+          </section>
+          <section
+            className="sc-tab-panel"
+            hidden={activeTab !== "my-schools"}
+            aria-hidden={activeTab !== "my-schools"}
+          >
             <MySchoolsPanel
               mySchools={mySchools}
               user={user}
               onSelectSchool={setSelectedSchool}
               onLeave={handleLeave}
             />
-          )}
-          {activeTab === "register" && <RegisterSchoolPanel user={user} />}
+          </section>
+          <section
+            className="sc-tab-panel"
+            hidden={activeTab !== "register"}
+            aria-hidden={activeTab !== "register"}
+          >
+            <RegisterSchoolPanel user={user} />
+          </section>
         </main>
       </div>
     </div>

@@ -1257,7 +1257,9 @@ export default function DashboardPage() {
                   className="panel-form__textarea"
                 />
 
-                <label className="panel-form__label">Photos (optional, up to 3)</label>
+                <label className="panel-form__label">
+                  Photos (optional, up to 3)
+                </label>
                 <label
                   className="panel-form__file-label"
                   htmlFor="found-file-upload"
@@ -1377,9 +1379,7 @@ export default function DashboardPage() {
                 />
 
                 <label className="panel-form__label">
-                  Photos{" "}
-                  
-                    (optional, up to 3)
+                  Photos (optional, up to 3)
                 </label>
                 <label
                   className="panel-form__file-label"
