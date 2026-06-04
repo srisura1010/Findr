@@ -1571,16 +1571,20 @@ function SchoolBoard({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function SchoolsPage() {
   const { user, isLoaded } = useUser();
+  const { language } = useSettings();
   const [mounted, setMounted] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  // ── Translated strings ──────────────────────────────────────────────────────
+  const [aboutText, setAboutText] = useState("About");
+  const [enterCodeText, setEnterCodeText] = useState("Enter Code");
+  const [mySchoolsText, setMySchoolsText] = useState("My Schools");
+  const [registerSchoolText, setRegisterSchoolText] =
+    useState("Register School");
+  const [yourSchoolsText, setYourSchoolsText] = useState("Your Schools");
+  const [schoolBoardsText, setSchoolBoardsText] = useState("School boards");
 
   type TopTab = "about" | "enter-code" | "my-schools" | "register";
-
-  const TOP_TABS: { id: TopTab; label: string; icon: ReactNode }[] = [
-    { id: "about", label: "About", icon: <FaGraduationCap></FaGraduationCap> },
-    { id: "enter-code", label: "Enter Code", icon: "#" },
-    { id: "my-schools", label: "My Schools", icon: <FaSchool></FaSchool> },
-    { id: "register", label: "Register School", icon: "+" },
-  ];
 
   const [activeTab, setActiveTab] = useState<TopTab>("about");
   const [mySchools, setMySchools] = useState<School[]>([]);
@@ -1633,6 +1637,74 @@ export default function SchoolsPage() {
     fetchMySchools();
   }, [user]);
 
+  // ── Translation effect ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (language === "en") {
+      setAboutText("About");
+      setEnterCodeText("Enter Code");
+      setMySchoolsText("My Schools");
+      setRegisterSchoolText("Register School");
+      setYourSchoolsText("Your Schools");
+      setSchoolBoardsText("School boards");
+      setIsReady(true);
+      return;
+    }
+    const translateAndCache = async () => {
+      const translations = [
+        { key: "About", setter: setAboutText, cacheKey: "sc_about" },
+        {
+          key: "Enter Code",
+          setter: setEnterCodeText,
+          cacheKey: "sc_enterCode",
+        },
+        {
+          key: "My Schools",
+          setter: setMySchoolsText,
+          cacheKey: "sc_mySchools",
+        },
+        {
+          key: "Register School",
+          setter: setRegisterSchoolText,
+          cacheKey: "sc_registerSchool",
+        },
+        {
+          key: "Your Schools",
+          setter: setYourSchoolsText,
+          cacheKey: "sc_yourSchools",
+        },
+        {
+          key: "School boards",
+          setter: setSchoolBoardsText,
+          cacheKey: "sc_schoolBoards",
+        },
+      ];
+      for (const { key, setter, cacheKey } of translations) {
+        const cached = localStorage.getItem(`${cacheKey}_${language}`);
+        if (cached) {
+          setter(cached);
+          continue;
+        }
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const t = data.translatedText || key;
+            setter(t);
+            localStorage.setItem(`${cacheKey}_${language}`, t);
+          }
+        } catch {
+          /* keep default */
+        }
+      }
+      setIsReady(true);
+    };
+    translateAndCache();
+  }, [language]);
+
   const handleJoined = (school: School) => {
     setMySchools((prev) => {
       const nextSchools = prev.some((s) => s.id === school.id)
@@ -1659,7 +1731,16 @@ export default function SchoolsPage() {
     localStorage.removeItem(`findr_school_admin_${school.id}`);
   };
 
-  if (!mounted || !isLoaded || loadingSchools) return <LoadingSpinner />;
+  // ── TOP_TABS now consumes translated state vars ──────────────────────────────
+  const TOP_TABS: { id: TopTab; label: string; icon: ReactNode }[] = [
+    { id: "about", label: aboutText, icon: <FaGraduationCap /> },
+    { id: "enter-code", label: enterCodeText, icon: "#" },
+    { id: "my-schools", label: mySchoolsText, icon: <FaSchool /> },
+    { id: "register", label: registerSchoolText, icon: "+" },
+  ];
+
+  if (!mounted || !isLoaded || loadingSchools || !isReady)
+    return <LoadingSpinner />;
 
   // Full board view
   if (selectedSchool) {
@@ -1684,7 +1765,7 @@ export default function SchoolsPage() {
             </span>
             <div>
               <p className="sc-sidebar__title">Findr Campus</p>
-              <p className="sc-sidebar__sub">School boards</p>
+              <p className="sc-sidebar__sub">{schoolBoardsText}</p>
             </div>
           </div>
 
@@ -1707,7 +1788,7 @@ export default function SchoolsPage() {
           {/* Quick school switcher */}
           {mySchools.length > 0 && (
             <div className="sc-sidebar__schools">
-              <p className="sc-sidebar__schools-label">Your Schools</p>
+              <p className="sc-sidebar__schools-label">{yourSchoolsText}</p>
               {mySchools.map((s) => (
                 <button
                   key={s.id}
