@@ -832,6 +832,39 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
   );
 }
 
+// ── Helper: fetch a single translation with fallback to the original key ──────
+async function fetchTranslation(
+  key: string,
+  target: string,
+  cacheKey: string,
+  setter: (val: string) => void,
+) {
+  const cached = localStorage.getItem(`${cacheKey}_${target}`);
+  if (cached) {
+    setter(cached);
+    return;
+  }
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: key, target }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      // Always fall back to the original key if the API returns nothing useful
+      const translated = (data.translatedText as string | undefined)?.trim() || key;
+      setter(translated);
+      localStorage.setItem(`${cacheKey}_${target}`, translated);
+    } else {
+      setter(key);
+    }
+  } catch {
+    // Network / parse error — show original text
+    setter(key);
+  }
+}
+
 export default function DashboardPage() {
   const {
     items,
@@ -910,7 +943,7 @@ export default function DashboardPage() {
   const [lostItemUploading, setLostItemUploading] = useState(false);
   const [lostItemSuccess, setLostItemSuccess] = useState(false);
 
-  // ── i18n strings ──
+  // ── i18n strings — default values are always the English originals ──────────
   const [addItemText, setAddItemText] = useState("+ Add Item");
   const [reportFoundText, setReportFoundText] = useState("Report Found Item");
   const [itemNameText, setItemNameText] = useState("Item Name");
@@ -924,6 +957,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (language === "en") {
+      // Reset to English defaults
       setAddItemText("+ Add Item");
       setReportFoundText("Report Found Item");
       setItemNameText("Item Name");
@@ -935,57 +969,47 @@ export default function DashboardPage() {
       setIsReady(true);
       return;
     }
-    const translateAndCache = async () => {
-      const translations = [
-        { key: "+ Add Item", setter: setAddItemText, cacheKey: "nav_addItem" },
-        {
-          key: "Report Found Item",
-          setter: setReportFoundText,
-          cacheKey: "nav_reportFound",
-        },
-        { key: "Item Name", setter: setItemNameText, cacheKey: "nav_itemName" },
-        {
-          key: "Description (location, time, etc)",
-          setter: setDescriptionText,
-          cacheKey: "nav_description",
-        },
-        { key: "Cancel", setter: setCancelText, cacheKey: "nav_cancel" },
-        { key: "Post Item", setter: setPostItemText, cacheKey: "nav_postItem" },
-        {
-          key: "Uploading...",
-          setter: setUploadingText,
-          cacheKey: "nav_uploading",
-        },
-        { key: "Found by:", setter: setFoundByText, cacheKey: "dash_foundBy" },
-      ];
-      for (const { key, setter, cacheKey } of translations) {
-        const cached = localStorage.getItem(`${cacheKey}_${language}`);
-        if (cached) {
-          setter(cached);
-          continue;
-        }
-        try {
-          const res = await fetch("/api/translate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: key, target: language }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            const t = data.translatedText || key;
-            setter(t);
-            localStorage.setItem(`${cacheKey}_${language}`, t);
-          }
-        } catch {
-          /* keep cached */
-        }
-      }
+
+    const translations: {
+      key: string;
+      setter: (v: string) => void;
+      cacheKey: string;
+    }[] = [
+      { key: "+ Add Item", setter: setAddItemText, cacheKey: "nav_addItem" },
+      {
+        key: "Report Found Item",
+        setter: setReportFoundText,
+        cacheKey: "nav_reportFound",
+      },
+      { key: "Item Name", setter: setItemNameText, cacheKey: "nav_itemName" },
+      {
+        key: "Description (location, time, etc)",
+        setter: setDescriptionText,
+        cacheKey: "nav_description",
+      },
+      { key: "Cancel", setter: setCancelText, cacheKey: "nav_cancel" },
+      { key: "Post Item", setter: setPostItemText, cacheKey: "nav_postItem" },
+      {
+        key: "Uploading...",
+        setter: setUploadingText,
+        cacheKey: "nav_uploading",
+      },
+      { key: "Found by:", setter: setFoundByText, cacheKey: "dash_foundBy" },
+    ];
+
+    const translateAll = async () => {
+      await Promise.all(
+        translations.map(({ key, setter, cacheKey }) =>
+          fetchTranslation(key, language, cacheKey, setter),
+        ),
+      );
       setIsReady(true);
     };
-    translateAndCache();
+
+    translateAll();
   }, [language]);
 
-  // ── My Items panel handlers (owner still needs these) ──
+  // ── My Items panel handlers ────────────────────────────────────────────────
   const handleConfirmClaimed = async (itemId: number) => {
     const { error } = await supabase.from("items").delete().eq("id", itemId);
     if (!error) {
