@@ -13,6 +13,30 @@ import { FaSchool } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
+const ABOUT_CAROUSEL_ITEMS: { icon: ReactNode; title: string; body: string }[] =
+  [
+    {
+      icon: <FaShieldAlt></FaShieldAlt>,
+      title: "Private by design",
+      body: "Campus boards stay scoped to each school and its verified members.",
+    },
+    {
+      icon: <BsLightningFill></BsLightningFill>,
+      title: "Fast item matching",
+      body: "Post found items quickly and surface likely matches before they disappear.",
+    },
+    {
+      icon: <FaSchool></FaSchool>,
+      title: "One board per school",
+      body: "Keep messages, items, and admin tools organized around the right campus.",
+    },
+    {
+      icon: <FaLock></FaLock>,
+      title: "Trusted access",
+      body: "School codes and admin tools keep the whole experience clean and secure.",
+    },
+  ];
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface School {
   id: string;
@@ -59,47 +83,132 @@ interface SchoolLostItem {
 }
 
 // ─── About / Landing Panel ────────────────────────────────────────────────────
-function AboutPanel({ onEnterCode }: { onEnterCode: () => void }) {
+function AboutPanel({
+  onEnterCode,
+  onRegister,
+}: {
+  onEnterCode: () => void;
+  onRegister?: () => void;
+}) {
   return (
     <div className="sc-about">
-      <div className="sc-about__hero">
-        <div className="sc-about__hero-icon">
-          <FaGraduationCap></FaGraduationCap>
+      <section className="sc-about__hero">
+        <div className="sc-about__hero-copy">
+          <p className="sc-about__eyebrow">Campus lost &amp; found</p>
+          <h1 className="sc-about__title">Findr for Campus</h1>
+          <p className="sc-about__subtitle">
+            A private school board for lost items, announcements, and matching.
+            Students and staff only see what belongs to their campus.
+          </p>
+          <div className="sc-about__cta-row">
+            <button
+              className="sc-btn sc-btn--primary sc-about__cta"
+              onClick={onEnterCode}
+            >
+              Join Your School
+            </button>
+            <button
+              className="sc-btn sc-btn--secondary sc-about__secondary"
+              onClick={() => {
+                if (onRegister) return onRegister();
+                document
+                  .querySelector("#register-anchor")
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            >
+              Register a School
+            </button>
+          </div>
+
+          <div className="sc-about__stats">
+            <div className="sc-about__stat">
+              <strong>Private</strong>
+              <span>school-code access</span>
+            </div>
+            <div className="sc-about__stat">
+              <strong>Fast</strong>
+              <span>item matching flow</span>
+            </div>
+            <div className="sc-about__stat">
+              <strong>Trusted</strong>
+              <span>admin-scoped controls</span>
+            </div>
+          </div>
         </div>
-        <h1 className="sc-about__title">Findr for Campus</h1>
-        <p className="sc-about__subtitle">
-          A private lost &amp; found board for your school — only students and
-          staff with your school code can see it.
+
+        <div className="sc-about__hero-visual" aria-hidden="true">
+          <div className="sc-about__orb sc-about__orb--one" />
+          <div className="sc-about__orb sc-about__orb--two" />
+          <div className="sc-about__hero-card">
+            <p className="sc-about__hero-label">Featured campus board</p>
+            <h2>Hillcrest High School</h2>
+            <p>
+              Live updates, polished branding, and one place for everything that
+              gets lost between classes.
+            </p>
+            <div className="sc-about__hero-tags">
+              <span>Found items</span>
+              <span>Admin tools</span>
+              <span>Campus chat</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="sc-about__carousel-section">
+        <div className="sc-section-title">Built to feel alive</div>
+        <p className="sc-hint sc-about__carousel-hint">
+          Smooth motion, bold cards, and a campus-first layout that feels like a
+          modern landing page.
         </p>
-        <button
-          className="sc-btn sc-btn--primary sc-about__cta"
-          onClick={onEnterCode}
-        >
-          Join Your School →
-        </button>
-      </div>
+        <div className="sc-carousel">
+          <div className="sc-carousel__track">
+            <div className="sc-carousel__group">
+              {ABOUT_CAROUSEL_ITEMS.map((item) => (
+                <article key={item.title} className="sc-carousel__card">
+                  <div className="sc-carousel__icon">{item.icon}</div>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
+              ))}
+            </div>
+            <div className="sc-carousel__group" aria-hidden="true">
+              {ABOUT_CAROUSEL_ITEMS.map((item) => (
+                <article
+                  key={`${item.title}-duplicate`}
+                  className="sc-carousel__card"
+                >
+                  <div className="sc-carousel__icon">{item.icon}</div>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="sc-about__features">
         {[
           {
-            icon: "",
-            title: "Private & Scoped",
-            desc: "Items posted inside a school are only visible to members of that school.",
+            icon: <FaGraduationCap></FaGraduationCap>,
+            title: "Branded campus space",
+            desc: "Each school can feel unique with its own color, logo, and tone.",
           },
           {
-            icon: "",
-            title: "Instant Notifications",
-            desc: "Get real-time updates when something matching your lost item is posted.",
+            icon: <BsLightningFill></BsLightningFill>,
+            title: "Real-time momentum",
+            desc: "Fast posting and scanning keep the board moving instead of stale.",
           },
           {
-            icon: "",
-            title: "School-Scoped Admins",
-            desc: "Designate trusted staff as admins — they manage only your school's board.",
+            icon: <FaShieldAlt></FaShieldAlt>,
+            title: "School-scoped privacy",
+            desc: "Members only see the board that belongs to their campus.",
           },
           {
-            icon: "",
-            title: "Branded Experience",
-            desc: "Your school's colors and logo make the board feel like home.",
+            icon: <FaLock></FaLock>,
+            title: "Admin controls",
+            desc: "Trusted staff manage their own board without affecting others.",
           },
         ].map(({ icon, title, desc }) => (
           <div key={title} className="sc-about__feature">
@@ -117,11 +226,12 @@ function AboutPanel({ onEnterCode }: { onEnterCode: () => void }) {
           within 48 hours.
         </p>
         <button
-          className="sc-btn sc-btn--outline"
+          className="sc-btn sc-btn--secondary"
           onClick={() => {
+            if (onRegister) return onRegister();
             document
               .querySelector("#register-anchor")
-              ?.scrollIntoView({ behavior: "smooth" });
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
         >
           Register Your School
@@ -1375,6 +1485,7 @@ function SchoolBoard({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function SchoolsPage() {
   const { user, isLoaded } = useUser();
+  const [mounted, setMounted] = useState(false);
 
   type TopTab = "about" | "enter-code" | "my-schools" | "register";
 
@@ -1389,6 +1500,10 @@ export default function SchoolsPage() {
   const [mySchools, setMySchools] = useState<School[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -1430,7 +1545,7 @@ export default function SchoolsPage() {
     localStorage.removeItem(`findr_school_admin_${school.id}`);
   };
 
-  if (!isLoaded || loadingSchools) return <LoadingSpinner />;
+  if (!mounted || !isLoaded || loadingSchools) return <LoadingSpinner />;
 
   // Full board view
   if (selectedSchool) {
@@ -1510,7 +1625,18 @@ export default function SchoolsPage() {
         {/* Main content */}
         <main className="sc-main">
           {activeTab === "about" && (
-            <AboutPanel onEnterCode={() => setActiveTab("enter-code")} />
+            <AboutPanel
+              onEnterCode={() => setActiveTab("enter-code")}
+              onRegister={() => {
+                setActiveTab("register");
+                // ensure the register panel anchor is visible after tab switch
+                setTimeout(() => {
+                  document
+                    .querySelector("#register-anchor")
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 180);
+              }}
+            />
           )}
           {activeTab === "enter-code" && (
             <EnterCodePanel

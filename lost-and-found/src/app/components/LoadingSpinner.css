@@ -1,5 +1,3 @@
-
-
 .spinner-overlay {
   position: fixed;
   inset: 0;
@@ -17,7 +15,6 @@
   object-fit: contain;
   mix-blend-mode: multiply;
 }
-
 
 body.high-contrast .spinner-gif {
   mix-blend-mode: normal;
