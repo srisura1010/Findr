@@ -720,7 +720,7 @@ function SchoolRequestCard({
     </div>
   );
 }
-
+{/** good */}
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="sa-detail">
