@@ -182,7 +182,7 @@ function AboutPanel({
       <section className="sc-about__hero">
         <div className="sc-about__hero-copy">
           <p className="sc-about__eyebrow">Campus lost &amp; found</p>
-          <h1 className="sc-about__title">Findr for Campus</h1>
+          <h1 className="sc-about__title">Findr for Schools</h1>
           <p className="sc-about__subtitle">
             A private school board for lost items, announcements, and matching.
             Students and staff only see what belongs to their campus.
@@ -244,9 +244,10 @@ function AboutPanel({
 
       <section className="sc-about__carousel-section">
         <div className="sc-section-title">Built to feel alive</div>
+        <div></div>
         <p className="sc-hint sc-about__carousel-hint">
-          Smooth motion, bold cards, and a campus-first layout that feels like a
-          modern landing page.
+          Smooth motion, bold cards, and a campus-first layout that helps you reconnect
+          with your lost items <b>and</b> your community.
         </p>
         <div className="sc-carousel">
           <div className="sc-carousel__track">
