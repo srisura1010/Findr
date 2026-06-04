@@ -1,9 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
-
-/* ═══════════════════════════════════════════
-   SCHOOLS PAGE — full layout
-   Inherits all CSS variables from dashboard.css
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   SCHOOLS — schools.css
+   Uses the exact same CSS variable system as dashboard.css
+   All sc- prefixed to avoid collisions.
+═══════════════════════════════════════════════════════════ */
 
 /* ── Page shell ── */
 .sc-page {
@@ -12,13 +11,14 @@
   transition: background 0.2s ease;
 }
 
+/* ── Top-level layout: sidebar + main ── */
 .sc-layout {
   display: flex;
   min-height: calc(100vh - 80px);
 }
 
 /* ═══════════════════════════════════════════
-   LEFT SIDEBAR  (mirrors .dashboard-sidebar)
+   LEFT SIDEBAR  (mirrors dashboard-sidebar)
 ═══════════════════════════════════════════ */
 .sc-sidebar {
   width: 256px;
@@ -38,7 +38,7 @@
 }
 
 .sc-sidebar::before {
-  content: '';
+  content: "";
   display: block;
   height: 3px;
   background: linear-gradient(90deg, var(--accent), transparent);
@@ -49,35 +49,39 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 14px 10px;
+  padding: 18px 16px 12px;
   border-bottom: 1px solid var(--border-default);
-  margin-bottom: 4px;
 }
 
-.sc-sidebar__icon { font-size: 22px; flex-shrink: 0; }
+.sc-sidebar__icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
 
 .sc-sidebar__title {
+  margin: 0;
   font-family: "Ubuntu", sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0;
-  line-height: 1.2;
+  letter-spacing: -0.2px;
 }
 
 .sc-sidebar__sub {
+  margin: 0;
   font-family: "Poppins", sans-serif;
   font-size: 10px;
   color: var(--text-muted);
-  margin: 0;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
 
+/* Tabs */
 .sc-sidebar__tabs {
   display: flex;
   flex-direction: column;
-  padding: 10px 10px 8px;
+  padding: 12px 10px 8px;
   gap: 2px;
 }
 
@@ -113,7 +117,7 @@
 }
 
 .sc-sidebar__tab--active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 20%;
@@ -124,14 +128,11 @@
 }
 
 .sc-sidebar__tab-icon {
-  font-size: 14px;
-  width: 18px;
+  font-size: 15px;
+  width: 20px;
   text-align: center;
   flex-shrink: 0;
-  opacity: 0.8;
 }
-
-.sc-sidebar__tab--active .sc-sidebar__tab-icon { opacity: 1; }
 
 .sc-sidebar__tab-pip {
   width: 6px;
@@ -139,6 +140,7 @@
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
+  margin-left: auto;
   animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -149,69 +151,68 @@
 
 /* Quick school switcher in sidebar */
 .sc-sidebar__schools {
-  margin-top: 4px;
+  padding: 12px 10px 16px;
   border-top: 1px solid var(--border-default);
-  padding: 10px 10px 8px;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 .sc-sidebar__schools-label {
-  font-family: "Ubuntu", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   color: var(--text-muted);
-  margin: 0 0 4px 4px;
+  margin: 0 0 6px 4px;
 }
 
 .sc-sidebar__school-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 10px;
+  padding: 8px 10px;
   border: none;
-  background: transparent;
+  background: var(--bg-input);
   border-left: 3px solid transparent;
   border-radius: 0 8px 8px 0;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 600;
+  color: var(--text-primary);
   text-align: left;
-  transition: background 0.15s ease, color 0.15s ease;
   width: 100%;
+  transition: background 0.15s ease, transform 0.12s ease;
 }
 
 .sc-sidebar__school-btn:hover {
   background: var(--bg-hover);
-  color: var(--text-primary);
+  transform: translateX(2px);
 }
 
 .sc-sidebar__school-logo {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
-  border: 1px solid var(--border-default);
 }
 
 .sc-sidebar__school-initial {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: 700;
   font-size: 11px;
-  flex-shrink: 0;
+  font-weight: 700;
   font-family: "Ubuntu", sans-serif;
+  flex-shrink: 0;
 }
 
 .sc-sidebar__school-name {
@@ -219,11 +220,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
 }
 
 /* ═══════════════════════════════════════════
-   MAIN CONTENT
+   MAIN CONTENT AREA
 ═══════════════════════════════════════════ */
 .sc-main {
   flex: 1;
@@ -233,12 +233,12 @@
   transition: background 0.2s ease;
 }
 
-/* ─── Shared panel wrapper ─── */
+/* ── Panel content wrapper ── */
 .sc-panel-content {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
-  padding: 32px 0;
+  padding: 24px 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -246,7 +246,7 @@
 }
 
 @keyframes sc-slide-in {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -263,12 +263,255 @@
   font-family: "Poppins", sans-serif;
   font-size: 13px;
   color: var(--text-secondary);
-  margin: -4px 0 4px;
-  line-height: 1.6;
+  margin: -8px 0 4px;
+  line-height: 1.55;
+}
+
+.sc-empty {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 40px 0;
+  grid-column: 1 / -1;
 }
 
 /* ═══════════════════════════════════════════
-   FORM  (mirrors panel-form in dashboard)
+   ABOUT / LANDING
+═══════════════════════════════════════════ */
+.sc-about {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  animation: sc-slide-in 0.3s ease;
+}
+
+.sc-about__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+  gap: 14px;
+}
+
+.sc-about__hero-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.sc-about__title {
+  font-family: "Ubuntu", sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.sc-about__subtitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.sc-about__cta {
+  margin-top: 4px;
+  font-size: 15px;
+  padding: 13px 28px;
+}
+
+.sc-about__features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.sc-about__feature {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  padding: 20px 18px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.sc-about__feature:hover {
+  box-shadow: var(--card-hover-shadow);
+  transform: translateY(-3px);
+}
+
+.sc-about__feature-icon {
+  font-size: 26px;
+}
+
+.sc-about__feature h3 {
+  font-family: "Ubuntu", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.sc-about__feature p {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.55;
+}
+
+.sc-about__register-cta {
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent-border);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.sc-about__register-cta h2 {
+  font-family: "Ubuntu", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.sc-about__register-cta p {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.sc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 20px;
+  border-radius: 9px;
+  border: 1.5px solid transparent;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease,
+    box-shadow 0.15s ease, border-color 0.15s ease;
+  letter-spacing: 0.2px;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.sc-btn--primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.sc-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(124, 58, 237, 0.35);
+}
+
+.sc-btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.sc-btn--outline {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.sc-btn--outline:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.sc-btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border-input);
+}
+
+.sc-btn--ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.sc-btn--success {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+
+.sc-btn--success:hover {
+  background: var(--success-hover);
+  transform: translateY(-1px);
+}
+
+.sc-btn--danger {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+.sc-btn--danger:hover {
+  background: var(--danger-hover);
+  transform: translateY(-1px);
+}
+
+.sc-btn--school {
+  color: #fff;
+}
+
+.sc-btn--school:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Small variant */
+.sc-btn--sm {
+  padding: 7px 13px;
+  font-size: 12px;
+  min-height: 36px;
+  border-radius: 7px;
+}
+
+/* Icon-only small */
+.sc-btn--icon {
+  padding: 7px 10px;
+  min-width: 36px;
+}
+
+/* ═══════════════════════════════════════════
+   FORMS
 ═══════════════════════════════════════════ */
 .sc-form {
   display: flex;
@@ -279,7 +522,6 @@
   border-radius: 14px;
   padding: 20px;
   box-shadow: var(--card-shadow);
-  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .sc-form__label {
@@ -290,13 +532,6 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: -6px;
-}
-
-.sc-form__hint {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
-  margin: -8px 0 0;
 }
 
 .sc-form__input,
@@ -321,13 +556,16 @@
 }
 
 .sc-form__input::placeholder,
-.sc-form__textarea::placeholder { color: var(--text-muted); }
+.sc-form__textarea::placeholder {
+  color: var(--text-muted);
+}
 
+/* Large code input */
 .sc-form__input--code {
-  font-family: "Ubuntu", monospace;
-  font-size: 16px;
+  font-size: max(16px, 15px);
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  font-family: "Ubuntu", sans-serif;
   text-transform: uppercase;
 }
 
@@ -336,26 +574,11 @@
   min-height: 80px;
 }
 
-.sc-form__error {
-  font-size: 12px;
-  color: var(--danger);
+.sc-form__hint {
+  font-size: 10px;
+  color: var(--text-muted);
   font-family: "Poppins", sans-serif;
-  margin: 0;
-  padding: 8px 12px;
-  background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
-  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
-  border-radius: 7px;
-}
-
-.sc-form__success {
-  font-size: 12px;
-  color: var(--success);
-  font-family: "Poppins", sans-serif;
-  margin: 0;
-  padding: 8px 12px;
-  background: color-mix(in srgb, var(--success) 8%, var(--bg-card));
-  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
-  border-radius: 7px;
+  margin: -4px 0 0;
 }
 
 .sc-form__file { display: none; }
@@ -384,7 +607,34 @@
   color: var(--accent);
 }
 
-.sc-form__file-icon { font-size: 16px; color: var(--text-muted); flex-shrink: 0; }
+.sc-form__file-icon {
+  font-size: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.sc-form__error {
+  font-size: 12px;
+  color: var(--danger);
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  border-radius: 7px;
+}
+
+.sc-form__success {
+  font-size: 12px;
+  color: var(--success);
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--success) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+  border-radius: 7px;
+  font-weight: 600;
+}
 
 .sc-form__actions {
   display: flex;
@@ -393,64 +643,125 @@
 }
 
 .sc-form__submit {
-  flex: 1;
+  width: 100%;
   padding: 12px 0;
   border-radius: 8px;
   border: none;
   background: var(--accent);
   color: #fff;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
-  letter-spacing: 0.2px;
   min-height: 48px;
+  letter-spacing: 0.2px;
 }
 
 .sc-form__submit:hover:not(:disabled) {
   background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
 }
 
-.sc-form__submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.sc-form__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 
-/* Color picker row */
+/* Image previews */
+.sc-form__previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sc-form__preview-wrap {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--border-input);
+  flex-shrink: 0;
+}
+
+.sc-form__preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+
+.sc-form__preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.sc-form__preview-remove:hover { background: rgba(0, 0, 0, 0.85); }
+
+/* ── Color picker row ── */
 .sc-color-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 10px 13px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: 9px;
 }
 
 .sc-color-picker {
   width: 40px;
-  height: 40px;
-  border: 1.5px solid var(--border-input);
-  border-radius: 8px;
-  padding: 2px;
+  height: 32px;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  background: var(--bg-input);
+  background: transparent;
+  border-radius: 5px;
+  flex-shrink: 0;
 }
 
 .sc-color-value {
-  font-family: "Ubuntu", monospace;
+  font-family: "Ubuntu", sans-serif;
   font-size: 13px;
+  font-weight: 600;
   color: var(--text-secondary);
+  letter-spacing: 0.5px;
 }
 
 .sc-color-preview {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  border: 1px solid var(--border-default);
+  flex-shrink: 0;
+  border: 1.5px solid var(--border-default);
+  margin-left: auto;
 }
 
-.sc-theme-toggle { display: flex; gap: 8px; }
+/* ── Theme toggle ── */
+.sc-theme-toggle {
+  display: flex;
+  gap: 8px;
+}
 
 .sc-theme-btn {
   flex: 1;
-  padding: 10px;
+  padding: 10px 0;
   border-radius: 8px;
   border: 1.5px solid var(--border-input);
   background: var(--bg-input);
@@ -462,6 +773,8 @@
   transition: all 0.15s ease;
   min-height: 44px;
 }
+
+.sc-theme-btn:hover { background: var(--bg-hover); border-color: var(--accent); }
 
 .sc-theme-btn--active {
   background: var(--accent);
@@ -498,7 +811,7 @@
 
 .sc-success p {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   font-family: "Poppins", sans-serif;
@@ -509,254 +822,7 @@
   color: var(--text-muted) !important;
   font-weight: 400 !important;
   text-align: center;
-}
-
-/* ═══════════════════════════════════════════
-   ABOUT / LANDING
-═══════════════════════════════════════════ */
-.sc-about {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 32px 0 48px;
-  animation: sc-slide-in 0.22s ease;
-}
-
-.sc-about__hero {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.sc-about__hero-icon { font-size: 48px; margin-bottom: 12px; }
-
-.sc-about__title {
-  font-family: "Ubuntu", sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 10px;
-  letter-spacing: -0.5px;
-}
-
-.sc-about__subtitle {
-  font-family: "Poppins", sans-serif;
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin: 0 0 24px;
-  line-height: 1.65;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.sc-about__cta {
-  font-size: 15px !important;
-  padding: 13px 32px !important;
-  border-radius: 10px !important;
-}
-
-.sc-about__features {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 36px;
-}
-
-.sc-about__feature {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: var(--card-shadow);
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
-}
-
-.sc-about__feature:hover {
-  box-shadow: var(--card-hover-shadow);
-  transform: translateY(-3px);
-}
-
-.sc-about__feature-icon { font-size: 24px; display: block; margin-bottom: 10px; }
-
-.sc-about__feature h3 {
-  font-family: "Ubuntu", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 5px;
-}
-
-.sc-about__feature p {
-  font-family: "Poppins", sans-serif;
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.55;
-}
-
-.sc-about__register-cta {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 14px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: var(--card-shadow);
-}
-
-.sc-about__register-cta h2 {
-  font-family: "Ubuntu", sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 8px;
-}
-
-.sc-about__register-cta p {
-  font-family: "Poppins", sans-serif;
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 0 0 16px;
-}
-
-/* ═══════════════════════════════════════════
-   BUTTONS (shared)
-═══════════════════════════════════════════ */
-.sc-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 8px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease, color 0.15s ease;
-  text-decoration: none;
-  min-height: 44px;
-  font-size: 13px;
-  padding: 10px 18px;
-}
-
-.sc-btn--primary {
-  background: var(--accent);
-  color: #fff;
-}
-
-.sc-btn--primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(124,58,237,0.35);
-}
-
-.sc-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.sc-btn--outline {
-  background: transparent;
-  color: var(--accent);
-  border: 1.5px solid var(--accent);
-}
-
-.sc-btn--outline:hover {
-  background: var(--accent-light);
-}
-
-.sc-btn--ghost {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-input);
-}
-
-.sc-btn--ghost:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.sc-btn--danger {
-  background: var(--danger);
-  color: #fff;
-}
-
-.sc-btn--danger:hover { background: var(--danger-hover); transform: translateY(-1px); }
-
-.sc-btn--success {
-  background: var(--success);
-  color: #fff;
-}
-
-.sc-btn--success:hover { background: var(--success-hover); transform: translateY(-1px); }
-
-.sc-btn--school {
-  color: #fff;
-  font-size: 13px;
-}
-
-.sc-btn--school:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-.sc-btn--sm {
-  padding: 6px 12px;
-  font-size: 12px;
-  min-height: 36px;
-  border-radius: 6px;
-}
-
-/* ═══════════════════════════════════════════
-   SCHOOL CHIPS (used in enter-code panel)
-═══════════════════════════════════════════ */
-.sc-school-list { display: flex; flex-direction: column; gap: 6px; }
-
-.sc-school-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-left: 4px solid transparent;
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
-}
-
-.sc-school-chip__logo {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid var(--border-default);
-}
-
-.sc-school-chip__initial {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 12px;
-  flex-shrink: 0;
-  font-family: "Ubuntu", sans-serif;
-}
-
-.sc-school-chip__name {
-  flex: 1;
-  font-family: "Ubuntu", sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.sc-school-chip__code {
-  font-family: "Ubuntu", monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-  background: var(--bg-input);
-  padding: 2px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--border-default);
+  max-width: 320px;
 }
 
 /* ═══════════════════════════════════════════
@@ -764,7 +830,7 @@
 ═══════════════════════════════════════════ */
 .sc-school-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 
@@ -775,13 +841,11 @@
   overflow: hidden;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.2s ease, transform 0.15s ease;
-  position: relative;
 }
 
 .sc-school-card:hover {
   box-shadow: var(--card-hover-shadow);
-  transform: translateY(-4px);
-  border-color: var(--sc-color, var(--accent-border));
+  transform: translateY(-3px);
 }
 
 .sc-school-card__accent {
@@ -789,19 +853,23 @@
   width: 100%;
 }
 
-.sc-school-card__body { padding: 16px; }
+.sc-school-card__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
 .sc-school-card__top {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
 }
 
 .sc-school-card__logo {
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
   border: 1px solid var(--border-default);
@@ -810,113 +878,176 @@
 .sc-school-card__initial {
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: 700;
   font-size: 18px;
-  flex-shrink: 0;
+  font-weight: 700;
   font-family: "Ubuntu", sans-serif;
+  flex-shrink: 0;
 }
 
 .sc-school-card__name {
   font-family: "Ubuntu", sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  line-height: 1.2;
+  letter-spacing: -0.2px;
 }
 
 .sc-school-card__code {
-  font-family: "Ubuntu", monospace;
+  font-family: "Poppins", sans-serif;
   font-size: 11px;
   color: var(--text-muted);
-  letter-spacing: 1px;
   margin: 2px 0 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.sc-school-card__actions { display: flex; gap: 8px; }
-
-/* ═══════════════════════════════════════════
-   EMPTY STATE
-═══════════════════════════════════════════ */
-.sc-empty {
-  text-align: center;
-  padding: 48px 0;
-  color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
-  font-size: 13px;
-  width: 100%;
+.sc-school-card__actions {
+  display: flex;
+  gap: 8px;
 }
 
-/* ═══════════════════════════════════════════
-   SCHOOL BOARD — full screen view
-═══════════════════════════════════════════ */
-.sc-board {
+/* School chips (enter-code panel) */
+.sc-school-list {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 80px);
-  background: var(--bg-page);
+  gap: 8px;
 }
 
-/* ── Board header banner ── */
+.sc-school-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-left: 3px solid transparent;
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+}
+
+.sc-school-chip__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sc-school-chip__initial {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Ubuntu", sans-serif;
+  flex-shrink: 0;
+}
+
+.sc-school-chip__name {
+  font-family: "Ubuntu", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.sc-school-chip__code {
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+/* ═══════════════════════════════════════════
+   SCHOOL BOARD
+═══════════════════════════════════════════ */
+.sc-board {
+  min-height: calc(100vh - 80px);
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+  animation: sc-slide-in 0.2s ease;
+}
+
+/* Header banner */
 .sc-board__header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 20px;
-  background: var(--bg-sidebar);
-  border-bottom: 3px solid transparent;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--bg-card);
+  border-bottom: 3px solid var(--accent);
   box-shadow: var(--card-shadow);
   flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  z-index: 20;
 }
 
 .sc-board__back {
   background: none;
   border: 1.5px solid var(--border-input);
-  border-radius: 7px;
-  padding: 6px 13px;
-  font-family: "Poppins", sans-serif;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
   font-weight: 600;
+  font-family: "Poppins", sans-serif;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   min-height: 36px;
   flex-shrink: 0;
 }
 
-.sc-board__back:hover { background: var(--bg-hover); color: var(--text-primary); }
+.sc-board__back:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+}
 
-.sc-board__identity { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.sc-board__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
 
 .sc-board__logo {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 7px;
   object-fit: cover;
-  border: 1px solid var(--border-default);
   flex-shrink: 0;
+  border: 1px solid var(--border-default);
 }
 
 .sc-board__initial {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: 700;
   font-size: 16px;
-  flex-shrink: 0;
+  font-weight: 700;
   font-family: "Ubuntu", sans-serif;
+  flex-shrink: 0;
 }
 
 .sc-board__name {
@@ -931,75 +1062,83 @@
 }
 
 .sc-board__code {
-  font-family: "Ubuntu", monospace;
+  font-family: "Poppins", sans-serif;
   font-size: 10px;
   color: var(--text-muted);
-  letter-spacing: 1px;
   margin: 1px 0 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Admin badge in header */
 .sc-admin-badge {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 6px 12px;
   background: #fef3c7;
   border: 1.5px solid #fcd34d;
   border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #92400e;
   font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #92400e;
   flex-shrink: 0;
 }
 
-body.dark .sc-admin-badge { background: #1a1200; border-color: #7a5c00; color: #fcd34d; }
+body.dark .sc-admin-badge {
+  background: #1a1200;
+  border-color: #7a5c00;
+  color: #fcd34d;
+}
 
 .sc-admin-badge__exit {
-  background: none;
-  border: 1.5px solid #fcd34d;
+  background: #92400e;
+  color: #fff;
+  border: none;
   border-radius: 5px;
-  padding: 3px 9px;
+  padding: 3px 10px;
   font-size: 11px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
   cursor: pointer;
-  color: #92400e;
+  font-family: "Poppins", sans-serif;
   transition: background 0.15s ease;
   min-height: 28px;
 }
 
-.sc-admin-badge__exit:hover { background: #fef3c7; }
-body.dark .sc-admin-badge__exit { color: #fcd34d; }
+.sc-admin-badge__exit:hover { background: #78350f; }
+body.dark .sc-admin-badge__exit { background: #7a5c00; }
 
-/* ── Board layout ── */
+/* Board two-column layout */
 .sc-board__layout {
   display: flex;
   flex: 1;
-  min-height: 0;
 }
 
-/* ── Board sidebar ── */
+/* Board sidebar */
 .sc-board__sidebar {
-  width: 200px;
-  min-width: 200px;
+  width: 210px;
+  min-width: 210px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-default);
   display: flex;
   flex-direction: column;
-  padding: 12px 8px;
+  padding: 14px 10px;
   gap: 2px;
   position: sticky;
-  top: 61px;
-  height: calc(100vh - 80px - 61px);
+  top: 0;
+  height: calc(100vh - 80px - 60px);
   overflow-y: auto;
+  box-shadow: var(--sidebar-shadow);
+  transition: background 0.2s ease;
 }
 
 .sc-board__tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 11px;
+  gap: 10px;
+  padding: 10px 12px;
   border: none;
   background: transparent;
   border-radius: 8px;
@@ -1010,97 +1149,140 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
   color: var(--text-secondary);
   text-align: left;
   position: relative;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   width: 100%;
 }
 
 .sc-board__tab:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
-  transform: translateX(2px);
 }
 
-.sc-board__tab--active { font-weight: 600; }
+.sc-board__tab--active {
+  font-weight: 600;
+}
 
 .sc-board__tab--active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 20%;
   height: 60%;
   width: 3px;
   border-radius: 0 2px 2px 0;
+  background: var(--sc-color, var(--accent));
 }
+
+.sc-board__tab-icon {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sc-board__tab-label { flex: 1; }
 
 .sc-board__tab-pip {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   margin-left: auto;
+  animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ── Board main ── */
+/* Board main content */
 .sc-board__main {
   flex: 1;
   min-width: 0;
-  padding: 20px 24px;
+  padding: 24px 24px 48px;
   background: var(--bg-page);
-  overflow-y: auto;
 }
 
-/* ═══════════════════════════════════════════
-   SEARCH + TAB ROW IN BOARD
-═══════════════════════════════════════════ */
-.sc-search-row { margin-bottom: 12px; }
+/* Search row */
+.sc-search-row {
+  margin-bottom: 14px;
+}
+
+.sc-search-wrap {
+  position: relative;
+  max-width: 400px;
+}
 
 .sc-search {
   width: 100%;
+  padding: 9px 36px 9px 14px;
   border: 1.5px solid var(--border-input);
   border-radius: 10px;
-  padding: 10px 14px;
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-family: "Poppins", sans-serif;
   font-size: 13px;
-  color: var(--text-primary);
-  background: var(--bg-input);
   outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
   box-sizing: border-box;
-  transition: border-color 0.15s ease;
 }
 
-.sc-search:focus { border-color: var(--border-focus); background: var(--bg-card); }
+.sc-search:focus {
+  border-color: var(--border-focus);
+  background: var(--bg-card);
+}
+
 .sc-search::placeholder { color: var(--text-muted); }
 
+.sc-search__clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: color 0.15s ease;
+}
+
+.sc-search__clear:hover { color: var(--text-secondary); }
+
+/* Tab pills row */
 .sc-tabs-row {
   display: flex;
   gap: 8px;
-  border-bottom: 1px solid var(--border-default);
   margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-default);
+  padding-bottom: 14px;
 }
 
 .sc-tab-btn {
   padding: 8px 20px;
   border-radius: 8px 8px 0 0;
-  border: none;
+  border: 1.5px solid var(--border-default);
+  border-bottom: none;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 13px;
   font-family: "Poppins", sans-serif;
-  background: var(--bg-page);
+  background: var(--bg-input);
   color: var(--text-muted);
   transition: all 0.15s ease;
-  min-height: 40px;
+  min-height: 38px;
 }
 
-.sc-tab-btn--active { color: #fff; }
+.sc-tab-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
 
-/* ═══════════════════════════════════════════
-   ITEMS GRID IN BOARD
-═══════════════════════════════════════════ */
+.sc-tab-btn--active {
+  font-weight: 700;
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Items grid (matches dashboard item cards) */
 .sc-items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
@@ -1109,26 +1291,30 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
   border: 1px solid var(--border-default);
   border-radius: 14px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
 .sc-item-card:hover {
   box-shadow: var(--card-hover-shadow);
-  transform: translateY(-4px);
+  transform: translateY(-3px);
+  border-color: var(--accent-border);
 }
 
 .sc-item-card::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--sc-color, var(--accent)), transparent);
   opacity: 0;
   transition: opacity 0.2s ease;
+  z-index: 1;
 }
 
 .sc-item-card:hover::before { opacity: 1; }
@@ -1145,6 +1331,7 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform 0.35s ease;
 }
 
@@ -1156,17 +1343,16 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: var(--text-muted);
-  background: var(--bg-input);
 }
 
 .sc-item-card__info {
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  padding: 12px 12px 8px;
   gap: 3px;
+  flex: 1;
 }
 
 .sc-item-card__name {
@@ -1190,27 +1376,38 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .sc-item-card__by {
   font-family: "Poppins", sans-serif;
   font-size: 11px;
   color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+.sc-item-card__status {
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
   margin: 2px 0 0;
 }
 
+.sc-item-card__status--pending { color: var(--accent); }
+
 .sc-item-card__actions {
   display: flex;
+  align-items: center;
   gap: 6px;
-  padding: 0 10px 10px;
-  flex-wrap: wrap;
+  padding: 0 14px 12px;
 }
 
 /* ═══════════════════════════════════════════
    MOBILE
 ═══════════════════════════════════════════ */
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .sc-layout { flex-direction: column; }
 
   .sc-sidebar {
@@ -1222,31 +1419,32 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
     border-bottom: 1px solid var(--border-default);
     margin-top: 0;
     overflow: visible;
+    z-index: 20;
   }
 
   .sc-sidebar::before { display: none; }
 
-  .sc-sidebar__brand { padding: 12px 12px 8px; }
+  .sc-sidebar__brand { padding: 12px 16px 10px; }
 
   .sc-sidebar__tabs {
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 8px 10px 10px;
-    gap: 6px;
-    overflow: visible;
+    padding: 8px 12px 12px;
+    gap: 8px;
   }
 
   .sc-sidebar__tab {
     flex: 0 1 auto;
-    padding: 7px 14px;
+    padding: 8px 14px;
     border-radius: 20px;
     font-size: 12px;
     white-space: nowrap;
     width: auto;
     min-height: 36px;
-    transform: none !important;
     border: 1.5px solid var(--border-default);
     background: var(--bg-input);
+    color: var(--text-secondary);
+    transform: none !important;
   }
 
   .sc-sidebar__tab--active {
@@ -1259,18 +1457,31 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
   .sc-sidebar__tab-pip { display: none; }
   .sc-sidebar__tab-icon { display: none; }
 
-  .sc-sidebar__schools { flex-direction: row; flex-wrap: wrap; padding: 6px 10px 10px; }
+  .sc-sidebar__schools {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 8px 12px 12px;
+    gap: 8px;
+    margin-top: 0;
+    border-top: 1px solid var(--border-default);
+  }
 
-  .sc-main { padding: 12px; }
+  .sc-sidebar__school-btn {
+    flex: 0 1 auto;
+    width: auto;
+    border-radius: 20px;
+    padding: 6px 12px;
+    border-left: none;
+    border: 1.5px solid var(--border-default);
+  }
 
-  .sc-panel-content { padding: 16px 0; max-width: 100%; }
+  .sc-main { padding: 16px 14px 40px; }
 
-  .sc-about__features { grid-template-columns: 1fr; }
-  .sc-about__title { font-size: 24px; }
+  .sc-about { gap: 28px; }
+  .sc-about__title { font-size: 1.6rem; }
+  .sc-about__features { grid-template-columns: 1fr 1fr; }
 
-  .sc-school-cards { grid-template-columns: 1fr; }
-
-  /* Board mobile */
+  /* Board mobile layout */
   .sc-board__layout { flex-direction: column; }
 
   .sc-board__sidebar {
@@ -1278,36 +1489,39 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
     min-width: unset;
     height: auto;
     position: relative;
-    top: 0;
     border-right: none;
     border-bottom: 1px solid var(--border-default);
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 8px 10px;
-    gap: 6px;
+    padding: 10px 12px;
+    gap: 8px;
     overflow: visible;
   }
 
   .sc-board__tab {
     flex: 0 1 auto;
-    padding: 7px 14px;
-    border-radius: 20px;
-    white-space: nowrap;
     width: auto;
-    min-height: 36px;
-    transform: none !important;
+    padding: 8px 14px;
+    border-radius: 20px;
     border: 1.5px solid var(--border-default);
     background: var(--bg-input);
     font-size: 12px;
+    white-space: nowrap;
   }
 
-  .sc-board__tab--active { color: #fff; }
+  .sc-board__tab--active {
+    color: #fff !important;
+    border-color: transparent !important;
+    background: var(--sc-color, var(--accent)) !important;
+  }
+
   .sc-board__tab--active::before { display: none; }
   .sc-board__tab-pip { display: none; }
+  .sc-board__tab-icon { display: none; }
 
-  .sc-board__main { padding: 12px; }
+  .sc-board__main { padding: 16px 14px 40px; }
 
-  .sc-items-grid { grid-template-columns: 1fr; gap: 10px; }
+  .sc-items-grid { grid-template-columns: 1fr; }
 
   .sc-item-card {
     flex-direction: row;
@@ -1322,5 +1536,23 @@ body.dark .sc-admin-badge__exit { color: #fcd34d; }
     border-radius: 14px 0 0 14px;
   }
 
-  .sc-item-card__actions { padding: 6px 8px 8px; }
+  .sc-item-card__info { padding: 10px 10px 6px; }
+
+  .sc-school-cards { grid-template-columns: 1fr; }
+
+  .sc-about__features { grid-template-columns: 1fr; }
+
+  .sc-form { padding: 16px; }
+
+  .sc-board__header { padding: 10px 16px; gap: 10px; }
+  .sc-board__name { font-size: 13px; }
+
+  .sc-admin-badge { font-size: 11px; padding: 5px 10px; }
+}
+
+@media (max-width: 480px) {
+  .sc-about__hero { padding: 28px 16px 24px; }
+  .sc-about__title { font-size: 1.4rem; }
+  .sc-tabs-row { flex-direction: column; }
+  .sc-tab-btn { border-radius: 8px; border: 1.5px solid var(--border-default); }
 }
