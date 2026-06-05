@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
   await resend.emails.send({
-    from: "Findr <noreply@yourdomain.com>",
+    from: "Findr <noreply@findrapp.me>",
     to: email,
     subject: "Your Findr admin account has been approved",
     html: `

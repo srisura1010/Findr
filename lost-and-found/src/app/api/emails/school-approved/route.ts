@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
-  const { name, email, school_name, school_code, school_password } = await req.json();
+  const { name, email, school_name, school_code, school_password } =
+    await req.json();
   await resend.emails.send({
-    from: "Findr <noreply@yourdomain.com>",
+    from: "Findr <noreply@findrapp.me>",
     to: email,
     subject: `${school_name} is now live on Findr!`,
     html: `
