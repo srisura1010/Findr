@@ -548,6 +548,9 @@ export default function Home() {
                 <button className="footer-link" onClick={() => router.push("/messages")}>Messages</button>
               )}
               {isSignedIn && (
+                <button className="footer-link" onClick={() => router.push("../schools")}>For Schools</button>
+              )}
+              {isSignedIn && (
                 <button className="footer-link" onClick={() => router.push("/help")}>Help</button>
               )}
               {isSignedIn && (
