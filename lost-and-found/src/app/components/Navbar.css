@@ -35,7 +35,7 @@ body.colorblind    { background-color: #e6f0ff; }
 }
 
 .topbar__logo {
-  width: 68px;
+  width: 80px;
   height: 54px;
   display: flex;
   align-items: center;
@@ -169,14 +169,14 @@ body.colorblind    { background-color: #e6f0ff; }
   position: fixed;
   top: 54px;
   left: 0;
-  width: 68px;
+  width: 80px;
   bottom: 0;
   background-color: rgb(15, 23, 42);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   z-index: 900;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .left-sidebar__nav {
@@ -198,8 +198,8 @@ body.colorblind    { background-color: #e6f0ff; }
 
 .left-sidebar__item {
   position: relative;
-  width: 52px;
-  height: 48px;
+  width: 64px;
+  height: 58px;
   border-radius: 10px;
   background: transparent;
   border: none;
@@ -209,8 +209,10 @@ body.colorblind    { background-color: #e6f0ff; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  gap: 3px;
+  gap: 4px;
   transition: background 0.15s ease, color 0.15s ease;
+  padding-bottom: 2px;
+  overflow: visible;
 }
 
 .left-sidebar__item:hover {
@@ -232,13 +234,14 @@ body.colorblind    { background-color: #e6f0ff; }
 }
 
 .left-sidebar__label {
+  padding-top: 1.5px;
   font-family: "Ubuntu", sans-serif;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-  max-width: 58px;
+  max-width: 70px;
   text-overflow: ellipsis;
   text-align: center;
   color: inherit;
