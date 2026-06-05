@@ -5,8 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
 import { useItems } from "@/context/ItemsContext";
-import emailjs from "@emailjs/browser";
-import { FaFlag, FaMessage, FaTrash, FaArrowLeft, FaCalendar, FaMapPin, FaUser } from "react-icons/fa6";
+import { FaFlag, FaMessage, FaTrash, FaArrowLeft, FaCalendar, FaMapPin } from "react-icons/fa6";
 import ImageGallery from "@/app/components/ImageGallery";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { getConversationId } from "@/app/components/MessagingSystem";
@@ -20,7 +19,6 @@ const REPORT_REASONS = [
   "Other",
 ];
 
-// Helper function to normalize image URL(s) to array
 function normalizeImages(imageData: any): string[] {
   if (Array.isArray(imageData)) return imageData.filter(url => url && typeof url === 'string');
   if (typeof imageData === 'string' && imageData) return [imageData];
@@ -75,15 +73,12 @@ export default function ItemDetailPage() {
 
     const idNum = parseInt(id, 10);
 
-    // Try found items first
     const found = items?.find((i) => i.id === idNum);
     if (found) { setItem(found); setIsLost(false); setLoading(false); return; }
 
-    // Try lost items
     const lost = lostItems?.find((i) => i.id === idNum);
     if (lost) { setItem(lost); setIsLost(true); setLoading(false); return; }
 
-    // Fallback: fetch from DB
     const fetchItem = async () => {
       const { data: foundData } = await supabase
         .from("items")
@@ -191,21 +186,24 @@ export default function ItemDetailPage() {
     if (!user || !item) return;
     setActionLoading(true);
     const { error } = await supabase.from("items").update({
-      status: "pending", claimer_email: user.primaryEmailAddress?.emailAddress,
+      status: "pending",
+      claimer_email: user.primaryEmailAddress?.emailAddress,
     }).eq("id", item.id);
+
     if (!error) {
-      emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        {
+      // Send retrieval notification email via Resend
+      fetch("/api/emails/item-retrieval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           author_name: item.authorName || "Owner",
+          author_email: item.authorEmail,
           item_name: item.name,
           retriever_name: user.fullName || "A user",
           retriever_email: user.primaryEmailAddress?.emailAddress,
-          to_email: item.authorEmail,
-        },
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      ).catch(console.error);
+        }),
+      }).catch(console.error);
+
       updateItemStatus(item.id, "pending", user.primaryEmailAddress?.emailAddress);
       setItem((prev: any) => ({ ...prev, status: "pending" }));
       setActionMsg("Request sent! The owner has been notified.");
@@ -319,11 +317,9 @@ export default function ItemDetailPage() {
       {/* Main layout */}
       <div className="detail-layout">
 
-      {/* LEFT: Image */}
+        {/* LEFT: Image */}
         <div className="detail-image-col">
           <ImageGallery images={item.images || [item.image].filter(Boolean)} title={item.name} />
-
-          {/* Status badge under image */}
           <div className={`detail-status-badge detail-status-badge--${currentStatus}`}>
             {isLost
               ? "🔍 Still Looking"
@@ -344,7 +340,7 @@ export default function ItemDetailPage() {
           </div>
 
           {/* Title */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <h1 className="detail-title">{item.name}</h1>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               {!isItemOwner && (

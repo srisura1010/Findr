@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import emailjs from "@emailjs/browser";
 import { SUPER_ADMINS } from "@/lib/superAdmin";
 
 interface AdminRequest {
@@ -49,7 +48,6 @@ function generatePassword(): string {
 }
 
 function generateSchoolCode(name: string): string {
-  // e.g. "Lincoln High School" → "LINCOLN-2025"
   const slug = name
     .toUpperCase()
     .replace(/[^A-Z0-9\s]/g, "")
@@ -60,6 +58,19 @@ function generateSchoolCode(name: string): string {
   const suffix = new Date().getFullYear();
   const rand = Math.random().toString(36).substring(2, 5).toUpperCase();
   return `${slug}-${suffix}-${rand}`;
+}
+
+// ── Resend helpers ────────────────────────────────────────────────────────────
+async function sendEmail(route: string, body: Record<string, string>) {
+  try {
+    await fetch(`/api/emails/${route}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    console.error(`Failed to send email [${route}]:`, err);
+  }
 }
 
 export default function SuperAdminPage() {
@@ -77,7 +88,6 @@ export default function SuperAdminPage() {
   const [schoolApprovingId, setSchoolApprovingId] = useState<string | null>(null);
   const [schoolRejectingId, setSchoolRejectingId] = useState<string | null>(null);
 
-  // which top-level section is active
   const [section, setSection] = useState<"admins" | "schools">("admins");
 
   const userEmail = user?.primaryEmailAddress?.emailAddress ?? "";
@@ -109,7 +119,7 @@ export default function SuperAdminPage() {
     setLoading(false);
   };
 
-  // ── Admin request handlers (unchanged) ────────────────────────────────────
+  // ── Admin request handlers ────────────────────────────────────────────────
   const handleApprove = async (request: AdminRequest) => {
     setApprovingId(request.id);
     try {
@@ -129,13 +139,15 @@ export default function SuperAdminPage() {
         password,
       });
       if (insertError) throw insertError;
+
       await supabase.from("admin_requests").delete().eq("id", request.id);
-      await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_ADMIN_TEMPLATE_ID!,
-        { name: request.name, email: request.email, password },
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      );
+
+      await sendEmail("admin-approved", {
+        name: request.name,
+        email: request.email,
+        password,
+      });
+
       setAdminRequests((prev) => prev.filter((r) => r.id !== request.id));
       alert(`✅ Approved! Password sent to ${request.email}`);
     } catch (err) {
@@ -146,16 +158,22 @@ export default function SuperAdminPage() {
     }
   };
 
-  const handleReject = async (id: string) => {
-    setRejectingId(id);
+  const handleReject = async (request: AdminRequest) => {
+    setRejectingId(request.id);
     try {
       const { error } = await supabase
         .from("admin_requests")
         .update({ status: "rejected" })
-        .eq("id", id);
+        .eq("id", request.id);
       if (error) throw error;
+
+      await sendEmail("admin-rejected", {
+        name: request.name,
+        email: request.email,
+      });
+
       setAdminRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: "rejected" } : r))
+        prev.map((r) => (r.id === request.id ? { ...r, status: "rejected" } : r))
       );
     } catch (err) {
       console.error("Failed to reject:", err);
@@ -197,11 +215,10 @@ export default function SuperAdminPage() {
     }
   };
 
-  // ── School request handlers ────────────────────────────────────────────────
+  // ── School request handlers ───────────────────────────────────────────────
   const handleApproveSchool = async (request: SchoolRequest) => {
     setSchoolApprovingId(request.id);
     try {
-      // Check not already approved
       const { data: existing } = await supabase
         .from("schools")
         .select("id")
@@ -240,7 +257,6 @@ export default function SuperAdminPage() {
         return;
       }
 
-      // Update request status — fatal if this fails so UI stays consistent
       const { error: updateError } = await supabase
         .from("school_requests")
         .update({ status: "approved" })
@@ -251,52 +267,27 @@ export default function SuperAdminPage() {
 
 Run this in Supabase SQL editor to fix RLS:
 CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true);`);
-        // Still update local state since school was created successfully
       }
 
-      // Email the rep — only if the template env var is configured
-      const schoolTemplateId = process.env.NEXT_PUBLIC_EMAILJS_SCHOOL_TEMPLATE_ID;
-      if (schoolTemplateId) {
-        try {
-          await emailjs.send(
-            process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-            schoolTemplateId,
-            {
-              name: request.rep_name,
-              email: request.rep_email,
-              school_name: request.name,
-              school_code: code,
-              school_password: password,
-            },
-            process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-          );
-        } catch (emailErr) {
-          console.error("EmailJS error:", emailErr);
-          // School is already created — don't roll back, just warn
-          alert(
-            `⚠️ School approved (code: ${code}) but email failed. Share the code manually with ${request.rep_email}.`
-          );
-          setSchoolRequests((prev) =>
-            prev.map((r) =>
-              r.id === request.id ? { ...r, status: "approved" } : r
-            )
-          );
-          return;
-        }
-      }
+      await sendEmail("school-approved", {
+        name: request.rep_name,
+        email: request.rep_email,
+        school_name: request.name,
+        school_code: code,
+        school_password: password,
+      });
 
       setSchoolRequests((prev) =>
         prev.map((r) =>
           r.id === request.id ? { ...r, status: "approved" } : r
         )
       );
-      const credentialsMsg = `✅ School approved!
+      alert(`✅ School approved!
 
 School Code (for all members to join): ${code}
 Admin Password (for rep to unlock admin panel): ${password}
 
-${schoolTemplateId ? `Sent to ${request.rep_email} via email.` : `⚠️ Email not configured — share both manually with ${request.rep_email}`}`;
-      alert(credentialsMsg);
+Sent to ${request.rep_email} via email.`);
     } catch (err: any) {
       const msg = err?.message ?? JSON.stringify(err);
       console.error("handleApproveSchool error:", msg, err);
@@ -306,13 +297,13 @@ ${schoolTemplateId ? `Sent to ${request.rep_email} via email.` : `⚠️ Email n
     }
   };
 
-  const handleRejectSchool = async (id: string) => {
-    setSchoolRejectingId(id);
+  const handleRejectSchool = async (request: SchoolRequest) => {
+    setSchoolRejectingId(request.id);
     try {
       const { error } = await supabase
         .from("school_requests")
         .update({ status: "rejected" })
-        .eq("id", id);
+        .eq("id", request.id);
       if (error) {
         console.error("Reject error:", JSON.stringify(error));
         alert(`Update failed: ${error.message}
@@ -322,8 +313,15 @@ Run in Supabase SQL editor:
 CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true);`);
         return;
       }
+
+      await sendEmail("school-rejected", {
+        name: request.rep_name,
+        email: request.rep_email,
+        school_name: request.name,
+      });
+
       setSchoolRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: "rejected" } : r))
+        prev.map((r) => (r.id === request.id ? { ...r, status: "rejected" } : r))
       );
     } catch (err: any) {
       console.error("Failed to reject:", err);
@@ -348,7 +346,6 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
           <p className="sa-subtitle">Manage admin requests for Findr</p>
         </div>
 
-        {/* Section switcher — styled same as existing tab pattern */}
         <div
           style={{
             display: "flex",
@@ -381,18 +378,12 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
             >
               {s === "admins" ? "Admin Requests" : "School Requests"}
               {s === "admins" && pendingAdmins.length > 0 && (
-                <span
-                  className="sa-badge"
-                  style={{ marginLeft: "6px" }}
-                >
+                <span className="sa-badge" style={{ marginLeft: "6px" }}>
                   {pendingAdmins.length}
                 </span>
               )}
               {s === "schools" && pendingSchools.length > 0 && (
-                <span
-                  className="sa-badge"
-                  style={{ marginLeft: "6px" }}
-                >
+                <span className="sa-badge" style={{ marginLeft: "6px" }}>
                   {pendingSchools.length}
                 </span>
               )}
@@ -400,7 +391,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
           ))}
         </div>
 
-        {/* ── ADMIN REQUESTS SECTION (original, untouched) ── */}
+        {/* ── ADMIN REQUESTS SECTION ── */}
         {section === "admins" && (
           <>
             <section className="sa-section">
@@ -418,7 +409,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                     key={r.id}
                     request={r}
                     onApprove={() => handleApprove(r)}
-                    onReject={() => handleReject(r.id)}
+                    onReject={() => handleReject(r)}
                     approving={approvingId === r.id}
                     rejecting={rejectingId === r.id}
                   />
@@ -465,7 +456,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                     key={r.id}
                     request={r}
                     onApprove={() => handleApproveSchool(r)}
-                    onReject={() => handleRejectSchool(r.id)}
+                    onReject={() => handleRejectSchool(r)}
                     approving={schoolApprovingId === r.id}
                     rejecting={schoolRejectingId === r.id}
                   />
@@ -488,7 +479,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
   );
 }
 
-// ── Existing AdminRequestCard (unchanged) ────────────────────────────────────
+// ── Admin Request Card ────────────────────────────────────────────────────────
 function RequestCard({
   request,
   onApprove,
@@ -586,7 +577,7 @@ function RequestCard({
   );
 }
 
-// ── New SchoolRequestCard ─────────────────────────────────────────────────────
+// ── School Request Card ───────────────────────────────────────────────────────
 function SchoolRequestCard({
   request,
   onApprove,
@@ -672,12 +663,9 @@ function SchoolRequestCard({
           label="Submitted"
           value={new Date(request.created_at).toLocaleDateString()}
         />
-        {/* Color swatch inline */}
         <div className="sa-detail">
           <span className="sa-detail-label">Brand Color:</span>
-          <span
-            style={{ display: "flex", alignItems: "center", gap: "6px" }}
-          >
+          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <span
               style={{
                 display: "inline-block",
@@ -726,7 +714,7 @@ function SchoolRequestCard({
     </div>
   );
 }
-{/** good */}
+
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="sa-detail">
