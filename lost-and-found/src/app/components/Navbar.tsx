@@ -7,50 +7,44 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Link from "next/dist/client/link";
 import { CiSettings } from "react-icons/ci";
+import {
+  MdOutlineDashboard,
+  MdOutlineMessage,
+  MdOutlineSchool,
+  MdOutlineHelp,
+  MdOutlineAdminPanelSettings,
+} from "react-icons/md";
 import { useSettings } from "@/context/SettingsContext";
 import { SUPER_ADMINS } from "@/lib/superAdmin";
 
 export default function Navbar() {
-  // Auth state from Clerk.
   const { isSignedIn, user, isLoaded } = useUser();
-
-  // Language preference is used to translate a few UI labels.
   const { language } = useSettings();
   const router = useRouter();
 
-  // `mounted` is used to avoid SSR/client hydration mismatches when reading
-  // values that only exist on the client (like `user` and localStorage translations).
   const [mounted, setMounted] = useState(false);
-
-  // Number of unread messages for the current user.
   const [unreadCount, setUnreadCount] = useState(0);
-
-  // Mobile sidebar open/closed state.
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activePath, setActivePath] = useState("/dashboard");
 
-  // Super-admins are determined by email allowlist.
-  // We gate it behind `mounted` + `isLoaded` so SSR doesn't guess incorrectly.
   const isSuperAdmin =
     mounted &&
     isLoaded &&
     SUPER_ADMINS.includes(user?.primaryEmailAddress?.emailAddress ?? "");
 
-  // Convenience flag for showing signed-in UI only when the client has mounted.
   const showSignedIn = mounted && isSignedIn;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Helper used by the mobile sidebar.
-  // Always closes the sidebar before navigating.
   const navigate = (path: string) => {
     setMobileOpen(false);
+    setActivePath(path);
     router.push(path);
   };
 
   useEffect(() => {
-    // Prevent background scroll when the mobile sidebar is open.
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -59,8 +53,6 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!user) return;
-
-    // Initial unread count fetch.
     const fetchUnread = async () => {
       const { count } = await supabase
         .from("chat_messages")
@@ -71,8 +63,6 @@ export default function Navbar() {
     };
     fetchUnread();
 
-    // Realtime listener for new incoming messages.
-    // This only listens for INSERTs addressed to the current user.
     const channel = supabase
       .channel("navbar-unread")
       .on(
@@ -91,16 +81,12 @@ export default function Navbar() {
     };
   }, [user]);
 
-  // Translated UI labels (small subset used in the navbar).
-  // Values are cached in localStorage with a language-specific key.
   const [dashboardText, setDashboardText] = useState("Dashboard");
   const [signUpText, setSignUpText] = useState("Sign Up");
   const [helpText, setHelpText] = useState("Help");
   const [schoolsText, setSchoolsText] = useState("For Schools");
 
   useEffect(() => {
-    // On mount, try to read cached translations for the active language.
-    // This keeps the navbar snappy without waiting for the translate API.
     if (language === "en") return;
     setDashboardText(
       localStorage.getItem(`nav_dashboard_${language}`) || "Dashboard",
@@ -108,14 +94,11 @@ export default function Navbar() {
     setSignUpText(localStorage.getItem(`nav_signUp_${language}`) || "Sign Up");
     setHelpText(localStorage.getItem(`nav_help_${language}`) || "Help");
     setSchoolsText(
-      localStorage.getItem("nav_schools_${language}") || "For Schools",
+      localStorage.getItem(`nav_schools_${language}`) || "For Schools",
     );
   }, []);
 
   useEffect(() => {
-    // When the user changes language:
-    // - reset to English immediately
-    // - otherwise translate the fixed labels and cache them
     if (language === "en") {
       setDashboardText("Dashboard");
       setSignUpText("Sign Up");
@@ -134,10 +117,8 @@ export default function Navbar() {
         { key: "Help", setter: setHelpText, cacheKey: "nav_help" },
         { key: "For Schools", setter: setSchoolsText, cacheKey: "nav_schools" },
       ];
-
       for (const { key, setter, cacheKey } of translations) {
         try {
-          // Delegate translation to the server route.
           const res = await fetch("/api/translate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -155,130 +136,149 @@ export default function Navbar() {
     translateAndCache();
   }, [language]);
 
+  // ─── sidebar nav items ──────────────────────────────────────────────
+  const navItems = [
+    {
+      label: dashboardText,
+      icon: <MdOutlineDashboard size={22} />,
+      path: "/dashboard",
+      requiresAuth: true,
+    },
+    {
+      label: "Messages",
+      icon: <MdOutlineMessage size={22} />,
+      path: "/messages",
+      requiresAuth: true,
+      badge: unreadCount,
+    },
+    {
+      label: schoolsText,
+      icon: <MdOutlineSchool size={22} />,
+      path: "/schools",
+      requiresAuth: true,
+    },
+    ...(isSuperAdmin
+      ? [
+          {
+            label: "Super Admin",
+            icon: <MdOutlineAdminPanelSettings size={22} />,
+            path: "/super-admin",
+            requiresAuth: true,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
-      <nav className="navbar">
-        <Link href="/" className="logo">
+      {/* ── TOP BAR ────────────────────────────────────────────────────── */}
+      <header className="topbar">
+        {/* Logo */}
+        <Link href="/" className="topbar__logo">
           Findr
         </Link>
 
-        {}
-        <ul className="nav-links">
-          <li>
-            <Link href="/settings" className="settings-icon-btn">
-              <CiSettings size={23} />
-            </Link>
-          </li>
+        {/* Right cluster */}
+        <div className="topbar__right">
+          <button
+            className="topbar__icon-btn"
+            onClick={() => router.push("/help")}
+            aria-label={helpText}
+            title={helpText}
+          >
+            <MdOutlineHelp size={20} />
+          </button>
 
-          <li>
-            {showSignedIn ? (
-              <button
-                className="dashboard-link"
-                onClick={() => router.push("/dashboard")}
-              >
-                {dashboardText}
-              </button>
-            ) : (
-              <SignInButton mode="modal">
-                <button className="dashboard-link">{dashboardText}</button>
-              </SignInButton>
-            )}
-          </li>
-          {showSignedIn && (
-            <li className="messages-nav-item">
-              <button
-                className="dashboard-link"
-                onClick={() => {
-                  setUnreadCount(0);
-                  router.push("/messages");
-                }}
-              >
-                Messages
-                {unreadCount > 0 && (
-                  <span className="unread-badge">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </button>
-            </li>
-          )}
+          <button
+            className="topbar__icon-btn topbar__icon-btn--settings"
+            onClick={() => router.push("/settings")}
+          >
+            <CiSettings size={20} />
+          </button>
 
-          <li>
-            {showSignedIn ? (
-              <button
-                className="dashboard-link"
-                onClick={() => router.push("/schools")}
-              >
-                {schoolsText}
-              </button>
-            ) : (
-              <SignInButton mode="modal">
-                <button className="dashboard-link">{schoolsText}</button>
-              </SignInButton>
-            )}
-          </li>
-
-          <li>
-            <button
-              className="dashboard-link"
-              onClick={() => router.push("/help")}
-            >
-              {helpText}
-            </button>
-          </li>
-
-          {isSuperAdmin && (
-            <li>
-              <button
-                className="dashboard-link"
-                onClick={() => router.push("/super-admin")}
-              >
-                Super Admin
-              </button>
-            </li>
-          )}
+          <div className="topbar__divider" />
 
           {showSignedIn ? (
-            <li>
-              <UserButton />
-            </li>
+            <UserButton />
           ) : (
-            <li>
+            <>
+              <SignInButton mode="modal">
+                <button className="topbar__signin-btn">{dashboardText}</button>
+              </SignInButton>
               <SignUpButton>
-                <button className="sign-up">{signUpText}</button>
+                <button className="topbar__signup-btn">{signUpText}</button>
               </SignUpButton>
-            </li>
+            </>
           )}
-        </ul>
 
-        {}
-        <div className="navbar-mobile-right">
-          {showSignedIn && <UserButton />}
+          {/* Mobile hamburger */}
           <button
-            className="navbar-hamburger"
+            className="topbar__hamburger"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
           >
             <span
-              className={`navbar-hamburger__bar${mobileOpen ? " open" : ""}`}
+              className={`topbar__hamburger-bar${mobileOpen ? " open" : ""}`}
             />
             <span
-              className={`navbar-hamburger__bar${mobileOpen ? " open" : ""}`}
+              className={`topbar__hamburger-bar${mobileOpen ? " open" : ""}`}
             />
             <span
-              className={`navbar-hamburger__bar${mobileOpen ? " open" : ""}`}
+              className={`topbar__hamburger-bar${mobileOpen ? " open" : ""}`}
             />
           </button>
         </div>
-      </nav>
+      </header>
 
-      {}
+      {/* ── LEFT SIDEBAR ───────────────────────────────────────────────── */}
+      <aside className="left-sidebar" aria-label="Main navigation">
+        <nav className="left-sidebar__nav">
+          {navItems.map((item) => {
+            const isActive = activePath === item.path;
+            const btn = (
+              <button
+                key={item.path}
+                className={`left-sidebar__item${isActive ? " left-sidebar__item--active" : ""}`}
+                onClick={() => {
+                  if (item.badge !== undefined) setUnreadCount(0);
+                  navigate(item.path);
+                }}
+                title={item.label}
+              >
+                <span className="left-sidebar__icon">{item.icon}</span>
+                <span className="left-sidebar__label">{item.label}</span>
+                {!!item.badge && item.badge > 0 && (
+                  <span className="left-sidebar__badge">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
+              </button>
+            );
+
+            if (item.requiresAuth && !showSignedIn) {
+              return (
+                <SignInButton key={item.path} mode="modal">
+                  <button
+                    className={`left-sidebar__item${isActive ? " left-sidebar__item--active" : ""}`}
+                    title={item.label}
+                  >
+                    <span className="left-sidebar__icon">{item.icon}</span>
+                    <span className="left-sidebar__label">{item.label}</span>
+                  </button>
+                </SignInButton>
+              );
+            }
+            return btn;
+          })}
+        </nav>
+      </aside>
+
+      {/* ── MOBILE OVERLAY + SIDEBAR ───────────────────────────────────── */}
       {mobileOpen && (
         <div className="mobile-overlay" onClick={() => setMobileOpen(false)} />
       )}
 
-      {}
       <div
         className={`mobile-sidebar${mobileOpen ? " mobile-sidebar--open" : ""}`}
       >
@@ -294,74 +294,41 @@ export default function Navbar() {
         </div>
 
         <nav className="mobile-sidebar__nav">
-          {showSignedIn ? (
-            <button
-              className="mobile-sidebar__item"
-              onClick={() => navigate("/dashboard")}
-            >
-              {dashboardText}
-            </button>
-          ) : (
-            <SignInButton mode="modal">
+          {navItems.map((item) => {
+            const btn = (
               <button
+                key={item.path}
                 className="mobile-sidebar__item"
-                onClick={() => setMobileOpen(false)}
+                onClick={() => {
+                  if (item.badge !== undefined) setUnreadCount(0);
+                  navigate(item.path);
+                }}
               >
-                {dashboardText}
+                {item.icon}
+                {item.label}
+                {!!item.badge && item.badge > 0 && (
+                  <span className="unread-badge">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
               </button>
-            </SignInButton>
-          )}
+            );
 
-          {showSignedIn && (
-            <button
-              className="mobile-sidebar__item messages-nav-item"
-              onClick={() => {
-                setUnreadCount(0);
-                navigate("/messages");
-              }}
-            >
-              Messages
-              {unreadCount > 0 && (
-                <span className="unread-badge">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-          )}
-
-          {showSignedIn ? (
-            <button
-              className="mobile-sidebar__item"
-              onClick={() => navigate("/schools")}
-            >
-              {schoolsText}
-            </button>
-          ) : (
-            <SignInButton mode="modal">
-              <button
-                className="mobile-sidebar__item"
-                onClick={() => setMobileOpen(false)}
-              >
-                {schoolsText}
-              </button>
-            </SignInButton>
-          )}
-
-          <button
-            className="mobile-sidebar__item"
-            onClick={() => navigate("/help")}
-          >
-            {helpText}
-          </button>
-
-          {isSuperAdmin && (
-            <button
-              className="mobile-sidebar__item"
-              onClick={() => navigate("/super-admin")}
-            >
-              Super Admin
-            </button>
-          )}
+            if (item.requiresAuth && !showSignedIn) {
+              return (
+                <SignInButton key={item.path} mode="modal">
+                  <button
+                    className="mobile-sidebar__item"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                </SignInButton>
+              );
+            }
+            return btn;
+          })}
 
           <button
             className="mobile-sidebar__item mobile-sidebar__item--icon"
@@ -383,7 +350,6 @@ export default function Navbar() {
           )}
         </nav>
       </div>
-      {/*The mobile sidebar is rendered in the DOM at all times but hidden when closed*/}
     </>
   );
 }

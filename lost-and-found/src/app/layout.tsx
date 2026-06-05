@@ -59,8 +59,18 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
               <ItemsProvider>
                 <TTSProvider>
                   <Navbar />
-                  {/* Primary landmark region used by the TTS provider to read page content. */}
-                  <main id="main-content">
+                  {/*
+                    Offset the main content so it isn't hidden behind the fixed
+                    top bar (48px) and left sidebar (56px).
+                    On mobile the sidebar is hidden, so padding-left drops to 0.
+                  */}
+                  <main
+                    id="main-content"
+                    style={{
+                      paddingTop: "54px",
+                      paddingLeft: "68px",
+                    }}
+                  >
                     {children}
                   </main>
                 </TTSProvider>
