@@ -66,33 +66,278 @@ type TabId =
   | "ban-management"
   | "inbox";
 
-const SIDEBAR_TABS: {
-  id: TabId;
-  label: string;
-  icon: React.ReactNode;
-  adminOnly?: boolean;
-}[] = [
-  { id: "items", label: "Items", icon: <HiOutlineMagnifyingGlass /> },
-  { id: "my-items", label: "My Items", icon: <FaClipboard /> },
-  { id: "add-item", label: "Report Found Item", icon: <FaFlag /> },
-  {
-    id: "report-lost",
-    label: "Report Lost Item",
-    icon: <FaTriangleExclamation />,
-  },
-  { id: "become-admin", label: "Become an Admin", icon: <FaClipboard /> },
-  { id: "admin-login", label: "Admin", icon: <CiLogin /> },
-  { id: "reports", label: "Reports", icon: <MdFlagCircle />, adminOnly: true },
-  {
-    id: "ban-management",
-    label: "Ban Management",
-    icon: <ImHammer2 />,
-    adminOnly: true,
-  },
-  { id: "inbox", label: "Inbox", icon: <IoMdMailOpen />, adminOnly: true },
-];
+// ── Translation helper ────────────────────────────────────────────────────────
+async function fetchTranslation(
+  key: string,
+  target: string,
+  cacheKey: string,
+  setter: (val: string) => void,
+) {
+  const cached = localStorage.getItem(`${cacheKey}_${target}`);
+  if (cached) {
+    setter(cached);
+    return;
+  }
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: key, target }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const translated =
+        (data.translatedText as string | undefined)?.trim() || key;
+      setter(translated);
+      localStorage.setItem(`${cacheKey}_${target}`, translated);
+    } else {
+      setter(key);
+    }
+  } catch {
+    setter(key);
+  }
+}
 
-function AdminPanel() {
+// ── String bundle types ───────────────────────────────────────────────────────
+interface DashStrings {
+  // Sidebar tabs
+  tabItems: string;
+  tabMyItems: string;
+  tabAddItem: string;
+  tabReportLost: string;
+  tabBecomeAdmin: string;
+  tabAdmin: string;
+  tabReports: string;
+  tabBanManagement: string;
+  tabInbox: string;
+  // Admin banner
+  adminBannerMsg: string;
+  adminBannerExit: string;
+  // Search / board tabs
+  searchPlaceholder: string;
+  foundItemsTab: string;
+  lostItemsTab: string;
+  // Item cards
+  foundBy: string;
+  lostBy: string;
+  claimPending: string;
+  noFoundItems: string;
+  noFoundItemsSearch: string;
+  tryKeywords: string;
+  noLostItems: string;
+  noLostItemsSearch: string;
+  clickReportLost: string;
+  // Add found item form
+  reportFoundTitle: string;
+  itemPosted: string;
+  itemNameLabel: string;
+  itemNamePlaceholder: string;
+  descriptionLabel: string;
+  descriptionPlaceholder: string;
+  photosLabel: string;
+  photosSelected: string;
+  uploadPhotos: string;
+  photoHint: string;
+  cancelBtn: string;
+  postItemBtn: string;
+  uploadingBtn: string;
+  // Report lost form
+  reportLostTitle: string;
+  lostItemPosted: string;
+  whatLostLabel: string;
+  itemNameDefault: string;
+  descLostPlaceholder: string;
+  postingBtn: string;
+  postLostBtn: string;
+  // My items
+  myItemsTitle: string;
+  signInToView: string;
+  noItemsYet: string;
+  foundItemsPosted: string;
+  lostItemsReported: string;
+  claimPendingStatus: string;
+  activeStatus: string;
+  confirmClaimed: string;
+  markAsFound: string;
+  // Become admin panel
+  becomeAdminTitle: string;
+  requestSubmitted: string;
+  reviewMsg: string;
+  fullNameLabel: string;
+  emailLabel: string;
+  schoolLabel: string;
+  schoolPlaceholder: string;
+  teacherIdLabel: string;
+  teacherIdPlaceholder: string;
+  uploadIdLabel: string;
+  uploadIdPlaceholder: string;
+  photoHintShort: string;
+  anythingElseLabel: string;
+  anythingElsePlaceholder: string;
+  submitRequestBtn: string;
+  submittingBtn: string;
+  // Admin login panel
+  adminAccessTitle: string;
+  adminLoginHint: string;
+  adminPasswordLabel: string;
+  adminPasswordPlaceholder: string;
+  checkingBtn: string;
+  unlockAdminBtn: string;
+  adminUnlocked: string;
+  adminUnlockedSub: string;
+  adminIncorrect: string;
+  // Reports panel
+  reportedItemsTab: string;
+  reportedUsersTab: string;
+  reportedItemsTitle: string;
+  reportedUsersTitle: string;
+  loadingText: string;
+  noItemReports: string;
+  noUserReports: string;
+  reportedBy: string;
+  postedBy: string;
+  unknown: string;
+  dismissBtn: string;
+  deleteItemBtn: string;
+  banUserBtn: string;
+  userEmailLabel: string;
+  // Ban management
+  banMgmtTitle: string;
+  banMgmtHint: string;
+  userEmailInputLabel: string;
+  reasonLabel: string;
+  reasonPlaceholder: string;
+  permanentBtn: string;
+  suspendBtn: string;
+  suspendDaysLabel: string;
+  processingBtn: string;
+  banUserBtn2: string;
+  suspendUserBtn: string;
+  activeBansTitle: string;
+  noBannedUsers: string;
+  suspendedUntil: string;
+  suspensionExpired: string;
+  permanentBan: string;
+  byLabel: string;
+  unbanBtn: string;
+}
+
+const DEFAULT_STRINGS: DashStrings = {
+  tabItems: "Items",
+  tabMyItems: "My Items",
+  tabAddItem: "Report Found Item",
+  tabReportLost: "Report Lost Item",
+  tabBecomeAdmin: "Become an Admin",
+  tabAdmin: "Admin",
+  tabReports: "Reports",
+  tabBanManagement: "Ban Management",
+  tabInbox: "Inbox",
+  adminBannerMsg: "Admin mode active — you can delete items and ban users",
+  adminBannerExit: "Exit Admin",
+  searchPlaceholder: "Search items...",
+  foundItemsTab: "Found Items",
+  lostItemsTab: "Lost Items",
+  foundBy: "Found by:",
+  lostBy: "Lost by:",
+  claimPending: "⏳ Claim pending",
+  noFoundItems: "No found items posted yet.",
+  noFoundItemsSearch: "No items found for",
+  tryKeywords: "Try different keywords like color, type, or brand",
+  noLostItems: "No lost item reports yet.",
+  noLostItemsSearch: "No lost items found for",
+  clickReportLost:
+    'Click "Report Lost Item" in the sidebar to post what you lost.',
+  reportFoundTitle: "Report Found Item",
+  itemPosted: "Item posted!",
+  itemNameLabel: "Item Name",
+  itemNamePlaceholder: "Item Name",
+  descriptionLabel: "Description",
+  descriptionPlaceholder: "Description (location, time, etc)",
+  photosLabel: "Photos (optional, up to 3)",
+  photosSelected: "photo(s) selected",
+  uploadPhotos: "Upload photos",
+  photoHint: "PNG, JPG up to 10MB each. Upload up to 3 photos.",
+  cancelBtn: "Cancel",
+  postItemBtn: "Post Item",
+  uploadingBtn: "Uploading...",
+  reportLostTitle: "Report Lost Item",
+  lostItemPosted: "Lost item reported!",
+  whatLostLabel: "What did you lose?",
+  itemNameDefault: "Item Name",
+  descLostPlaceholder: "Description (location, time, etc)",
+  postingBtn: "Posting...",
+  postLostBtn: "Post Lost Item",
+  myItemsTitle: "My Items",
+  signInToView: "Please sign in to view your items.",
+  noItemsYet: "You haven't posted any items yet.",
+  foundItemsPosted: "Found Items I Posted",
+  lostItemsReported: "Lost Items I Reported",
+  claimPendingStatus: "⏳ Claim pending",
+  activeStatus: "✓ Active",
+  confirmClaimed: "Confirm Claimed",
+  markAsFound: "Mark as Found",
+  becomeAdminTitle: "Become an Admin",
+  requestSubmitted: "Request submitted!",
+  reviewMsg: "We will review and get back to you.",
+  fullNameLabel: "Full Name",
+  emailLabel: "Email",
+  schoolLabel: "School / Institution",
+  schoolPlaceholder: "Lincoln High School",
+  teacherIdLabel: "Teacher ID / Staff Number",
+  teacherIdPlaceholder: "T-00123",
+  uploadIdLabel: "Upload ID or Badge Photo",
+  uploadIdPlaceholder: "Upload ID or badge photo",
+  photoHintShort: "PNG, JPG up to 10MB",
+  anythingElseLabel: "Anything else we should know?",
+  anythingElsePlaceholder: "e.g. I run the lost and found office...",
+  submitRequestBtn: "Submit Request",
+  submittingBtn: "Submitting...",
+  adminAccessTitle: "Admin Access",
+  adminLoginHint: "Enter the password from your approval email.",
+  adminPasswordLabel: "Admin Password",
+  adminPasswordPlaceholder: "e.g. FINDR-JANE-X4K2",
+  checkingBtn: "Checking...",
+  unlockAdminBtn: "Unlock Admin View",
+  adminUnlocked: "Admin view unlocked!",
+  adminUnlockedSub: "Delete buttons and ban tools are now visible.",
+  adminIncorrect: "Incorrect password or not approved yet.",
+  reportedItemsTab: "Reported Items",
+  reportedUsersTab: "Reported Users",
+  reportedItemsTitle: "Reported Items",
+  reportedUsersTitle: "Reported Users",
+  loadingText: "Loading...",
+  noItemReports: "No item reports — all clear!",
+  noUserReports: "No user reports — all clear!",
+  reportedBy: "Reported by",
+  postedBy: "Posted by",
+  unknown: "Unknown",
+  dismissBtn: "Dismiss",
+  deleteItemBtn: "Delete Item",
+  banUserBtn: "Ban User",
+  userEmailLabel: "User email:",
+  banMgmtTitle: "Ban Management",
+  banMgmtHint: "Ban or suspend users by their account email.",
+  userEmailInputLabel: "User Email",
+  reasonLabel: "Reason",
+  reasonPlaceholder: "e.g. Spam, abusive messages, false claims...",
+  permanentBtn: "Permanent",
+  suspendBtn: "Suspend",
+  suspendDaysLabel: "Suspend for how many days?",
+  processingBtn: "Processing...",
+  banUserBtn2: "Ban User",
+  suspendUserBtn: "Suspend User",
+  activeBansTitle: "Active Bans & Suspensions",
+  noBannedUsers: "No banned users.",
+  suspendedUntil: "Suspended until",
+  suspensionExpired: "Suspension expired",
+  permanentBan: "Permanent ban",
+  byLabel: "by",
+  unbanBtn: "Unban",
+};
+
+// ── Sub-panels (receive s prop) ───────────────────────────────────────────────
+
+function AdminPanel({ s }: { s: DashStrings }) {
   const { user } = useUser();
   const [adminForm, setAdminForm] = useState({
     name: "",
@@ -159,42 +404,38 @@ function AdminPanel() {
 
   return (
     <div className="main-panel-content">
-      <div className="main-panel-section-title">Become an Admin</div>
+      <div className="main-panel-section-title">{s.becomeAdminTitle}</div>
       {adminSuccess ? (
         <div className="panel-success">
           <span className="panel-success__icon">✓</span>
-          <p>Request submitted!</p>
-          <p className="panel-success__sub">
-            We will review and get back to you.
-          </p>
+          <p>{s.requestSubmitted}</p>
+          <p className="panel-success__sub">{s.reviewMsg}</p>
         </div>
       ) : (
         <form className="panel-form" onSubmit={handleAdminSubmit}>
-          <label className="panel-form__label">Full Name</label>
+          <label className="panel-form__label">{s.fullNameLabel}</label>
           <input
             className="panel-form__input"
             type="text"
-            placeholder="Jane Smith"
             required
             value={adminForm.name}
             readOnly
           />
 
-          <label className="panel-form__label">Email</label>
+          <label className="panel-form__label">{s.emailLabel}</label>
           <input
             className="panel-form__input"
             type="email"
-            placeholder="jane@school.edu"
             required
             value={adminForm.email}
             readOnly
           />
 
-          <label className="panel-form__label">School / Institution</label>
+          <label className="panel-form__label">{s.schoolLabel}</label>
           <input
             className="panel-form__input"
             type="text"
-            placeholder="Lincoln High School"
+            placeholder={s.schoolPlaceholder}
             required
             value={adminForm.school}
             onChange={(e) =>
@@ -202,11 +443,11 @@ function AdminPanel() {
             }
           />
 
-          <label className="panel-form__label">Teacher ID / Staff Number</label>
+          <label className="panel-form__label">{s.teacherIdLabel}</label>
           <input
             className="panel-form__input"
             type="text"
-            placeholder="T-00123"
+            placeholder={s.teacherIdPlaceholder}
             required
             value={adminForm.teacherId}
             onChange={(e) =>
@@ -214,11 +455,11 @@ function AdminPanel() {
             }
           />
 
-          <label className="panel-form__label">Upload ID or Badge Photo</label>
+          <label className="panel-form__label">{s.uploadIdLabel}</label>
           <label className="panel-form__file-label" htmlFor="admin-file-upload">
             <span className="panel-form__file-icon">+</span>
             <span className="panel-form__file-text">
-              {adminFile ? adminFile.name : "Upload ID or badge photo"}
+              {adminFile ? adminFile.name : s.uploadIdPlaceholder}
             </span>
           </label>
           <input
@@ -230,7 +471,7 @@ function AdminPanel() {
               if (e.target.files?.[0]) setAdminFile(e.target.files[0]);
             }}
           />
-          <p className="panel-form__file-hint">PNG, JPG up to 10MB</p>
+          <p className="panel-form__file-hint">{s.photoHintShort}</p>
 
           {adminFile && (
             <div className="panel-form__preview-wrap">
@@ -249,12 +490,10 @@ function AdminPanel() {
             </div>
           )}
 
-          <label className="panel-form__label">
-            Anything else we should know?
-          </label>
+          <label className="panel-form__label">{s.anythingElseLabel}</label>
           <textarea
             className="panel-form__textarea"
-            placeholder="e.g. I run the lost and found office..."
+            placeholder={s.anythingElsePlaceholder}
             value={adminForm.extraInfo}
             onChange={(e) =>
               setAdminForm((p) => ({ ...p, extraInfo: e.target.value }))
@@ -266,7 +505,7 @@ function AdminPanel() {
             className="panel-form__submit"
             disabled={adminUploading}
           >
-            {adminUploading ? "Submitting..." : "Submit Request"}
+            {adminUploading ? s.submittingBtn : s.submitRequestBtn}
           </button>
         </form>
       )}
@@ -274,7 +513,13 @@ function AdminPanel() {
   );
 }
 
-function AdminLoginPanel({ onUnlock }: { onUnlock: () => void }) {
+function AdminLoginPanel({
+  onUnlock,
+  s,
+}: {
+  onUnlock: () => void;
+  s: DashStrings;
+}) {
   const { user } = useUser();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -292,7 +537,7 @@ function AdminLoginPanel({ onUnlock }: { onUnlock: () => void }) {
       .eq("password", password)
       .single();
     if (dbError || !data) {
-      setError("Incorrect password or not approved yet.");
+      setError(s.adminIncorrect);
     } else {
       localStorage.setItem("findr_is_admin", "true");
       localStorage.setItem("findr_admin_id", data.id);
@@ -308,10 +553,8 @@ function AdminLoginPanel({ onUnlock }: { onUnlock: () => void }) {
       <div className="main-panel-content">
         <div className="panel-success">
           <span className="panel-success__icon">✓</span>
-          <p>Admin view unlocked!</p>
-          <p className="panel-success__sub">
-            Delete buttons and ban tools are now visible.
-          </p>
+          <p>{s.adminUnlocked}</p>
+          <p className="panel-success__sub">{s.adminUnlockedSub}</p>
         </div>
       </div>
     );
@@ -319,16 +562,14 @@ function AdminLoginPanel({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <div className="main-panel-content">
-      <div className="main-panel-section-title">Admin Access</div>
-      <p className="admin-login__hint">
-        Enter the password from your approval email.
-      </p>
+      <div className="main-panel-section-title">{s.adminAccessTitle}</div>
+      <p className="admin-login__hint">{s.adminLoginHint}</p>
       <form className="panel-form" onSubmit={handleCheck}>
-        <label className="panel-form__label">Admin Password</label>
+        <label className="panel-form__label">{s.adminPasswordLabel}</label>
         <input
           className="panel-form__input"
           type="password"
-          placeholder="e.g. FINDR-JANE-X4K2"
+          placeholder={s.adminPasswordPlaceholder}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -339,7 +580,7 @@ function AdminLoginPanel({ onUnlock }: { onUnlock: () => void }) {
           className="panel-form__submit"
           disabled={checking}
         >
-          {checking ? "Checking..." : "Unlock Admin View"}
+          {checking ? s.checkingBtn : s.unlockAdminBtn}
         </button>
       </form>
     </div>
@@ -348,8 +589,10 @@ function AdminLoginPanel({ onUnlock }: { onUnlock: () => void }) {
 
 function ReportedItemsPanel({
   updateItemStatus,
+  s,
 }: {
   updateItemStatus: (id: number, status: string) => void;
+  s: DashStrings;
 }) {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -381,9 +624,9 @@ function ReportedItemsPanel({
     setReports((prev) => prev.filter((r) => r.item_id !== report.item_id));
   };
 
-  if (loading) return <p className="panel-empty">Loading...</p>;
+  if (loading) return <p className="panel-empty">{s.loadingText}</p>;
   if (reports.length === 0)
-    return <p className="panel-empty">No item reports — all clear!</p>;
+    return <p className="panel-empty">{s.noItemReports}</p>;
 
   return (
     <div className="panel-item-list">
@@ -400,14 +643,14 @@ function ReportedItemsPanel({
             <p className="reported-card__name">{report.item_name}</p>
             <p className="reported-card__reason">{report.reason}</p>
             <p className="reported-card__meta">
-              Reported by {report.reporter_name} ·{" "}
+              {s.reportedBy} {report.reporter_name} ·{" "}
               {new Date(report.created_at).toLocaleDateString()}
             </p>
             <p
               className="reported-card__meta"
               style={{ color: "var(--danger)", marginTop: "2px" }}
             >
-              Posted by {report.items?.author_name ?? "Unknown"} ·{" "}
+              {s.postedBy} {report.items?.author_name ?? s.unknown} ·{" "}
               {report.items?.author_email ?? ""}
             </p>
           </div>
@@ -416,13 +659,13 @@ function ReportedItemsPanel({
               className="reported-card__dismiss"
               onClick={() => handleDismiss(report.id)}
             >
-              Dismiss
+              {s.dismissBtn}
             </button>
             <button
               className="reported-card__delete"
               onClick={() => handleDeleteItem(report)}
             >
-              Delete Item
+              {s.deleteItemBtn}
             </button>
           </div>
         </div>
@@ -431,7 +674,13 @@ function ReportedItemsPanel({
   );
 }
 
-function ReportedUsersPanel({ adminEmail }: { adminEmail: string }) {
+function ReportedUsersPanel({
+  adminEmail,
+  s,
+}: {
+  adminEmail: string;
+  s: DashStrings;
+}) {
   const [reports, setReports] = useState<UserReport[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -472,9 +721,9 @@ function ReportedUsersPanel({ adminEmail }: { adminEmail: string }) {
     );
   };
 
-  if (loading) return <p className="panel-empty">Loading...</p>;
+  if (loading) return <p className="panel-empty">{s.loadingText}</p>;
   if (reports.length === 0)
-    return <p className="panel-empty">No user reports — all clear!</p>;
+    return <p className="panel-empty">{s.noUserReports}</p>;
 
   return (
     <div className="panel-item-list">
@@ -512,7 +761,7 @@ function ReportedUsersPanel({ adminEmail }: { adminEmail: string }) {
             </div>
             <p className="reported-card__reason">{report.reason}</p>
             <p className="reported-card__meta">
-              Reported by {report.reporter_name} ({report.reporter_email}) ·{" "}
+              {s.reportedBy} {report.reporter_name} ({report.reporter_email}) ·{" "}
               {new Date(report.created_at).toLocaleDateString()}
             </p>
             {report.reported_user_email && (
@@ -520,7 +769,7 @@ function ReportedUsersPanel({ adminEmail }: { adminEmail: string }) {
                 className="reported-card__meta"
                 style={{ color: "var(--danger)", marginTop: 2 }}
               >
-                User email: {report.reported_user_email}
+                {s.userEmailLabel} {report.reported_user_email}
               </p>
             )}
           </div>
@@ -529,13 +778,13 @@ function ReportedUsersPanel({ adminEmail }: { adminEmail: string }) {
               className="reported-card__dismiss"
               onClick={() => handleDismiss(report.id)}
             >
-              Dismiss
+              {s.dismissBtn}
             </button>
             <button
               className="reported-card__delete"
               onClick={() => handleBanUser(report)}
             >
-              Ban User
+              {s.banUserBtn}
             </button>
           </div>
         </div>
@@ -544,7 +793,13 @@ function ReportedUsersPanel({ adminEmail }: { adminEmail: string }) {
   );
 }
 
-function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
+function BanManagementPanel({
+  adminEmail,
+  s,
+}: {
+  adminEmail: string;
+  s: DashStrings;
+}) {
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState("");
   const [banType, setBanType] = useState<"permanent" | "suspend">("permanent");
@@ -624,12 +879,10 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
 
   return (
     <div className="main-panel-content">
-      <div className="main-panel-section-title">Ban Management</div>
-      <p className="admin-login__hint">
-        Ban or suspend users by their account email.
-      </p>
+      <div className="main-panel-section-title">{s.banMgmtTitle}</div>
+      <p className="admin-login__hint">{s.banMgmtHint}</p>
       <form className="panel-form" onSubmit={handleBan}>
-        <label className="panel-form__label">User Email</label>
+        <label className="panel-form__label">{s.userEmailInputLabel}</label>
         <input
           className="panel-form__input"
           type="email"
@@ -639,63 +892,44 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
           required
         />
 
-        <label className="panel-form__label">Reason</label>
+        <label className="panel-form__label">{s.reasonLabel}</label>
         <textarea
           className="panel-form__textarea"
-          placeholder="e.g. Spam, abusive messages, false claims..."
+          placeholder={s.reasonPlaceholder}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           required
         />
 
         <div style={{ display: "flex", gap: "8px", marginBottom: "4px" }}>
-          <button
-            type="button"
-            style={{
-              flex: 1,
-              padding: "10px",
-              borderRadius: "8px",
-              border: "1.5px solid var(--border-input)",
-              background:
-                banType === "permanent" ? "var(--accent)" : "var(--bg-input)",
-              color: banType === "permanent" ? "#fff" : "var(--text-primary)",
-              fontSize: "13px",
-              fontWeight: "600",
-              fontFamily: "Poppins, sans-serif",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-            onClick={() => setBanType("permanent")}
-          >
-            Permanent
-          </button>
-          <button
-            type="button"
-            style={{
-              flex: 1,
-              padding: "10px",
-              borderRadius: "8px",
-              border: "1.5px solid var(--border-input)",
-              background:
-                banType === "suspend" ? "var(--accent)" : "var(--bg-input)",
-              color: banType === "suspend" ? "#fff" : "var(--text-primary)",
-              fontSize: "13px",
-              fontWeight: "600",
-              fontFamily: "Poppins, sans-serif",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-            onClick={() => setBanType("suspend")}
-          >
-            Suspend
-          </button>
+          {(["permanent", "suspend"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1.5px solid var(--border-input)",
+                background:
+                  banType === type ? "var(--accent)" : "var(--bg-input)",
+                color: banType === type ? "#fff" : "var(--text-primary)",
+                fontSize: "13px",
+                fontWeight: "600",
+                fontFamily: "Poppins, sans-serif",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+              onClick={() => setBanType(type)}
+            >
+              {type === "permanent" ? s.permanentBtn : s.suspendBtn}
+            </button>
+          ))}
         </div>
 
         {banType === "suspend" && (
           <>
-            <label className="panel-form__label">
-              Suspend for how many days?
-            </label>
+            <label className="panel-form__label">{s.suspendDaysLabel}</label>
             <input
               className="panel-form__input"
               type="number"
@@ -723,20 +957,20 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
 
         <button type="submit" className="panel-form__submit" disabled={loading}>
           {loading
-            ? "Processing..."
+            ? s.processingBtn
             : banType === "permanent"
-              ? "Ban User"
-              : "Suspend User"}
+              ? s.banUserBtn2
+              : s.suspendUserBtn}
         </button>
       </form>
 
       <div className="main-panel-section-title" style={{ marginTop: "1.5rem" }}>
-        Active Bans & Suspensions
+        {s.activeBansTitle}
       </div>
       {fetchingList ? (
-        <p className="panel-empty">Loading...</p>
+        <p className="panel-empty">{s.loadingText}</p>
       ) : bannedUsers.length === 0 ? (
-        <p className="panel-empty">No banned users.</p>
+        <p className="panel-empty">{s.noBannedUsers}</p>
       ) : (
         <div
           style={{
@@ -800,10 +1034,10 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
                 >
                   {u.suspended_until
                     ? isActive(u)
-                      ? `Suspended until ${new Date(u.suspended_until).toLocaleDateString()}`
-                      : "Suspension expired"
-                    : "Permanent ban"}{" "}
-                  · by {u.banned_by}
+                      ? `${s.suspendedUntil} ${new Date(u.suspended_until).toLocaleDateString()}`
+                      : s.suspensionExpired
+                    : s.permanentBan}{" "}
+                  · {s.byLabel} {u.banned_by}
                 </span>
               </div>
               <button
@@ -822,7 +1056,7 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
                   transition: "background 0.15s ease",
                 }}
               >
-                Unban
+                {s.unbanBtn}
               </button>
             </div>
           ))}
@@ -832,39 +1066,7 @@ function BanManagementPanel({ adminEmail }: { adminEmail: string }) {
   );
 }
 
-// ── Helper: fetch a single translation with fallback to the original key ──────
-async function fetchTranslation(
-  key: string,
-  target: string,
-  cacheKey: string,
-  setter: (val: string) => void,
-) {
-  const cached = localStorage.getItem(`${cacheKey}_${target}`);
-  if (cached) {
-    setter(cached);
-    return;
-  }
-  try {
-    const res = await fetch("/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: key, target }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      // Always fall back to the original key if the API returns nothing useful
-      const translated = (data.translatedText as string | undefined)?.trim() || key;
-      setter(translated);
-      localStorage.setItem(`${cacheKey}_${target}`, translated);
-    } else {
-      setter(key);
-    }
-  } catch {
-    // Network / parse error — show original text
-    setter(key);
-  }
-}
-
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const {
     items,
@@ -883,6 +1085,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
   const [reportsTab, setReportsTab] = useState<"items" | "users">("items");
+  const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
 
   const [banChecked, setBanChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -931,6 +1134,189 @@ export default function DashboardPage() {
     checkBan();
   }, [user, isLoaded]);
 
+  // ── Translation effect ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (language === "en") {
+      setS(DEFAULT_STRINGS);
+      setIsReady(true);
+      return;
+    }
+
+    const translations: [keyof DashStrings, string, string][] = [
+      ["tabItems", "Items", "dash_tabItems"],
+      ["tabMyItems", "My Items", "dash_tabMyItems"],
+      ["tabAddItem", "Report Found Item", "dash_tabAddItem"],
+      ["tabReportLost", "Report Lost Item", "dash_tabReportLost"],
+      ["tabBecomeAdmin", "Become an Admin", "dash_tabBecomeAdmin"],
+      ["tabAdmin", "Admin", "dash_tabAdmin"],
+      ["tabReports", "Reports", "dash_tabReports"],
+      ["tabBanManagement", "Ban Management", "dash_tabBanManagement"],
+      ["tabInbox", "Inbox", "dash_tabInbox"],
+      ["adminBannerMsg", DEFAULT_STRINGS.adminBannerMsg, "dash_adminBannerMsg"],
+      ["adminBannerExit", "Exit Admin", "dash_adminBannerExit"],
+      ["searchPlaceholder", "Search items...", "dash_searchPlaceholder"],
+      ["foundItemsTab", "Found Items", "dash_foundItemsTab"],
+      ["lostItemsTab", "Lost Items", "dash_lostItemsTab"],
+      ["foundBy", "Found by:", "dash_foundBy"],
+      ["lostBy", "Lost by:", "dash_lostBy"],
+      ["claimPending", "⏳ Claim pending", "dash_claimPending"],
+      ["noFoundItems", "No found items posted yet.", "dash_noFoundItems"],
+      ["noFoundItemsSearch", "No items found for", "dash_noFoundItemsSearch"],
+      ["tryKeywords", DEFAULT_STRINGS.tryKeywords, "dash_tryKeywords"],
+      ["noLostItems", "No lost item reports yet.", "dash_noLostItems"],
+      [
+        "noLostItemsSearch",
+        "No lost items found for",
+        "dash_noLostItemsSearch",
+      ],
+      [
+        "clickReportLost",
+        DEFAULT_STRINGS.clickReportLost,
+        "dash_clickReportLost",
+      ],
+      ["reportFoundTitle", "Report Found Item", "dash_reportFoundTitle"],
+      ["itemPosted", "Item posted!", "dash_itemPosted"],
+      ["itemNameLabel", "Item Name", "dash_itemNameLabel"],
+      ["itemNamePlaceholder", "Item Name", "dash_itemNamePlaceholder"],
+      ["descriptionLabel", "Description", "dash_descriptionLabel"],
+      [
+        "descriptionPlaceholder",
+        "Description (location, time, etc)",
+        "dash_descriptionPlaceholder",
+      ],
+      ["photosLabel", "Photos (optional, up to 3)", "dash_photosLabel"],
+      ["photosSelected", "photo(s) selected", "dash_photosSelected"],
+      ["uploadPhotos", "Upload photos", "dash_uploadPhotos"],
+      ["photoHint", DEFAULT_STRINGS.photoHint, "dash_photoHint"],
+      ["cancelBtn", "Cancel", "dash_cancelBtn"],
+      ["postItemBtn", "Post Item", "dash_postItemBtn"],
+      ["uploadingBtn", "Uploading...", "dash_uploadingBtn"],
+      ["reportLostTitle", "Report Lost Item", "dash_reportLostTitle"],
+      ["lostItemPosted", "Lost item reported!", "dash_lostItemPosted"],
+      ["whatLostLabel", "What did you lose?", "dash_whatLostLabel"],
+      ["itemNameDefault", "Item Name", "dash_itemNameDefault"],
+      [
+        "descLostPlaceholder",
+        "Description (location, time, etc)",
+        "dash_descLostPlaceholder",
+      ],
+      ["postingBtn", "Posting...", "dash_postingBtn"],
+      ["postLostBtn", "Post Lost Item", "dash_postLostBtn"],
+      ["myItemsTitle", "My Items", "dash_myItemsTitle"],
+      [
+        "signInToView",
+        "Please sign in to view your items.",
+        "dash_signInToView",
+      ],
+      ["noItemsYet", "You haven't posted any items yet.", "dash_noItemsYet"],
+      ["foundItemsPosted", "Found Items I Posted", "dash_foundItemsPosted"],
+      ["lostItemsReported", "Lost Items I Reported", "dash_lostItemsReported"],
+      ["claimPendingStatus", "⏳ Claim pending", "dash_claimPendingStatus"],
+      ["activeStatus", "✓ Active", "dash_activeStatus"],
+      ["confirmClaimed", "Confirm Claimed", "dash_confirmClaimed"],
+      ["markAsFound", "Mark as Found", "dash_markAsFound"],
+      ["becomeAdminTitle", "Become an Admin", "dash_becomeAdminTitle"],
+      ["requestSubmitted", "Request submitted!", "dash_requestSubmitted"],
+      ["reviewMsg", "We will review and get back to you.", "dash_reviewMsg"],
+      ["fullNameLabel", "Full Name", "dash_fullNameLabel"],
+      ["emailLabel", "Email", "dash_emailLabel"],
+      ["schoolLabel", "School / Institution", "dash_schoolLabel"],
+      ["schoolPlaceholder", "Lincoln High School", "dash_schoolPlaceholder"],
+      ["teacherIdLabel", "Teacher ID / Staff Number", "dash_teacherIdLabel"],
+      ["teacherIdPlaceholder", "T-00123", "dash_teacherIdPlaceholder"],
+      ["uploadIdLabel", "Upload ID or Badge Photo", "dash_uploadIdLabel"],
+      [
+        "uploadIdPlaceholder",
+        "Upload ID or badge photo",
+        "dash_uploadIdPlaceholder",
+      ],
+      ["photoHintShort", "PNG, JPG up to 10MB", "dash_photoHintShort"],
+      [
+        "anythingElseLabel",
+        "Anything else we should know?",
+        "dash_anythingElseLabel",
+      ],
+      [
+        "anythingElsePlaceholder",
+        DEFAULT_STRINGS.anythingElsePlaceholder,
+        "dash_anythingElsePlaceholder",
+      ],
+      ["submitRequestBtn", "Submit Request", "dash_submitRequestBtn"],
+      ["submittingBtn", "Submitting...", "dash_submittingBtn"],
+      ["adminAccessTitle", "Admin Access", "dash_adminAccessTitle"],
+      ["adminLoginHint", DEFAULT_STRINGS.adminLoginHint, "dash_adminLoginHint"],
+      ["adminPasswordLabel", "Admin Password", "dash_adminPasswordLabel"],
+      [
+        "adminPasswordPlaceholder",
+        "e.g. FINDR-JANE-X4K2",
+        "dash_adminPasswordPlaceholder",
+      ],
+      ["checkingBtn", "Checking...", "dash_checkingBtn"],
+      ["unlockAdminBtn", "Unlock Admin View", "dash_unlockAdminBtn"],
+      ["adminUnlocked", "Admin view unlocked!", "dash_adminUnlocked"],
+      [
+        "adminUnlockedSub",
+        DEFAULT_STRINGS.adminUnlockedSub,
+        "dash_adminUnlockedSub",
+      ],
+      ["adminIncorrect", DEFAULT_STRINGS.adminIncorrect, "dash_adminIncorrect"],
+      ["reportedItemsTab", "Reported Items", "dash_reportedItemsTab"],
+      ["reportedUsersTab", "Reported Users", "dash_reportedUsersTab"],
+      ["reportedItemsTitle", "Reported Items", "dash_reportedItemsTitle"],
+      ["reportedUsersTitle", "Reported Users", "dash_reportedUsersTitle"],
+      ["loadingText", "Loading...", "dash_loadingText"],
+      ["noItemReports", "No item reports — all clear!", "dash_noItemReports"],
+      ["noUserReports", "No user reports — all clear!", "dash_noUserReports"],
+      ["reportedBy", "Reported by", "dash_reportedBy"],
+      ["postedBy", "Posted by", "dash_postedBy"],
+      ["unknown", "Unknown", "dash_unknown"],
+      ["dismissBtn", "Dismiss", "dash_dismissBtn"],
+      ["deleteItemBtn", "Delete Item", "dash_deleteItemBtn"],
+      ["banUserBtn", "Ban User", "dash_banUserBtn"],
+      ["userEmailLabel", "User email:", "dash_userEmailLabel"],
+      ["banMgmtTitle", "Ban Management", "dash_banMgmtTitle"],
+      ["banMgmtHint", DEFAULT_STRINGS.banMgmtHint, "dash_banMgmtHint"],
+      ["userEmailInputLabel", "User Email", "dash_userEmailInputLabel"],
+      ["reasonLabel", "Reason", "dash_reasonLabel"],
+      [
+        "reasonPlaceholder",
+        DEFAULT_STRINGS.reasonPlaceholder,
+        "dash_reasonPlaceholder",
+      ],
+      ["permanentBtn", "Permanent", "dash_permanentBtn"],
+      ["suspendBtn", "Suspend", "dash_suspendBtn"],
+      [
+        "suspendDaysLabel",
+        "Suspend for how many days?",
+        "dash_suspendDaysLabel",
+      ],
+      ["processingBtn", "Processing...", "dash_processingBtn"],
+      ["banUserBtn2", "Ban User", "dash_banUserBtn2"],
+      ["suspendUserBtn", "Suspend User", "dash_suspendUserBtn"],
+      ["activeBansTitle", "Active Bans & Suspensions", "dash_activeBansTitle"],
+      ["noBannedUsers", "No banned users.", "dash_noBannedUsers"],
+      ["suspendedUntil", "Suspended until", "dash_suspendedUntil"],
+      ["suspensionExpired", "Suspension expired", "dash_suspensionExpired"],
+      ["permanentBan", "Permanent ban", "dash_permanentBan"],
+      ["byLabel", "by", "dash_byLabel"],
+      ["unbanBtn", "Unban", "dash_unbanBtn"],
+    ];
+
+    const translateAll = async () => {
+      await Promise.all(
+        translations.map(([field, key, cacheKey]) =>
+          fetchTranslation(key, language, cacheKey, (val) =>
+            setS((prev) => ({ ...prev, [field]: val })),
+          ),
+        ),
+      );
+      setIsReady(true);
+    };
+
+    translateAll();
+  }, [language]);
+
+  // ── Item handlers ─────────────────────────────────────────────────────────
   const [newItemName, setNewItemName] = useState("");
   const [newItemDesc, setNewItemDesc] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -943,78 +1329,9 @@ export default function DashboardPage() {
   const [lostItemUploading, setLostItemUploading] = useState(false);
   const [lostItemSuccess, setLostItemSuccess] = useState(false);
 
-  // ── i18n strings — default values are always the English originals ──────────
-  const [addItemText, setAddItemText] = useState("+ Add Item");
-  const [reportFoundText, setReportFoundText] = useState("Report Found Item");
-  const [itemNameText, setItemNameText] = useState("Item Name");
-  const [descriptionText, setDescriptionText] = useState(
-    "Description (location, time, etc)",
-  );
-  const [cancelText, setCancelText] = useState("Cancel");
-  const [postItemText, setPostItemText] = useState("Post Item");
-  const [uploadingText, setUploadingText] = useState("Uploading...");
-  const [foundByText, setFoundByText] = useState("Found by:");
-
-  useEffect(() => {
-    if (language === "en") {
-      // Reset to English defaults
-      setAddItemText("+ Add Item");
-      setReportFoundText("Report Found Item");
-      setItemNameText("Item Name");
-      setDescriptionText("Description (location, time, etc)");
-      setCancelText("Cancel");
-      setPostItemText("Post Item");
-      setUploadingText("Uploading...");
-      setFoundByText("Found by:");
-      setIsReady(true);
-      return;
-    }
-
-    const translations: {
-      key: string;
-      setter: (v: string) => void;
-      cacheKey: string;
-    }[] = [
-      { key: "+ Add Item", setter: setAddItemText, cacheKey: "nav_addItem" },
-      {
-        key: "Report Found Item",
-        setter: setReportFoundText,
-        cacheKey: "nav_reportFound",
-      },
-      { key: "Item Name", setter: setItemNameText, cacheKey: "nav_itemName" },
-      {
-        key: "Description (location, time, etc)",
-        setter: setDescriptionText,
-        cacheKey: "nav_description",
-      },
-      { key: "Cancel", setter: setCancelText, cacheKey: "nav_cancel" },
-      { key: "Post Item", setter: setPostItemText, cacheKey: "nav_postItem" },
-      {
-        key: "Uploading...",
-        setter: setUploadingText,
-        cacheKey: "nav_uploading",
-      },
-      { key: "Found by:", setter: setFoundByText, cacheKey: "dash_foundBy" },
-    ];
-
-    const translateAll = async () => {
-      await Promise.all(
-        translations.map(({ key, setter, cacheKey }) =>
-          fetchTranslation(key, language, cacheKey, setter),
-        ),
-      );
-      setIsReady(true);
-    };
-
-    translateAll();
-  }, [language]);
-
-  // ── My Items panel handlers ────────────────────────────────────────────────
   const handleConfirmClaimed = async (itemId: number) => {
     const { error } = await supabase.from("items").delete().eq("id", itemId);
-    if (!error) {
-      updateItemStatus(itemId, "claimed");
-    }
+    if (!error) updateItemStatus(itemId, "claimed");
   };
 
   const handleDelete = async (itemId: number) => {
@@ -1069,32 +1386,26 @@ export default function DashboardPage() {
     try {
       const imageUrls: string[] = [];
       const aiKeywordsArray: string[] = [];
-
       for (const file of selectedFiles.slice(0, 3)) {
         const fileName = `${Date.now()}_${Math.random()}_${file.name}`;
         const uploadResult = await supabase.storage
           .from("item-images")
           .upload(fileName, file);
-
         if (uploadResult.error) {
           console.error("Upload error:", uploadResult.error.message);
           continue;
         }
-
         const { data: urlData } = supabase.storage
           .from("item-images")
           .getPublicUrl(fileName);
         imageUrls.push(urlData.publicUrl);
-
         const keywords = await extractKeywords(file);
         if (keywords) aiKeywordsArray.push(keywords);
       }
-
       if (imageUrls.length === 0) {
         console.error("No images uploaded successfully");
         return;
       }
-
       const { data: insertedItem, error: insertError } = await supabase
         .from("items")
         .insert([
@@ -1114,12 +1425,10 @@ export default function DashboardPage() {
         ])
         .select()
         .single();
-
       if (insertError) {
         console.error("Insert error:", insertError.message);
         return;
       }
-
       addItem({
         id: insertedItem.id,
         name: insertedItem.name,
@@ -1133,7 +1442,6 @@ export default function DashboardPage() {
         authorEmail: insertedItem.author_email || "",
         aiKeywords: insertedItem.ai_keywords || "",
       } as any);
-
       setNewItemName("");
       setNewItemDesc("");
       setSelectedFiles([]);
@@ -1155,24 +1463,20 @@ export default function DashboardPage() {
     setLostItemUploading(true);
     try {
       const imageUrls: string[] = [];
-
       for (const file of lostSelectedFiles.slice(0, 3)) {
         const fileName = `lost_${Date.now()}_${Math.random()}_${file.name}`;
         const { error: uploadError } = await supabase.storage
           .from("item-images")
           .upload(fileName, file);
-
         if (uploadError) {
           console.error("Upload error:", uploadError.message);
           continue;
         }
-
         const { data: urlData } = supabase.storage
           .from("item-images")
           .getPublicUrl(fileName);
         imageUrls.push(urlData.publicUrl);
       }
-
       const { data: insertedItem, error: insertError } = await supabase
         .from("lost_items")
         .insert([
@@ -1190,12 +1494,10 @@ export default function DashboardPage() {
         ])
         .select()
         .single();
-
       if (insertError) {
         console.error("Insert error:", insertError.message);
         return;
       }
-
       addLostItem({
         id: insertedItem.id,
         name: insertedItem.name,
@@ -1209,7 +1511,6 @@ export default function DashboardPage() {
         status: insertedItem.status,
         created_at: insertedItem.created_at,
       });
-
       setLostItemName("");
       setLostItemDesc("");
       setLostSelectedFiles([]);
@@ -1249,41 +1550,71 @@ export default function DashboardPage() {
       })
     : (lostItems ?? []);
 
+  // ── Sidebar tabs (derived from s so they update with language) ────────────
+  const SIDEBAR_TABS: {
+    id: TabId;
+    label: string;
+    icon: React.ReactNode;
+    adminOnly?: boolean;
+  }[] = [
+    { id: "items", label: s.tabItems, icon: <HiOutlineMagnifyingGlass /> },
+    { id: "my-items", label: s.tabMyItems, icon: <FaClipboard /> },
+    { id: "add-item", label: s.tabAddItem, icon: <FaFlag /> },
+    {
+      id: "report-lost",
+      label: s.tabReportLost,
+      icon: <FaTriangleExclamation />,
+    },
+    { id: "become-admin", label: s.tabBecomeAdmin, icon: <FaClipboard /> },
+    { id: "admin-login", label: s.tabAdmin, icon: <CiLogin /> },
+    {
+      id: "reports",
+      label: s.tabReports,
+      icon: <MdFlagCircle />,
+      adminOnly: true,
+    },
+    {
+      id: "ban-management",
+      label: s.tabBanManagement,
+      icon: <ImHammer2 />,
+      adminOnly: true,
+    },
+    { id: "inbox", label: s.tabInbox, icon: <IoMdMailOpen />, adminOnly: true },
+  ];
+
   const renderMainContent = () => {
     switch (activeTab) {
       case "add-item":
         return (
           <div className="main-panel-content">
-            <div className="main-panel-section-title">{reportFoundText}</div>
+            <div className="main-panel-section-title">{s.reportFoundTitle}</div>
             {uploadSuccess ? (
               <div className="panel-success">
                 <span className="panel-success__icon">✓</span>
-                <p>Item posted!</p>
+                <p>{s.itemPosted}</p>
               </div>
             ) : (
               <form className="panel-form" onSubmit={handleSubmit}>
-                <label className="panel-form__label">Item Name</label>
+                <label className="panel-form__label">{s.itemNameLabel}</label>
                 <input
                   type="text"
-                  placeholder={itemNameText}
+                  placeholder={s.itemNamePlaceholder}
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
                   required
                   className="panel-form__input"
                 />
-
-                <label className="panel-form__label">Description</label>
+                <label className="panel-form__label">
+                  {s.descriptionLabel}
+                </label>
                 <textarea
-                  placeholder={descriptionText}
+                  placeholder={s.descriptionPlaceholder}
                   value={newItemDesc}
                   onChange={(e) => setNewItemDesc(e.target.value)}
                   required
                   className="panel-form__textarea"
                 />
-
-                <label className="panel-form__label">
-                  Photos (optional, up to 3)
-                </label>
+                <label className="panel-form__label">{s.photosLabel}</label>
                 <label
                   className="panel-form__file-label"
                   htmlFor="found-file-upload"
@@ -1291,8 +1622,8 @@ export default function DashboardPage() {
                   <span className="panel-form__file-icon">+</span>
                   <span className="panel-form__file-text">
                     {selectedFiles.length > 0
-                      ? `${selectedFiles.length} photo(s) selected`
-                      : "Upload photos"}
+                      ? `${selectedFiles.length} ${s.photosSelected}`
+                      : s.uploadPhotos}
                   </span>
                 </label>
                 <input
@@ -1303,16 +1634,11 @@ export default function DashboardPage() {
                   multiple
                   required
                   onChange={(e) => {
-                    if (e.target.files) {
-                      const files = Array.from(e.target.files).slice(0, 3);
-                      setSelectedFiles(files);
-                    }
+                    if (e.target.files)
+                      setSelectedFiles(Array.from(e.target.files).slice(0, 3));
                   }}
                 />
-                <p className="panel-form__file-hint">
-                  PNG, JPG up to 10MB each. Upload up to 3 photos.
-                </p>
-
+                <p className="panel-form__file-hint">{s.photoHint}</p>
                 {selectedFiles.length > 0 && (
                   <div className="panel-form__preview-wrap">
                     {selectedFiles.map((file, idx) => (
@@ -1345,7 +1671,6 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
-
                 <div className="panel-form__actions">
                   <button
                     type="button"
@@ -1357,14 +1682,14 @@ export default function DashboardPage() {
                       setActiveTab("items");
                     }}
                   >
-                    {cancelText}
+                    {s.cancelBtn}
                   </button>
                   <button
                     type="submit"
                     className="panel-form__submit"
                     disabled={isUploading}
                   >
-                    {isUploading ? uploadingText : postItemText}
+                    {isUploading ? s.uploadingBtn : s.postItemBtn}
                   </button>
                 </div>
               </form>
@@ -1375,36 +1700,34 @@ export default function DashboardPage() {
       case "report-lost":
         return (
           <div className="main-panel-content">
-            <div className="main-panel-section-title">Report Lost Item</div>
+            <div className="main-panel-section-title">{s.reportLostTitle}</div>
             {lostItemSuccess ? (
               <div className="panel-success">
                 <span className="panel-success__icon">✓</span>
-                <p>Lost item reported!</p>
+                <p>{s.lostItemPosted}</p>
               </div>
             ) : (
               <form className="panel-form" onSubmit={handleLostSubmit}>
-                <label className="panel-form__label">What did you lose?</label>
+                <label className="panel-form__label">{s.whatLostLabel}</label>
                 <input
                   type="text"
-                  placeholder="Item Name"
+                  placeholder={s.itemNameDefault}
                   value={lostItemName}
                   onChange={(e) => setLostItemName(e.target.value)}
                   required
                   className="panel-form__input"
                 />
-
-                <label className="panel-form__label">Description</label>
+                <label className="panel-form__label">
+                  {s.descriptionLabel}
+                </label>
                 <textarea
-                  placeholder="Description (location, time, etc)"
+                  placeholder={s.descLostPlaceholder}
                   value={lostItemDesc}
                   onChange={(e) => setLostItemDesc(e.target.value)}
                   required
                   className="panel-form__textarea"
                 />
-
-                <label className="panel-form__label">
-                  Photos (optional, up to 3)
-                </label>
+                <label className="panel-form__label">{s.photosLabel}</label>
                 <label
                   className="panel-form__file-label"
                   htmlFor="lost-file-upload"
@@ -1412,8 +1735,8 @@ export default function DashboardPage() {
                   <span className="panel-form__file-icon">+</span>
                   <span className="panel-form__file-text">
                     {lostSelectedFiles.length > 0
-                      ? `${lostSelectedFiles.length} photo(s) selected`
-                      : "Upload photos"}
+                      ? `${lostSelectedFiles.length} ${s.photosSelected}`
+                      : s.uploadPhotos}
                   </span>
                 </label>
                 <input
@@ -1423,16 +1746,13 @@ export default function DashboardPage() {
                   accept="image/*"
                   multiple
                   onChange={(e) => {
-                    if (e.target.files) {
-                      const files = Array.from(e.target.files).slice(0, 3);
-                      setLostSelectedFiles(files);
-                    }
+                    if (e.target.files)
+                      setLostSelectedFiles(
+                        Array.from(e.target.files).slice(0, 3),
+                      );
                   }}
                 />
-                <p className="panel-form__file-hint">
-                  PNG, JPG up to 10MB each. Upload up to 3 photos.
-                </p>
-
+                <p className="panel-form__file-hint">{s.photoHint}</p>
                 {lostSelectedFiles.length > 0 && (
                   <div className="panel-form__preview-wrap">
                     {lostSelectedFiles.map((file, idx) => (
@@ -1465,7 +1785,6 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
-
                 <div className="panel-form__actions">
                   <button
                     type="button"
@@ -1477,14 +1796,14 @@ export default function DashboardPage() {
                       setActiveTab("items");
                     }}
                   >
-                    {cancelText}
+                    {s.cancelBtn}
                   </button>
                   <button
                     type="submit"
                     className="panel-form__submit"
                     disabled={lostItemUploading}
                   >
-                    {lostItemUploading ? "Posting..." : "Post Lost Item"}
+                    {lostItemUploading ? s.postingBtn : s.postLostBtn}
                   </button>
                 </div>
               </form>
@@ -1493,10 +1812,10 @@ export default function DashboardPage() {
         );
 
       case "become-admin":
-        return <AdminPanel />;
+        return <AdminPanel s={s} />;
 
       case "admin-login":
-        return <AdminLoginPanel onUnlock={() => setIsAdmin(true)} />;
+        return <AdminLoginPanel onUnlock={() => setIsAdmin(true)} s={s} />;
 
       case "reports":
         return isAdmin ? (
@@ -1509,53 +1828,41 @@ export default function DashboardPage() {
                 borderBottom: "1px solid var(--border-default)",
               }}
             >
-              <button
-                onClick={() => setReportsTab("items")}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: "8px 8px 0 0",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
-                  fontFamily: "Poppins, sans-serif",
-                  background:
-                    reportsTab === "items" ? "var(--danger)" : "var(--bg-page)",
-                  color: reportsTab === "items" ? "#fff" : "var(--text-muted)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                Reported Items
-              </button>
-              <button
-                onClick={() => setReportsTab("users")}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: "8px 8px 0 0",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
-                  fontFamily: "Poppins, sans-serif",
-                  background:
-                    reportsTab === "users" ? "var(--danger)" : "var(--bg-page)",
-                  color: reportsTab === "users" ? "#fff" : "var(--text-muted)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                Reported Users
-              </button>
+              {(["items", "users"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setReportsTab(t)}
+                  style={{
+                    padding: "8px 20px",
+                    borderRadius: "8px 8px 0 0",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    fontFamily: "Poppins, sans-serif",
+                    background:
+                      reportsTab === t ? "var(--danger)" : "var(--bg-page)",
+                    color: reportsTab === t ? "#fff" : "var(--text-muted)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {t === "items" ? s.reportedItemsTab : s.reportedUsersTab}
+                </button>
+              ))}
             </div>
             <div className="main-panel-content" style={{ maxWidth: "720px" }}>
               <div className="main-panel-section-title">
-                {reportsTab === "items" ? "Reported Items" : "Reported Users"}
+                {reportsTab === "items"
+                  ? s.reportedItemsTitle
+                  : s.reportedUsersTitle}
               </div>
               {reportsTab === "items" && (
-                <ReportedItemsPanel updateItemStatus={updateItemStatus} />
+                <ReportedItemsPanel updateItemStatus={updateItemStatus} s={s} />
               )}
               {reportsTab === "users" && (
                 <ReportedUsersPanel
                   adminEmail={user?.primaryEmailAddress?.emailAddress ?? ""}
+                  s={s}
                 />
               )}
             </div>
@@ -1566,6 +1873,7 @@ export default function DashboardPage() {
         return isAdmin ? (
           <BanManagementPanel
             adminEmail={user?.primaryEmailAddress?.emailAddress ?? ""}
+            s={s}
           />
         ) : null;
 
@@ -1587,11 +1895,11 @@ export default function DashboardPage() {
         );
         return (
           <div className="main-panel-content" style={{ maxWidth: "960px" }}>
-            <div className="main-panel-section-title">My Items</div>
+            <div className="main-panel-section-title">{s.myItemsTitle}</div>
             {!user ? (
-              <p className="panel-empty">Please sign in to view your items.</p>
+              <p className="panel-empty">{s.signInToView}</p>
             ) : myFoundItems.length === 0 && myLostItems.length === 0 ? (
-              <p className="panel-empty">You haven't posted any items yet.</p>
+              <p className="panel-empty">{s.noItemsYet}</p>
             ) : (
               <>
                 {myFoundItems.length > 0 && (
@@ -1600,7 +1908,7 @@ export default function DashboardPage() {
                       className="panel-section-title"
                       style={{ marginBottom: 8 }}
                     >
-                      Found Items I Posted ({myFoundItems.length})
+                      {s.foundItemsPosted} ({myFoundItems.length})
                     </p>
                     <div className="items-container" style={{ margin: 0 }}>
                       {myFoundItems.map((item) => (
@@ -1628,8 +1936,8 @@ export default function DashboardPage() {
                               }}
                             >
                               {item.status === "pending"
-                                ? "⏳ Claim pending"
-                                : "✓ Active"}
+                                ? s.claimPendingStatus
+                                : s.activeStatus}
                             </p>
                           </div>
                           <div className="button-group">
@@ -1638,7 +1946,7 @@ export default function DashboardPage() {
                                 className="confirm-button"
                                 onClick={() => handleConfirmClaimed(item.id)}
                               >
-                                Confirm Claimed
+                                {s.confirmClaimed}
                               </button>
                             )}
                             <div className="button-group__row">
@@ -1655,7 +1963,6 @@ export default function DashboardPage() {
                     </div>
                   </>
                 )}
-
                 {myLostItems.length > 0 && (
                   <>
                     <p
@@ -1665,7 +1972,7 @@ export default function DashboardPage() {
                         marginTop: myFoundItems.length > 0 ? 24 : 0,
                       }}
                     >
-                      Lost Items I Reported ({myLostItems.length})
+                      {s.lostItemsReported} ({myLostItems.length})
                     </p>
                     <div className="items-container" style={{ margin: 0 }}>
                       {myLostItems.map((item) => (
@@ -1704,7 +2011,7 @@ export default function DashboardPage() {
                               className="confirm-button"
                               onClick={() => handleMarkFound(item.id)}
                             >
-                              Mark as Found
+                              {s.markAsFound}
                             </button>
                             <div className="button-group__row">
                               <button
@@ -1757,7 +2064,7 @@ export default function DashboardPage() {
         {isAdmin && (
           <div className="admin-banner">
             <span className="admin-banner__icon">*</span>
-            <span>Admin mode active — you can delete items and ban users</span>
+            <span>{s.adminBannerMsg}</span>
             <button
               className="admin-banner__exit"
               onClick={() => {
@@ -1767,7 +2074,7 @@ export default function DashboardPage() {
                 localStorage.removeItem("findr_admin_name");
               }}
             >
-              Exit Admin
+              {s.adminBannerExit}
             </button>
           </div>
         )}
@@ -1780,7 +2087,7 @@ export default function DashboardPage() {
               <span className="panel-search__icon"></span>
               <input
                 className="panel-search__input"
-                placeholder="Search items..."
+                placeholder={s.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -1802,46 +2109,30 @@ export default function DashboardPage() {
                 borderBottom: "1px solid var(--border-default)",
               }}
             >
-              <button
-                onClick={() => setBoardTab("found")}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: "8px 8px 0 0",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
-                  fontFamily: "Poppins, sans-serif",
-                  background:
-                    boardTab === "found" ? "#f97316" : "var(--bg-page)",
-                  color: boardTab === "found" ? "#fff" : "var(--text-muted)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                Found Items (
-                {filteredItems.filter((i) => i.status !== "claimed").length})
-              </button>
-              <button
-                onClick={() => setBoardTab("lost")}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: "8px 8px 0 0",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
-                  fontFamily: "Poppins, sans-serif",
-                  background:
-                    boardTab === "lost" ? "#f97316" : "var(--bg-page)",
-                  color: boardTab === "lost" ? "#fff" : "var(--text-muted)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                Lost Items ({filteredLostItems.length})
-              </button>
+              {(["found", "lost"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setBoardTab(t)}
+                  style={{
+                    padding: "8px 20px",
+                    borderRadius: "8px 8px 0 0",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    fontFamily: "Poppins, sans-serif",
+                    background: boardTab === t ? "#f97316" : "var(--bg-page)",
+                    color: boardTab === t ? "#fff" : "var(--text-muted)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {t === "found"
+                    ? `${s.foundItemsTab} (${filteredItems.filter((i) => i.status !== "claimed").length})`
+                    : `${s.lostItemsTab} (${filteredLostItems.length})`}
+                </button>
+              ))}
             </div>
 
-            {/* ── FOUND ITEMS BOARD ── */}
             {boardTab === "found" && (
               <div className="items-container">
                 {filteredItems
@@ -1877,7 +2168,7 @@ export default function DashboardPage() {
                             />
                           )}
                           <span>
-                            {foundByText} {item.authorName || "Anonymous"}
+                            {s.foundBy} {item.authorName || "Anonymous"}
                           </span>
                         </div>
                         {item.status === "pending" && (
@@ -1890,7 +2181,7 @@ export default function DashboardPage() {
                               marginTop: 4,
                             }}
                           >
-                            ⏳ Claim pending
+                            {s.claimPending}
                           </span>
                         )}
                       </div>
@@ -1901,18 +2192,15 @@ export default function DashboardPage() {
                   <div className="empty-state">
                     <p>
                       {searchQuery
-                        ? `No items found for "${searchQuery}"`
-                        : "No found items posted yet."}
+                        ? `${s.noFoundItemsSearch} "${searchQuery}"`
+                        : s.noFoundItems}
                     </p>
-                    {searchQuery && (
-                      <p>Try different keywords like color, type, or brand</p>
-                    )}
+                    {searchQuery && <p>{s.tryKeywords}</p>}
                   </div>
                 )}
               </div>
             )}
 
-            {/* ── LOST ITEMS BOARD ── */}
             {boardTab === "lost" && (
               <div className="items-container">
                 {filteredLostItems.map((item) => (
@@ -1963,7 +2251,9 @@ export default function DashboardPage() {
                             className="posted-by__avatar"
                           />
                         )}
-                        <span>Lost by: {item.authorName || "Anonymous"}</span>
+                        <span>
+                          {s.lostBy} {item.authorName || "Anonymous"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1972,13 +2262,10 @@ export default function DashboardPage() {
                   <div className="empty-state">
                     <p>
                       {searchQuery
-                        ? `No lost items found for "${searchQuery}"`
-                        : "No lost item reports yet."}
+                        ? `${s.noLostItemsSearch} "${searchQuery}"`
+                        : s.noLostItems}
                     </p>
-                    <p>
-                      Click "Report Lost Item" in the sidebar to post what you
-                      lost.
-                    </p>
+                    <p>{s.clickReportLost}</p>
                   </div>
                 )}
               </div>
