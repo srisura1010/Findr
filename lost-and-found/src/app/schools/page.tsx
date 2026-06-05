@@ -177,7 +177,7 @@ function gradStyles(hex: string): string[] {
   ];
 }
 
-// ─── Translation helper (same pattern as dashboard) ──────────────────────────
+// ─── Translation helper ───────────────────────────────────────────────────────
 async function fetchTranslation(
   key: string,
   target: string,
@@ -317,7 +317,6 @@ interface BoardStrings {
   noLostItems: string;
   noImage: string;
   lostBy: string;
-  // Report found form
   reportFoundTitle: string;
   itemNameLabel: string;
   itemNamePlaceholder: string;
@@ -330,7 +329,6 @@ interface BoardStrings {
   postItemBtn: string;
   postingBtn: string;
   itemPostedMsg: string;
-  // Report lost form
   reportLostTitle: string;
   whatLostLabel: string;
   lostItemPlaceholder: string;
@@ -339,7 +337,6 @@ interface BoardStrings {
   postLostBtn: string;
   postingLostBtn: string;
   lostPostedMsg: string;
-  // Admin login
   adminLoginTitle: string;
   adminLoginHint: string;
   adminPasswordLabel: string;
@@ -422,9 +419,7 @@ function AboutPanel({
 
       <section className="sc-about__carousel-section">
         <div className="sc-section-title">{s.carouselTitle}</div>
-        <p className="sc-hint sc-about__carousel-hint">
-          {s.carouselHint}
-        </p>
+        <p className="sc-hint sc-about__carousel-hint">{s.carouselHint}</p>
         <div className="sc-carousel">
           <div className="sc-carousel__track">
             <div className="sc-carousel__group">
@@ -1051,6 +1046,8 @@ function SchoolBoard({
 }) {
   type BoardTab = "items" | "add-item" | "report-lost" | "admin-login";
 
+  const router = useRouter();
+
   const BOARD_TABS: { id: BoardTab; label: string; icon: string }[] = [
     { id: "items", label: s.itemsTab, icon: "" },
     { id: "add-item", label: s.addItemTab, icon: "" },
@@ -1244,21 +1241,25 @@ function SchoolBoard({
   };
 
   // ── Admin delete / status actions ───────────────────────────────────────────
-  const handleDeleteFound = async (id: number) => {
+  const handleDeleteFound = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     if (!confirm("Delete this item permanently?")) return;
     await supabase.from("school_items").delete().eq("id", id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
-  const handleDeleteLost = async (id: number) => {
+  const handleDeleteLost = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     if (!confirm("Delete this lost item?")) return;
     await supabase.from("school_lost_items").delete().eq("id", id);
     setLostItems((prev) => prev.filter((i) => i.id !== id));
   };
-  const handleMarkClaimed = async (id: number) => {
+  const handleMarkClaimed = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     await supabase.from("school_items").delete().eq("id", id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
-  const handleMarkFound = async (id: number) => {
+  const handleMarkFound = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     await supabase.from("school_lost_items").delete().eq("id", id);
     setLostItems((prev) => prev.filter((i) => i.id !== id));
   };
@@ -1452,7 +1453,17 @@ function SchoolBoard({
                   {filteredFound
                     .filter((i) => i.status !== "claimed")
                     .map((item) => (
-                      <div key={item.id} className="sc-item-card">
+                      <div
+                        key={item.id}
+                        className="sc-item-card sc-item-card--clickable"
+                        onClick={() => router.push(`/school-items/${item.id}`)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ")
+                            router.push(`/school-items/${item.id}`);
+                        }}
+                      >
                         <div className="sc-item-card__img-wrap">
                           {item.image_url ? (
                             <img
@@ -1461,12 +1472,16 @@ function SchoolBoard({
                               className="sc-item-card__img"
                             />
                           ) : (
-                            <div className="sc-item-card__no-img">{s.noImage}</div>
+                            <div className="sc-item-card__no-img">
+                              {s.noImage}
+                            </div>
                           )}
                         </div>
                         <div className="sc-item-card__info">
                           <p className="sc-item-card__name">{item.name}</p>
-                          <p className="sc-item-card__desc">{item.description}</p>
+                          <p className="sc-item-card__desc">
+                            {item.description}
+                          </p>
                           <p className="sc-item-card__by">
                             {s.foundBy} {item.author_name}
                           </p>
@@ -1482,14 +1497,16 @@ function SchoolBoard({
                               item.status === "pending" && (
                                 <button
                                   className="sc-btn sc-btn--success sc-btn--sm"
-                                  onClick={() => handleMarkClaimed(item.id)}
+                                  onClick={(e) =>
+                                    handleMarkClaimed(e, item.id)
+                                  }
                                 >
                                   {s.confirmClaimed}
                                 </button>
                               )}
                             <button
                               className="sc-btn sc-btn--danger sc-btn--sm sc-btn--icon"
-                              onClick={() => handleDeleteFound(item.id)}
+                              onClick={(e) => handleDeleteFound(e, item.id)}
                             >
                               <FaTrash />
                             </button>
@@ -1497,14 +1514,25 @@ function SchoolBoard({
                         )}
                       </div>
                     ))}
-                  {filteredFound.filter((i) => i.status !== "claimed").length === 0 && (
+                  {filteredFound.filter((i) => i.status !== "claimed")
+                    .length === 0 && (
                     <div className="sc-empty">{s.noFoundItems}</div>
                   )}
                 </div>
               ) : (
                 <div className="sc-items-grid">
                   {filteredLost.map((item) => (
-                    <div key={item.id} className="sc-item-card">
+                    <div
+                      key={item.id}
+                      className="sc-item-card sc-item-card--clickable"
+                      onClick={() => router.push(`/school-items/${item.id}`)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ")
+                          router.push(`/school-items/${item.id}`);
+                      }}
+                    >
                       <div className="sc-item-card__img-wrap">
                         {item.image_url ? (
                           <img
@@ -1513,7 +1541,9 @@ function SchoolBoard({
                             className="sc-item-card__img"
                           />
                         ) : (
-                          <div className="sc-item-card__no-img">{s.noImage}</div>
+                          <div className="sc-item-card__no-img">
+                            {s.noImage}
+                          </div>
                         )}
                       </div>
                       <div className="sc-item-card__info">
@@ -1528,14 +1558,14 @@ function SchoolBoard({
                           {user?.id === item.author_id && (
                             <button
                               className="sc-btn sc-btn--success sc-btn--sm"
-                              onClick={() => handleMarkFound(item.id)}
+                              onClick={(e) => handleMarkFound(e, item.id)}
                             >
                               {s.markFound}
                             </button>
                           )}
                           <button
                             className="sc-btn sc-btn--danger sc-btn--sm sc-btn--icon"
-                            onClick={() => handleDeleteLost(item.id)}
+                            onClick={(e) => handleDeleteLost(e, item.id)}
                           >
                             <FaTrash />
                           </button>
@@ -1580,7 +1610,10 @@ function SchoolBoard({
                     onChange={(e) => setFoundDesc(e.target.value)}
                   />
                   <label className="sc-form__label">{s.photosLabel}</label>
-                  <label className="sc-form__file-label" htmlFor="sc-found-upload">
+                  <label
+                    className="sc-form__file-label"
+                    htmlFor="sc-found-upload"
+                  >
                     <span className="sc-form__file-icon">+</span>
                     <span>
                       {foundFiles.length > 0
@@ -1612,7 +1645,9 @@ function SchoolBoard({
                             type="button"
                             className="sc-form__preview-remove"
                             onClick={() =>
-                              setFoundFiles(foundFiles.filter((_, i) => i !== idx))
+                              setFoundFiles(
+                                foundFiles.filter((_, i) => i !== idx),
+                              )
                             }
                           >
                             ×
@@ -1671,8 +1706,13 @@ function SchoolBoard({
                     value={lostDesc}
                     onChange={(e) => setLostDesc(e.target.value)}
                   />
-                  <label className="sc-form__label">{s.photosOptionalLabel}</label>
-                  <label className="sc-form__file-label" htmlFor="sc-lost-upload">
+                  <label className="sc-form__label">
+                    {s.photosOptionalLabel}
+                  </label>
+                  <label
+                    className="sc-form__file-label"
+                    htmlFor="sc-lost-upload"
+                  >
                     <span className="sc-form__file-icon">+</span>
                     <span>
                       {lostFiles.length > 0
@@ -1704,7 +1744,9 @@ function SchoolBoard({
                             type="button"
                             className="sc-form__preview-remove"
                             onClick={() =>
-                              setLostFiles(lostFiles.filter((_, i) => i !== idx))
+                              setLostFiles(
+                                lostFiles.filter((_, i) => i !== idx),
+                              )
                             }
                           >
                             ×
@@ -1748,7 +1790,9 @@ function SchoolBoard({
               ) : (
                 <form className="sc-form" onSubmit={handleAdminLogin}>
                   <p className="sc-hint">{s.adminLoginHint}</p>
-                  <label className="sc-form__label">{s.adminPasswordLabel}</label>
+                  <label className="sc-form__label">
+                    {s.adminPasswordLabel}
+                  </label>
                   <input
                     className="sc-form__input"
                     type="password"
@@ -1757,7 +1801,9 @@ function SchoolBoard({
                     onChange={(e) => setAdminPassword(e.target.value)}
                     required
                   />
-                  {adminError && <p className="sc-form__error">{adminError}</p>}
+                  {adminError && (
+                    <p className="sc-form__error">{adminError}</p>
+                  )}
                   <button
                     type="submit"
                     className="sc-btn sc-btn--primary"
@@ -1796,7 +1842,8 @@ const DEFAULT_ABOUT: AboutStrings = {
   feature1Title: "Branded campus space",
   feature1Desc: "Each school can feel unique with its own color, logo, and tone.",
   feature2Title: "Real-time momentum",
-  feature2Desc: "Fast posting and scanning keep the board moving instead of stale.",
+  feature2Desc:
+    "Fast posting and scanning keep the board moving instead of stale.",
   feature3Title: "School-scoped privacy",
   feature3Desc: "Members only see the board that belongs to their campus.",
   feature4Title: "Admin controls",
@@ -1819,7 +1866,8 @@ const DEFAULT_ENTER_CODE: EnterCodeStrings = {
   codeLabel: "School Code",
   codePlaceholder: "e.g. LINCOLN-2025",
   alreadyMember: "You're already a member of this school.",
-  notFound: "No approved school found with that code. Double-check and try again.",
+  notFound:
+    "No approved school found with that code. Double-check and try again.",
   joinedPrefix: "You've joined",
   searchingBtn: "Searching...",
   joinBtn: "Join School",
@@ -1847,7 +1895,8 @@ const DEFAULT_REGISTER: RegisterStrings = {
     "Upload a campus photo — your primary color gradient will be overlaid on the board header automatically.",
   bgUpload: "Upload campus photo",
   gradientLabel: "Gradient Style",
-  gradientHint: "Pick how your primary color fades over the campus photo.",
+  gradientHint:
+    "Pick how your primary color fades over the campus photo.",
   headerPreviewLabel: "Header Preview",
   verifyDocLabel: "Verification Document (optional)",
   verifyDocHint:
@@ -1866,7 +1915,8 @@ const DEFAULT_REGISTER: RegisterStrings = {
 const DEFAULT_MY_SCHOOLS: MySchoolsStrings = {
   title: "My Schools",
   signInMsg: "Sign in to see your schools.",
-  emptyMsg: "You haven't joined any schools yet. Enter your school code to get started.",
+  emptyMsg:
+    "You haven't joined any schools yet. Enter your school code to get started.",
   viewBoardBtn: "View Board →",
   leaveBtn: "Leave",
 };
@@ -1918,7 +1968,8 @@ const DEFAULT_BOARD: BoardStrings = {
   unlockBtn: "Unlock Admin View",
   checkingBtn: "Checking...",
   adminUnlockedMsg: "Admin view unlocked!",
-  adminUnlockedSub: "You can now delete items and manage this school's board.",
+  adminUnlockedSub:
+    "You can now delete items and manage this school's board.",
   adminIncorrect: "Incorrect password or not approved yet.",
 };
 
@@ -1929,7 +1980,6 @@ export default function SchoolsPage() {
   const [mounted, setMounted] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // ── Top nav tab labels ────────────────────────────────────────────────────
   const [aboutTabText, setAboutTabText] = useState("About");
   const [enterCodeTabText, setEnterCodeTabText] = useState("Enter Code");
   const [mySchoolsTabText, setMySchoolsTabText] = useState("My Schools");
@@ -1937,15 +1987,16 @@ export default function SchoolsPage() {
   const [yourSchoolsText, setYourSchoolsText] = useState("Your Schools");
   const [schoolBoardsText, setSchoolBoardsText] = useState("School boards");
 
-  // ── Sub-component string bundles ──────────────────────────────────────────
-  const [aboutStrings, setAboutStrings] = useState<AboutStrings>(DEFAULT_ABOUT);
+  const [aboutStrings, setAboutStrings] =
+    useState<AboutStrings>(DEFAULT_ABOUT);
   const [enterCodeStrings, setEnterCodeStrings] =
     useState<EnterCodeStrings>(DEFAULT_ENTER_CODE);
   const [registerStrings, setRegisterStrings] =
     useState<RegisterStrings>(DEFAULT_REGISTER);
   const [mySchoolsStrings, setMySchoolsStrings] =
     useState<MySchoolsStrings>(DEFAULT_MY_SCHOOLS);
-  const [boardStrings, setBoardStrings] = useState<BoardStrings>(DEFAULT_BOARD);
+  const [boardStrings, setBoardStrings] =
+    useState<BoardStrings>(DEFAULT_BOARD);
 
   type TopTab = "about" | "enter-code" | "my-schools" | "register";
 
@@ -2025,7 +2076,6 @@ export default function SchoolsPage() {
         setter: (val: string) => void,
       ) => fetchTranslation(key, language, cacheKey, setter);
 
-      // ── Nav tabs ──
       const navPromises = [
         t("About", "sc_tab_about", setAboutTabText),
         t("Enter Code", "sc_tab_enterCode", setEnterCodeTabText),
@@ -2035,7 +2085,6 @@ export default function SchoolsPage() {
         t("School boards", "sc_sidebar_schoolBoards", setSchoolBoardsText),
       ];
 
-      // ── About panel ──
       const aboutSetters: [keyof AboutStrings, string, string][] = [
         ["eyebrow", "Campus lost & found", "sc_about_eyebrow"],
         ["title", "Findr for Schools", "sc_about_title"],
@@ -2058,8 +2107,16 @@ export default function SchoolsPage() {
         ["feature3Desc", DEFAULT_ABOUT.feature3Desc, "sc_about_feature3Desc"],
         ["feature4Title", "Admin controls", "sc_about_feature4Title"],
         ["feature4Desc", DEFAULT_ABOUT.feature4Desc, "sc_about_feature4Desc"],
-        ["registerCtaTitle", DEFAULT_ABOUT.registerCtaTitle, "sc_about_registerCtaTitle"],
-        ["registerCtaDesc", DEFAULT_ABOUT.registerCtaDesc, "sc_about_registerCtaDesc"],
+        [
+          "registerCtaTitle",
+          DEFAULT_ABOUT.registerCtaTitle,
+          "sc_about_registerCtaTitle",
+        ],
+        [
+          "registerCtaDesc",
+          DEFAULT_ABOUT.registerCtaDesc,
+          "sc_about_registerCtaDesc",
+        ],
         ["registerCtaBtn", "Register Your School", "sc_about_registerCtaBtn"],
         ["heroCardLabel", "Featured campus board", "sc_about_heroCardLabel"],
         ["heroCardBody", DEFAULT_ABOUT.heroCardBody, "sc_about_heroCardBody"],
@@ -2073,13 +2130,16 @@ export default function SchoolsPage() {
         ),
       );
 
-      // ── Enter code panel ──
       const enterCodeSetters: [keyof EnterCodeStrings, string, string][] = [
         ["title", "Enter School Code", "sc_ec_title"],
         ["hint", DEFAULT_ENTER_CODE.hint, "sc_ec_hint"],
         ["codeLabel", "School Code", "sc_ec_codeLabel"],
         ["codePlaceholder", "e.g. LINCOLN-2025", "sc_ec_codePlaceholder"],
-        ["alreadyMember", DEFAULT_ENTER_CODE.alreadyMember, "sc_ec_alreadyMember"],
+        [
+          "alreadyMember",
+          DEFAULT_ENTER_CODE.alreadyMember,
+          "sc_ec_alreadyMember",
+        ],
         ["notFound", DEFAULT_ENTER_CODE.notFound, "sc_ec_notFound"],
         ["joinedPrefix", "You've joined", "sc_ec_joinedPrefix"],
         ["searchingBtn", "Searching...", "sc_ec_searchingBtn"],
@@ -2093,36 +2153,71 @@ export default function SchoolsPage() {
         ),
       );
 
-      // ── Register panel ──
       const registerSetters: [keyof RegisterStrings, string, string][] = [
         ["title", "Register Your School", "sc_reg_title"],
         ["hint", DEFAULT_REGISTER.hint, "sc_reg_hint"],
         ["nameLabel", "School / Institution Name *", "sc_reg_nameLabel"],
         ["namePlaceholder", "Lincoln High School", "sc_reg_namePlaceholder"],
         ["websiteLabel", "Website URL", "sc_reg_websiteLabel"],
-        ["websitePlaceholder", "https://lincolnhs.edu", "sc_reg_websitePlaceholder"],
-        ["roleLabel", "Your Role at the Institution *", "sc_reg_roleLabel"],
-        ["rolePlaceholder", "e.g. Principal, IT Coordinator, Dean", "sc_reg_rolePlaceholder"],
+        [
+          "websitePlaceholder",
+          "https://lincolnhs.edu",
+          "sc_reg_websitePlaceholder",
+        ],
+        [
+          "roleLabel",
+          "Your Role at the Institution *",
+          "sc_reg_roleLabel",
+        ],
+        [
+          "rolePlaceholder",
+          "e.g. Principal, IT Coordinator, Dean",
+          "sc_reg_rolePlaceholder",
+        ],
         ["yourNameLabel", "Your Name", "sc_reg_yourNameLabel"],
         ["yourEmailLabel", "Your Email", "sc_reg_yourEmailLabel"],
         ["logoLabel", "School Logo", "sc_reg_logoLabel"],
         ["logoUpload", "Upload school logo", "sc_reg_logoUpload"],
-        ["primaryColorLabel", "School Primary Brand Color", "sc_reg_primaryColorLabel"],
-        ["secondaryColorLabel", "Secondary / Accent Color", "sc_reg_secondaryColorLabel"],
+        [
+          "primaryColorLabel",
+          "School Primary Brand Color",
+          "sc_reg_primaryColorLabel",
+        ],
+        [
+          "secondaryColorLabel",
+          "Secondary / Accent Color",
+          "sc_reg_secondaryColorLabel",
+        ],
         ["bgPhotoLabel", "Campus Background Photo", "sc_reg_bgPhotoLabel"],
         ["bgPhotoHint", DEFAULT_REGISTER.bgPhotoHint, "sc_reg_bgPhotoHint"],
         ["bgUpload", "Upload campus photo", "sc_reg_bgUpload"],
         ["gradientLabel", "Gradient Style", "sc_reg_gradientLabel"],
         ["gradientHint", DEFAULT_REGISTER.gradientHint, "sc_reg_gradientHint"],
         ["headerPreviewLabel", "Header Preview", "sc_reg_headerPreviewLabel"],
-        ["verifyDocLabel", "Verification Document (optional)", "sc_reg_verifyDocLabel"],
-        ["verifyDocHint", DEFAULT_REGISTER.verifyDocHint, "sc_reg_verifyDocHint"],
+        [
+          "verifyDocLabel",
+          "Verification Document (optional)",
+          "sc_reg_verifyDocLabel",
+        ],
+        [
+          "verifyDocHint",
+          DEFAULT_REGISTER.verifyDocHint,
+          "sc_reg_verifyDocHint",
+        ],
         ["verifyDocUpload", "Upload verification doc", "sc_reg_verifyDocUpload"],
         ["extraLabel", "Anything else?", "sc_reg_extraLabel"],
-        ["extraPlaceholder", DEFAULT_REGISTER.extraPlaceholder, "sc_reg_extraPlaceholder"],
+        [
+          "extraPlaceholder",
+          DEFAULT_REGISTER.extraPlaceholder,
+          "sc_reg_extraPlaceholder",
+        ],
         ["submitBtn", "Submit Registration", "sc_reg_submitBtn"],
         ["submittingBtn", "Submitting...", "sc_reg_submittingBtn"],
-        ["signInRequired", "Sign in to submit a registration.", "sc_reg_signInRequired"],
+        [
+          "signInRequired",
+          "Sign in to submit a registration.",
+          "sc_reg_signInRequired",
+        ],
         ["successTitle", "Registration submitted!", "sc_reg_successTitle"],
         ["successSub", DEFAULT_REGISTER.successSub, "sc_reg_successSub"],
       ];
@@ -2132,7 +2227,6 @@ export default function SchoolsPage() {
         ),
       );
 
-      // ── My schools panel ──
       const mySchoolsSetters: [keyof MySchoolsStrings, string, string][] = [
         ["title", "My Schools", "sc_ms_title"],
         ["signInMsg", "Sign in to see your schools.", "sc_ms_signInMsg"],
@@ -2146,7 +2240,6 @@ export default function SchoolsPage() {
         ),
       );
 
-      // ── Board strings ──
       const boardSetters: [keyof BoardStrings, string, string][] = [
         ["backBtn", "← Back", "sc_board_backBtn"],
         ["adminBadge", "School Admin", "sc_board_adminBadge"],
@@ -2169,9 +2262,17 @@ export default function SchoolsPage() {
         ["lostBy", "Lost by", "sc_board_lostBy"],
         ["reportFoundTitle", "Report Found Item", "sc_board_reportFoundTitle"],
         ["itemNameLabel", "Item Name", "sc_board_itemNameLabel"],
-        ["itemNamePlaceholder", "e.g. Blue water bottle", "sc_board_itemNamePlaceholder"],
+        [
+          "itemNamePlaceholder",
+          "e.g. Blue water bottle",
+          "sc_board_itemNamePlaceholder",
+        ],
         ["descLabel", "Description", "sc_board_descLabel"],
-        ["descFoundPlaceholder", DEFAULT_BOARD.descFoundPlaceholder, "sc_board_descFoundPlaceholder"],
+        [
+          "descFoundPlaceholder",
+          DEFAULT_BOARD.descFoundPlaceholder,
+          "sc_board_descFoundPlaceholder",
+        ],
         ["photosLabel", "Photos (up to 3)", "sc_board_photosLabel"],
         ["photosSelected", "photo(s) selected", "sc_board_photosSelected"],
         ["uploadPhotos", "Upload photos", "sc_board_uploadPhotos"],
@@ -2182,19 +2283,43 @@ export default function SchoolsPage() {
         ["reportLostTitle", "Report Lost Item", "sc_board_reportLostTitle"],
         ["whatLostLabel", "What did you lose?", "sc_board_whatLostLabel"],
         ["lostItemPlaceholder", "Item name", "sc_board_lostItemPlaceholder"],
-        ["descLostPlaceholder", DEFAULT_BOARD.descLostPlaceholder, "sc_board_descLostPlaceholder"],
-        ["photosOptionalLabel", "Photos (optional, up to 3)", "sc_board_photosOptionalLabel"],
+        [
+          "descLostPlaceholder",
+          DEFAULT_BOARD.descLostPlaceholder,
+          "sc_board_descLostPlaceholder",
+        ],
+        [
+          "photosOptionalLabel",
+          "Photos (optional, up to 3)",
+          "sc_board_photosOptionalLabel",
+        ],
         ["postLostBtn", "Post Lost Item", "sc_board_postLostBtn"],
         ["postingLostBtn", "Posting...", "sc_board_postingLostBtn"],
         ["lostPostedMsg", "Lost item reported!", "sc_board_lostPostedMsg"],
-        ["adminLoginTitle", "School Admin Access", "sc_board_adminLoginTitle"],
-        ["adminLoginHint", DEFAULT_BOARD.adminLoginHint, "sc_board_adminLoginHint"],
+        [
+          "adminLoginTitle",
+          "School Admin Access",
+          "sc_board_adminLoginTitle",
+        ],
+        [
+          "adminLoginHint",
+          DEFAULT_BOARD.adminLoginHint,
+          "sc_board_adminLoginHint",
+        ],
         ["adminPasswordLabel", "Admin Password", "sc_board_adminPasswordLabel"],
-        ["adminPasswordPlaceholder", "e.g. FINDR-JANE-X4K2", "sc_board_adminPasswordPlaceholder"],
+        [
+          "adminPasswordPlaceholder",
+          "e.g. FINDR-JANE-X4K2",
+          "sc_board_adminPasswordPlaceholder",
+        ],
         ["unlockBtn", "Unlock Admin View", "sc_board_unlockBtn"],
         ["checkingBtn", "Checking...", "sc_board_checkingBtn"],
         ["adminUnlockedMsg", "Admin view unlocked!", "sc_board_adminUnlockedMsg"],
-        ["adminUnlockedSub", DEFAULT_BOARD.adminUnlockedSub, "sc_board_adminUnlockedSub"],
+        [
+          "adminUnlockedSub",
+          DEFAULT_BOARD.adminUnlockedSub,
+          "sc_board_adminUnlockedSub",
+        ],
         ["adminIncorrect", DEFAULT_BOARD.adminIncorrect, "sc_board_adminIncorrect"],
       ];
       const boardPromises = boardSetters.map(([field, key, cacheKey]) =>
