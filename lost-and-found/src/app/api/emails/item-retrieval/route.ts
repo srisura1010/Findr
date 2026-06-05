@@ -10,14 +10,15 @@ export async function POST(req: Request) {
     retriever_name,
     retriever_email,
   } = await req.json();
-  await resend.emails.send({
-    from: "Findr <noreply@yourdomain.com>",
+
+  const result = await resend.emails.send({
+    from: "noreply@findrapp.me",
     to: author_email,
     subject: `Someone wants to retrieve "${item_name}"`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px">
         <h2>Hi ${author_name},</h2>
-        <p>Someone has requested to retrieve an item that you reported as found on the Lost and Found portal.</p>
+        <p>Someone has requested to retrieve an item.</p>
         <table style="border-collapse:collapse;width:100%;margin:16px 0;background:#f9f9f9;border-radius:8px">
           <tr>
             <td style="padding:10px 16px;font-weight:600;width:100px">Item</td>
@@ -34,11 +35,12 @@ export async function POST(req: Request) {
             </td>
           </tr>
         </table>
-        <p>Please contact <strong>${retriever_name}</strong> using the email above to arrange a time and place to return the item. Once returned, they will confirm receipt and the post will be removed from the system.</p>
         <p>Thank you for helping return lost items.</p>
         <p style="color:#888;font-size:13px;margin-top:24px">Best regards,<br/>The Lost and Found Team</p>
       </div>
     `,
   });
+
+  console.log("Resend result:", result);
   return NextResponse.json({ ok: true });
 }
