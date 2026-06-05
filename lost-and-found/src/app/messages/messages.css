@@ -157,7 +157,7 @@ body.colorblind {
 
 .messages-layout {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 54px);
   font-family: "Poppins", sans-serif;
   background: var(--msg-bg-page);
   transition: background 0.2s ease;
@@ -165,9 +165,10 @@ body.colorblind {
 }
 
 
+/* ── Sidebar ── same width/height/structure as dashboard and schools ── */
 .messages-sidebar {
-  width: 300px;
-  margin-top: 16px;
+  width: 256px;
+  min-width: 256px;
   flex-shrink: 0;
   background: var(--msg-bg-sidebar);
   border-right: 1px solid var(--msg-border);
@@ -175,25 +176,62 @@ body.colorblind {
   flex-direction: column;
   overflow: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
+  /* No margin-top — layout starts at top like dashboard/schools */
 }
 
 .messages-sidebar::before {
   content: '';
   display: block;
   height: 3px;
-  background: linear-gradient(90deg, var(--accent), transparent);
+  background: linear-gradient(90deg, var(--msg-accent), transparent);
   flex-shrink: 0;
 }
 
-.messages-sidebar__header {
-  padding: 20px 18px 14px;
+/* ── Brand header — matches dashboard and schools ── */
+.messages-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 12px;
   border-bottom: 1px solid var(--msg-border);
+  flex-shrink: 0;
+}
+
+.messages-sidebar__brand-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  color: var(--msg-accent);
+}
+
+.messages-sidebar__brand-title {
+  margin: 0;
+  font-family: "Ubuntu", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--msg-text-primary);
+  letter-spacing: -0.2px;
+}
+
+.messages-sidebar__brand-sub {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  color: var(--msg-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.messages-sidebar__header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--msg-border);
+  flex-shrink: 0;
 }
 
 .messages-sidebar__title {
   margin: 0;
   font-family: "Ubuntu", sans-serif;
-  font-size: 1.25rem;
+  font-size: 15px;
   font-weight: 700;
   color: var(--msg-text-primary);
   letter-spacing: -0.2px;
@@ -203,6 +241,7 @@ body.colorblind {
 .messages-sidebar__admin-btn-wrap {
   padding: 10px 12px;
   border-bottom: 1px solid var(--msg-border);
+  flex-shrink: 0;
 }
 
 .messages-sidebar__admin-btn {
@@ -318,11 +357,12 @@ body.high-contrast .messages-conv-avatar {
 
 .messages-conv-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--msg-text-primary);
   display: flex;
   align-items: center;
   gap: 5px;
+  font-family: "Poppins", sans-serif;
 }
 
 .messages-conv-name--unread {
@@ -352,14 +392,16 @@ body.high-contrast .messages-conv-avatar {
   color: var(--msg-text-active);
   font-weight: 600;
   margin-bottom: 2px;
+  font-family: "Poppins", sans-serif;
 }
 
 .messages-conv-preview {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--msg-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: "Poppins", sans-serif;
 }
 
 .messages-conv-preview--unread {
@@ -428,6 +470,7 @@ body.high-contrast .messages-conv-avatar {
   font-size: 12px;
   color: var(--msg-text-secondary);
   margin-top: 1px;
+  font-family: "Poppins", sans-serif;
 }
 
 .messages-chat__header-badge {
@@ -472,7 +515,7 @@ body.high-contrast .messages-conv-avatar {
   border: 1px solid var(--msg-border);
   border-radius: 7px;
   color: var(--msg-text-muted);
-  font-family: "Ubuntu", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -587,6 +630,7 @@ body.high-contrast .msg-bubble--own {
   font-size: 10px;
   color: var(--msg-text-muted);
   margin-top: 2px;
+  font-family: "Poppins", sans-serif;
 }
 
 
@@ -693,6 +737,7 @@ body.high-contrast .messages-chat__send--active {
   font-size: 0.83rem;
   color: var(--msg-text-secondary);
   margin: 0 0 16px;
+  font-family: "Poppins", sans-serif;
 }
 
 .report-modal__reasons {
@@ -846,6 +891,7 @@ body.high-contrast .admin-select-avatar {
 .admin-select-email {
   font-size: 12px;
   color: var(--msg-text-secondary);
+  font-family: "Poppins", sans-serif;
 }
 
 .admin-select-tag {
@@ -865,6 +911,7 @@ body.high-contrast .admin-select-avatar {
   padding: 24px 0;
   color: var(--msg-text-muted);
   font-size: 14px;
+  font-family: "Poppins", sans-serif;
 }
 
 
@@ -879,7 +926,10 @@ body.high-contrast .admin-select-avatar {
     width: 100%;
     flex-shrink: 0;
     border-right: none;
+  }
 
+  .messages-sidebar__brand {
+    display: none;
   }
 
   .messages-chat {

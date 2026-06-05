@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useSettings } from "@/context/SettingsContext";
 import { FaFlag, FaShieldHalved } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-
+import { MdOutlineMessage } from "react-icons/md";
 
 interface Message {
   id: number;
@@ -67,7 +67,9 @@ async function t(text: string, language: string): Promise<string> {
       localStorage.setItem(cacheKey, translated);
       return translated;
     }
-  } catch { /* keep original */ }
+  } catch {
+    /* keep original */
+  }
   return text;
 }
 
@@ -116,7 +118,9 @@ function ReportUserModal({
         ) : (
           <>
             <p className="report-modal__title">Report {reportedUserName}</p>
-            <p className="report-modal__subtitle">Why are you reporting this user?</p>
+            <p className="report-modal__subtitle">
+              Why are you reporting this user?
+            </p>
             <div className="report-modal__reasons">
               {USER_REPORT_REASONS.map((reason) => (
                 <button
@@ -129,7 +133,9 @@ function ReportUserModal({
               ))}
             </div>
             <div className="report-modal__actions">
-              <button className="report-modal__cancel" onClick={onClose}>Cancel</button>
+              <button className="report-modal__cancel" onClick={onClose}>
+                Cancel
+              </button>
               <button
                 className="report-modal__submit"
                 onClick={handleSubmit}
@@ -163,12 +169,16 @@ function ContactAdminModal({
           <FaShieldHalved className="messages-sidebar__admin-icon" />
           Contact an Admin
         </p>
-        <p className="report-modal__subtitle">Select an admin to start a conversation.</p>
+        <p className="report-modal__subtitle">
+          Select an admin to start a conversation.
+        </p>
 
         {loading ? (
           <div className="admin-modal-loading">Loading admins…</div>
         ) : admins.length === 0 ? (
-          <div className="admin-modal-loading">No admins available right now.</div>
+          <div className="admin-modal-loading">
+            No admins available right now.
+          </div>
         ) : (
           <div style={{ margin: "12px 0" }}>
             {admins.map((admin) => (
@@ -181,7 +191,9 @@ function ContactAdminModal({
                   {(admin.name || admin.email)[0].toUpperCase()}
                 </div>
                 <div>
-                  <div className="admin-select-name">{admin.name || "Admin"}</div>
+                  <div className="admin-select-name">
+                    {admin.name || "Admin"}
+                  </div>
                   <div className="admin-select-email">{admin.email}</div>
                 </div>
                 <div className="admin-select-tag">Admin</div>
@@ -191,7 +203,9 @@ function ContactAdminModal({
         )}
 
         <div className="report-modal__actions" style={{ marginTop: 4 }}>
-          <button className="report-modal__cancel" onClick={onClose}>Cancel</button>
+          <button className="report-modal__cancel" onClick={onClose}>
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -216,18 +230,27 @@ export default function MessagesPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [isReady, setIsReady] = useState(false);
-  const [uiMessagesTitle, setUiMessagesTitle]           = useState("Messages");
-  const [uiNoConversations, setUiNoConversations]       = useState("No conversations yet.");
-  const [uiSelectConversation, setUiSelectConversation] = useState("Select a conversation to start chatting");
-  const [uiStartConversation, setUiStartConversation]   = useState("Start the conversation!");
-  const [uiTypePlaceholder, setUiTypePlaceholder]       = useState("Type a message…");
+  const [uiMessagesTitle, setUiMessagesTitle] = useState("Messages");
+  const [uiNoConversations, setUiNoConversations] = useState(
+    "No conversations yet.",
+  );
+  const [uiSelectConversation, setUiSelectConversation] = useState(
+    "Select a conversation to start chatting",
+  );
+  const [uiStartConversation, setUiStartConversation] = useState(
+    "Start the conversation!",
+  );
+  const [uiTypePlaceholder, setUiTypePlaceholder] = useState("Type a message…");
 
   useEffect(() => {
     const translateUI = async () => {
       setIsReady(false);
       const [
-        messagesTitle, noConversations, selectConversation,
-        startConversation, typePlaceholder,
+        messagesTitle,
+        noConversations,
+        selectConversation,
+        startConversation,
+        typePlaceholder,
       ] = await Promise.all([
         t("Messages", language),
         t("No conversations yet.", language),
@@ -250,7 +273,10 @@ export default function MessagesPage() {
   }, [isLoaded, user, router]);
 
   useEffect(() => {
-    if (!user) { setBanChecked(true); return; }
+    if (!user) {
+      setBanChecked(true);
+      return;
+    }
     const checkBan = async () => {
       const { data } = await supabase
         .from("banned_users")
@@ -259,8 +285,12 @@ export default function MessagesPage() {
         .single();
       if (data) {
         const isPermanent = !data.suspended_until;
-        const isSuspended = data.suspended_until && new Date(data.suspended_until) > new Date();
-        if (isPermanent || isSuspended) { router.push("/banned"); return; }
+        const isSuspended =
+          data.suspended_until && new Date(data.suspended_until) > new Date();
+        if (isPermanent || isSuspended) {
+          router.push("/banned");
+          return;
+        }
       }
       setBanChecked(true);
     };
@@ -305,15 +335,22 @@ export default function MessagesPage() {
 
     const fetchConversations = async () => {
       const { data: sent } = await supabase
-        .from("chat_messages").select("*")
-        .eq("sender_id", user.id).order("created_at", { ascending: false });
+        .from("chat_messages")
+        .select("*")
+        .eq("sender_id", user.id)
+        .order("created_at", { ascending: false });
 
       const { data: received } = await supabase
-        .from("chat_messages").select("*")
-        .eq("receiver_id", user.id).order("created_at", { ascending: false });
+        .from("chat_messages")
+        .select("*")
+        .eq("receiver_id", user.id)
+        .order("created_at", { ascending: false });
 
       const all = [...(sent ?? []), ...(received ?? [])];
-      all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      all.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
       if (!all.length) return;
 
       const convMap = new Map<string, Conversation>();
@@ -325,8 +362,12 @@ export default function MessagesPage() {
             conversation_id: msg.conversation_id,
             item_title: isAdminConv ? "Admin Support" : msg.item_title,
             otherUserId: isOwn ? msg.receiver_id : msg.sender_id,
-            otherUserName: isOwn ? (msg.receiver_name || msg.receiver_id) : msg.sender_name,
-            otherUserEmail: isOwn ? (msg.receiver_email || "") : (msg.sender_email || ""),
+            otherUserName: isOwn
+              ? msg.receiver_name || msg.receiver_id
+              : msg.sender_name,
+            otherUserEmail: isOwn
+              ? msg.receiver_email || ""
+              : msg.sender_email || "",
             lastMessage: msg.text,
             lastMessageAt: msg.created_at,
             unread: !msg.read && msg.receiver_id === user.id,
@@ -345,7 +386,7 @@ export default function MessagesPage() {
             ]);
             conv.item_title = title;
             conv.lastMessage = lastMsg;
-          })
+          }),
         );
       }
 
@@ -356,13 +397,21 @@ export default function MessagesPage() {
 
     const channel = supabase
       .channel("messages-page-convos")
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "chat_messages",
-        filter: `receiver_id=eq.${user.id}`,
-      }, () => fetchConversations())
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        () => fetchConversations(),
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, language]);
 
   useEffect(() => {
@@ -370,8 +419,10 @@ export default function MessagesPage() {
 
     const fetchMessages = async () => {
       const { data } = await supabase
-        .from("chat_messages").select("*")
-        .eq("conversation_id", activeConvId).order("created_at", { ascending: true });
+        .from("chat_messages")
+        .select("*")
+        .eq("conversation_id", activeConvId)
+        .order("created_at", { ascending: true });
 
       if (data) {
         if (language !== "en") {
@@ -379,7 +430,7 @@ export default function MessagesPage() {
             data.map(async (msg) => {
               const translatedText = await t(msg.text, language);
               return { ...msg, text: translatedText };
-            })
+            }),
           );
           setMessages(translated);
         } else {
@@ -387,11 +438,16 @@ export default function MessagesPage() {
         }
       }
 
-      await supabase.from("chat_messages").update({ read: true })
-        .eq("conversation_id", activeConvId).eq("receiver_id", user.id);
+      await supabase
+        .from("chat_messages")
+        .update({ read: true })
+        .eq("conversation_id", activeConvId)
+        .eq("receiver_id", user.id);
 
       setConversations((prev) =>
-        prev.map((c) => c.conversation_id === activeConvId ? { ...c, unread: false } : c)
+        prev.map((c) =>
+          c.conversation_id === activeConvId ? { ...c, unread: false } : c,
+        ),
       );
     };
 
@@ -399,27 +455,41 @@ export default function MessagesPage() {
 
     const channel = supabase
       .channel(`messages-page-chat:${activeConvId}`)
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "chat_messages",
-        filter: `conversation_id=eq.${activeConvId}`,
-      }, async (payload) => {
-        const newMsg = payload.new as Message;
-        const translatedText = language !== "en" ? await t(newMsg.text, language) : newMsg.text;
-        setMessages((prev) => [...prev, { ...newMsg, text: translatedText }]);
-        if (newMsg.receiver_id === user.id) {
-          supabase.from("chat_messages").update({ read: true }).eq("id", newMsg.id);
-        }
-      })
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `conversation_id=eq.${activeConvId}`,
+        },
+        async (payload) => {
+          const newMsg = payload.new as Message;
+          const translatedText =
+            language !== "en" ? await t(newMsg.text, language) : newMsg.text;
+          setMessages((prev) => [...prev, { ...newMsg, text: translatedText }]);
+          if (newMsg.receiver_id === user.id) {
+            supabase
+              .from("chat_messages")
+              .update({ read: true })
+              .eq("id", newMsg.id);
+          }
+        },
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [activeConvId, user, language]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const activeConv = conversations.find((c) => c.conversation_id === activeConvId);
+  const activeConv = conversations.find(
+    (c) => c.conversation_id === activeConvId,
+  );
 
   const handleSend = async () => {
     if (!text.trim() || sending || !activeConv || !user) return;
@@ -434,8 +504,12 @@ export default function MessagesPage() {
       receiver_id: activeConv.otherUserId,
       receiver_name: activeConv.otherUserName,
       receiver_email: activeConv.otherUserEmail,
-      item_id: activeConv.isAdminConv ? "admin-support" : activeConv.conversation_id.split("_")[0],
-      item_title: activeConv.isAdminConv ? "Admin Support" : activeConv.item_title,
+      item_id: activeConv.isAdminConv
+        ? "admin-support"
+        : activeConv.conversation_id.split("_")[0],
+      item_title: activeConv.isAdminConv
+        ? "Admin Support"
+        : activeConv.item_title,
       text: trimmed,
       read: false,
     });
@@ -443,7 +517,10 @@ export default function MessagesPage() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   // Close chat pane on mobile and return to sidebar
@@ -452,19 +529,28 @@ export default function MessagesPage() {
     setReportingUser(false);
   };
 
-if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
+  if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
 
   return (
     <div className="messages-layout">
-
       {/* ── Sidebar ── */}
+
       <div className="messages-sidebar">
-        <div className="messages-sidebar__header">
-          <h2 className="messages-sidebar__title">{uiMessagesTitle}</h2>
+        <div className="messages-sidebar__brand">
+          <span className="messages-sidebar__brand-icon">
+            <MdOutlineMessage size={22} />
+          </span>
+          <div>
+            <p className="messages-sidebar__brand-title">Messages</p>
+            <p className="messages-sidebar__brand-sub">Your conversations</p>
+          </div>
         </div>
 
         <div className="messages-sidebar__admin-btn-wrap">
-          <button className="messages-sidebar__admin-btn" onClick={handleOpenAdminModal}>
+          <button
+            className="messages-sidebar__admin-btn"
+            onClick={handleOpenAdminModal}
+          >
             <FaShieldHalved className="messages-sidebar__admin-icon" />
             Contact an Admin
           </button>
@@ -486,16 +572,25 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
             <button
               key={conv.conversation_id}
               className={`messages-conv-row${activeConvId === conv.conversation_id ? " messages-conv-row--active" : ""}`}
-              onClick={() => { setActiveConvId(conv.conversation_id); setReportingUser(false); }}
+              onClick={() => {
+                setActiveConvId(conv.conversation_id);
+                setReportingUser(false);
+              }}
             >
-              <div className={`messages-conv-avatar${conv.isAdminConv ? " messages-conv-avatar--admin" : ""}`}>
-                {conv.isAdminConv
-                  ? <FaShieldHalved style={{ fontSize: 14 }} />
-                  : (conv.otherUserName?.[0]?.toUpperCase() ?? "?")}
+              <div
+                className={`messages-conv-avatar${conv.isAdminConv ? " messages-conv-avatar--admin" : ""}`}
+              >
+                {conv.isAdminConv ? (
+                  <FaShieldHalved style={{ fontSize: 14 }} />
+                ) : (
+                  (conv.otherUserName?.[0]?.toUpperCase() ?? "?")
+                )}
               </div>
               <div className="messages-conv-info">
                 <div className="messages-conv-top">
-                  <span className={`messages-conv-name${conv.unread ? " messages-conv-name--unread" : ""}`}>
+                  <span
+                    className={`messages-conv-name${conv.unread ? " messages-conv-name--unread" : ""}`}
+                  >
                     {conv.otherUserName}
                     {conv.isAdminConv && (
                       <span className="messages-conv-admin-badge">Admin</span>
@@ -504,7 +599,9 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
                   {conv.unread && <span className="messages-conv-unread-dot" />}
                 </div>
                 <div className="messages-conv-item">{conv.item_title}</div>
-                <div className={`messages-conv-preview${conv.unread ? " messages-conv-preview--unread" : ""}`}>
+                <div
+                  className={`messages-conv-preview${conv.unread ? " messages-conv-preview--unread" : ""}`}
+                >
                   {conv.lastMessage || "Start the conversation"}
                 </div>
               </div>
@@ -516,7 +613,9 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
       {/* ── Chat area ──
           On mobile: slides over sidebar when activeConvId is set (.messages-chat--open)
       ── */}
-      <div className={`messages-chat${activeConvId ? " messages-chat--open" : ""}`}>
+      <div
+        className={`messages-chat${activeConvId ? " messages-chat--open" : ""}`}
+      >
         {!activeConvId ? (
           <div className="messages-chat__empty">
             <div className="messages-chat__empty-icon">💬</div>
@@ -527,14 +626,22 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
             {/* Header */}
             <div className="messages-chat__header">
               {/* Back button — only visible on mobile via CSS */}
-              <button className="messages-chat__back" onClick={handleBack} aria-label="Back to conversations">
+              <button
+                className="messages-chat__back"
+                onClick={handleBack}
+                aria-label="Back to conversations"
+              >
                 ←
               </button>
 
-              <div className={`messages-conv-avatar${activeConv?.isAdminConv ? " messages-conv-avatar--admin" : ""}`}>
-                {activeConv?.isAdminConv
-                  ? <FaShieldHalved style={{ fontSize: 14 }} />
-                  : (activeConv?.otherUserName?.[0]?.toUpperCase() ?? "?")}
+              <div
+                className={`messages-conv-avatar${activeConv?.isAdminConv ? " messages-conv-avatar--admin" : ""}`}
+              >
+                {activeConv?.isAdminConv ? (
+                  <FaShieldHalved style={{ fontSize: 14 }} />
+                ) : (
+                  (activeConv?.otherUserName?.[0]?.toUpperCase() ?? "?")
+                )}
               </div>
               <div className="messages-chat__header-info">
                 <div className="messages-chat__header-name">
@@ -543,10 +650,15 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
                     <span className="messages-chat__header-badge">Admin</span>
                   )}
                 </div>
-                <div className="messages-chat__header-sub">{activeConv?.item_title}</div>
+                <div className="messages-chat__header-sub">
+                  {activeConv?.item_title}
+                </div>
               </div>
               {!activeConv?.isAdminConv && (
-                <button className="msg-report-btn" onClick={() => setReportingUser(true)}>
+                <button
+                  className="msg-report-btn"
+                  onClick={() => setReportingUser(true)}
+                >
                   <FaFlag style={{ fontSize: 11 }} />
                   Report User
                 </button>
@@ -560,7 +672,10 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
                   {activeConv?.isAdminConv ? (
                     <>
                       <FaShieldHalved className="messages-chat__admin-empty-icon" />
-                      <p>You're chatting with an admin. Ask anything — they're here to help.</p>
+                      <p>
+                        You're chatting with an admin. Ask anything — they're
+                        here to help.
+                      </p>
                     </>
                   ) : (
                     <>
@@ -573,14 +688,17 @@ if (!banChecked || !isLoaded || !user || !isReady) return <LoadingSpinner />;
               {messages.map((msg) => {
                 const isOwn = msg.sender_id === user.id;
                 const time = new Date(msg.created_at).toLocaleTimeString([], {
-                  hour: "2-digit", minute: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
                 });
                 return (
                   <div
                     key={msg.id}
                     className={`msg-row${isOwn ? " msg-row--own" : " msg-row--other"}`}
                   >
-                    <div className={`msg-bubble${isOwn ? " msg-bubble--own" : " msg-bubble--other"}`}>
+                    <div
+                      className={`msg-bubble${isOwn ? " msg-bubble--own" : " msg-bubble--other"}`}
+                    >
                       {msg.text}
                     </div>
                     <span className="msg-time">{time}</span>

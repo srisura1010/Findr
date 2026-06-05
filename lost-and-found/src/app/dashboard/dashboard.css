@@ -178,7 +178,7 @@ body.colorblind {
 ═══════════════════════════════════════════ */
 .dashboard-layout {
   display: flex;
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 54px);
   background: var(--bg-page);
   transition: background 0.2s ease, color 0.2s ease;
 }
@@ -195,12 +195,12 @@ body.colorblind {
   flex-direction: column;
   box-shadow: var(--sidebar-shadow);
   position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
+  top: 54px;
+  height: calc(100vh - 54px);
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
   z-index: 10;
-  margin-top: 16px;
 }
 
 .dashboard-sidebar::before {
@@ -211,11 +211,47 @@ body.colorblind {
   flex-shrink: 0;
 }
 
+/* ── Brand header (matches sc-sidebar__brand in schools.css) ── */
+.dashboard-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 12px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.dashboard-sidebar__brand-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.dashboard-sidebar__brand-title {
+  margin: 0;
+  font-family: "Ubuntu", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.dashboard-sidebar__brand-sub {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
 .sidebar-tabs {
   display: flex;
   flex-direction: column;
-  padding: 16px 10px 8px;
+  padding: 12px 10px 8px;
   gap: 2px;
+  flex: 1;
 }
 
 .sidebar-tab {
@@ -717,7 +753,6 @@ body.colorblind {
 
 .item-card:hover::before { opacity: 1; }
 
-/* Wider aspect ratio = more image space */
 .item-image-wrapper {
   width: 100%;
   aspect-ratio: 16 / 10;
@@ -798,7 +833,6 @@ body.colorblind {
   flex-shrink: 0;
 }
 
-/* Icon buttons row — message + trash sit side by side */
 .button-group__row {
   display: flex;
   gap: 6px;
@@ -853,7 +887,6 @@ body.colorblind {
   min-height: 40px;
 }
 
-/* Icon-only buttons — flex: 1 so they split the row equally */
 .message-finder-button {
   background: var(--accent);
   color: white;
@@ -1454,14 +1487,14 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
     min-width: unset;
     height: auto;
     position: relative;
+    top: 0;
     border-right: none;
     border-bottom: 1px solid var(--border-default);
-    margin-top: 0;
-    z-index: 20;
     overflow: visible;
+    z-index: 20;
   }
 
-  .dashboard-sidebar::before { display: none; }
+  .dashboard-sidebar__brand { display: none; }
 
   .sidebar-tabs {
     flex-direction: row;
@@ -1605,7 +1638,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 }
 
 /* ═══════════════════════════════════════════
-   CLICKABLE CARD (append to dashboard.css)
+   CLICKABLE CARD
 ═══════════════════════════════════════════ */
 .item-card--clickable {
   cursor: pointer;
@@ -1617,7 +1650,110 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   box-shadow: 0 0 0 3px var(--accent);
 }
 
-/* Remove bottom padding since there's no button-group anymore */
 .item-info--card {
   padding-bottom: 14px;
+}
+
+/* ═══════════════════════════════════════════
+   SCHOOL BANNER
+═══════════════════════════════════════════ */
+.school-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.school-banner--none {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+}
+
+.school-banner--active {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-left: 4px solid var(--school-color, var(--accent));
+  box-shadow: var(--card-shadow);
+}
+
+.school-banner__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border-default);
+}
+
+.school-banner__name {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  font-family: "Ubuntu", sans-serif;
+}
+
+.school-banner__tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  padding: 2px 9px;
+}
+
+.school-banner__text { color: var(--text-secondary); }
+.school-banner__spacer { flex: 1; }
+.school-banner__divider { color: var(--text-muted); font-size: 12px; }
+
+.school-banner__action {
+  background: none;
+  border: 1.5px solid var(--border-input);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  min-height: 32px;
+}
+
+.school-banner__action:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.school-banner__leave {
+  background: none;
+  border: 1.5px solid var(--border-input);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  min-height: 32px;
+}
+
+.school-banner__leave:hover {
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+@media (max-width: 768px) {
+  .school-banner { padding: 8px 12px; font-size: 12px; gap: 8px; }
+  .school-banner__name { font-size: 13px; }
 }

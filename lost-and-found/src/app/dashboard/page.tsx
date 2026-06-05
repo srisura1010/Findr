@@ -2043,6 +2043,15 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-layout">
       <aside className="dashboard-sidebar">
+        <div className="dashboard-sidebar__brand">
+          <span className="dashboard-sidebar__brand-icon">
+            <HiOutlineMagnifyingGlass />
+          </span>
+          <div>
+            <p className="dashboard-sidebar__brand-title">Findr</p>
+            <p className="dashboard-sidebar__brand-sub">Lost & Found</p>
+          </div>
+        </div>
         <div className="sidebar-tabs">
           {SIDEBAR_TABS.filter((tab) => !tab.adminOnly || isAdmin).map(
             (tab) => (
