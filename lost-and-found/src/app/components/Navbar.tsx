@@ -82,6 +82,7 @@ export default function Navbar() {
   }, [user]);
 
   const [dashboardText, setDashboardText] = useState("Dashboard");
+  const [signInText, setSignInText] = useState("Sign In");
   const [signUpText, setSignUpText] = useState("Sign Up");
   const [helpText, setHelpText] = useState("Help");
   const [schoolsText, setSchoolsText] = useState("For Schools");
@@ -91,7 +92,9 @@ export default function Navbar() {
     setDashboardText(
       localStorage.getItem(`nav_dashboard_${language}`) || "Dashboard",
     );
+    setSignInText(localStorage.getItem(`nav_signIn_${language}`) || "Sign In");
     setSignUpText(localStorage.getItem(`nav_signUp_${language}`) || "Sign Up");
+    setSignInText(localStorage.getItem(`nav_signIn_${language}`) || "Sign In");
     setHelpText(localStorage.getItem(`nav_help_${language}`) || "Help");
     setSchoolsText(
       localStorage.getItem(`nav_schools_${language}`) || "For Schools",
@@ -101,6 +104,7 @@ export default function Navbar() {
   useEffect(() => {
     if (language === "en") {
       setDashboardText("Dashboard");
+      setSignInText("Sign In");
       setSignUpText("Sign Up");
       setHelpText("Help");
       setSchoolsText("For Schools");
@@ -113,6 +117,7 @@ export default function Navbar() {
           setter: setDashboardText,
           cacheKey: "nav_dashboard",
         },
+        { key: "Sign In", setter: setSignInText, cacheKey: "nav_signIn" },
         { key: "Sign Up", setter: setSignUpText, cacheKey: "nav_signUp" },
         { key: "Help", setter: setHelpText, cacheKey: "nav_help" },
         { key: "For Schools", setter: setSchoolsText, cacheKey: "nav_schools" },
@@ -203,7 +208,7 @@ export default function Navbar() {
           ) : (
             <>
               <SignInButton mode="modal">
-                <button className="topbar__signin-btn">{dashboardText}</button>
+                <button className="topbar__signin-btn">{signInText}</button>
               </SignInButton>
               <SignUpButton>
                 <button className="topbar__signup-btn">{signUpText}</button>
