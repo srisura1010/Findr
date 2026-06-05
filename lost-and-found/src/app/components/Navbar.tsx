@@ -25,7 +25,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activePath, setActivePath] = useState("/dashboard");
+  const [activePath, setActivePath] = useState("/");
 
   const isSuperAdmin =
     mounted &&
