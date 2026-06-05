@@ -304,7 +304,6 @@ interface BoardStrings {
   itemsTab: string;
   addItemTab: string;
   reportLostTab: string;
-  becomeAdminTab: string;
   adminTab: string;
   searchPlaceholder: string;
   foundTabLabel: string;
@@ -340,20 +339,6 @@ interface BoardStrings {
   postLostBtn: string;
   postingLostBtn: string;
   lostPostedMsg: string;
-  // Become admin
-  becomeAdminTitle: string;
-  fullNameLabel: string;
-  emailLabel: string;
-  staffIdLabel: string;
-  staffIdPlaceholder: string;
-  uploadIdLabel: string;
-  uploadIdBtn: string;
-  extraAdminLabel: string;
-  extraAdminPlaceholder: string;
-  submitRequestBtn: string;
-  submittingBtn: string;
-  requestSubmittedMsg: string;
-  requestSubmittedSub: string;
   // Admin login
   adminLoginTitle: string;
   adminLoginHint: string;
@@ -1064,18 +1049,12 @@ function SchoolBoard({
   onBack: () => void;
   s: BoardStrings;
 }) {
-  type BoardTab =
-    | "items"
-    | "add-item"
-    | "report-lost"
-    | "become-admin"
-    | "admin-login";
+  type BoardTab = "items" | "add-item" | "report-lost" | "admin-login";
 
   const BOARD_TABS: { id: BoardTab; label: string; icon: string }[] = [
     { id: "items", label: s.itemsTab, icon: "" },
     { id: "add-item", label: s.addItemTab, icon: "" },
     { id: "report-lost", label: s.reportLostTab, icon: "" },
-    { id: "become-admin", label: s.becomeAdminTab, icon: "" },
     { id: "admin-login", label: s.adminTab, icon: "" },
   ];
 
@@ -1262,37 +1241,6 @@ function SchoolBoard({
       setAdminUnlocked(true);
     }
     setAdminChecking(false);
-  };
-
-  // ── Become admin ────────────────────────────────────────────────────────────
-  const [reqForm, setReqForm] = useState({ teacherId: "", extraInfo: "" });
-  const [reqFile, setReqFile] = useState<File | null>(null);
-  const [reqSubmitting, setReqSubmitting] = useState(false);
-  const [reqDone, setReqDone] = useState(false);
-
-  const handleBecomeAdmin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setReqSubmitting(true);
-    let idImageUrl = "";
-    if (reqFile) {
-      const fn = `school_admin_req_${Date.now()}_${reqFile.name}`;
-      await supabase.storage.from("item-images").upload(fn, reqFile);
-      const { data } = supabase.storage.from("item-images").getPublicUrl(fn);
-      idImageUrl = data.publicUrl;
-    }
-    await supabase.from("school_admin_requests").insert({
-      school_id: school.id,
-      name: user.fullName || user.username || "",
-      email: user.primaryEmailAddress?.emailAddress || "",
-      user_id: user.id,
-      teacher_id: reqForm.teacherId || null,
-      extra_info: reqForm.extraInfo || null,
-      id_image_url: idImageUrl || null,
-      status: "pending",
-    });
-    setReqDone(true);
-    setReqSubmitting(false);
   };
 
   // ── Admin delete / status actions ───────────────────────────────────────────
@@ -1787,81 +1735,6 @@ function SchoolBoard({
             </div>
           )}
 
-          {/* ── BECOME ADMIN ── */}
-          {activeTab === "become-admin" && (
-            <div className="sc-panel-content">
-              <div className="sc-section-title">
-                {s.becomeAdminTitle} {school.name}
-              </div>
-              {reqDone ? (
-                <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
-                  <p>{s.requestSubmittedMsg}</p>
-                  <p className="sc-success__sub">{s.requestSubmittedSub}</p>
-                </div>
-              ) : (
-                <form className="sc-form" onSubmit={handleBecomeAdmin}>
-                  <label className="sc-form__label">{s.fullNameLabel}</label>
-                  <input
-                    className="sc-form__input"
-                    value={user?.fullName || ""}
-                    readOnly
-                  />
-                  <label className="sc-form__label">{s.emailLabel}</label>
-                  <input
-                    className="sc-form__input"
-                    value={user?.primaryEmailAddress?.emailAddress || ""}
-                    readOnly
-                  />
-                  <label className="sc-form__label">{s.staffIdLabel}</label>
-                  <input
-                    className="sc-form__input"
-                    type="text"
-                    placeholder={s.staffIdPlaceholder}
-                    value={reqForm.teacherId}
-                    onChange={(e) =>
-                      setReqForm((p) => ({ ...p, teacherId: e.target.value }))
-                    }
-                  />
-                  <label className="sc-form__label">{s.uploadIdLabel}</label>
-                  <label
-                    className="sc-form__file-label"
-                    htmlFor="sc-admin-req-upload"
-                  >
-                    <span className="sc-form__file-icon">+</span>
-                    <span>{reqFile ? reqFile.name : s.uploadIdBtn}</span>
-                  </label>
-                  <input
-                    id="sc-admin-req-upload"
-                    className="sc-form__file"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      e.target.files?.[0] && setReqFile(e.target.files[0])
-                    }
-                  />
-                  <label className="sc-form__label">{s.extraAdminLabel}</label>
-                  <textarea
-                    className="sc-form__textarea"
-                    placeholder={s.extraAdminPlaceholder}
-                    value={reqForm.extraInfo}
-                    onChange={(e) =>
-                      setReqForm((p) => ({ ...p, extraInfo: e.target.value }))
-                    }
-                  />
-                  <button
-                    type="submit"
-                    className="sc-btn sc-btn--primary"
-                    style={{ background: color, borderColor: color }}
-                    disabled={reqSubmitting || !user}
-                  >
-                    {reqSubmitting ? s.submittingBtn : s.submitRequestBtn}
-                  </button>
-                </form>
-              )}
-            </div>
-          )}
-
           {/* ── ADMIN LOGIN ── */}
           {activeTab === "admin-login" && (
             <div className="sc-panel-content">
@@ -2005,7 +1878,6 @@ const DEFAULT_BOARD: BoardStrings = {
   itemsTab: "Items",
   addItemTab: "Report Found",
   reportLostTab: "Report Lost",
-  becomeAdminTab: "Become Admin",
   adminTab: "Admin",
   searchPlaceholder: "Search items...",
   foundTabLabel: "Found Items",
@@ -2039,19 +1911,6 @@ const DEFAULT_BOARD: BoardStrings = {
   postLostBtn: "Post Lost Item",
   postingLostBtn: "Posting...",
   lostPostedMsg: "Lost item reported!",
-  becomeAdminTitle: "Become a",
-  fullNameLabel: "Full Name",
-  emailLabel: "Email",
-  staffIdLabel: "Teacher / Staff ID",
-  staffIdPlaceholder: "T-00123",
-  uploadIdLabel: "Upload ID or Badge",
-  uploadIdBtn: "Upload ID or badge photo",
-  extraAdminLabel: "Anything else?",
-  extraAdminPlaceholder: "e.g. I manage the lost and found office...",
-  submitRequestBtn: "Submit Request",
-  submittingBtn: "Submitting...",
-  requestSubmittedMsg: "Request submitted!",
-  requestSubmittedSub: "The school's super-admin will review your request.",
   adminLoginTitle: "School Admin Access",
   adminLoginHint: "Enter the password from your Findr approval email.",
   adminPasswordLabel: "Admin Password",
@@ -2160,7 +2019,6 @@ export default function SchoolsPage() {
     }
 
     const translateAll = async () => {
-      // Helper that writes into a partial accumulator for each string bundle
       const t = (
         key: string,
         cacheKey: string,
@@ -2296,7 +2154,6 @@ export default function SchoolsPage() {
         ["itemsTab", "Items", "sc_board_itemsTab"],
         ["addItemTab", "Report Found", "sc_board_addItemTab"],
         ["reportLostTab", "Report Lost", "sc_board_reportLostTab"],
-        ["becomeAdminTab", "Become Admin", "sc_board_becomeAdminTab"],
         ["adminTab", "Admin", "sc_board_adminTab"],
         ["searchPlaceholder", "Search items...", "sc_board_searchPlaceholder"],
         ["foundTabLabel", "Found Items", "sc_board_foundTabLabel"],
@@ -2330,19 +2187,6 @@ export default function SchoolsPage() {
         ["postLostBtn", "Post Lost Item", "sc_board_postLostBtn"],
         ["postingLostBtn", "Posting...", "sc_board_postingLostBtn"],
         ["lostPostedMsg", "Lost item reported!", "sc_board_lostPostedMsg"],
-        ["becomeAdminTitle", "Become a", "sc_board_becomeAdminTitle"],
-        ["fullNameLabel", "Full Name", "sc_board_fullNameLabel"],
-        ["emailLabel", "Email", "sc_board_emailLabel"],
-        ["staffIdLabel", "Teacher / Staff ID", "sc_board_staffIdLabel"],
-        ["staffIdPlaceholder", "T-00123", "sc_board_staffIdPlaceholder"],
-        ["uploadIdLabel", "Upload ID or Badge", "sc_board_uploadIdLabel"],
-        ["uploadIdBtn", "Upload ID or badge photo", "sc_board_uploadIdBtn"],
-        ["extraAdminLabel", "Anything else?", "sc_board_extraAdminLabel"],
-        ["extraAdminPlaceholder", DEFAULT_BOARD.extraAdminPlaceholder, "sc_board_extraAdminPlaceholder"],
-        ["submitRequestBtn", "Submit Request", "sc_board_submitRequestBtn"],
-        ["submittingBtn", "Submitting...", "sc_board_submittingBtn"],
-        ["requestSubmittedMsg", "Request submitted!", "sc_board_requestSubmittedMsg"],
-        ["requestSubmittedSub", DEFAULT_BOARD.requestSubmittedSub, "sc_board_requestSubmittedSub"],
         ["adminLoginTitle", "School Admin Access", "sc_board_adminLoginTitle"],
         ["adminLoginHint", DEFAULT_BOARD.adminLoginHint, "sc_board_adminLoginHint"],
         ["adminPasswordLabel", "Admin Password", "sc_board_adminPasswordLabel"],
