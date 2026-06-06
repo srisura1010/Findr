@@ -12,6 +12,7 @@ import {
   FaClipboard,
   FaFlag,
   FaTriangleExclamation,
+  FaPlus,
 } from "react-icons/fa6";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { CiLogin } from "react-icons/ci";
@@ -58,8 +59,7 @@ interface BannedUser {
 type TabId =
   | "items"
   | "my-items"
-  | "add-item"
-  | "report-lost"
+  | "report-item"
   | "become-admin"
   | "admin-login"
   | "reports"
@@ -103,8 +103,7 @@ interface DashStrings {
   // Sidebar tabs
   tabItems: string;
   tabMyItems: string;
-  tabAddItem: string;
-  tabReportLost: string;
+  tabReportItem: string;
   tabBecomeAdmin: string;
   tabAdmin: string;
   tabReports: string;
@@ -127,6 +126,9 @@ interface DashStrings {
   noLostItems: string;
   noLostItemsSearch: string;
   clickReportLost: string;
+  // Toggle
+  toggleFound: string;
+  toggleLost: string;
   // Add found item form
   reportFoundTitle: string;
   itemPosted: string;
@@ -225,8 +227,7 @@ interface DashStrings {
 const DEFAULT_STRINGS: DashStrings = {
   tabItems: "Items",
   tabMyItems: "My Items",
-  tabAddItem: "Report Found Item",
-  tabReportLost: "Report Lost Item",
+  tabReportItem: "Lost/Found Item",
   tabBecomeAdmin: "Become an Admin",
   tabAdmin: "Admin",
   tabReports: "Reports",
@@ -247,6 +248,8 @@ const DEFAULT_STRINGS: DashStrings = {
   noLostItemsSearch: "No lost items found for",
   clickReportLost:
     'Click "Report Lost Item" in the sidebar to post what you lost.',
+  toggleFound: "Found an Item",
+  toggleLost: "Lost an Item",
   reportFoundTitle: "Report Found Item",
   itemPosted: "Item posted!",
   itemNameLabel: "Item Name",
@@ -1085,6 +1088,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
   const [reportsTab, setReportsTab] = useState<"items" | "users">("items");
+  const [reportMode, setReportMode] = useState<"found" | "lost">("found");
   const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
 
   const [banChecked, setBanChecked] = useState(false);
@@ -1145,8 +1149,7 @@ export default function DashboardPage() {
     const translations: [keyof DashStrings, string, string][] = [
       ["tabItems", "Items", "dash_tabItems"],
       ["tabMyItems", "My Items", "dash_tabMyItems"],
-      ["tabAddItem", "Report Found Item", "dash_tabAddItem"],
-      ["tabReportLost", "Report Lost Item", "dash_tabReportLost"],
+      ["tabReportItem", "Lost/Found Item", "dash_tabReportItem"],
       ["tabBecomeAdmin", "Become an Admin", "dash_tabBecomeAdmin"],
       ["tabAdmin", "Admin", "dash_tabAdmin"],
       ["tabReports", "Reports", "dash_tabReports"],
@@ -1174,6 +1177,8 @@ export default function DashboardPage() {
         DEFAULT_STRINGS.clickReportLost,
         "dash_clickReportLost",
       ],
+      ["toggleFound", "Found an Item", "dash_toggleFound"],
+      ["toggleLost", "Lost an Item", "dash_toggleLost"],
       ["reportFoundTitle", "Report Found Item", "dash_reportFoundTitle"],
       ["itemPosted", "Item posted!", "dash_itemPosted"],
       ["itemNameLabel", "Item Name", "dash_itemNameLabel"],
@@ -1550,7 +1555,7 @@ export default function DashboardPage() {
       })
     : (lostItems ?? []);
 
-  // ── Sidebar tabs (derived from s so they update with language) ────────────
+  // ── Sidebar tabs ────────────────────────────────────────────────────────
   const SIDEBAR_TABS: {
     id: TabId;
     label: string;
@@ -1559,12 +1564,7 @@ export default function DashboardPage() {
   }[] = [
     { id: "items", label: s.tabItems, icon: <HiOutlineMagnifyingGlass /> },
     { id: "my-items", label: s.tabMyItems, icon: <FaClipboard /> },
-    { id: "add-item", label: s.tabAddItem, icon: <FaFlag /> },
-    {
-      id: "report-lost",
-      label: s.tabReportLost,
-      icon: <FaTriangleExclamation />,
-    },
+    { id: "report-item", label: s.tabReportItem, icon: <FaPlus /> },
     { id: "become-admin", label: s.tabBecomeAdmin, icon: <FaClipboard /> },
     { id: "admin-login", label: s.tabAdmin, icon: <CiLogin /> },
     {
@@ -1582,231 +1582,290 @@ export default function DashboardPage() {
     { id: "inbox", label: s.tabInbox, icon: <IoMdMailOpen />, adminOnly: true },
   ];
 
+  // ── Report Item pill toggle ───────────────────────────────────────────────
+  const ReportItemToggle = () => (
+    <div
+      style={{
+        display: "flex",
+        background: "var(--bg-input)",
+        border: "1.5px solid var(--border-input)",
+        borderRadius: "100px",
+        padding: "4px",
+        gap: "2px",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      {(["found", "lost"] as const).map((mode) => {
+        const isActive = reportMode === mode;
+        return (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => setReportMode(mode)}
+            style={{
+              flex: 1,
+              padding: "9px 0",
+              borderRadius: "100px",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "13px",
+              fontWeight: 700,
+              letterSpacing: "0.1px",
+              transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              background: isActive ? "var(--accent)" : "transparent",
+              color: isActive ? "#fff" : "var(--text-muted)",
+              boxShadow: isActive
+                ? "0 2px 10px rgba(var(--accent-rgb, 47,128,237), 0.35)"
+                : "none",
+              transform: isActive ? "scale(1.02)" : "scale(1)",
+            }}
+          >
+            {mode === "found" ? s.toggleFound : s.toggleLost}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   const renderMainContent = () => {
     switch (activeTab) {
-      case "add-item":
+      case "report-item":
         return (
           <div className="main-panel-content">
-            <div className="main-panel-section-title">{s.reportFoundTitle}</div>
-            {uploadSuccess ? (
-              <div className="panel-success">
-                <span className="panel-success__icon">✓</span>
-                <p>{s.itemPosted}</p>
-              </div>
-            ) : (
-              <form className="panel-form" onSubmit={handleSubmit}>
-                <label className="panel-form__label">{s.itemNameLabel}</label>
-                <input
-                  type="text"
-                  placeholder={s.itemNamePlaceholder}
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  required
-                  className="panel-form__input"
-                />
-                <label className="panel-form__label">
-                  {s.descriptionLabel}
-                </label>
-                <textarea
-                  placeholder={s.descriptionPlaceholder}
-                  value={newItemDesc}
-                  onChange={(e) => setNewItemDesc(e.target.value)}
-                  required
-                  className="panel-form__textarea"
-                />
-                <label className="panel-form__label">{s.photosLabel}</label>
-                <label
-                  className="panel-form__file-label"
-                  htmlFor="found-file-upload"
-                >
-                  <span className="panel-form__file-icon">+</span>
-                  <span className="panel-form__file-text">
-                    {selectedFiles.length > 0
-                      ? `${selectedFiles.length} ${s.photosSelected}`
-                      : s.uploadPhotos}
-                  </span>
-                </label>
-                <input
-                  id="found-file-upload"
-                  className="panel-form__file"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  required
-                  onChange={(e) => {
-                    if (e.target.files)
-                      setSelectedFiles(Array.from(e.target.files).slice(0, 3));
-                  }}
-                />
-                <p className="panel-form__file-hint">{s.photoHint}</p>
-                {selectedFiles.length > 0 && (
-                  <div className="panel-form__preview-wrap">
-                    {selectedFiles.map((file, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          position: "relative",
-                          display: "inline-block",
-                          marginRight: "8px",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`preview ${idx + 1}`}
-                          className="panel-form__preview"
-                        />
-                        <button
-                          type="button"
-                          className="panel-form__preview-remove"
-                          onClick={() =>
-                            setSelectedFiles(
-                              selectedFiles.filter((_, i) => i !== idx),
-                            )
-                          }
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="panel-form__actions">
-                  <button
-                    type="button"
-                    className="panel-form__cancel"
-                    onClick={() => {
-                      setNewItemName("");
-                      setNewItemDesc("");
-                      setSelectedFiles([]);
-                      setActiveTab("items");
-                    }}
-                  >
-                    {s.cancelBtn}
-                  </button>
-                  <button
-                    type="submit"
-                    className="panel-form__submit"
-                    disabled={isUploading}
-                  >
-                    {isUploading ? s.uploadingBtn : s.postItemBtn}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        );
+            <div className="main-panel-section-title">
+              {reportMode === "found" ? s.reportFoundTitle : s.reportLostTitle}
+            </div>
 
-      case "report-lost":
-        return (
-          <div className="main-panel-content">
-            <div className="main-panel-section-title">{s.reportLostTitle}</div>
-            {lostItemSuccess ? (
-              <div className="panel-success">
-                <span className="panel-success__icon">✓</span>
-                <p>{s.lostItemPosted}</p>
-              </div>
-            ) : (
-              <form className="panel-form" onSubmit={handleLostSubmit}>
-                <label className="panel-form__label">{s.whatLostLabel}</label>
-                <input
-                  type="text"
-                  placeholder={s.itemNameDefault}
-                  value={lostItemName}
-                  onChange={(e) => setLostItemName(e.target.value)}
-                  required
-                  className="panel-form__input"
-                />
-                <label className="panel-form__label">
-                  {s.descriptionLabel}
-                </label>
-                <textarea
-                  placeholder={s.descLostPlaceholder}
-                  value={lostItemDesc}
-                  onChange={(e) => setLostItemDesc(e.target.value)}
-                  required
-                  className="panel-form__textarea"
-                />
-                <label className="panel-form__label">{s.photosLabel}</label>
-                <label
-                  className="panel-form__file-label"
-                  htmlFor="lost-file-upload"
-                >
-                  <span className="panel-form__file-icon">+</span>
-                  <span className="panel-form__file-text">
-                    {lostSelectedFiles.length > 0
-                      ? `${lostSelectedFiles.length} ${s.photosSelected}`
-                      : s.uploadPhotos}
-                  </span>
-                </label>
-                <input
-                  id="lost-file-upload"
-                  className="panel-form__file"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    if (e.target.files)
-                      setLostSelectedFiles(
-                        Array.from(e.target.files).slice(0, 3),
-                      );
-                  }}
-                />
-                <p className="panel-form__file-hint">{s.photoHint}</p>
-                {lostSelectedFiles.length > 0 && (
-                  <div className="panel-form__preview-wrap">
-                    {lostSelectedFiles.map((file, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          position: "relative",
-                          display: "inline-block",
-                          marginRight: "8px",
-                          marginBottom: "8px",
+            {/* Pill toggle */}
+            <ReportItemToggle />
+
+            {/* ── Found form ── */}
+            {reportMode === "found" && (
+              <>
+                {uploadSuccess ? (
+                  <div className="panel-success">
+                    <span className="panel-success__icon">✓</span>
+                    <p>{s.itemPosted}</p>
+                  </div>
+                ) : (
+                  <form className="panel-form" onSubmit={handleSubmit}>
+                    <label className="panel-form__label">{s.itemNameLabel}</label>
+                    <input
+                      type="text"
+                      placeholder={s.itemNamePlaceholder}
+                      value={newItemName}
+                      onChange={(e) => setNewItemName(e.target.value)}
+                      required
+                      className="panel-form__input"
+                    />
+                    <label className="panel-form__label">
+                      {s.descriptionLabel}
+                    </label>
+                    <textarea
+                      placeholder={s.descriptionPlaceholder}
+                      value={newItemDesc}
+                      onChange={(e) => setNewItemDesc(e.target.value)}
+                      required
+                      className="panel-form__textarea"
+                    />
+                    <label className="panel-form__label">{s.photosLabel}</label>
+                    <label
+                      className="panel-form__file-label"
+                      htmlFor="found-file-upload"
+                    >
+                      <span className="panel-form__file-icon">+</span>
+                      <span className="panel-form__file-text">
+                        {selectedFiles.length > 0
+                          ? `${selectedFiles.length} ${s.photosSelected}`
+                          : s.uploadPhotos}
+                      </span>
+                    </label>
+                    <input
+                      id="found-file-upload"
+                      className="panel-form__file"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      required
+                      onChange={(e) => {
+                        if (e.target.files)
+                          setSelectedFiles(
+                            Array.from(e.target.files).slice(0, 3),
+                          );
+                      }}
+                    />
+                    <p className="panel-form__file-hint">{s.photoHint}</p>
+                    {selectedFiles.length > 0 && (
+                      <div className="panel-form__preview-wrap">
+                        {selectedFiles.map((file, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              position: "relative",
+                              display: "inline-block",
+                              marginRight: "8px",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`preview ${idx + 1}`}
+                              className="panel-form__preview"
+                            />
+                            <button
+                              type="button"
+                              className="panel-form__preview-remove"
+                              onClick={() =>
+                                setSelectedFiles(
+                                  selectedFiles.filter((_, i) => i !== idx),
+                                )
+                              }
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="panel-form__actions">
+                      <button
+                        type="button"
+                        className="panel-form__cancel"
+                        onClick={() => {
+                          setNewItemName("");
+                          setNewItemDesc("");
+                          setSelectedFiles([]);
+                          setActiveTab("items");
                         }}
                       >
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`preview ${idx + 1}`}
-                          className="panel-form__preview"
-                        />
-                        <button
-                          type="button"
-                          className="panel-form__preview-remove"
-                          onClick={() =>
-                            setLostSelectedFiles(
-                              lostSelectedFiles.filter((_, i) => i !== idx),
-                            )
-                          }
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                        {s.cancelBtn}
+                      </button>
+                      <button
+                        type="submit"
+                        className="panel-form__submit"
+                        disabled={isUploading}
+                      >
+                        {isUploading ? s.uploadingBtn : s.postItemBtn}
+                      </button>
+                    </div>
+                  </form>
                 )}
-                <div className="panel-form__actions">
-                  <button
-                    type="button"
-                    className="panel-form__cancel"
-                    onClick={() => {
-                      setLostItemName("");
-                      setLostItemDesc("");
-                      setLostSelectedFiles([]);
-                      setActiveTab("items");
-                    }}
-                  >
-                    {s.cancelBtn}
-                  </button>
-                  <button
-                    type="submit"
-                    className="panel-form__submit"
-                    disabled={lostItemUploading}
-                  >
-                    {lostItemUploading ? s.postingBtn : s.postLostBtn}
-                  </button>
-                </div>
-              </form>
+              </>
+            )}
+
+            {/* ── Lost form ── */}
+            {reportMode === "lost" && (
+              <>
+                {lostItemSuccess ? (
+                  <div className="panel-success">
+                    <span className="panel-success__icon">✓</span>
+                    <p>{s.lostItemPosted}</p>
+                  </div>
+                ) : (
+                  <form className="panel-form" onSubmit={handleLostSubmit}>
+                    <label className="panel-form__label">{s.whatLostLabel}</label>
+                    <input
+                      type="text"
+                      placeholder={s.itemNameDefault}
+                      value={lostItemName}
+                      onChange={(e) => setLostItemName(e.target.value)}
+                      required
+                      className="panel-form__input"
+                    />
+                    <label className="panel-form__label">
+                      {s.descriptionLabel}
+                    </label>
+                    <textarea
+                      placeholder={s.descLostPlaceholder}
+                      value={lostItemDesc}
+                      onChange={(e) => setLostItemDesc(e.target.value)}
+                      required
+                      className="panel-form__textarea"
+                    />
+                    <label className="panel-form__label">{s.photosLabel}</label>
+                    <label
+                      className="panel-form__file-label"
+                      htmlFor="lost-file-upload"
+                    >
+                      <span className="panel-form__file-icon">+</span>
+                      <span className="panel-form__file-text">
+                        {lostSelectedFiles.length > 0
+                          ? `${lostSelectedFiles.length} ${s.photosSelected}`
+                          : s.uploadPhotos}
+                      </span>
+                    </label>
+                    <input
+                      id="lost-file-upload"
+                      className="panel-form__file"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files)
+                          setLostSelectedFiles(
+                            Array.from(e.target.files).slice(0, 3),
+                          );
+                      }}
+                    />
+                    <p className="panel-form__file-hint">{s.photoHint}</p>
+                    {lostSelectedFiles.length > 0 && (
+                      <div className="panel-form__preview-wrap">
+                        {lostSelectedFiles.map((file, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              position: "relative",
+                              display: "inline-block",
+                              marginRight: "8px",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`preview ${idx + 1}`}
+                              className="panel-form__preview"
+                            />
+                            <button
+                              type="button"
+                              className="panel-form__preview-remove"
+                              onClick={() =>
+                                setLostSelectedFiles(
+                                  lostSelectedFiles.filter((_, i) => i !== idx),
+                                )
+                              }
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="panel-form__actions">
+                      <button
+                        type="button"
+                        className="panel-form__cancel"
+                        onClick={() => {
+                          setLostItemName("");
+                          setLostItemDesc("");
+                          setLostSelectedFiles([]);
+                          setActiveTab("items");
+                        }}
+                      >
+                        {s.cancelBtn}
+                      </button>
+                      <button
+                        type="submit"
+                        className="panel-form__submit"
+                        disabled={lostItemUploading}
+                      >
+                        {lostItemUploading ? s.postingBtn : s.postLostBtn}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </>
             )}
           </div>
         );
