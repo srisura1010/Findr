@@ -21,7 +21,7 @@ import { ImHammer2 } from "react-icons/im";
 import { IoMdMailOpen } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
-import Cropper from 'react-easy-crop'
+import Cropper from "react-easy-crop";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Report {
@@ -97,6 +97,58 @@ async function fetchTranslation(
   } catch {
     setter(key);
   }
+}
+
+// ── Crop helper ───────────────────────────────────────────────────────────────
+async function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number },
+  rotation = 0,
+): Promise<File> {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.addEventListener("load", () => resolve(img));
+    img.addEventListener("error", reject);
+    img.src = imageSrc;
+  });
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+
+  const maxSize = Math.max(image.width, image.height);
+  const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
+
+  canvas.width = safeArea;
+  canvas.height = safeArea;
+
+  ctx.translate(safeArea / 2, safeArea / 2);
+  ctx.rotate((rotation * Math.PI) / 180);
+  ctx.translate(-safeArea / 2, -safeArea / 2);
+  ctx.drawImage(
+    image,
+    safeArea / 2 - image.width * 0.5,
+    safeArea / 2 - image.height * 0.5,
+  );
+
+  const data = ctx.getImageData(0, 0, safeArea, safeArea);
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+
+  ctx.putImageData(
+    data,
+    Math.round(0 - safeArea / 2 + image.width * 0.5 - pixelCrop.x),
+    Math.round(0 - safeArea / 2 + image.height * 0.5 - pixelCrop.y),
+  );
+
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => {
+        resolve(new File([blob!], "cropped.jpg", { type: "image/jpeg" }));
+      },
+      "image/jpeg",
+      0.92,
+    );
+  });
 }
 
 // ── String bundle types ───────────────────────────────────────────────────────
@@ -1335,6 +1387,67 @@ export default function DashboardPage() {
   const [lostItemUploading, setLostItemUploading] = useState(false);
   const [lostItemSuccess, setLostItemSuccess] = useState(false);
 
+  // ── Crop state ────────────────────────────────────────────────────────────
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropIndex, setCropIndex] = useState(0);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"found" | "lost" | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [cropResults, setCropResults] = useState<File[]>([]);
+
+  const startCropQueue = (files: File[], target: "found" | "lost") => {
+    setCropResults([]);
+    setCropQueue(files);
+    setCropIndex(0);
+    setCropTarget(target);
+    const url = URL.createObjectURL(files[0]);
+    setCropSrc(url);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setRotation(0);
+  };
+
+  const advanceCropQueue = (results: File[], queue: File[], idx: number, target: "found" | "lost") => {
+    URL.revokeObjectURL(cropSrc!);
+    if (idx + 1 < queue.length) {
+      setCropResults(results);
+      setCropIndex(idx + 1);
+      setCropSrc(URL.createObjectURL(queue[idx + 1]));
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setRotation(0);
+    } else {
+      if (target === "found") setSelectedFiles(results);
+      else setLostSelectedFiles(results);
+      setCropSrc(null);
+      setCropQueue([]);
+      setCropResults([]);
+      setCropTarget(null);
+    }
+  };
+
+  const handleCropConfirm = async () => {
+    if (!cropSrc || !croppedAreaPixels || !cropTarget) return;
+    const cropped = await getCroppedImg(cropSrc, croppedAreaPixels, rotation);
+    const newResults = [...cropResults, cropped];
+    advanceCropQueue(newResults, cropQueue, cropIndex, cropTarget);
+  };
+
+  const handleCropSkip = () => {
+    if (!cropSrc || !cropTarget) return;
+    const original = cropQueue[cropIndex];
+    const newResults = [...cropResults, original];
+    advanceCropQueue(newResults, cropQueue, cropIndex, cropTarget);
+  };
+
   const handleConfirmClaimed = async (itemId: number) => {
     const { error } = await supabase.from("items").delete().eq("id", itemId);
     if (!error) updateItemStatus(itemId, "claimed");
@@ -1691,10 +1804,10 @@ export default function DashboardPage() {
                       multiple
                       required
                       onChange={(e) => {
-                        if (e.target.files)
-                          setSelectedFiles(
-                            Array.from(e.target.files).slice(0, 3),
-                          );
+                        if (e.target.files) {
+                          const files = Array.from(e.target.files).slice(0, 3);
+                          if (files.length > 0) startCropQueue(files, "found");
+                        }
                       }}
                     />
                     <p className="panel-form__file-hint">{s.photoHint}</p>
@@ -1804,10 +1917,10 @@ export default function DashboardPage() {
                       accept="image/*"
                       multiple
                       onChange={(e) => {
-                        if (e.target.files)
-                          setLostSelectedFiles(
-                            Array.from(e.target.files).slice(0, 3),
-                          );
+                        if (e.target.files) {
+                          const files = Array.from(e.target.files).slice(0, 3);
+                          if (files.length > 0) startCropQueue(files, "lost");
+                        }
                       }}
                     />
                     <p className="panel-form__file-hint">{s.photoHint}</p>
@@ -2342,6 +2455,198 @@ export default function DashboardPage() {
           </>
         )}
       </main>
+
+      {/* ── CROP MODAL ── */}
+      {cropSrc && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.88)",
+            zIndex: 2000,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+            gap: "14px",
+          }}
+        >
+          {/* Header */}
+          <p
+            style={{
+              color: "#fff",
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 700,
+              fontSize: "15px",
+              margin: 0,
+              letterSpacing: "-0.1px",
+            }}
+          >
+            Crop Photo
+            {cropQueue.length > 1
+              ? ` (${cropIndex + 1} of ${cropQueue.length})`
+              : ""}
+          </p>
+
+          {/* Cropper box — 16:10 matches .item-image-wrapper aspect-ratio */}
+          <div
+            style={{
+              position: "relative",
+              width: "min(90vw, 600px)",
+              aspectRatio: "16 / 10",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "2px solid rgba(255,255,255,0.12)",
+            }}
+          >
+            <Cropper
+              image={cropSrc}
+              crop={crop}
+              zoom={zoom}
+              rotation={rotation}
+              aspect={16 / 10}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onRotationChange={setRotation}
+              onCropComplete={(_area, pixels) => setCroppedAreaPixels(pixels)}
+            />
+          </div>
+
+          {/* Controls */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              width: "min(90vw, 600px)",
+              background: "rgba(255,255,255,0.06)",
+              borderRadius: "10px",
+              padding: "14px 16px",
+            }}
+          >
+            {/* Zoom */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.55)",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.6px",
+                  minWidth: 44,
+                }}
+              >
+                Zoom
+              </span>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.05}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "var(--accent)" }}
+              />
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.4)",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "11px",
+                  minWidth: 32,
+                  textAlign: "right",
+                }}
+              >
+                {zoom.toFixed(1)}×
+              </span>
+            </div>
+
+            {/* Rotate */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.55)",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.6px",
+                  minWidth: 44,
+                }}
+              >
+                Rotate
+              </span>
+              <input
+                type="range"
+                min={-180}
+                max={180}
+                step={1}
+                value={rotation}
+                onChange={(e) => setRotation(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "var(--accent)" }}
+              />
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.4)",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "11px",
+                  minWidth: 32,
+                  textAlign: "right",
+                }}
+              >
+                {rotation}°
+              </span>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              width: "min(90vw, 600px)",
+            }}
+          >
+            <button
+              onClick={handleCropSkip}
+              style={{
+                flex: 1,
+                padding: "13px 0",
+                borderRadius: "9px",
+                border: "1.5px solid rgba(255,255,255,0.2)",
+                background: "transparent",
+                color: "rgba(255,255,255,0.7)",
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "border-color 0.15s ease, color 0.15s ease",
+              }}
+            >
+              Skip crop
+            </button>
+            <button
+              onClick={handleCropConfirm}
+              style={{
+                flex: 2,
+                padding: "13px 0",
+                borderRadius: "9px",
+                border: "none",
+                background: "var(--accent)",
+                color: "#fff",
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "background 0.15s ease, transform 0.12s ease",
+              }}
+            >
+              Apply Crop
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
