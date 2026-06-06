@@ -1985,7 +1985,7 @@ export default function SchoolsPage() {
   const [mySchoolsTabText, setMySchoolsTabText] = useState("My Schools");
   const [registerTabText, setRegisterTabText] = useState("Register School");
   const [yourSchoolsText, setYourSchoolsText] = useState("Your Schools");
-  const [schoolBoardsText, setSchoolBoardsText] = useState("School boards");
+  const [schoolBoardsText, setSchoolBoardsText] = useState("Your School boards");
 
   const [aboutStrings, setAboutStrings] =
     useState<AboutStrings>(DEFAULT_ABOUT);
@@ -2059,7 +2059,7 @@ export default function SchoolsPage() {
       setMySchoolsTabText("My Schools");
       setRegisterTabText("Register School");
       setYourSchoolsText("Your Schools");
-      setSchoolBoardsText("School boards");
+      setSchoolBoardsText("Your School boards");
       setAboutStrings(DEFAULT_ABOUT);
       setEnterCodeStrings(DEFAULT_ENTER_CODE);
       setRegisterStrings(DEFAULT_REGISTER);
@@ -2082,7 +2082,7 @@ export default function SchoolsPage() {
         t("My Schools", "sc_tab_mySchools", setMySchoolsTabText),
         t("Register School", "sc_tab_registerSchool", setRegisterTabText),
         t("Your Schools", "sc_sidebar_yourSchools", setYourSchoolsText),
-        t("School boards", "sc_sidebar_schoolBoards", setSchoolBoardsText),
+        t("Your School Boards", "sc_sidebar_schoolBoards", setSchoolBoardsText),
       ];
 
       const aboutSetters: [keyof AboutStrings, string, string][] = [

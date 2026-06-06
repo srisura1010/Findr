@@ -230,7 +230,7 @@ export default function MessagesPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [isReady, setIsReady] = useState(false);
-  const [uiMessagesTitle, setUiMessagesTitle] = useState("Messages");
+  const [uiMessagesTitle, setUiMessagesTitle] = useState("Findr Messages");
   const [uiNoConversations, setUiNoConversations] = useState(
     "No conversations yet.",
   );
@@ -252,7 +252,7 @@ export default function MessagesPage() {
         startConversation,
         typePlaceholder,
       ] = await Promise.all([
-        t("Messages", language),
+        t("Findr Messages", language),
         t("No conversations yet.", language),
         t("Select a conversation to start chatting", language),
         t("Start the conversation!", language),
@@ -541,7 +541,7 @@ export default function MessagesPage() {
             <MdOutlineMessage size={22} />
           </span>
           <div>
-            <p className="messages-sidebar__brand-title">Messages</p>
+            <p className="messages-sidebar__brand-title">Findr Messages</p>
             <p className="messages-sidebar__brand-sub">Your conversations</p>
           </div>
         </div>

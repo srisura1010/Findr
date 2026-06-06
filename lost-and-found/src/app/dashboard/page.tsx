@@ -2048,8 +2048,8 @@ export default function DashboardPage() {
             <HiOutlineMagnifyingGlass />
           </span>
           <div>
-            <p className="dashboard-sidebar__brand-title">Findr</p>
-            <p className="dashboard-sidebar__brand-sub">Lost & Found</p>
+            <p className="dashboard-sidebar__brand-title">Findr Dashboard</p>
+            <p className="dashboard-sidebar__brand-sub">Your Lost & Found</p>
           </div>
         </div>
         <div className="sidebar-tabs">
