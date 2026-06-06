@@ -267,8 +267,8 @@ export default function LocationPicker({
       if (res.ok) {
         const data = await res.json();
         return (
-          data.shortAddress ||
           data.displayName ||
+          data.shortAddress ||
           `${lat.toFixed(5)}, ${lng.toFixed(5)}`
         );
       }
@@ -304,10 +304,13 @@ export default function LocationPicker({
   );
 
   const handleSelectResult = (r: GeoResult) => {
-    setSearchQuery(r.shortName);
+    const fullAddress =
+      [r.street, r.city, r.state, r.postcode].filter(Boolean).join(", ") ||
+      r.shortName;
+    setSearchQuery(fullAddress);
     setShowDropdown(false);
     setSearchResults([]);
-    onChange({ lat: r.lat, lng: r.lng, address: r.shortName });
+    onChange({ lat: r.lat, lng: r.lng, address: fullAddress });
     mapRef.current?.setView([r.lat, r.lng], 16);
   };
 
