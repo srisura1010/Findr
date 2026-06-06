@@ -20,9 +20,35 @@ export default function LocationMap({
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    if (mapRef.current || !mapContainerRef.current) return;
+    if (!mapContainerRef.current) return;
+
+    let cancelled = false;
+
+    // Hard-reset stale Leaflet state (fixes double-init in StrictMode / HMR / page refresh)
+    const container = mapContainerRef.current;
+    if ((container as any)._leaflet_id) {
+      delete (container as any)._leaflet_id;
+    }
+    container.innerHTML = "";
+
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+    }
+
+    setMapReady(false);
 
     import("leaflet").then((L) => {
+      // If cleanup already ran (StrictMode unmount), bail out
+      if (cancelled || !mapContainerRef.current) return;
+
+      // Re-check: another effect cycle may have already set _leaflet_id
+      const c = mapContainerRef.current;
+      if ((c as any)._leaflet_id) {
+        delete (c as any)._leaflet_id;
+        c.innerHTML = "";
+      }
+
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
         iconRetinaUrl:
@@ -32,13 +58,13 @@ export default function LocationMap({
           "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
-      const map = L.map(mapContainerRef.current!, {
+      const map = L.map(mapContainerRef.current, {
         center: [lat, lng],
         zoom,
         zoomControl: true,
         attributionControl: false,
         dragging: true,
-        scrollWheelZoom: false, // prevents accidental zoom while scrolling page
+        scrollWheelZoom: false,
         doubleClickZoom: true,
       });
 
@@ -46,7 +72,6 @@ export default function LocationMap({
         maxZoom: 19,
       }).addTo(map);
 
-      // Custom pin icon matching the app accent colour
       const pinIcon = L.divIcon({
         className: "",
         html: `<div style="
@@ -86,12 +111,14 @@ export default function LocationMap({
     });
 
     return () => {
+      cancelled = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      setMapReady(false);
     };
-  }, []);
+  }, [lat, lng, address, zoom]);
 
   const handleOpenInMaps = () => {
     window.open(
@@ -112,13 +139,11 @@ export default function LocationMap({
         background: "var(--bg-card)",
       }}
     >
-      {/* Leaflet CSS */}
       <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       />
 
-      {/* Address header */}
       {address && (
         <div
           style={{
@@ -170,7 +195,6 @@ export default function LocationMap({
         </div>
       )}
 
-      {/* Map */}
       <div style={{ position: "relative", height: "260px" }}>
         <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
         {!mapReady && (

@@ -379,7 +379,10 @@ export default function ItemDetailPage() {
     : null;
 
   const hasLocation =
-    typeof item.latitude === "number" && typeof item.longitude === "number";
+  item.latitude != null &&
+  item.longitude != null &&
+  !isNaN(Number(item.latitude)) &&
+  !isNaN(Number(item.longitude));
 
   return (
     <div className="detail-page">
@@ -519,8 +522,8 @@ export default function ItemDetailPage() {
                 {isLost ? "Last seen location" : "Found location"}
               </p>
               <LocationMap
-                lat={item.latitude}
-                lng={item.longitude}
+                lat={Number(item.latitude)}
+                lng={Number(item.longitude)}
                 address={item.location ?? undefined}
               />
             </div>
