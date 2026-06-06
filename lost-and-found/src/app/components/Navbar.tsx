@@ -185,20 +185,24 @@ export default function Navbar() {
 
         {/* Right cluster */}
         <div className="topbar__right">
+
+          <button
+            className="topbar__icon-btn topbar__icon-btn--settings"
+            onClick={() => router.push("/settings")}
+            aria-label="Settings"
+            title="Settings"
+          >
+            <CiSettings size={30} />
+          </button>
+
           <button
             className="topbar__icon-btn"
             onClick={() => router.push("/help")}
             aria-label={helpText}
             title={helpText}
+            style={{ marginRight: "8px", marginLeft: "2px"}}
           >
-            <MdOutlineHelp size={20} />
-          </button>
-
-          <button
-            className="topbar__icon-btn topbar__icon-btn--settings"
-            onClick={() => router.push("/settings")}
-          >
-            <CiSettings size={20} />
+            <MdOutlineHelp size={30} />
           </button>
 
           <div className="topbar__divider" />
