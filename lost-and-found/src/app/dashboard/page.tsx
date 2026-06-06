@@ -2489,12 +2489,12 @@ export default function DashboardPage() {
               : ""}
           </p>
 
-          {/* Cropper box — 16:10 matches .item-image-wrapper aspect-ratio */}
+          {/* Cropper box — 4:3 comes close to matching .item-image-wrapper aspect-ratio */}
           <div
             style={{
               position: "relative",
               width: "min(90vw, 600px)",
-              aspectRatio: "16 / 10",
+              aspectRatio: "4 / 3",
               borderRadius: "12px",
               overflow: "hidden",
               border: "2px solid rgba(255,255,255,0.12)",
@@ -2505,7 +2505,7 @@ export default function DashboardPage() {
               crop={crop}
               zoom={zoom}
               rotation={rotation}
-              aspect={16 / 10}
+              aspect={6 / 5}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onRotationChange={setRotation}
