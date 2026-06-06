@@ -150,7 +150,7 @@ async function fetchTranslation(
   }
 }
 
-// ─── BoardStrings type ─────────────────────────────────────────────────────────
+// ─── BoardStrings ──────────────────────────────────────────────────────────────
 interface BoardStrings {
   backBtn: string;
   adminBadge: string;
@@ -253,7 +253,7 @@ const DEFAULT_BOARD: BoardStrings = {
   adminIncorrect: "Incorrect password or not approved yet.",
 };
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export default function SchoolBoardPage() {
   const { schoolId } = useParams<{ schoolId: string }>();
   const router = useRouter();
@@ -265,10 +265,10 @@ export default function SchoolBoardPage() {
   const [s, setS] = useState<BoardStrings>(DEFAULT_BOARD);
   const [stringsReady, setStringsReady] = useState(false);
 
-  // ── Fetch school ──────────────────────────────────────────────────────────
+  // ── Fetch school ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!schoolId) return;
-    const fetch_ = async () => {
+    const fetchSchool = async () => {
       const { data } = await supabase
         .from("schools")
         .select("*")
@@ -278,10 +278,10 @@ export default function SchoolBoardPage() {
       if (data) setSchool(data as School);
       setLoadingSchool(false);
     };
-    fetch_();
+    fetchSchool();
   }, [schoolId]);
 
-  // ── Translation ───────────────────────────────────────────────────────────
+  // ── Translations ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (language === "en") {
       setS(DEFAULT_BOARD);
@@ -355,19 +355,50 @@ export default function SchoolBoardPage() {
   }, [language]);
 
   if (!isLoaded || loadingSchool || !stringsReady) return <LoadingSpinner />;
-  if (!school) return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, fontFamily: "Poppins, sans-serif" }}>
-      <p style={{ color: "var(--text-secondary)" }}>School not found.</p>
-      <button onClick={() => router.push("/schools")} style={{ padding: "8px 18px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-card)", cursor: "pointer", fontFamily: "Poppins, sans-serif", fontWeight: 600, color: "var(--text-secondary)" }}>
-        ← Back to Schools
-      </button>
-    </div>
-  );
 
-  return <SchoolBoard school={school} user={user} onBack={() => router.push("/schools")} s={s} />;
+  if (!school)
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+          gap: 16,
+          fontFamily: "Poppins, sans-serif",
+        }}
+      >
+        <p style={{ color: "var(--text-secondary)" }}>School not found.</p>
+        <button
+          onClick={() => router.push("/schools")}
+          style={{
+            padding: "8px 18px",
+            borderRadius: 8,
+            border: "1.5px solid var(--border-input)",
+            background: "var(--bg-card)",
+            cursor: "pointer",
+            fontFamily: "Poppins, sans-serif",
+            fontWeight: 600,
+            color: "var(--text-secondary)",
+          }}
+        >
+          ← Back to Schools
+        </button>
+      </div>
+    );
+
+  return (
+    <SchoolBoard
+      school={school}
+      user={user}
+      onBack={() => router.push("/schools")}
+      s={s}
+    />
+  );
 }
 
-// ─── SchoolBoard component (moved from schools/page.tsx) ───────────────────────
+// ─── SchoolBoard ───────────────────────────────────────────────────────────────
 function SchoolBoard({
   school,
   user,
@@ -383,11 +414,11 @@ function SchoolBoard({
 
   const router = useRouter();
 
-  const BOARD_TABS: { id: BoardTab; label: string; icon: string }[] = [
-    { id: "items", label: s.itemsTab, icon: "" },
-    { id: "add-item", label: s.addItemTab, icon: "" },
-    { id: "report-lost", label: s.reportLostTab, icon: "" },
-    { id: "admin-login", label: s.adminTab, icon: "" },
+  const BOARD_TABS: { id: BoardTab; label: string }[] = [
+    { id: "items", label: s.itemsTab },
+    { id: "add-item", label: s.addItemTab },
+    { id: "report-lost", label: s.reportLostTab },
+    { id: "admin-login", label: s.adminTab },
   ];
 
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
@@ -575,7 +606,7 @@ function SchoolBoard({
     setAdminChecking(false);
   };
 
-  // ── Admin delete / status actions ───────────────────────────────────────────
+  // ── Admin actions ───────────────────────────────────────────────────────────
   const handleDeleteFound = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
     if (!confirm("Delete this item permanently?")) return;
@@ -617,14 +648,9 @@ function SchoolBoard({
   return (
     <div
       className="sc-board"
-      style={
-        {
-          "--sc-color": color,
-          "--sc-color-2": color2,
-        } as React.CSSProperties
-      }
+      style={{ "--sc-color": color, "--sc-color-2": color2 } as React.CSSProperties}
     >
-      {/* ── School header banner ── */}
+      {/* ── Header ── */}
       <div
         className="sc-board__header"
         style={{
@@ -637,11 +663,7 @@ function SchoolBoard({
           onClick={onBack}
           style={
             hasBg
-              ? {
-                  background: "rgba(0,0,0,0.3)",
-                  color: "#fff",
-                  borderColor: "rgba(255,255,255,0.3)",
-                }
+              ? { background: "rgba(0,0,0,0.3)", color: "#fff", borderColor: "rgba(255,255,255,0.3)" }
               : {}
           }
         >
@@ -649,11 +671,7 @@ function SchoolBoard({
         </button>
         <div className="sc-board__identity">
           {school.logo_url ? (
-            <img
-              src={school.logo_url}
-              alt={school.name}
-              className="sc-board__logo"
-            />
+            <img src={school.logo_url} alt={school.name} className="sc-board__logo" />
           ) : (
             <div className="sc-board__initial" style={{ background: color }}>
               {school.name[0]}
@@ -662,11 +680,7 @@ function SchoolBoard({
           <div>
             <p
               className="sc-board__name"
-              style={
-                hasBg
-                  ? { color: "#fff", textShadow: "0 1px 6px rgba(0,0,0,0.5)" }
-                  : {}
-              }
+              style={hasBg ? { color: "#fff", textShadow: "0 1px 6px rgba(0,0,0,0.5)" } : {}}
             >
               {school.name}
             </p>
@@ -701,25 +715,19 @@ function SchoolBoard({
         )}
       </div>
 
-      {/* ── Board layout: sidebar + main ── */}
+      {/* ── Layout ── */}
       <div className="sc-board__layout">
         <aside className="sc-board__sidebar">
           {BOARD_TABS.map((tab) => (
             <button
               key={tab.id}
               className={`sc-board__tab${activeTab === tab.id ? " sc-board__tab--active" : ""}`}
-              style={
-                activeTab === tab.id ? { background: `${color}22`, color } : {}
-              }
+              style={activeTab === tab.id ? { background: `${color}22`, color } : {}}
               onClick={() => setActiveTab(tab.id)}
             >
-              <span className="sc-board__tab-icon">{tab.icon}</span>
               <span className="sc-board__tab-label">{tab.label}</span>
               {activeTab === tab.id && (
-                <span
-                  className="sc-board__tab-pip"
-                  style={{ background: color2 }}
-                />
+                <span className="sc-board__tab-pip" style={{ background: color2 }} />
               )}
             </button>
           ))}
@@ -737,7 +745,7 @@ function SchoolBoard({
               : {}
           }
         >
-          {/* ── ITEMS TAB ── */}
+          {/* ── ITEMS ── */}
           {activeTab === "items" && (
             <>
               <div className="sc-search-row">
@@ -749,12 +757,7 @@ function SchoolBoard({
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   {searchQuery && (
-                    <button
-                      className="sc-search__clear"
-                      onClick={() => setSearchQuery("")}
-                    >
-                      ×
-                    </button>
+                    <button className="sc-search__clear" onClick={() => setSearchQuery("")}>×</button>
                   )}
                 </div>
               </div>
@@ -763,15 +766,7 @@ function SchoolBoard({
                   <button
                     key={t}
                     className={`sc-tab-btn${boardTab === t ? " sc-tab-btn--active" : ""}`}
-                    style={
-                      boardTab === t
-                        ? {
-                            background: color,
-                            color: "#fff",
-                            borderColor: color,
-                          }
-                        : {}
-                    }
+                    style={boardTab === t ? { background: color, color: "#fff", borderColor: color } : {}}
                     onClick={() => setBoardTab(t)}
                   >
                     {t === "found"
@@ -801,25 +796,15 @@ function SchoolBoard({
                       >
                         <div className="sc-item-card__img-wrap">
                           {item.image_url ? (
-                            <img
-                              src={item.image_url}
-                              alt={item.name}
-                              className="sc-item-card__img"
-                            />
+                            <img src={item.image_url} alt={item.name} className="sc-item-card__img" />
                           ) : (
-                            <div className="sc-item-card__no-img">
-                              {s.noImage}
-                            </div>
+                            <div className="sc-item-card__no-img">{s.noImage}</div>
                           )}
                         </div>
                         <div className="sc-item-card__info">
                           <p className="sc-item-card__name">{item.name}</p>
-                          <p className="sc-item-card__desc">
-                            {item.description}
-                          </p>
-                          <p className="sc-item-card__by">
-                            {s.foundBy} {item.author_name}
-                          </p>
+                          <p className="sc-item-card__desc">{item.description}</p>
+                          <p className="sc-item-card__by">{s.foundBy} {item.author_name}</p>
                           {item.status === "pending" && (
                             <span className="sc-item-card__status sc-item-card__status--pending">
                               {s.claimPending}
@@ -828,17 +813,14 @@ function SchoolBoard({
                         </div>
                         {(isSchoolAdmin || user?.id === item.author_id) && (
                           <div className="sc-item-card__actions">
-                            {user?.id === item.author_id &&
-                              item.status === "pending" && (
-                                <button
-                                  className="sc-btn sc-btn--success sc-btn--sm"
-                                  onClick={(e) =>
-                                    handleMarkClaimed(e, item.id)
-                                  }
-                                >
-                                  {s.confirmClaimed}
-                                </button>
-                              )}
+                            {user?.id === item.author_id && item.status === "pending" && (
+                              <button
+                                className="sc-btn sc-btn--success sc-btn--sm"
+                                onClick={(e) => handleMarkClaimed(e, item.id)}
+                              >
+                                {s.confirmClaimed}
+                              </button>
+                            )}
                             <button
                               className="sc-btn sc-btn--danger sc-btn--sm sc-btn--icon"
                               onClick={(e) => handleDeleteFound(e, item.id)}
@@ -849,8 +831,7 @@ function SchoolBoard({
                         )}
                       </div>
                     ))}
-                  {filteredFound.filter((i) => i.status !== "claimed")
-                    .length === 0 && (
+                  {filteredFound.filter((i) => i.status !== "claimed").length === 0 && (
                     <div className="sc-empty">{s.noFoundItems}</div>
                   )}
                 </div>
@@ -870,23 +851,15 @@ function SchoolBoard({
                     >
                       <div className="sc-item-card__img-wrap">
                         {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="sc-item-card__img"
-                          />
+                          <img src={item.image_url} alt={item.name} className="sc-item-card__img" />
                         ) : (
-                          <div className="sc-item-card__no-img">
-                            {s.noImage}
-                          </div>
+                          <div className="sc-item-card__no-img">{s.noImage}</div>
                         )}
                       </div>
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        <p className="sc-item-card__by">
-                          {s.lostBy} {item.author_name}
-                        </p>
+                        <p className="sc-item-card__by">{s.lostBy} {item.author_name}</p>
                       </div>
                       {(isSchoolAdmin || user?.id === item.author_id) && (
                         <div className="sc-item-card__actions">
@@ -945,10 +918,7 @@ function SchoolBoard({
                     onChange={(e) => setFoundDesc(e.target.value)}
                   />
                   <label className="sc-form__label">{s.photosLabel}</label>
-                  <label
-                    className="sc-form__file-label"
-                    htmlFor="sc-found-upload"
-                  >
+                  <label className="sc-form__file-label" htmlFor="sc-found-upload">
                     <span className="sc-form__file-icon">+</span>
                     <span>
                       {foundFiles.length > 0
@@ -980,9 +950,7 @@ function SchoolBoard({
                             type="button"
                             className="sc-form__preview-remove"
                             onClick={() =>
-                              setFoundFiles(
-                                foundFiles.filter((_, i) => i !== idx),
-                              )
+                              setFoundFiles(foundFiles.filter((_, i) => i !== idx))
                             }
                           >
                             ×
@@ -1041,13 +1009,8 @@ function SchoolBoard({
                     value={lostDesc}
                     onChange={(e) => setLostDesc(e.target.value)}
                   />
-                  <label className="sc-form__label">
-                    {s.photosOptionalLabel}
-                  </label>
-                  <label
-                    className="sc-form__file-label"
-                    htmlFor="sc-lost-upload"
-                  >
+                  <label className="sc-form__label">{s.photosOptionalLabel}</label>
+                  <label className="sc-form__file-label" htmlFor="sc-lost-upload">
                     <span className="sc-form__file-icon">+</span>
                     <span>
                       {lostFiles.length > 0
@@ -1079,9 +1042,7 @@ function SchoolBoard({
                             type="button"
                             className="sc-form__preview-remove"
                             onClick={() =>
-                              setLostFiles(
-                                lostFiles.filter((_, i) => i !== idx),
-                              )
+                              setLostFiles(lostFiles.filter((_, i) => i !== idx))
                             }
                           >
                             ×
@@ -1125,9 +1086,7 @@ function SchoolBoard({
               ) : (
                 <form className="sc-form" onSubmit={handleAdminLogin}>
                   <p className="sc-hint">{s.adminLoginHint}</p>
-                  <label className="sc-form__label">
-                    {s.adminPasswordLabel}
-                  </label>
+                  <label className="sc-form__label">{s.adminPasswordLabel}</label>
                   <input
                     className="sc-form__input"
                     type="password"
@@ -1136,9 +1095,7 @@ function SchoolBoard({
                     onChange={(e) => setAdminPassword(e.target.value)}
                     required
                   />
-                  {adminError && (
-                    <p className="sc-form__error">{adminError}</p>
-                  )}
+                  {adminError && <p className="sc-form__error">{adminError}</p>}
                   <button
                     type="submit"
                     className="sc-btn sc-btn--primary"
