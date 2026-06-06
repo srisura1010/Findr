@@ -21,6 +21,7 @@ import { ImHammer2 } from "react-icons/im";
 import { IoMdMailOpen } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
+import Cropper from 'react-easy-crop'
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Report {
