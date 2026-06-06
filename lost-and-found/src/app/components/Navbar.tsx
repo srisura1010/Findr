@@ -2,7 +2,7 @@
 
 import "./Navbar.css";
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Link from "next/dist/client/link";
@@ -25,7 +25,8 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activePath, setActivePath] = useState("/");
+
+  const pathname = usePathname();
 
   const isSuperAdmin =
     mounted &&
@@ -40,7 +41,6 @@ export default function Navbar() {
 
   const navigate = (path: string) => {
     setMobileOpen(false);
-    setActivePath(path);
     router.push(path);
   };
 
@@ -185,7 +185,6 @@ export default function Navbar() {
 
         {/* Right cluster */}
         <div className="topbar__right">
-
           <button
             className="topbar__icon-btn topbar__icon-btn--settings"
             onClick={() => router.push("/settings")}
@@ -200,7 +199,7 @@ export default function Navbar() {
             onClick={() => router.push("/help")}
             aria-label={helpText}
             title={helpText}
-            style={{ marginRight: "8px", marginLeft: "2px"}}
+            style={{ marginRight: "8px", marginLeft: "2px" }}
           >
             <MdOutlineHelp size={30} />
           </button>
@@ -244,7 +243,7 @@ export default function Navbar() {
       <aside className="left-sidebar" aria-label="Main navigation">
         <nav className="left-sidebar__nav">
           {navItems.map((item) => {
-            const isActive = activePath === item.path;
+            const isActive = pathname === item.path;
             const btn = (
               <button
                 key={item.path}
