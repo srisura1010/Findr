@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import Cropper from "react-easy-crop";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import LocationPicker, { LocationData } from "@/app/components/LocationPicker";
 
 interface Report {
   id: number;
@@ -153,7 +154,6 @@ async function getCroppedImg(
 
 // ── String bundle types ───────────────────────────────────────────────────────
 interface DashStrings {
-  // Sidebar tabs
   tabItems: string;
   tabMyItems: string;
   tabReportItem: string;
@@ -162,14 +162,11 @@ interface DashStrings {
   tabReports: string;
   tabBanManagement: string;
   tabInbox: string;
-  // Admin banner
   adminBannerMsg: string;
   adminBannerExit: string;
-  // Search / board tabs
   searchPlaceholder: string;
   foundItemsTab: string;
   lostItemsTab: string;
-  // Item cards
   foundBy: string;
   lostBy: string;
   claimPending: string;
@@ -179,16 +176,16 @@ interface DashStrings {
   noLostItems: string;
   noLostItemsSearch: string;
   clickReportLost: string;
-  // Toggle
   toggleFound: string;
   toggleLost: string;
-  // Add found item form
   reportFoundTitle: string;
   itemPosted: string;
   itemNameLabel: string;
   itemNamePlaceholder: string;
   descriptionLabel: string;
   descriptionPlaceholder: string;
+  locationLabel: string;
+  locationLostLabel: string;
   photosLabel: string;
   photosSelected: string;
   uploadPhotos: string;
@@ -196,7 +193,6 @@ interface DashStrings {
   cancelBtn: string;
   postItemBtn: string;
   uploadingBtn: string;
-  // Report lost form
   reportLostTitle: string;
   lostItemPosted: string;
   whatLostLabel: string;
@@ -204,7 +200,6 @@ interface DashStrings {
   descLostPlaceholder: string;
   postingBtn: string;
   postLostBtn: string;
-  // My items
   myItemsTitle: string;
   signInToView: string;
   noItemsYet: string;
@@ -214,7 +209,6 @@ interface DashStrings {
   activeStatus: string;
   confirmClaimed: string;
   markAsFound: string;
-  // Become admin panel
   becomeAdminTitle: string;
   requestSubmitted: string;
   reviewMsg: string;
@@ -231,7 +225,6 @@ interface DashStrings {
   anythingElsePlaceholder: string;
   submitRequestBtn: string;
   submittingBtn: string;
-  // Admin login panel
   adminAccessTitle: string;
   adminLoginHint: string;
   adminPasswordLabel: string;
@@ -241,7 +234,6 @@ interface DashStrings {
   adminUnlocked: string;
   adminUnlockedSub: string;
   adminIncorrect: string;
-  // Reports panel
   reportedItemsTab: string;
   reportedUsersTab: string;
   reportedItemsTitle: string;
@@ -256,7 +248,6 @@ interface DashStrings {
   deleteItemBtn: string;
   banUserBtn: string;
   userEmailLabel: string;
-  // Ban management
   banMgmtTitle: string;
   banMgmtHint: string;
   userEmailInputLabel: string;
@@ -309,6 +300,8 @@ const DEFAULT_STRINGS: DashStrings = {
   itemNamePlaceholder: "Item Name",
   descriptionLabel: "Description",
   descriptionPlaceholder: "Description (location, time, etc)",
+  locationLabel: "Where was it found?",
+  locationLostLabel: "Last seen where?",
   photosLabel: "Photos (optional, up to 3)",
   photosSelected: "photo(s) selected",
   uploadPhotos: "Upload photos",
@@ -391,7 +384,7 @@ const DEFAULT_STRINGS: DashStrings = {
   unbanBtn: "Unban",
 };
 
-// ── Sub-panels (receive s prop) ───────────────────────────────────────────────
+// ── Sub-panels ────────────────────────────────────────────────────────────────
 
 function AdminPanel({ s }: { s: DashStrings }) {
   const { user } = useUser();
@@ -477,7 +470,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
             value={adminForm.name}
             readOnly
           />
-
           <label className="panel-form__label">{s.emailLabel}</label>
           <input
             className="panel-form__input"
@@ -486,7 +478,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
             value={adminForm.email}
             readOnly
           />
-
           <label className="panel-form__label">{s.schoolLabel}</label>
           <input
             className="panel-form__input"
@@ -498,7 +489,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
               setAdminForm((p) => ({ ...p, school: e.target.value }))
             }
           />
-
           <label className="panel-form__label">{s.teacherIdLabel}</label>
           <input
             className="panel-form__input"
@@ -510,7 +500,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
               setAdminForm((p) => ({ ...p, teacherId: e.target.value }))
             }
           />
-
           <label className="panel-form__label">{s.uploadIdLabel}</label>
           <label className="panel-form__file-label" htmlFor="admin-file-upload">
             <span className="panel-form__file-icon">+</span>
@@ -528,7 +517,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
             }}
           />
           <p className="panel-form__file-hint">{s.photoHintShort}</p>
-
           {adminFile && (
             <div className="panel-form__preview-wrap">
               <img
@@ -545,7 +533,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
               </button>
             </div>
           )}
-
           <label className="panel-form__label">{s.anythingElseLabel}</label>
           <textarea
             className="panel-form__textarea"
@@ -555,7 +542,6 @@ function AdminPanel({ s }: { s: DashStrings }) {
               setAdminForm((p) => ({ ...p, extraInfo: e.target.value }))
             }
           />
-
           <button
             type="submit"
             className="panel-form__submit"
@@ -947,7 +933,6 @@ function BanManagementPanel({
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-
         <label className="panel-form__label">{s.reasonLabel}</label>
         <textarea
           className="panel-form__textarea"
@@ -956,7 +941,6 @@ function BanManagementPanel({
           onChange={(e) => setReason(e.target.value)}
           required
         />
-
         <div style={{ display: "flex", gap: "8px", marginBottom: "4px" }}>
           {(["permanent", "suspend"] as const).map((type) => (
             <button
@@ -982,7 +966,6 @@ function BanManagementPanel({
             </button>
           ))}
         </div>
-
         {banType === "suspend" && (
           <>
             <label className="panel-form__label">{s.suspendDaysLabel}</label>
@@ -996,7 +979,6 @@ function BanManagementPanel({
             />
           </>
         )}
-
         {successMsg && (
           <p
             style={{
@@ -1010,7 +992,6 @@ function BanManagementPanel({
           </p>
         )}
         {errorMsg && <p className="admin-login__error">{errorMsg}</p>}
-
         <button type="submit" className="panel-form__submit" disabled={loading}>
           {loading
             ? s.processingBtn
@@ -1220,16 +1201,8 @@ export default function DashboardPage() {
       ["noFoundItemsSearch", "No items found for", "dash_noFoundItemsSearch"],
       ["tryKeywords", DEFAULT_STRINGS.tryKeywords, "dash_tryKeywords"],
       ["noLostItems", "No lost item reports yet.", "dash_noLostItems"],
-      [
-        "noLostItemsSearch",
-        "No lost items found for",
-        "dash_noLostItemsSearch",
-      ],
-      [
-        "clickReportLost",
-        DEFAULT_STRINGS.clickReportLost,
-        "dash_clickReportLost",
-      ],
+      ["noLostItemsSearch", "No lost items found for", "dash_noLostItemsSearch"],
+      ["clickReportLost", DEFAULT_STRINGS.clickReportLost, "dash_clickReportLost"],
       ["toggleFound", "Found an Item", "dash_toggleFound"],
       ["toggleLost", "Lost an Item", "dash_toggleLost"],
       ["reportFoundTitle", "Report Found Item", "dash_reportFoundTitle"],
@@ -1237,11 +1210,9 @@ export default function DashboardPage() {
       ["itemNameLabel", "Item Name", "dash_itemNameLabel"],
       ["itemNamePlaceholder", "Item Name", "dash_itemNamePlaceholder"],
       ["descriptionLabel", "Description", "dash_descriptionLabel"],
-      [
-        "descriptionPlaceholder",
-        "Description (location, time, etc)",
-        "dash_descriptionPlaceholder",
-      ],
+      ["descriptionPlaceholder", "Description (location, time, etc)", "dash_descriptionPlaceholder"],
+      ["locationLabel", "Where was it found?", "dash_locationLabel"],
+      ["locationLostLabel", "Last seen where?", "dash_locationLostLabel"],
       ["photosLabel", "Photos (optional, up to 3)", "dash_photosLabel"],
       ["photosSelected", "photo(s) selected", "dash_photosSelected"],
       ["uploadPhotos", "Upload photos", "dash_uploadPhotos"],
@@ -1253,19 +1224,11 @@ export default function DashboardPage() {
       ["lostItemPosted", "Lost item reported!", "dash_lostItemPosted"],
       ["whatLostLabel", "What did you lose?", "dash_whatLostLabel"],
       ["itemNameDefault", "Item Name", "dash_itemNameDefault"],
-      [
-        "descLostPlaceholder",
-        "Description (location, time, etc)",
-        "dash_descLostPlaceholder",
-      ],
+      ["descLostPlaceholder", "Description (location, time, etc)", "dash_descLostPlaceholder"],
       ["postingBtn", "Posting...", "dash_postingBtn"],
       ["postLostBtn", "Post Lost Item", "dash_postLostBtn"],
       ["myItemsTitle", "My Items", "dash_myItemsTitle"],
-      [
-        "signInToView",
-        "Please sign in to view your items.",
-        "dash_signInToView",
-      ],
+      ["signInToView", "Please sign in to view your items.", "dash_signInToView"],
       ["noItemsYet", "You haven't posted any items yet.", "dash_noItemsYet"],
       ["foundItemsPosted", "Found Items I Posted", "dash_foundItemsPosted"],
       ["lostItemsReported", "Lost Items I Reported", "dash_lostItemsReported"],
@@ -1283,40 +1246,20 @@ export default function DashboardPage() {
       ["teacherIdLabel", "Teacher ID / Staff Number", "dash_teacherIdLabel"],
       ["teacherIdPlaceholder", "T-00123", "dash_teacherIdPlaceholder"],
       ["uploadIdLabel", "Upload ID or Badge Photo", "dash_uploadIdLabel"],
-      [
-        "uploadIdPlaceholder",
-        "Upload ID or badge photo",
-        "dash_uploadIdPlaceholder",
-      ],
+      ["uploadIdPlaceholder", "Upload ID or badge photo", "dash_uploadIdPlaceholder"],
       ["photoHintShort", "PNG, JPG up to 10MB", "dash_photoHintShort"],
-      [
-        "anythingElseLabel",
-        "Anything else we should know?",
-        "dash_anythingElseLabel",
-      ],
-      [
-        "anythingElsePlaceholder",
-        DEFAULT_STRINGS.anythingElsePlaceholder,
-        "dash_anythingElsePlaceholder",
-      ],
+      ["anythingElseLabel", "Anything else we should know?", "dash_anythingElseLabel"],
+      ["anythingElsePlaceholder", DEFAULT_STRINGS.anythingElsePlaceholder, "dash_anythingElsePlaceholder"],
       ["submitRequestBtn", "Submit Request", "dash_submitRequestBtn"],
       ["submittingBtn", "Submitting...", "dash_submittingBtn"],
       ["adminAccessTitle", "Admin Access", "dash_adminAccessTitle"],
       ["adminLoginHint", DEFAULT_STRINGS.adminLoginHint, "dash_adminLoginHint"],
       ["adminPasswordLabel", "Admin Password", "dash_adminPasswordLabel"],
-      [
-        "adminPasswordPlaceholder",
-        "e.g. FINDR-JANE-X4K2",
-        "dash_adminPasswordPlaceholder",
-      ],
+      ["adminPasswordPlaceholder", "e.g. FINDR-JANE-X4K2", "dash_adminPasswordPlaceholder"],
       ["checkingBtn", "Checking...", "dash_checkingBtn"],
       ["unlockAdminBtn", "Unlock Admin View", "dash_unlockAdminBtn"],
       ["adminUnlocked", "Admin view unlocked!", "dash_adminUnlocked"],
-      [
-        "adminUnlockedSub",
-        DEFAULT_STRINGS.adminUnlockedSub,
-        "dash_adminUnlockedSub",
-      ],
+      ["adminUnlockedSub", DEFAULT_STRINGS.adminUnlockedSub, "dash_adminUnlockedSub"],
       ["adminIncorrect", DEFAULT_STRINGS.adminIncorrect, "dash_adminIncorrect"],
       ["reportedItemsTab", "Reported Items", "dash_reportedItemsTab"],
       ["reportedUsersTab", "Reported Users", "dash_reportedUsersTab"],
@@ -1336,18 +1279,10 @@ export default function DashboardPage() {
       ["banMgmtHint", DEFAULT_STRINGS.banMgmtHint, "dash_banMgmtHint"],
       ["userEmailInputLabel", "User Email", "dash_userEmailInputLabel"],
       ["reasonLabel", "Reason", "dash_reasonLabel"],
-      [
-        "reasonPlaceholder",
-        DEFAULT_STRINGS.reasonPlaceholder,
-        "dash_reasonPlaceholder",
-      ],
+      ["reasonPlaceholder", DEFAULT_STRINGS.reasonPlaceholder, "dash_reasonPlaceholder"],
       ["permanentBtn", "Permanent", "dash_permanentBtn"],
       ["suspendBtn", "Suspend", "dash_suspendBtn"],
-      [
-        "suspendDaysLabel",
-        "Suspend for how many days?",
-        "dash_suspendDaysLabel",
-      ],
+      ["suspendDaysLabel", "Suspend for how many days?", "dash_suspendDaysLabel"],
       ["processingBtn", "Processing...", "dash_processingBtn"],
       ["banUserBtn2", "Ban User", "dash_banUserBtn2"],
       ["suspendUserBtn", "Suspend User", "dash_suspendUserBtn"],
@@ -1374,18 +1309,20 @@ export default function DashboardPage() {
     translateAll();
   }, [language]);
 
-  // ── Item handlers ─────────────────────────────────────────────────────────
+  // ── Item form state ───────────────────────────────────────────────────────
   const [newItemName, setNewItemName] = useState("");
   const [newItemDesc, setNewItemDesc] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [foundLocation, setFoundLocation] = useState<LocationData | null>(null);
 
   const [lostItemName, setLostItemName] = useState("");
   const [lostItemDesc, setLostItemDesc] = useState("");
   const [lostSelectedFiles, setLostSelectedFiles] = useState<File[]>([]);
   const [lostItemUploading, setLostItemUploading] = useState(false);
   const [lostItemSuccess, setLostItemSuccess] = useState(false);
+  const [lostLocation, setLostLocation] = useState<LocationData | null>(null);
 
   // ── Crop state ────────────────────────────────────────────────────────────
   const [cropQueue, setCropQueue] = useState<File[]>([]);
@@ -1415,7 +1352,12 @@ export default function DashboardPage() {
     setRotation(0);
   };
 
-  const advanceCropQueue = (results: File[], queue: File[], idx: number, target: "found" | "lost") => {
+  const advanceCropQueue = (
+    results: File[],
+    queue: File[],
+    idx: number,
+    target: "found" | "lost",
+  ) => {
     URL.revokeObjectURL(cropSrc!);
     if (idx + 1 < queue.length) {
       setCropResults(results);
@@ -1499,7 +1441,7 @@ export default function DashboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItemName || !newItemDesc || selectedFiles.length === 0 || !user)
+    if (!newItemName || !newItemDesc || selectedFiles.length === 0 || !user || !foundLocation)
       return;
     setIsUploading(true);
     try {
@@ -1540,6 +1482,9 @@ export default function DashboardPage() {
             status: "waiting",
             ai_keywords: aiKeywordsArray.join(", "),
             date_found: new Date().toISOString(),
+            location: foundLocation.address,
+            latitude: foundLocation.lat,
+            longitude: foundLocation.lng,
           },
         ])
         .select()
@@ -1560,10 +1505,14 @@ export default function DashboardPage() {
         authorId: insertedItem.author_id,
         authorEmail: insertedItem.author_email || "",
         aiKeywords: insertedItem.ai_keywords || "",
+        location: insertedItem.location ?? null,
+        latitude: insertedItem.latitude ?? null,
+        longitude: insertedItem.longitude ?? null,
       } as any);
       setNewItemName("");
       setNewItemDesc("");
       setSelectedFiles([]);
+      setFoundLocation(null);
       setUploadSuccess(true);
       setTimeout(() => {
         setUploadSuccess(false);
@@ -1578,7 +1527,7 @@ export default function DashboardPage() {
 
   const handleLostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lostItemName || !lostItemDesc || !user) return;
+    if (!lostItemName || !lostItemDesc || !user || !lostLocation) return;
     setLostItemUploading(true);
     try {
       const imageUrls: string[] = [];
@@ -1609,6 +1558,9 @@ export default function DashboardPage() {
             author_id: user.id,
             author_email: user.primaryEmailAddress?.emailAddress,
             status: "looking",
+            location: lostLocation.address,
+            latitude: lostLocation.lat,
+            longitude: lostLocation.lng,
           },
         ])
         .select()
@@ -1629,10 +1581,14 @@ export default function DashboardPage() {
         authorEmail: insertedItem.author_email || "",
         status: insertedItem.status,
         created_at: insertedItem.created_at,
+        location: insertedItem.location ?? null,
+        latitude: insertedItem.latitude ?? null,
+        longitude: insertedItem.longitude ?? null,
       });
       setLostItemName("");
       setLostItemDesc("");
       setLostSelectedFiles([]);
+      setLostLocation(null);
       setLostItemSuccess(true);
       setTimeout(() => {
         setLostItemSuccess(false);
@@ -1752,7 +1708,6 @@ export default function DashboardPage() {
               {reportMode === "found" ? s.reportFoundTitle : s.reportLostTitle}
             </div>
 
-            {/* Pill toggle */}
             <ReportItemToggle />
 
             {/* ── Found form ── */}
@@ -1774,9 +1729,8 @@ export default function DashboardPage() {
                       required
                       className="panel-form__input"
                     />
-                    <label className="panel-form__label">
-                      {s.descriptionLabel}
-                    </label>
+
+                    <label className="panel-form__label">{s.descriptionLabel}</label>
                     <textarea
                       placeholder={s.descriptionPlaceholder}
                       value={newItemDesc}
@@ -1784,6 +1738,17 @@ export default function DashboardPage() {
                       required
                       className="panel-form__textarea"
                     />
+
+                    <label className="panel-form__label">
+                      {s.locationLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
+                    </label>
+                    <LocationPicker
+                      value={foundLocation}
+                      onChange={setFoundLocation}
+                      required
+                    />
+
                     <label className="panel-form__label">{s.photosLabel}</label>
                     <label
                       className="panel-form__file-label"
@@ -1851,6 +1816,7 @@ export default function DashboardPage() {
                           setNewItemName("");
                           setNewItemDesc("");
                           setSelectedFiles([]);
+                          setFoundLocation(null);
                           setActiveTab("items");
                         }}
                       >
@@ -1859,7 +1825,7 @@ export default function DashboardPage() {
                       <button
                         type="submit"
                         className="panel-form__submit"
-                        disabled={isUploading}
+                        disabled={isUploading || !foundLocation}
                       >
                         {isUploading ? s.uploadingBtn : s.postItemBtn}
                       </button>
@@ -1888,9 +1854,8 @@ export default function DashboardPage() {
                       required
                       className="panel-form__input"
                     />
-                    <label className="panel-form__label">
-                      {s.descriptionLabel}
-                    </label>
+
+                    <label className="panel-form__label">{s.descriptionLabel}</label>
                     <textarea
                       placeholder={s.descLostPlaceholder}
                       value={lostItemDesc}
@@ -1898,6 +1863,17 @@ export default function DashboardPage() {
                       required
                       className="panel-form__textarea"
                     />
+
+                    <label className="panel-form__label">
+                      {s.locationLostLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
+                    </label>
+                    <LocationPicker
+                      value={lostLocation}
+                      onChange={setLostLocation}
+                      required
+                    />
+
                     <label className="panel-form__label">{s.photosLabel}</label>
                     <label
                       className="panel-form__file-label"
@@ -1964,6 +1940,7 @@ export default function DashboardPage() {
                           setLostItemName("");
                           setLostItemDesc("");
                           setLostSelectedFiles([]);
+                          setLostLocation(null);
                           setActiveTab("items");
                         }}
                       >
@@ -1972,7 +1949,7 @@ export default function DashboardPage() {
                       <button
                         type="submit"
                         className="panel-form__submit"
-                        disabled={lostItemUploading}
+                        disabled={lostItemUploading || !lostLocation}
                       >
                         {lostItemUploading ? s.postingBtn : s.postLostBtn}
                       </button>
@@ -2077,10 +2054,7 @@ export default function DashboardPage() {
               <>
                 {myFoundItems.length > 0 && (
                   <>
-                    <p
-                      className="panel-section-title"
-                      style={{ marginBottom: 8 }}
-                    >
+                    <p className="panel-section-title" style={{ marginBottom: 8 }}>
                       {s.foundItemsPosted} ({myFoundItems.length})
                     </p>
                     <div className="items-container" style={{ margin: 0 }}>
@@ -2096,6 +2070,11 @@ export default function DashboardPage() {
                           <div className="item-info">
                             <h3>{item.name}</h3>
                             <p>{item.description}</p>
+                            {item.location && (
+                              <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>
+                                📍 {item.location}
+                              </p>
+                            )}
                             <p
                               style={{
                                 fontSize: "0.75rem",
@@ -2178,6 +2157,11 @@ export default function DashboardPage() {
                           <div className="item-info">
                             <h3>{item.name}</h3>
                             <p>{item.description}</p>
+                            {item.location && (
+                              <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>
+                                📍 {item.location}
+                              </p>
+                            )}
                           </div>
                           <div className="button-group">
                             <button
@@ -2353,6 +2337,11 @@ export default function DashboardPage() {
                             {s.foundBy} {item.authorName || "Anonymous"}
                           </span>
                         </div>
+                        {(item as any).location && (
+                          <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 4, fontFamily: "Poppins, sans-serif" }}>
+                            📍 {(item as any).location}
+                          </p>
+                        )}
                         {item.status === "pending" && (
                           <span
                             style={{
@@ -2437,6 +2426,11 @@ export default function DashboardPage() {
                           {s.lostBy} {item.authorName || "Anonymous"}
                         </span>
                       </div>
+                      {item.location && (
+                        <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 4, fontFamily: "Poppins, sans-serif" }}>
+                          📍 {item.location}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -2472,7 +2466,6 @@ export default function DashboardPage() {
             gap: "14px",
           }}
         >
-          {/* Header */}
           <p
             style={{
               color: "#fff",
@@ -2489,7 +2482,6 @@ export default function DashboardPage() {
               : ""}
           </p>
 
-          {/* Cropper box — 4:3 comes close to matching .item-image-wrapper aspect-ratio */}
           <div
             style={{
               position: "relative",
@@ -2513,7 +2505,6 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Controls */}
           <div
             style={{
               display: "flex",
@@ -2525,7 +2516,6 @@ export default function DashboardPage() {
               padding: "14px 16px",
             }}
           >
-            {/* Zoom */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <span
                 style={{
@@ -2562,7 +2552,6 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Rotate */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <span
                 style={{
@@ -2600,7 +2589,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Action buttons */}
           <div
             style={{
               display: "flex",

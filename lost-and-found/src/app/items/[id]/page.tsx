@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa6";
 import ImageGallery from "@/app/components/ImageGallery";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import LocationMap from "@/app/components/LocationMap";
 import { getConversationId } from "@/app/components/MessagingSystem";
 import "./item-detail.css";
 
@@ -123,7 +124,9 @@ export default function ItemDetailPage() {
           status: foundData.status,
           aiKeywords: foundData.ai_keywords,
           date_found: foundData.date_found,
-          location: foundData.location,
+          location: foundData.location ?? null,
+          latitude: foundData.latitude ?? null,
+          longitude: foundData.longitude ?? null,
         });
         setIsLost(false);
         setLoading(false);
@@ -152,6 +155,9 @@ export default function ItemDetailPage() {
           authorEmail: lostData.author_email,
           status: lostData.status,
           date_found: lostData.created_at,
+          location: lostData.location ?? null,
+          latitude: lostData.latitude ?? null,
+          longitude: lostData.longitude ?? null,
         });
         setIsLost(true);
       }
@@ -230,7 +236,6 @@ export default function ItemDetailPage() {
       .eq("id", item.id);
 
     if (!error) {
-      // Send retrieval notification email via Resend
       fetch("/api/emails/item-retrieval", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -373,6 +378,9 @@ export default function ItemDetailPage() {
       })
     : null;
 
+  const hasLocation =
+    typeof item.latitude === "number" && typeof item.longitude === "number";
+
   return (
     <div className="detail-page">
       {/* Back nav */}
@@ -494,6 +502,30 @@ export default function ItemDetailPage() {
             <p className="detail-description-text">{item.description}</p>
           </div>
 
+          {/* Location map */}
+          {hasLocation && (
+            <div style={{ marginTop: "4px" }}>
+              <p
+                style={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  color: "var(--text-muted)",
+                  margin: "0 0 8px",
+                }}
+              >
+                {isLost ? "Last seen location" : "Found location"}
+              </p>
+              <LocationMap
+                lat={item.latitude}
+                lng={item.longitude}
+                address={item.location ?? undefined}
+              />
+            </div>
+          )}
+
           {/* Action success message */}
           {actionMsg && (
             <div className="detail-action-msg">
@@ -503,7 +535,6 @@ export default function ItemDetailPage() {
 
           {/* PRIMARY ACTIONS */}
           <div className="detail-actions">
-            {/* Found item: retrieve / confirm claimed */}
             {!isLost && !isItemOwner && currentStatus === "waiting" && (
               <button
                 className="detail-btn detail-btn--primary"
@@ -532,7 +563,6 @@ export default function ItemDetailPage() {
               </button>
             )}
 
-            {/* Lost item: I found this */}
             {isLost && !isItemOwner && (
               <button
                 className="detail-btn detail-btn--primary"
@@ -553,7 +583,6 @@ export default function ItemDetailPage() {
               </button>
             )}
 
-            {/* Message button (non-owners of found items) */}
             {!isLost && !isItemOwner && (
               <button
                 className="detail-btn detail-btn--secondary"
