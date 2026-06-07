@@ -13,6 +13,7 @@ import {
   FaFlag,
   FaTriangleExclamation,
   FaPlus,
+  FaChevronDown,
 } from "react-icons/fa6";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { CiLogin } from "react-icons/ci";
@@ -24,6 +25,29 @@ import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import Cropper from "react-easy-crop";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import LocationPicker, { LocationData } from "@/app/components/LocationPicker";
+
+// ── Categories ────────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  "Electronics",
+  "Clothing & Accessories",
+  "Bags & Backpacks",
+  "Books & Stationery",
+  "Keys",
+  "Wallet & Cards",
+  "Jewelry",
+  "Water Bottle",
+  "Sports Equipment",
+  "Musical Instrument",
+  "Glasses & Eyewear",
+  "Headphones & Earbuds",
+  "Phone",
+  "Charger & Cables",
+  "ID & Documents",
+  "Toys & Games",
+  "Food & Containers",
+  "Umbrella",
+  "Other",
+];
 
 interface Report {
   id: number;
@@ -266,6 +290,13 @@ interface DashStrings {
   permanentBan: string;
   byLabel: string;
   unbanBtn: string;
+  categoryLabel: string;
+  categoryPlaceholder: string;
+  filterCategory: string;
+  filterLocation: string;
+  filterDate: string;
+  filterAll: string;
+  clearFilters: string;
 }
 
 const DEFAULT_STRINGS: DashStrings = {
@@ -382,6 +413,13 @@ const DEFAULT_STRINGS: DashStrings = {
   permanentBan: "Permanent ban",
   byLabel: "by",
   unbanBtn: "Unban",
+  categoryLabel: "Category",
+  categoryPlaceholder: "Select a category",
+  filterCategory: "Category",
+  filterLocation: "Location",
+  filterDate: "Date",
+  filterAll: "All",
+  clearFilters: "Clear filters",
 };
 
 // ── Sub-panels ────────────────────────────────────────────────────────────────
@@ -1103,6 +1141,66 @@ function BanManagementPanel({
   );
 }
 
+// ── Category Select ───────────────────────────────────────────────────────────
+function CategorySelect({
+  value,
+  onChange,
+  placeholder,
+  required,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  required?: boolean;
+}) {
+  return (
+    <div style={{ position: "relative" }}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        style={{
+          width: "100%",
+          padding: "10px 36px 10px 12px",
+          borderRadius: "8px",
+          border: "1.5px solid var(--border-input)",
+          background: "var(--bg-input)",
+          color: value ? "var(--text-primary)" : "var(--text-muted)",
+          fontFamily: "Poppins, sans-serif",
+          fontSize: "13px",
+          fontWeight: 500,
+          cursor: "pointer",
+          appearance: "none",
+          WebkitAppearance: "none",
+          outline: "none",
+          transition: "border-color 0.15s ease",
+          boxSizing: "border-box",
+        }}
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {CATEGORIES.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
+      </select>
+      <FaChevronDown
+        style={{
+          position: "absolute",
+          right: 12,
+          top: "50%",
+          transform: "translateY(-50%)",
+          color: "var(--text-muted)",
+          fontSize: 11,
+          pointerEvents: "none",
+        }}
+      />
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const {
@@ -1124,6 +1222,22 @@ export default function DashboardPage() {
   const [reportsTab, setReportsTab] = useState<"items" | "users">("items");
   const [reportMode, setReportMode] = useState<"found" | "lost">("found");
   const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
+
+  // ── Filter state ────────────────────────────────────────────────────────────
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+
+  const hasActiveFilters =
+    !!filterCategory || !!filterLocation || !!filterDateFrom || !!filterDateTo;
+
+  const clearFilters = () => {
+    setFilterCategory("");
+    setFilterLocation("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+  };
 
   const [banChecked, setBanChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -1293,6 +1407,13 @@ export default function DashboardPage() {
       ["permanentBan", "Permanent ban", "dash_permanentBan"],
       ["byLabel", "by", "dash_byLabel"],
       ["unbanBtn", "Unban", "dash_unbanBtn"],
+      ["categoryLabel", "Category", "dash_categoryLabel"],
+      ["categoryPlaceholder", "Select a category", "dash_categoryPlaceholder"],
+      ["filterCategory", "Category", "dash_filterCategory"],
+      ["filterLocation", "Location", "dash_filterLocation"],
+      ["filterDate", "Date", "dash_filterDate"],
+      ["filterAll", "All", "dash_filterAll"],
+      ["clearFilters", "Clear filters", "dash_clearFilters"],
     ];
 
     const translateAll = async () => {
@@ -1312,6 +1433,7 @@ export default function DashboardPage() {
   // ── Item form state ───────────────────────────────────────────────────────
   const [newItemName, setNewItemName] = useState("");
   const [newItemDesc, setNewItemDesc] = useState("");
+  const [newItemCategory, setNewItemCategory] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -1319,6 +1441,7 @@ export default function DashboardPage() {
 
   const [lostItemName, setLostItemName] = useState("");
   const [lostItemDesc, setLostItemDesc] = useState("");
+  const [lostItemCategory, setLostItemCategory] = useState("");
   const [lostSelectedFiles, setLostSelectedFiles] = useState<File[]>([]);
   const [lostItemUploading, setLostItemUploading] = useState(false);
   const [lostItemSuccess, setLostItemSuccess] = useState(false);
@@ -1473,6 +1596,7 @@ export default function DashboardPage() {
           {
             name: newItemName,
             description: newItemDesc,
+            category: newItemCategory || null,
             image_url: imageUrls[0],
             image_urls: imageUrls,
             author_name: user.fullName || user.username || "Anonymous",
@@ -1505,12 +1629,14 @@ export default function DashboardPage() {
         authorId: insertedItem.author_id,
         authorEmail: insertedItem.author_email || "",
         aiKeywords: insertedItem.ai_keywords || "",
+        category: insertedItem.category || "",
         location: insertedItem.location ?? null,
         latitude: insertedItem.latitude ?? null,
         longitude: insertedItem.longitude ?? null,
       } as any);
       setNewItemName("");
       setNewItemDesc("");
+      setNewItemCategory("");
       setSelectedFiles([]);
       setFoundLocation(null);
       setUploadSuccess(true);
@@ -1551,6 +1677,7 @@ export default function DashboardPage() {
           {
             name: lostItemName,
             description: lostItemDesc,
+            category: lostItemCategory || null,
             image_url: imageUrls[0] || null,
             image_urls: imageUrls.length > 0 ? imageUrls : null,
             author_name: user.fullName || user.username || "Anonymous",
@@ -1581,12 +1708,14 @@ export default function DashboardPage() {
         authorEmail: insertedItem.author_email || "",
         status: insertedItem.status,
         created_at: insertedItem.created_at,
+        category: insertedItem.category || "",
         location: insertedItem.location ?? null,
         latitude: insertedItem.latitude ?? null,
         longitude: insertedItem.longitude ?? null,
       });
       setLostItemName("");
       setLostItemDesc("");
+      setLostItemCategory("");
       setLostSelectedFiles([]);
       setLostLocation(null);
       setLostItemSuccess(true);
@@ -1602,28 +1731,52 @@ export default function DashboardPage() {
     }
   };
 
-  const filteredItems = searchQuery.trim()
-    ? (items ?? []).filter((item) => {
-        const q = searchQuery.toLowerCase();
-        const haystack =
-          `${item.name} ${item.description} ${(item as any).aiKeywords ?? ""}`.toLowerCase();
-        return (
-          haystack.includes(q) ||
-          q.split(/\s+/).some((word) => haystack.includes(word))
-        );
-      })
-    : (items ?? []);
+  // ── Filtering logic ─────────────────────────────────────────────────────────
+  const applyFilters = (itemList: any[]) => {
+    return itemList.filter((item) => {
+      if (filterCategory && (item.category ?? "") !== filterCategory) return false;
+      if (filterLocation) {
+        const loc = (item.location ?? "").toLowerCase();
+        if (!loc.includes(filterLocation.toLowerCase())) return false;
+      }
+      if (filterDateFrom) {
+        const itemDate = item.date_found || item.created_at;
+        if (!itemDate || new Date(itemDate) < new Date(filterDateFrom)) return false;
+      }
+      if (filterDateTo) {
+        const itemDate = item.date_found || item.created_at;
+        if (!itemDate || new Date(itemDate) > new Date(filterDateTo + "T23:59:59")) return false;
+      }
+      return true;
+    });
+  };
 
-  const filteredLostItems = searchQuery.trim()
-    ? (lostItems ?? []).filter((item) => {
-        const q = searchQuery.toLowerCase();
-        const haystack = `${item.name} ${item.description}`.toLowerCase();
-        return (
-          haystack.includes(q) ||
-          q.split(/\s+/).some((word) => haystack.includes(word))
-        );
-      })
-    : (lostItems ?? []);
+  const filteredItems = applyFilters(
+    searchQuery.trim()
+      ? (items ?? []).filter((item) => {
+          const q = searchQuery.toLowerCase();
+          const haystack =
+            `${item.name} ${item.description} ${(item as any).aiKeywords ?? ""} ${(item as any).category ?? ""}`.toLowerCase();
+          return (
+            haystack.includes(q) ||
+            q.split(/\s+/).some((word) => haystack.includes(word))
+          );
+        })
+      : (items ?? [])
+  );
+
+  const filteredLostItems = applyFilters(
+    searchQuery.trim()
+      ? (lostItems ?? []).filter((item) => {
+          const q = searchQuery.toLowerCase();
+          const haystack = `${item.name} ${item.description} ${(item as any).category ?? ""}`.toLowerCase();
+          return (
+            haystack.includes(q) ||
+            q.split(/\s+/).some((word) => haystack.includes(word))
+          );
+        })
+      : (lostItems ?? [])
+  );
 
   // ── Sidebar tabs ────────────────────────────────────────────────────────
   const SIDEBAR_TABS: {
@@ -1730,6 +1883,13 @@ export default function DashboardPage() {
                       className="panel-form__input"
                     />
 
+                    <label className="panel-form__label">{s.categoryLabel}</label>
+                    <CategorySelect
+                      value={newItemCategory}
+                      onChange={setNewItemCategory}
+                      placeholder={s.categoryPlaceholder}
+                    />
+
                     <label className="panel-form__label">{s.descriptionLabel}</label>
                     <textarea
                       placeholder={s.descriptionPlaceholder}
@@ -1815,6 +1975,7 @@ export default function DashboardPage() {
                         onClick={() => {
                           setNewItemName("");
                           setNewItemDesc("");
+                          setNewItemCategory("");
                           setSelectedFiles([]);
                           setFoundLocation(null);
                           setActiveTab("items");
@@ -1853,6 +2014,13 @@ export default function DashboardPage() {
                       onChange={(e) => setLostItemName(e.target.value)}
                       required
                       className="panel-form__input"
+                    />
+
+                    <label className="panel-form__label">{s.categoryLabel}</label>
+                    <CategorySelect
+                      value={lostItemCategory}
+                      onChange={setLostItemCategory}
+                      placeholder={s.categoryPlaceholder}
                     />
 
                     <label className="panel-form__label">{s.descriptionLabel}</label>
@@ -1939,6 +2107,7 @@ export default function DashboardPage() {
                         onClick={() => {
                           setLostItemName("");
                           setLostItemDesc("");
+                          setLostItemCategory("");
                           setLostSelectedFiles([]);
                           setLostLocation(null);
                           setActiveTab("items");
@@ -2070,6 +2239,22 @@ export default function DashboardPage() {
                           <div className="item-info">
                             <h3>{item.name}</h3>
                             <p>{item.description}</p>
+                            {(item as any).category && (
+                              <span style={{
+                                display: "inline-block",
+                                fontSize: "0.68rem",
+                                fontWeight: 600,
+                                padding: "2px 8px",
+                                borderRadius: "100px",
+                                background: "var(--accent)",
+                                color: "#fff",
+                                fontFamily: "Poppins, sans-serif",
+                                marginTop: 4,
+                                marginBottom: 2,
+                              }}>
+                                {(item as any).category}
+                              </span>
+                            )}
                             {item.location && (
                               <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>
                                 📍 {item.location}
@@ -2157,6 +2342,22 @@ export default function DashboardPage() {
                           <div className="item-info">
                             <h3>{item.name}</h3>
                             <p>{item.description}</p>
+                            {(item as any).category && (
+                              <span style={{
+                                display: "inline-block",
+                                fontSize: "0.68rem",
+                                fontWeight: 600,
+                                padding: "2px 8px",
+                                borderRadius: "100px",
+                                background: "var(--accent)",
+                                color: "#fff",
+                                fontFamily: "Poppins, sans-serif",
+                                marginTop: 4,
+                                marginBottom: 2,
+                              }}>
+                                {(item as any).category}
+                              </span>
+                            )}
                             {item.location && (
                               <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>
                                 📍 {item.location}
@@ -2196,6 +2397,15 @@ export default function DashboardPage() {
   };
 
   if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
+
+  // Collect unique locations from items for datalist
+  const allLocations = Array.from(
+    new Set(
+      [...(items ?? []), ...(lostItems ?? [])]
+        .map((i) => (i as any).location)
+        .filter(Boolean),
+    ),
+  );
 
   return (
     <div className="dashboard-layout">
@@ -2249,21 +2459,259 @@ export default function DashboardPage() {
           renderMainContent()
         ) : (
           <>
-            <div className="panel-search" style={{ margin: "16px 20px 0" }}>
-              <span className="panel-search__icon"></span>
-              <input
-                className="panel-search__input"
-                placeholder={s.searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
+            {/* ── Search + Filter box ── */}
+            <div
+              style={{
+                margin: "16px 20px 0",
+                background: "var(--bg-card)",
+                border: "1.5px solid var(--border-default)",
+                borderRadius: "16px",
+                padding: "14px 16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              {/* Search row */}
+              <div className="panel-search" style={{ margin: 0 }}>
+                <span className="panel-search__icon"></span>
+                <input
+                  className="panel-search__input"
+                  placeholder={s.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    className="panel-search__clear"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {/* Filter row */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr 1fr auto",
+                  gap: "8px",
+                  alignItems: "center",
+                }}
+              >
+                {/* Category filter */}
+                <div style={{ position: "relative" }}>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "8px 30px 8px 10px",
+                      borderRadius: "8px",
+                      border: "1.5px solid var(--border-input)",
+                      background: filterCategory ? "var(--accent)" : "var(--bg-input)",
+                      color: filterCategory ? "#fff" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      appearance: "none",
+                      WebkitAppearance: "none",
+                      outline: "none",
+                      transition: "all 0.15s ease",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <option value="">{s.filterCategory}</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <FaChevronDown
+                    style={{
+                      position: "absolute",
+                      right: 9,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: filterCategory ? "rgba(255,255,255,0.7)" : "var(--text-muted)",
+                      fontSize: 10,
+                      pointerEvents: "none",
+                    }}
+                  />
+                </div>
+
+                {/* Location filter */}
+                <div style={{ position: "relative" }}>
+                  <input
+                    list="location-suggestions"
+                    value={filterLocation}
+                    onChange={(e) => setFilterLocation(e.target.value)}
+                    placeholder={s.filterLocation}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: "8px",
+                      border: "1.5px solid var(--border-input)",
+                      background: filterLocation ? "var(--accent)" : "var(--bg-input)",
+                      color: filterLocation ? "#fff" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      outline: "none",
+                      transition: "all 0.15s ease",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <datalist id="location-suggestions">
+                    {allLocations.map((loc) => (
+                      <option key={loc} value={loc} />
+                    ))}
+                  </datalist>
+                </div>
+
+                {/* Date range filter */}
+                <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                  <input
+                    type="date"
+                    value={filterDateFrom}
+                    onChange={(e) => setFilterDateFrom(e.target.value)}
+                    title="From date"
+                    style={{
+                      flex: 1,
+                      padding: "8px 6px",
+                      borderRadius: "8px",
+                      border: "1.5px solid var(--border-input)",
+                      background: filterDateFrom ? "var(--accent)" : "var(--bg-input)",
+                      color: filterDateFrom ? "#fff" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      outline: "none",
+                      transition: "all 0.15s ease",
+                      boxSizing: "border-box",
+                      colorScheme: "dark",
+                      minWidth: 0,
+                    }}
+                  />
+                  <span style={{ color: "var(--text-muted)", fontSize: 11, flexShrink: 0 }}>–</span>
+                  <input
+                    type="date"
+                    value={filterDateTo}
+                    onChange={(e) => setFilterDateTo(e.target.value)}
+                    title="To date"
+                    style={{
+                      flex: 1,
+                      padding: "8px 6px",
+                      borderRadius: "8px",
+                      border: "1.5px solid var(--border-input)",
+                      background: filterDateTo ? "var(--accent)" : "var(--bg-input)",
+                      color: filterDateTo ? "#fff" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      outline: "none",
+                      transition: "all 0.15s ease",
+                      boxSizing: "border-box",
+                      colorScheme: "dark",
+                      minWidth: 0,
+                    }}
+                  />
+                </div>
+
+                {/* Clear filters button */}
                 <button
-                  className="panel-search__clear"
-                  onClick={() => setSearchQuery("")}
+                  onClick={clearFilters}
+                  disabled={!hasActiveFilters}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    border: "1.5px solid var(--border-input)",
+                    background: hasActiveFilters ? "var(--danger)" : "var(--bg-input)",
+                    color: hasActiveFilters ? "#fff" : "var(--text-muted)",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    cursor: hasActiveFilters ? "pointer" : "not-allowed",
+                    opacity: hasActiveFilters ? 1 : 0.45,
+                    transition: "all 0.15s ease",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
                 >
-                  ×
+                  {s.clearFilters}
                 </button>
+              </div>
+
+              {/* Active filter chips */}
+              {hasActiveFilters && (
+                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                  {filterCategory && (
+                    <span
+                      onClick={() => setFilterCategory("")}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "3px 10px",
+                        borderRadius: "100px",
+                        background: "rgba(var(--accent-rgb, 47,128,237), 0.15)",
+                        border: "1px solid var(--accent)",
+                        color: "var(--accent)",
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {filterCategory} <span style={{ opacity: 0.7 }}>×</span>
+                    </span>
+                  )}
+                  {filterLocation && (
+                    <span
+                      onClick={() => setFilterLocation("")}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "3px 10px",
+                        borderRadius: "100px",
+                        background: "rgba(var(--accent-rgb, 47,128,237), 0.15)",
+                        border: "1px solid var(--accent)",
+                        color: "var(--accent)",
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      📍 {filterLocation} <span style={{ opacity: 0.7 }}>×</span>
+                    </span>
+                  )}
+                  {(filterDateFrom || filterDateTo) && (
+                    <span
+                      onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "3px 10px",
+                        borderRadius: "100px",
+                        background: "rgba(var(--accent-rgb, 47,128,237), 0.15)",
+                        border: "1px solid var(--accent)",
+                        color: "var(--accent)",
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      📅 {filterDateFrom || "…"} – {filterDateTo || "…"} <span style={{ opacity: 0.7 }}>×</span>
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -2337,6 +2785,21 @@ export default function DashboardPage() {
                             {s.foundBy} {item.authorName || "Anonymous"}
                           </span>
                         </div>
+                        {(item as any).category && (
+                          <span style={{
+                            display: "inline-block",
+                            fontSize: "0.68rem",
+                            fontWeight: 600,
+                            padding: "2px 8px",
+                            borderRadius: "100px",
+                            background: "var(--accent)",
+                            color: "#fff",
+                            fontFamily: "Poppins, sans-serif",
+                            marginTop: 4,
+                          }}>
+                            {(item as any).category}
+                          </span>
+                        )}
                         {(item as any).location && (
                           <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 4, fontFamily: "Poppins, sans-serif" }}>
                             📍 {(item as any).location}
@@ -2426,6 +2889,21 @@ export default function DashboardPage() {
                           {s.lostBy} {item.authorName || "Anonymous"}
                         </span>
                       </div>
+                      {(item as any).category && (
+                        <span style={{
+                          display: "inline-block",
+                          fontSize: "0.68rem",
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          borderRadius: "100px",
+                          background: "var(--accent)",
+                          color: "#fff",
+                          fontFamily: "Poppins, sans-serif",
+                          marginTop: 4,
+                        }}>
+                          {(item as any).category}
+                        </span>
+                      )}
                       {item.location && (
                         <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 4, fontFamily: "Poppins, sans-serif" }}>
                           📍 {item.location}

@@ -49,6 +49,7 @@ export interface LostItem {
   location?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  category?: string;
 }
 
 function normalizeImages(imageData: any): string[] {
