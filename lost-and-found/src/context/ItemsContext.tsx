@@ -10,6 +10,8 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { useSettings } from "@/context/SettingsContext";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export interface Item {
   id: number;
   name: string;
@@ -23,6 +25,8 @@ export interface Item {
   authorEmail: string;
   claimerEmail?: string;
   aiKeywords?: string;
+  school_id?: string | null;
+  date_found?: string | null;
   location?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -40,6 +44,7 @@ export interface LostItem {
   authorEmail: string;
   status: string;
   created_at: string;
+  school_id?: string | null;
   location?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -68,9 +73,13 @@ interface ItemsContextType {
     claimerEmail?: string,
   ) => void;
   removeLostItem: (id: number) => void;
+  // schoolId is set externally by SchoolContext integration in the provider wrapper
+  setActiveSchoolId: (id: string | null) => void;
 }
 
 const ItemsContext = createContext<ItemsContextType | undefined>(undefined);
+
+// ─── Translation helpers ───────────────────────────────────────────────────────
 
 async function translateText(text: string, target: string): Promise<string> {
   const cacheKey = `item_text_${target}_${btoa(encodeURIComponent(text)).slice(0, 40)}`;
@@ -108,22 +117,41 @@ async function translateItems(
   );
 }
 
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
 export const ItemsProvider = ({ children }: { children: ReactNode }) => {
   const [rawItems, setRawItems] = useState<RawItem[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [lostItems, setLostItems] = useState<LostItem[]>([]);
   const { language } = useSettings();
 
+  // schoolId drives which subset of items we fetch.
+  // null = global (no school filter).
+  // This is set by the SchoolBanner / dashboard once SchoolContext resolves.
+  const [activeSchoolId, setActiveSchoolId] = useState<string | null>(null);
+
+  // ── Fetch found items ──────────────────────────────────────────────────────
   useEffect(() => {
     const fetchItems = async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("items")
         .select("*")
         .order("id", { ascending: false });
+
+      // If user is in a school, only show that school's items.
+      // If not in a school, show items with no school (global items).
+      if (activeSchoolId) {
+        query = query.eq("school_id", activeSchoolId);
+      } else {
+        query = query.is("school_id", null);
+      }
+
+      const { data, error } = await query;
       if (error) {
         console.error("Failed to fetch items:", error.message);
         return;
       }
+
       const formatted: RawItem[] = data.map((item) => {
         const imageArray = normalizeImages(item.image_urls || item.image_url);
         return {
@@ -139,27 +167,39 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
           authorEmail: item.author_email,
           claimerEmail: item.claimer_email,
           aiKeywords: item.ai_keywords || "",
+          date_found: item.date_found ?? null,
           location: item.location ?? null,
-          latitude: item.latitude != null ? Number(item.latitude) : null, // ← FIXED
-          longitude: item.longitude != null ? Number(item.longitude) : null, // ← FIXED
+          latitude: item.latitude ?? null,
+          longitude: item.longitude ?? null,
+          school_id: item.school_id ?? null,
         };
       });
       setRawItems(formatted);
     };
     fetchItems();
-  }, []);
+  }, [activeSchoolId]);
 
+  // ── Fetch lost items ───────────────────────────────────────────────────────
   useEffect(() => {
     const fetchLostItems = async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("lost_items")
         .select("*")
         .eq("status", "looking")
         .order("id", { ascending: false });
+
+      if (activeSchoolId) {
+        query = query.eq("school_id", activeSchoolId);
+      } else {
+        query = query.is("school_id", null);
+      }
+
+      const { data, error } = await query;
       if (error) {
         console.error("Failed to fetch lost items:", error.message);
         return;
       }
+
       const formatted: LostItem[] = data.map((item) => {
         const imageArray = normalizeImages(item.image_urls || item.image_url);
         return {
@@ -174,16 +214,18 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
           authorEmail: item.author_email,
           status: item.status,
           created_at: item.created_at,
+          school_id: item.school_id ?? null,
           location: item.location ?? null,
-          latitude: item.latitude != null ? Number(item.latitude) : null, // ← FIXED
-          longitude: item.longitude != null ? Number(item.longitude) : null, // ← FIXED
+          latitude: item.latitude ?? null,
+          longitude: item.longitude ?? null,
         };
       });
       setLostItems(formatted);
     };
     fetchLostItems();
-  }, []);
+  }, [activeSchoolId]);
 
+  // ── Realtime ───────────────────────────────────────────────────────────────
   useEffect(() => {
     const channel = supabase
       .channel("items-realtime")
@@ -221,10 +263,16 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // ── Translate on language or rawItems change ───────────────────────────────
   useEffect(() => {
-    if (rawItems.length === 0) return;
+    if (rawItems.length === 0) {
+      setItems([]);
+      return;
+    }
     translateItems(rawItems, language).then(setItems);
   }, [rawItems, language]);
+
+  // ── Public mutations ───────────────────────────────────────────────────────
 
   const addItem = (item: Item) => {
     setRawItems((prev) => [item, ...prev]);
@@ -276,6 +324,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
         addLostItem,
         updateItemStatus,
         removeLostItem,
+        setActiveSchoolId,
       }}
     >
       {children}
@@ -284,7 +333,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useItems = () => {
-  const context = useContext(ItemsContext);
-  if (!context) throw new Error("useItems must be used inside ItemsProvider");
-  return context;
+  const ctx = useContext(ItemsContext);
+  if (!ctx) throw new Error("useItems must be used inside ItemsProvider");
+  return ctx;
 };
