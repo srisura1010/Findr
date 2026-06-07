@@ -1315,8 +1315,16 @@ export default function DashboardPage() {
       ["noFoundItemsSearch", "No items found for", "dash_noFoundItemsSearch"],
       ["tryKeywords", DEFAULT_STRINGS.tryKeywords, "dash_tryKeywords"],
       ["noLostItems", "No lost item reports yet.", "dash_noLostItems"],
-      ["noLostItemsSearch", "No lost items found for", "dash_noLostItemsSearch"],
-      ["clickReportLost", DEFAULT_STRINGS.clickReportLost, "dash_clickReportLost"],
+      [
+        "noLostItemsSearch",
+        "No lost items found for",
+        "dash_noLostItemsSearch",
+      ],
+      [
+        "clickReportLost",
+        DEFAULT_STRINGS.clickReportLost,
+        "dash_clickReportLost",
+      ],
       ["toggleFound", "Found an Item", "dash_toggleFound"],
       ["toggleLost", "Lost an Item", "dash_toggleLost"],
       ["reportFoundTitle", "Report Found Item", "dash_reportFoundTitle"],
@@ -1324,7 +1332,11 @@ export default function DashboardPage() {
       ["itemNameLabel", "Item Name", "dash_itemNameLabel"],
       ["itemNamePlaceholder", "Item Name", "dash_itemNamePlaceholder"],
       ["descriptionLabel", "Description", "dash_descriptionLabel"],
-      ["descriptionPlaceholder", "Description (location, time, etc)", "dash_descriptionPlaceholder"],
+      [
+        "descriptionPlaceholder",
+        "Description (location, time, etc)",
+        "dash_descriptionPlaceholder",
+      ],
       ["locationLabel", "Where was it found?", "dash_locationLabel"],
       ["locationLostLabel", "Last seen where?", "dash_locationLostLabel"],
       ["photosLabel", "Photos (optional, up to 3)", "dash_photosLabel"],
@@ -1338,11 +1350,19 @@ export default function DashboardPage() {
       ["lostItemPosted", "Lost item reported!", "dash_lostItemPosted"],
       ["whatLostLabel", "What did you lose?", "dash_whatLostLabel"],
       ["itemNameDefault", "Item Name", "dash_itemNameDefault"],
-      ["descLostPlaceholder", "Description (location, time, etc)", "dash_descLostPlaceholder"],
+      [
+        "descLostPlaceholder",
+        "Description (location, time, etc)",
+        "dash_descLostPlaceholder",
+      ],
       ["postingBtn", "Posting...", "dash_postingBtn"],
       ["postLostBtn", "Post Lost Item", "dash_postLostBtn"],
       ["myItemsTitle", "My Items", "dash_myItemsTitle"],
-      ["signInToView", "Please sign in to view your items.", "dash_signInToView"],
+      [
+        "signInToView",
+        "Please sign in to view your items.",
+        "dash_signInToView",
+      ],
       ["noItemsYet", "You haven't posted any items yet.", "dash_noItemsYet"],
       ["foundItemsPosted", "Found Items I Posted", "dash_foundItemsPosted"],
       ["lostItemsReported", "Lost Items I Reported", "dash_lostItemsReported"],
@@ -1360,20 +1380,40 @@ export default function DashboardPage() {
       ["teacherIdLabel", "Teacher ID / Staff Number", "dash_teacherIdLabel"],
       ["teacherIdPlaceholder", "T-00123", "dash_teacherIdPlaceholder"],
       ["uploadIdLabel", "Upload ID or Badge Photo", "dash_uploadIdLabel"],
-      ["uploadIdPlaceholder", "Upload ID or badge photo", "dash_uploadIdPlaceholder"],
+      [
+        "uploadIdPlaceholder",
+        "Upload ID or badge photo",
+        "dash_uploadIdPlaceholder",
+      ],
       ["photoHintShort", "PNG, JPG up to 10MB", "dash_photoHintShort"],
-      ["anythingElseLabel", "Anything else we should know?", "dash_anythingElseLabel"],
-      ["anythingElsePlaceholder", DEFAULT_STRINGS.anythingElsePlaceholder, "dash_anythingElsePlaceholder"],
+      [
+        "anythingElseLabel",
+        "Anything else we should know?",
+        "dash_anythingElseLabel",
+      ],
+      [
+        "anythingElsePlaceholder",
+        DEFAULT_STRINGS.anythingElsePlaceholder,
+        "dash_anythingElsePlaceholder",
+      ],
       ["submitRequestBtn", "Submit Request", "dash_submitRequestBtn"],
       ["submittingBtn", "Submitting...", "dash_submittingBtn"],
       ["adminAccessTitle", "Admin Access", "dash_adminAccessTitle"],
       ["adminLoginHint", DEFAULT_STRINGS.adminLoginHint, "dash_adminLoginHint"],
       ["adminPasswordLabel", "Admin Password", "dash_adminPasswordLabel"],
-      ["adminPasswordPlaceholder", "e.g. FINDR-JANE-X4K2", "dash_adminPasswordPlaceholder"],
+      [
+        "adminPasswordPlaceholder",
+        "e.g. FINDR-JANE-X4K2",
+        "dash_adminPasswordPlaceholder",
+      ],
       ["checkingBtn", "Checking...", "dash_checkingBtn"],
       ["unlockAdminBtn", "Unlock Admin View", "dash_unlockAdminBtn"],
       ["adminUnlocked", "Admin view unlocked!", "dash_adminUnlocked"],
-      ["adminUnlockedSub", DEFAULT_STRINGS.adminUnlockedSub, "dash_adminUnlockedSub"],
+      [
+        "adminUnlockedSub",
+        DEFAULT_STRINGS.adminUnlockedSub,
+        "dash_adminUnlockedSub",
+      ],
       ["adminIncorrect", DEFAULT_STRINGS.adminIncorrect, "dash_adminIncorrect"],
       ["reportedItemsTab", "Reported Items", "dash_reportedItemsTab"],
       ["reportedUsersTab", "Reported Users", "dash_reportedUsersTab"],
@@ -1393,10 +1433,18 @@ export default function DashboardPage() {
       ["banMgmtHint", DEFAULT_STRINGS.banMgmtHint, "dash_banMgmtHint"],
       ["userEmailInputLabel", "User Email", "dash_userEmailInputLabel"],
       ["reasonLabel", "Reason", "dash_reasonLabel"],
-      ["reasonPlaceholder", DEFAULT_STRINGS.reasonPlaceholder, "dash_reasonPlaceholder"],
+      [
+        "reasonPlaceholder",
+        DEFAULT_STRINGS.reasonPlaceholder,
+        "dash_reasonPlaceholder",
+      ],
       ["permanentBtn", "Permanent", "dash_permanentBtn"],
       ["suspendBtn", "Suspend", "dash_suspendBtn"],
-      ["suspendDaysLabel", "Suspend for how many days?", "dash_suspendDaysLabel"],
+      [
+        "suspendDaysLabel",
+        "Suspend for how many days?",
+        "dash_suspendDaysLabel",
+      ],
       ["processingBtn", "Processing...", "dash_processingBtn"],
       ["banUserBtn2", "Ban User", "dash_banUserBtn2"],
       ["suspendUserBtn", "Suspend User", "dash_suspendUserBtn"],
@@ -1564,7 +1612,13 @@ export default function DashboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItemName || !newItemDesc || selectedFiles.length === 0 || !user || !foundLocation)
+    if (
+      !newItemName ||
+      !newItemDesc ||
+      selectedFiles.length === 0 ||
+      !user ||
+      !foundLocation
+    )
       return;
     setIsUploading(true);
     try {
@@ -1734,18 +1788,24 @@ export default function DashboardPage() {
   // ── Filtering logic ─────────────────────────────────────────────────────────
   const applyFilters = (itemList: any[]) => {
     return itemList.filter((item) => {
-      if (filterCategory && (item.category ?? "") !== filterCategory) return false;
+      if (filterCategory && (item.category ?? "") !== filterCategory)
+        return false;
       if (filterLocation) {
         const loc = (item.location ?? "").toLowerCase();
         if (!loc.includes(filterLocation.toLowerCase())) return false;
       }
       if (filterDateFrom) {
         const itemDate = item.date_found || item.created_at;
-        if (!itemDate || new Date(itemDate) < new Date(filterDateFrom)) return false;
+        if (!itemDate || new Date(itemDate) < new Date(filterDateFrom))
+          return false;
       }
       if (filterDateTo) {
         const itemDate = item.date_found || item.created_at;
-        if (!itemDate || new Date(itemDate) > new Date(filterDateTo + "T23:59:59")) return false;
+        if (
+          !itemDate ||
+          new Date(itemDate) > new Date(filterDateTo + "T23:59:59")
+        )
+          return false;
       }
       return true;
     });
@@ -1762,20 +1822,21 @@ export default function DashboardPage() {
             q.split(/\s+/).some((word) => haystack.includes(word))
           );
         })
-      : (items ?? [])
+      : (items ?? []),
   );
 
   const filteredLostItems = applyFilters(
     searchQuery.trim()
       ? (lostItems ?? []).filter((item) => {
           const q = searchQuery.toLowerCase();
-          const haystack = `${item.name} ${item.description} ${(item as any).category ?? ""}`.toLowerCase();
+          const haystack =
+            `${item.name} ${item.description} ${(item as any).category ?? ""}`.toLowerCase();
           return (
             haystack.includes(q) ||
             q.split(/\s+/).some((word) => haystack.includes(word))
           );
         })
-      : (lostItems ?? [])
+      : (lostItems ?? []),
   );
 
   // ── Sidebar tabs ────────────────────────────────────────────────────────
@@ -1873,7 +1934,9 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <form className="panel-form" onSubmit={handleSubmit}>
-                    <label className="panel-form__label">{s.itemNameLabel}</label>
+                    <label className="panel-form__label">
+                      {s.itemNameLabel}
+                    </label>
                     <input
                       type="text"
                       placeholder={s.itemNamePlaceholder}
@@ -1883,14 +1946,18 @@ export default function DashboardPage() {
                       className="panel-form__input"
                     />
 
-                    <label className="panel-form__label">{s.categoryLabel}</label>
+                    <label className="panel-form__label">
+                      {s.categoryLabel}
+                    </label>
                     <CategorySelect
                       value={newItemCategory}
                       onChange={setNewItemCategory}
                       placeholder={s.categoryPlaceholder}
                     />
 
-                    <label className="panel-form__label">{s.descriptionLabel}</label>
+                    <label className="panel-form__label">
+                      {s.descriptionLabel}
+                    </label>
                     <textarea
                       placeholder={s.descriptionPlaceholder}
                       value={newItemDesc}
@@ -2006,7 +2073,9 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <form className="panel-form" onSubmit={handleLostSubmit}>
-                    <label className="panel-form__label">{s.whatLostLabel}</label>
+                    <label className="panel-form__label">
+                      {s.whatLostLabel}
+                    </label>
                     <input
                       type="text"
                       placeholder={s.itemNameDefault}
@@ -2016,14 +2085,18 @@ export default function DashboardPage() {
                       className="panel-form__input"
                     />
 
-                    <label className="panel-form__label">{s.categoryLabel}</label>
+                    <label className="panel-form__label">
+                      {s.categoryLabel}
+                    </label>
                     <CategorySelect
                       value={lostItemCategory}
                       onChange={setLostItemCategory}
                       placeholder={s.categoryPlaceholder}
                     />
 
-                    <label className="panel-form__label">{s.descriptionLabel}</label>
+                    <label className="panel-form__label">
+                      {s.descriptionLabel}
+                    </label>
                     <textarea
                       placeholder={s.descLostPlaceholder}
                       value={lostItemDesc}
@@ -2223,7 +2296,10 @@ export default function DashboardPage() {
               <>
                 {myFoundItems.length > 0 && (
                   <>
-                    <p className="panel-section-title" style={{ marginBottom: 8 }}>
+                    <p
+                      className="panel-section-title"
+                      style={{ marginBottom: 8 }}
+                    >
                       {s.foundItemsPosted} ({myFoundItems.length})
                     </p>
                     <div className="items-container" style={{ margin: 0 }}>
@@ -2240,23 +2316,32 @@ export default function DashboardPage() {
                             <h3>{item.name}</h3>
                             <p>{item.description}</p>
                             {(item as any).category && (
-                              <span style={{
-                                display: "inline-block",
-                                fontSize: "0.68rem",
-                                fontWeight: 600,
-                                padding: "2px 8px",
-                                borderRadius: "100px",
-                                background: "var(--accent)",
-                                color: "#fff",
-                                fontFamily: "Poppins, sans-serif",
-                                marginTop: 4,
-                                marginBottom: 2,
-                              }}>
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  fontSize: "0.68rem",
+                                  fontWeight: 600,
+                                  padding: "2px 8px",
+                                  borderRadius: "100px",
+                                  background: "var(--accent)",
+                                  color: "#fff",
+                                  fontFamily: "Poppins, sans-serif",
+                                  marginTop: 4,
+                                  marginBottom: 2,
+                                }}
+                              >
                                 {(item as any).category}
                               </span>
                             )}
                             {item.location && (
-                              <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>
+                              <p
+                                style={{
+                                  fontSize: "0.72rem",
+                                  color: "var(--text-muted)",
+                                  marginTop: 2,
+                                  fontFamily: "Poppins, sans-serif",
+                                }}
+                              >
                                 📍 {item.location}
                               </p>
                             )}
@@ -2343,23 +2428,32 @@ export default function DashboardPage() {
                             <h3>{item.name}</h3>
                             <p>{item.description}</p>
                             {(item as any).category && (
-                              <span style={{
-                                display: "inline-block",
-                                fontSize: "0.68rem",
-                                fontWeight: 600,
-                                padding: "2px 8px",
-                                borderRadius: "100px",
-                                background: "var(--accent)",
-                                color: "#fff",
-                                fontFamily: "Poppins, sans-serif",
-                                marginTop: 4,
-                                marginBottom: 2,
-                              }}>
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  fontSize: "0.68rem",
+                                  fontWeight: 600,
+                                  padding: "2px 8px",
+                                  borderRadius: "100px",
+                                  background: "var(--accent)",
+                                  color: "#fff",
+                                  fontFamily: "Poppins, sans-serif",
+                                  marginTop: 4,
+                                  marginBottom: 2,
+                                }}
+                              >
                                 {(item as any).category}
                               </span>
                             )}
                             {item.location && (
-                              <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>
+                              <p
+                                style={{
+                                  fontSize: "0.72rem",
+                                  color: "var(--text-muted)",
+                                  marginTop: 2,
+                                  fontFamily: "Poppins, sans-serif",
+                                }}
+                              >
                                 📍 {item.location}
                               </p>
                             )}
@@ -2397,15 +2491,6 @@ export default function DashboardPage() {
   };
 
   if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
-
-  // Collect unique locations from items for datalist
-  const allLocations = Array.from(
-    new Set(
-      [...(items ?? []), ...(lostItems ?? [])]
-        .map((i) => (i as any).location)
-        .filter(Boolean),
-    ),
-  );
 
   return (
     <div className="dashboard-layout">
@@ -2510,7 +2595,9 @@ export default function DashboardPage() {
                       padding: "8px 30px 8px 10px",
                       borderRadius: "8px",
                       border: "1.5px solid var(--border-input)",
-                      background: filterCategory ? "var(--accent)" : "var(--bg-input)",
+                      background: filterCategory
+                        ? "var(--accent)"
+                        : "var(--bg-input)",
                       color: filterCategory ? "#fff" : "var(--text-muted)",
                       fontFamily: "Poppins, sans-serif",
                       fontSize: "12px",
@@ -2525,7 +2612,14 @@ export default function DashboardPage() {
                   >
                     <option value="">{s.filterCategory}</option>
                     {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>
+                      <option
+                        key={cat}
+                        value={cat}
+                        style={{
+                          background: "var(--bg-input)",
+                          color: "var(--text-primary)",
+                        }}
+                      >
                         {cat}
                       </option>
                     ))}
@@ -2536,7 +2630,9 @@ export default function DashboardPage() {
                       right: 9,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: filterCategory ? "rgba(255,255,255,0.7)" : "var(--text-muted)",
+                      color: filterCategory
+                        ? "rgba(255,255,255,0.7)"
+                        : "var(--text-muted)",
                       fontSize: 10,
                       pointerEvents: "none",
                     }}
@@ -2545,35 +2641,36 @@ export default function DashboardPage() {
 
                 {/* Location filter */}
                 <div style={{ position: "relative" }}>
-                  <input
-                    list="location-suggestions"
-                    value={filterLocation}
-                    onChange={(e) => setFilterLocation(e.target.value)}
-                    placeholder={s.filterLocation}
-                    style={{
-                      width: "100%",
-                      padding: "8px 10px",
-                      borderRadius: "8px",
-                      border: "1.5px solid var(--border-input)",
-                      background: filterLocation ? "var(--accent)" : "var(--bg-input)",
-                      color: filterLocation ? "#fff" : "var(--text-muted)",
-                      fontFamily: "Poppins, sans-serif",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      outline: "none",
-                      transition: "all 0.15s ease",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                  <datalist id="location-suggestions">
-                    {allLocations.map((loc) => (
-                      <option key={loc} value={loc} />
-                    ))}
-                  </datalist>
+                  <form autoComplete="off" style={{ margin: 0 }}>
+                    <input
+                      value={filterLocation}
+                      onChange={(e) => setFilterLocation(e.target.value)}
+                      placeholder={s.filterLocation}
+                      autoComplete="off"
+                      style={{
+                        width: "100%",
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        border: "1.5px solid var(--border-input)",
+                        background: filterLocation
+                          ? "var(--accent)"
+                          : "var(--bg-input)",
+                        color: filterLocation ? "#fff" : "var(--text-muted)",
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        outline: "none",
+                        transition: "all 0.15s ease",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </form>
                 </div>
 
                 {/* Date range filter */}
-                <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                <div
+                  style={{ display: "flex", gap: "4px", alignItems: "center" }}
+                >
                   <input
                     type="date"
                     value={filterDateFrom}
@@ -2584,7 +2681,9 @@ export default function DashboardPage() {
                       padding: "8px 6px",
                       borderRadius: "8px",
                       border: "1.5px solid var(--border-input)",
-                      background: filterDateFrom ? "var(--accent)" : "var(--bg-input)",
+                      background: filterDateFrom
+                        ? "var(--accent)"
+                        : "var(--bg-input)",
                       color: filterDateFrom ? "#fff" : "var(--text-muted)",
                       fontFamily: "Poppins, sans-serif",
                       fontSize: "11px",
@@ -2596,7 +2695,15 @@ export default function DashboardPage() {
                       minWidth: 0,
                     }}
                   />
-                  <span style={{ color: "var(--text-muted)", fontSize: 11, flexShrink: 0 }}>–</span>
+                  <span
+                    style={{
+                      color: "var(--text-muted)",
+                      fontSize: 11,
+                      flexShrink: 0,
+                    }}
+                  >
+                    –
+                  </span>
                   <input
                     type="date"
                     value={filterDateTo}
@@ -2607,7 +2714,9 @@ export default function DashboardPage() {
                       padding: "8px 6px",
                       borderRadius: "8px",
                       border: "1.5px solid var(--border-input)",
-                      background: filterDateTo ? "var(--accent)" : "var(--bg-input)",
+                      background: filterDateTo
+                        ? "var(--accent)"
+                        : "var(--bg-input)",
                       color: filterDateTo ? "#fff" : "var(--text-muted)",
                       fontFamily: "Poppins, sans-serif",
                       fontSize: "11px",
@@ -2629,7 +2738,9 @@ export default function DashboardPage() {
                     padding: "8px 12px",
                     borderRadius: "8px",
                     border: "1.5px solid var(--border-input)",
-                    background: hasActiveFilters ? "var(--danger)" : "var(--bg-input)",
+                    background: hasActiveFilters
+                      ? "var(--danger)"
+                      : "var(--bg-input)",
                     color: hasActiveFilters ? "#fff" : "var(--text-muted)",
                     fontFamily: "Poppins, sans-serif",
                     fontSize: "11px",
@@ -2687,12 +2798,16 @@ export default function DashboardPage() {
                         cursor: "pointer",
                       }}
                     >
-                      📍 {filterLocation} <span style={{ opacity: 0.7 }}>×</span>
+                      📍 {filterLocation}{" "}
+                      <span style={{ opacity: 0.7 }}>×</span>
                     </span>
                   )}
                   {(filterDateFrom || filterDateTo) && (
                     <span
-                      onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }}
+                      onClick={() => {
+                        setFilterDateFrom("");
+                        setFilterDateTo("");
+                      }}
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
@@ -2708,7 +2823,8 @@ export default function DashboardPage() {
                         cursor: "pointer",
                       }}
                     >
-                      📅 {filterDateFrom || "…"} – {filterDateTo || "…"} <span style={{ opacity: 0.7 }}>×</span>
+                      📅 {filterDateFrom || "…"} – {filterDateTo || "…"}{" "}
+                      <span style={{ opacity: 0.7 }}>×</span>
                     </span>
                   )}
                 </div>
@@ -2785,23 +2901,15 @@ export default function DashboardPage() {
                             {s.foundBy} {item.authorName || "Anonymous"}
                           </span>
                         </div>
-                        {(item as any).category && (
-                          <span style={{
-                            display: "inline-block",
-                            fontSize: "0.68rem",
-                            fontWeight: 600,
-                            padding: "2px 8px",
-                            borderRadius: "100px",
-                            background: "var(--accent)",
-                            color: "#fff",
-                            fontFamily: "Poppins, sans-serif",
-                            marginTop: 4,
-                          }}>
-                            {(item as any).category}
-                          </span>
-                        )}
                         {(item as any).location && (
-                          <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 4, fontFamily: "Poppins, sans-serif" }}>
+                          <p
+                            style={{
+                              fontSize: "0.72rem",
+                              color: "var(--text-muted)",
+                              marginTop: 4,
+                              fontFamily: "Poppins, sans-serif",
+                            }}
+                          >
                             📍 {(item as any).location}
                           </p>
                         )}
@@ -2889,23 +2997,15 @@ export default function DashboardPage() {
                           {s.lostBy} {item.authorName || "Anonymous"}
                         </span>
                       </div>
-                      {(item as any).category && (
-                        <span style={{
-                          display: "inline-block",
-                          fontSize: "0.68rem",
-                          fontWeight: 600,
-                          padding: "2px 8px",
-                          borderRadius: "100px",
-                          background: "var(--accent)",
-                          color: "#fff",
-                          fontFamily: "Poppins, sans-serif",
-                          marginTop: 4,
-                        }}>
-                          {(item as any).category}
-                        </span>
-                      )}
                       {item.location && (
-                        <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 4, fontFamily: "Poppins, sans-serif" }}>
+                        <p
+                          style={{
+                            fontSize: "0.72rem",
+                            color: "var(--text-muted)",
+                            marginTop: 4,
+                            fontFamily: "Poppins, sans-serif",
+                          }}
+                        >
                           📍 {item.location}
                         </p>
                       )}

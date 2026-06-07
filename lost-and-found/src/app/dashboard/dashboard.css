@@ -1757,3 +1757,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   .school-banner { padding: 8px 12px; font-size: 12px; gap: 8px; }
   .school-banner__name { font-size: 13px; }
 }
+
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
