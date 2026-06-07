@@ -44,6 +44,7 @@ export interface LostItem {
   authorEmail: string;
   status: string;
   created_at: string;
+  date_found?: string | null;
   school_id?: string | null;
   location?: string | null;
   latitude?: number | null;
@@ -214,6 +215,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
           authorEmail: item.author_email,
           status: item.status,
           created_at: item.created_at,
+          date_found: item.created_at ?? null,
           school_id: item.school_id ?? null,
           location: item.location ?? null,
           latitude: item.latitude ?? null,
