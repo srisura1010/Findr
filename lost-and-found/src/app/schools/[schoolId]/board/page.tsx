@@ -312,9 +312,17 @@ export default function SchoolBoardPage() {
         ["lostBy", "Lost by", "sc_board_lostBy"],
         ["reportFoundTitle", "Report Found Item", "sc_board_reportFoundTitle"],
         ["itemNameLabel", "Item Name", "sc_board_itemNameLabel"],
-        ["itemNamePlaceholder", "e.g. Blue water bottle", "sc_board_itemNamePlaceholder"],
+        [
+          "itemNamePlaceholder",
+          "e.g. Blue water bottle",
+          "sc_board_itemNamePlaceholder",
+        ],
         ["descLabel", "Description", "sc_board_descLabel"],
-        ["descFoundPlaceholder", DEFAULT_BOARD.descFoundPlaceholder, "sc_board_descFoundPlaceholder"],
+        [
+          "descFoundPlaceholder",
+          DEFAULT_BOARD.descFoundPlaceholder,
+          "sc_board_descFoundPlaceholder",
+        ],
         ["photosLabel", "Photos (up to 3)", "sc_board_photosLabel"],
         ["photosSelected", "photo(s) selected", "sc_board_photosSelected"],
         ["uploadPhotos", "Upload photos", "sc_board_uploadPhotos"],
@@ -325,20 +333,48 @@ export default function SchoolBoardPage() {
         ["reportLostTitle", "Report Lost Item", "sc_board_reportLostTitle"],
         ["whatLostLabel", "What did you lose?", "sc_board_whatLostLabel"],
         ["lostItemPlaceholder", "Item name", "sc_board_lostItemPlaceholder"],
-        ["descLostPlaceholder", DEFAULT_BOARD.descLostPlaceholder, "sc_board_descLostPlaceholder"],
-        ["photosOptionalLabel", "Photos (optional, up to 3)", "sc_board_photosOptionalLabel"],
+        [
+          "descLostPlaceholder",
+          DEFAULT_BOARD.descLostPlaceholder,
+          "sc_board_descLostPlaceholder",
+        ],
+        [
+          "photosOptionalLabel",
+          "Photos (optional, up to 3)",
+          "sc_board_photosOptionalLabel",
+        ],
         ["postLostBtn", "Post Lost Item", "sc_board_postLostBtn"],
         ["postingLostBtn", "Posting...", "sc_board_postingLostBtn"],
         ["lostPostedMsg", "Lost item reported!", "sc_board_lostPostedMsg"],
         ["adminLoginTitle", "School Admin Access", "sc_board_adminLoginTitle"],
-        ["adminLoginHint", DEFAULT_BOARD.adminLoginHint, "sc_board_adminLoginHint"],
+        [
+          "adminLoginHint",
+          DEFAULT_BOARD.adminLoginHint,
+          "sc_board_adminLoginHint",
+        ],
         ["adminPasswordLabel", "Admin Password", "sc_board_adminPasswordLabel"],
-        ["adminPasswordPlaceholder", "e.g. FINDR-JANE-X4K2", "sc_board_adminPasswordPlaceholder"],
+        [
+          "adminPasswordPlaceholder",
+          "e.g. FINDR-JANE-X4K2",
+          "sc_board_adminPasswordPlaceholder",
+        ],
         ["unlockBtn", "Unlock Admin View", "sc_board_unlockBtn"],
         ["checkingBtn", "Checking...", "sc_board_checkingBtn"],
-        ["adminUnlockedMsg", "Admin view unlocked!", "sc_board_adminUnlockedMsg"],
-        ["adminUnlockedSub", DEFAULT_BOARD.adminUnlockedSub, "sc_board_adminUnlockedSub"],
-        ["adminIncorrect", DEFAULT_BOARD.adminIncorrect, "sc_board_adminIncorrect"],
+        [
+          "adminUnlockedMsg",
+          "Admin view unlocked!",
+          "sc_board_adminUnlockedMsg",
+        ],
+        [
+          "adminUnlockedSub",
+          DEFAULT_BOARD.adminUnlockedSub,
+          "sc_board_adminUnlockedSub",
+        ],
+        [
+          "adminIncorrect",
+          DEFAULT_BOARD.adminIncorrect,
+          "sc_board_adminIncorrect",
+        ],
       ];
 
       await Promise.all(
@@ -399,6 +435,31 @@ export default function SchoolBoardPage() {
 }
 
 // ─── SchoolBoard ───────────────────────────────────────────────────────────────
+// Replace your existing SchoolBoard function with this one.
+// Everything else in the file stays the same.
+
+const CATEGORIES = [
+  "Electronics",
+  "Clothing & Accessories",
+  "Bags & Backpacks",
+  "Books & Stationery",
+  "Keys",
+  "Wallet & Cards",
+  "Jewelry",
+  "Water Bottle",
+  "Sports Equipment",
+  "Musical Instrument",
+  "Glasses & Eyewear",
+  "Headphones & Earbuds",
+  "Phone",
+  "Charger & Cables",
+  "ID & Documents",
+  "Toys & Games",
+  "Food & Containers",
+  "Umbrella",
+  "Other",
+];
+
 function SchoolBoard({
   school,
   user,
@@ -476,6 +537,9 @@ function SchoolBoard({
   // ── Add Found Item ──────────────────────────────────────────────────────────
   const [foundName, setFoundName] = useState("");
   const [foundDesc, setFoundDesc] = useState("");
+  const [foundCategory, setFoundCategory] = useState("");
+  const [foundLocation, setFoundLocation] = useState("");
+  const [foundDate, setFoundDate] = useState("");
   const [foundFiles, setFoundFiles] = useState<File[]>([]);
   const [foundUploading, setFoundUploading] = useState(false);
   const [foundSuccess, setFoundSuccess] = useState(false);
@@ -497,6 +561,11 @@ function SchoolBoard({
         school_id: school.id,
         name: foundName,
         description: foundDesc,
+        category: foundCategory || null,
+        location: foundLocation || null,
+        date_found: foundDate
+          ? new Date(foundDate).toISOString()
+          : new Date().toISOString(),
         image_url: imageUrls[0] || null,
         image_urls: imageUrls.length > 0 ? imageUrls : null,
         author_name: user.fullName || user.username || "Anonymous",
@@ -510,6 +579,9 @@ function SchoolBoard({
     if (inserted) setItems((prev) => [inserted, ...prev]);
     setFoundName("");
     setFoundDesc("");
+    setFoundCategory("");
+    setFoundLocation("");
+    setFoundDate("");
     setFoundFiles([]);
     setFoundSuccess(true);
     setTimeout(() => {
@@ -522,6 +594,8 @@ function SchoolBoard({
   // ── Add Lost Item ───────────────────────────────────────────────────────────
   const [lostName, setLostName] = useState("");
   const [lostDesc, setLostDesc] = useState("");
+  const [lostCategory, setLostCategory] = useState("");
+  const [lostLocation, setLostLocation] = useState("");
   const [lostFiles, setLostFiles] = useState<File[]>([]);
   const [lostUploading, setLostUploading] = useState(false);
   const [lostSuccess, setLostSuccess] = useState(false);
@@ -543,6 +617,8 @@ function SchoolBoard({
         school_id: school.id,
         name: lostName,
         description: lostDesc,
+        category: lostCategory || null,
+        location: lostLocation || null,
         image_url: imageUrls[0] || null,
         image_urls: imageUrls.length > 0 ? imageUrls : null,
         author_name: user.fullName || user.username || "Anonymous",
@@ -556,6 +632,8 @@ function SchoolBoard({
     if (inserted) setLostItems((prev) => [inserted, ...prev]);
     setLostName("");
     setLostDesc("");
+    setLostCategory("");
+    setLostLocation("");
     setLostFiles([]);
     setLostSuccess(true);
     setTimeout(() => {
@@ -645,10 +723,30 @@ function SchoolBoard({
       )
     : lostItems;
 
+  // ── Shared select style ─────────────────────────────────────────────────────
+  const selectStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: "8px",
+    border: "1.5px solid var(--sc-input-border, #2a2a3a)",
+    background: "var(--sc-input-bg, #12121a)",
+    color: "var(--sc-text, #e8e8f0)",
+    fontFamily: "Poppins, sans-serif",
+    fontSize: "13px",
+    fontWeight: 500,
+    outline: "none",
+    appearance: "none" as any,
+    WebkitAppearance: "none" as any,
+    cursor: "pointer",
+    boxSizing: "border-box" as any,
+  };
+
   return (
     <div
       className="sc-board"
-      style={{ "--sc-color": color, "--sc-color-2": color2 } as React.CSSProperties}
+      style={
+        { "--sc-color": color, "--sc-color-2": color2 } as React.CSSProperties
+      }
     >
       {/* ── Header ── */}
       <div
@@ -663,7 +761,11 @@ function SchoolBoard({
           onClick={onBack}
           style={
             hasBg
-              ? { background: "rgba(0,0,0,0.3)", color: "#fff", borderColor: "rgba(255,255,255,0.3)" }
+              ? {
+                  background: "rgba(0,0,0,0.3)",
+                  color: "#fff",
+                  borderColor: "rgba(255,255,255,0.3)",
+                }
               : {}
           }
         >
@@ -671,7 +773,11 @@ function SchoolBoard({
         </button>
         <div className="sc-board__identity">
           {school.logo_url ? (
-            <img src={school.logo_url} alt={school.name} className="sc-board__logo" />
+            <img
+              src={school.logo_url}
+              alt={school.name}
+              className="sc-board__logo"
+            />
           ) : (
             <div className="sc-board__initial" style={{ background: color }}>
               {school.name[0]}
@@ -680,7 +786,11 @@ function SchoolBoard({
           <div>
             <p
               className="sc-board__name"
-              style={hasBg ? { color: "#fff", textShadow: "0 1px 6px rgba(0,0,0,0.5)" } : {}}
+              style={
+                hasBg
+                  ? { color: "#fff", textShadow: "0 1px 6px rgba(0,0,0,0.5)" }
+                  : {}
+              }
             >
               {school.name}
             </p>
@@ -722,12 +832,17 @@ function SchoolBoard({
             <button
               key={tab.id}
               className={`sc-board__tab${activeTab === tab.id ? " sc-board__tab--active" : ""}`}
-              style={activeTab === tab.id ? { background: `${color}22`, color } : {}}
+              style={
+                activeTab === tab.id ? { background: `${color}22`, color } : {}
+              }
               onClick={() => setActiveTab(tab.id)}
             >
               <span className="sc-board__tab-label">{tab.label}</span>
               {activeTab === tab.id && (
-                <span className="sc-board__tab-pip" style={{ background: color2 }} />
+                <span
+                  className="sc-board__tab-pip"
+                  style={{ background: color2 }}
+                />
               )}
             </button>
           ))}
@@ -757,7 +872,12 @@ function SchoolBoard({
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   {searchQuery && (
-                    <button className="sc-search__clear" onClick={() => setSearchQuery("")}>×</button>
+                    <button
+                      className="sc-search__clear"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      ×
+                    </button>
                   )}
                 </div>
               </div>
@@ -766,7 +886,15 @@ function SchoolBoard({
                   <button
                     key={t}
                     className={`sc-tab-btn${boardTab === t ? " sc-tab-btn--active" : ""}`}
-                    style={boardTab === t ? { background: color, color: "#fff", borderColor: color } : {}}
+                    style={
+                      boardTab === t
+                        ? {
+                            background: color,
+                            color: "#fff",
+                            borderColor: color,
+                          }
+                        : {}
+                    }
                     onClick={() => setBoardTab(t)}
                   >
                     {t === "found"
@@ -796,15 +924,25 @@ function SchoolBoard({
                       >
                         <div className="sc-item-card__img-wrap">
                           {item.image_url ? (
-                            <img src={item.image_url} alt={item.name} className="sc-item-card__img" />
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="sc-item-card__img"
+                            />
                           ) : (
-                            <div className="sc-item-card__no-img">{s.noImage}</div>
+                            <div className="sc-item-card__no-img">
+                              {s.noImage}
+                            </div>
                           )}
                         </div>
                         <div className="sc-item-card__info">
                           <p className="sc-item-card__name">{item.name}</p>
-                          <p className="sc-item-card__desc">{item.description}</p>
-                          <p className="sc-item-card__by">{s.foundBy} {item.author_name}</p>
+                          <p className="sc-item-card__desc">
+                            {item.description}
+                          </p>
+                          <p className="sc-item-card__by">
+                            {s.foundBy} {item.author_name}
+                          </p>
                           {item.status === "pending" && (
                             <span className="sc-item-card__status sc-item-card__status--pending">
                               {s.claimPending}
@@ -813,14 +951,15 @@ function SchoolBoard({
                         </div>
                         {(isSchoolAdmin || user?.id === item.author_id) && (
                           <div className="sc-item-card__actions">
-                            {user?.id === item.author_id && item.status === "pending" && (
-                              <button
-                                className="sc-btn sc-btn--success sc-btn--sm"
-                                onClick={(e) => handleMarkClaimed(e, item.id)}
-                              >
-                                {s.confirmClaimed}
-                              </button>
-                            )}
+                            {user?.id === item.author_id &&
+                              item.status === "pending" && (
+                                <button
+                                  className="sc-btn sc-btn--success sc-btn--sm"
+                                  onClick={(e) => handleMarkClaimed(e, item.id)}
+                                >
+                                  {s.confirmClaimed}
+                                </button>
+                              )}
                             <button
                               className="sc-btn sc-btn--danger sc-btn--sm sc-btn--icon"
                               onClick={(e) => handleDeleteFound(e, item.id)}
@@ -831,7 +970,8 @@ function SchoolBoard({
                         )}
                       </div>
                     ))}
-                  {filteredFound.filter((i) => i.status !== "claimed").length === 0 && (
+                  {filteredFound.filter((i) => i.status !== "claimed")
+                    .length === 0 && (
                     <div className="sc-empty">{s.noFoundItems}</div>
                   )}
                 </div>
@@ -851,15 +991,23 @@ function SchoolBoard({
                     >
                       <div className="sc-item-card__img-wrap">
                         {item.image_url ? (
-                          <img src={item.image_url} alt={item.name} className="sc-item-card__img" />
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="sc-item-card__img"
+                          />
                         ) : (
-                          <div className="sc-item-card__no-img">{s.noImage}</div>
+                          <div className="sc-item-card__no-img">
+                            {s.noImage}
+                          </div>
                         )}
                       </div>
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        <p className="sc-item-card__by">{s.lostBy} {item.author_name}</p>
+                        <p className="sc-item-card__by">
+                          {s.lostBy} {item.author_name}
+                        </p>
                       </div>
                       {(isSchoolAdmin || user?.id === item.author_id) && (
                         <div className="sc-item-card__actions">
@@ -909,6 +1057,21 @@ function SchoolBoard({
                     value={foundName}
                     onChange={(e) => setFoundName(e.target.value)}
                   />
+
+                  <label className="sc-form__label">Category</label>
+                  <select
+                    style={selectStyle}
+                    value={foundCategory}
+                    onChange={(e) => setFoundCategory(e.target.value)}
+                  >
+                    <option value="">Select a category</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+
                   <label className="sc-form__label">{s.descLabel}</label>
                   <textarea
                     className="sc-form__textarea"
@@ -917,8 +1080,30 @@ function SchoolBoard({
                     value={foundDesc}
                     onChange={(e) => setFoundDesc(e.target.value)}
                   />
+
+                  <label className="sc-form__label">Where was it found?</label>
+                  <input
+                    className="sc-form__input"
+                    type="text"
+                    placeholder="e.g. Room 204, near the gym, front office..."
+                    value={foundLocation}
+                    onChange={(e) => setFoundLocation(e.target.value)}
+                  />
+
+                  <label className="sc-form__label">Date Found</label>
+                  <input
+                    className="sc-form__input"
+                    type="date"
+                    value={foundDate}
+                    onChange={(e) => setFoundDate(e.target.value)}
+                    style={{ colorScheme: "dark" }}
+                  />
+
                   <label className="sc-form__label">{s.photosLabel}</label>
-                  <label className="sc-form__file-label" htmlFor="sc-found-upload">
+                  <label
+                    className="sc-form__file-label"
+                    htmlFor="sc-found-upload"
+                  >
                     <span className="sc-form__file-icon">+</span>
                     <span>
                       {foundFiles.length > 0
@@ -950,7 +1135,9 @@ function SchoolBoard({
                             type="button"
                             className="sc-form__preview-remove"
                             onClick={() =>
-                              setFoundFiles(foundFiles.filter((_, i) => i !== idx))
+                              setFoundFiles(
+                                foundFiles.filter((_, i) => i !== idx),
+                              )
                             }
                           >
                             ×
@@ -1001,6 +1188,21 @@ function SchoolBoard({
                     value={lostName}
                     onChange={(e) => setLostName(e.target.value)}
                   />
+
+                  <label className="sc-form__label">Category</label>
+                  <select
+                    style={selectStyle}
+                    value={lostCategory}
+                    onChange={(e) => setLostCategory(e.target.value)}
+                  >
+                    <option value="">Select a category</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+
                   <label className="sc-form__label">{s.descLabel}</label>
                   <textarea
                     className="sc-form__textarea"
@@ -1009,8 +1211,23 @@ function SchoolBoard({
                     value={lostDesc}
                     onChange={(e) => setLostDesc(e.target.value)}
                   />
-                  <label className="sc-form__label">{s.photosOptionalLabel}</label>
-                  <label className="sc-form__file-label" htmlFor="sc-lost-upload">
+
+                  <label className="sc-form__label">Last seen where?</label>
+                  <input
+                    className="sc-form__input"
+                    type="text"
+                    placeholder="e.g. Cafeteria, locker room, room 101..."
+                    value={lostLocation}
+                    onChange={(e) => setLostLocation(e.target.value)}
+                  />
+
+                  <label className="sc-form__label">
+                    {s.photosOptionalLabel}
+                  </label>
+                  <label
+                    className="sc-form__file-label"
+                    htmlFor="sc-lost-upload"
+                  >
                     <span className="sc-form__file-icon">+</span>
                     <span>
                       {lostFiles.length > 0
@@ -1042,7 +1259,9 @@ function SchoolBoard({
                             type="button"
                             className="sc-form__preview-remove"
                             onClick={() =>
-                              setLostFiles(lostFiles.filter((_, i) => i !== idx))
+                              setLostFiles(
+                                lostFiles.filter((_, i) => i !== idx),
+                              )
                             }
                           >
                             ×
@@ -1086,7 +1305,9 @@ function SchoolBoard({
               ) : (
                 <form className="sc-form" onSubmit={handleAdminLogin}>
                   <p className="sc-hint">{s.adminLoginHint}</p>
-                  <label className="sc-form__label">{s.adminPasswordLabel}</label>
+                  <label className="sc-form__label">
+                    {s.adminPasswordLabel}
+                  </label>
                   <input
                     className="sc-form__input"
                     type="password"
