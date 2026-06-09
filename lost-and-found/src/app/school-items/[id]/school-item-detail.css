@@ -1,4 +1,4 @@
-.sid-page {
+.detail-page {
   min-height: calc(100vh - 80px);
   background: var(--bg-page);
   padding: 24px 28px 48px;
@@ -6,7 +6,7 @@
   margin: 0 auto;
 }
 
-.sid-not-found {
+.detail-not-found {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,7 +18,7 @@
 }
 
 /* ── Breadcrumb ── */
-.sid-breadcrumb {
+.detail-breadcrumb {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -26,7 +26,7 @@
   flex-wrap: wrap;
 }
 
-.sid-back-btn {
+.detail-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -43,24 +43,24 @@
   min-height: 36px;
 }
 
-.sid-back-btn:hover {
+.detail-back-btn:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
   border-color: var(--accent);
 }
 
-.sid-breadcrumb__sep {
+.detail-breadcrumb__sep {
   color: var(--text-muted);
   font-size: 13px;
 }
 
-.sid-breadcrumb__label {
+.detail-breadcrumb__label {
   font-family: "Poppins", sans-serif;
   font-size: 13px;
   color: var(--text-secondary);
 }
 
-.sid-breadcrumb__current {
+.detail-breadcrumb__current {
   font-family: "Poppins", sans-serif;
   font-size: 13px;
   font-weight: 600;
@@ -72,7 +72,7 @@
 }
 
 /* ── Main layout ── */
-.sid-layout {
+.detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: 32px;
@@ -80,7 +80,7 @@
 }
 
 /* ── Image col ── */
-.sid-image-col {
+.detail-image-col {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -88,7 +88,7 @@
   top: 24px;
 }
 
-.sid-status-badge {
+.detail-status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -100,38 +100,38 @@
   width: fit-content;
 }
 
-.sid-status-badge--waiting {
+.detail-status-badge--waiting {
   background: color-mix(in srgb, var(--success) 12%, var(--bg-card));
   color: var(--success);
   border: 1.5px solid color-mix(in srgb, var(--success) 30%, transparent);
 }
 
-.sid-status-badge--pending {
+.detail-status-badge--pending {
   background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
   color: var(--accent);
   border: 1.5px solid color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
-.sid-status-badge--lost {
+.detail-status-badge--lost {
   background: color-mix(in srgb, var(--warning) 12%, var(--bg-card));
   color: var(--warning-text);
   border: 1.5px solid color-mix(in srgb, var(--warning) 40%, transparent);
 }
 
-.sid-status-badge--claimed {
+.detail-status-badge--claimed {
   background: color-mix(in srgb, var(--text-muted) 10%, var(--bg-card));
   color: var(--text-muted);
   border: 1.5px solid var(--border-default);
 }
 
 /* ── Info col ── */
-.sid-info-col {
+.detail-info-col {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.sid-type-pill {
+.detail-type-pill {
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
@@ -147,14 +147,7 @@
   width: fit-content;
 }
 
-.sid-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.sid-title {
+.detail-title {
   margin: 0;
   font-family: "Ubuntu", sans-serif;
   font-size: clamp(1.6rem, 4vw, 2.4rem);
@@ -164,14 +157,12 @@
   letter-spacing: -0.04em;
 }
 
-.sid-danger-btn {
+/* ── Secondary buttons (Report / Delete) ── */
+.detail-secondary-btn {
   display: inline-flex;
   align-items: center;
   padding: 8px 14px;
   border-radius: 8px;
-  border: 1.5px solid var(--danger);
-  background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
-  color: var(--danger);
   font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 600;
@@ -181,19 +172,25 @@
   flex-shrink: 0;
 }
 
-.sid-danger-btn:hover {
+.detail-secondary-btn--danger {
+  border: 1.5px solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
+  color: var(--danger);
+}
+
+.detail-secondary-btn--danger:hover {
   background: var(--danger);
   color: #fff;
 }
 
 /* ── Poster ── */
-.sid-poster {
+.detail-poster {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.sid-poster__avatar {
+.detail-poster__avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -202,32 +199,38 @@
   flex-shrink: 0;
 }
 
-.sid-poster__info {
+.detail-poster__info {
   display: flex;
   flex-direction: column;
   gap: 1px;
 }
 
-.sid-poster__label {
+.detail-poster__label {
   font-family: "Poppins", sans-serif;
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.sid-poster__name {
+.detail-poster__name {
   font-family: "Poppins", sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.sid-divider {
+.detail-divider {
   height: 1px;
   background: var(--border-default);
 }
 
-/* ── Meta chip ── */
-.sid-meta-chip {
+/* ── Meta chips ── */
+.detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-meta-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -241,21 +244,21 @@
   width: fit-content;
 }
 
-.sid-meta-chip__icon {
+.detail-meta-chip__icon {
   font-size: 11px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 /* ── Description ── */
-.sid-description-box {
+.detail-description-box {
   background: var(--bg-input);
   border: 1px solid var(--border-default);
   border-radius: 14px;
   padding: 16px 18px;
 }
 
-.sid-description-label {
+.detail-description-label {
   margin: 0 0 6px;
   font-family: "Poppins", sans-serif;
   font-size: 10px;
@@ -265,7 +268,7 @@
   color: var(--text-muted);
 }
 
-.sid-description-text {
+.detail-description-text {
   margin: 0;
   font-family: "Poppins", sans-serif;
   font-size: 14px;
@@ -274,7 +277,7 @@
 }
 
 /* ── Action message ── */
-.sid-action-msg {
+.detail-action-msg {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -289,13 +292,19 @@
 }
 
 /* ── Action buttons ── */
-.sid-actions {
+.detail-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.sid-btn {
+.detail-secondary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -311,58 +320,58 @@
   letter-spacing: 0.2px;
 }
 
-.sid-btn--primary {
+.detail-btn--primary {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 35%, rgba(0,0,0,0.1));
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.1));
 }
 
-.sid-btn--primary:hover {
+.detail-btn--primary:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, rgba(0,0,0,0.1));
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, rgba(0, 0, 0, 0.1));
 }
 
-.sid-btn--secondary {
+.detail-btn--secondary {
   background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
   color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 28%, var(--border-default));
 }
 
-.sid-btn--secondary:hover {
+.detail-btn--secondary:hover {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
   transform: translateY(-1px);
 }
 
-.sid-btn--success {
+.detail-btn--success {
   background: var(--success);
   color: #fff;
   border-color: var(--success);
 }
 
-.sid-btn--success:hover:not(:disabled) {
+.detail-btn--success:hover:not(:disabled) {
   background: var(--success-hover);
   transform: translateY(-1px);
 }
 
-.sid-btn--success:disabled {
+.detail-btn--success:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.sid-btn--disabled {
+.detail-btn--disabled {
   background: var(--bg-input);
   color: var(--text-muted);
   border-color: var(--border-default);
   cursor: not-allowed;
 }
 
-/* ── Chat overlay ── */
-.sid-overlay {
+/* ── Overlay (report & chat) ── */
+.detail-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
@@ -371,16 +380,149 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 0 0 0;
-  animation: sid-fade-in 0.18s ease;
+  animation: detail-fade-in 0.18s ease;
 }
 
-@keyframes sid-fade-in {
+@keyframes detail-fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-.sid-chat {
+/* ── Report modal ── */
+.detail-modal {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border-radius: 24px 24px 0 0;
+  border: 1.5px solid var(--border-default);
+  border-bottom: none;
+  padding: 24px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: detail-slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.18);
+}
+
+@keyframes detail-slide-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.detail-modal__title {
+  margin: 0;
+  font-family: "Ubuntu", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detail-modal__subtitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.detail-modal__reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-modal__reason {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.detail-modal__reason:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+}
+
+.detail-modal__reason--selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-card));
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.detail-modal__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.detail-modal__cancel {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.detail-modal__cancel:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.detail-modal__submit {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.detail-modal__submit:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.detail-modal__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Success panel (inside modal) ── */
+.panel-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0;
+  color: var(--success);
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.panel-success__icon {
+  font-size: 32px;
+}
+
+/* ── Chat panel ── */
+.detail-chat {
   width: 100%;
   max-width: 480px;
   max-height: 70vh;
@@ -391,16 +533,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: sid-slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: detail-slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.18);
 }
 
-@keyframes sid-slide-up {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.sid-chat__header {
+.detail-chat__header {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -410,7 +547,8 @@
   flex-shrink: 0;
 }
 
-.sid-chat__avatar {
+/* ── Chat modal classes (used inside detail-chat) ── */
+.chat-modal__avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -425,12 +563,12 @@
   flex-shrink: 0;
 }
 
-.sid-chat__header-info {
+.chat-modal__header-info {
   flex: 1;
   min-width: 0;
 }
 
-.sid-chat__name {
+.chat-modal__name {
   font-family: "Ubuntu", sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -440,7 +578,7 @@
   text-overflow: ellipsis;
 }
 
-.sid-chat__item {
+.chat-modal__item {
   font-family: "Poppins", sans-serif;
   font-size: 11px;
   color: var(--text-muted);
@@ -449,7 +587,7 @@
   text-overflow: ellipsis;
 }
 
-.sid-chat__close {
+.chat-modal__close {
   background: none;
   border: none;
   font-size: 22px;
@@ -461,9 +599,9 @@
   flex-shrink: 0;
 }
 
-.sid-chat__close:hover { color: var(--text-primary); }
+.chat-modal__close:hover { color: var(--text-primary); }
 
-.sid-chat__messages {
+.chat-modal__messages {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
@@ -472,7 +610,7 @@
   gap: 8px;
 }
 
-.sid-chat__empty {
+.chat-modal__empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -483,16 +621,16 @@
   text-align: center;
 }
 
-.sid-bubble-wrap {
+.chat-bubble-wrapper {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
 }
 
-.sid-bubble-wrap--own { align-items: flex-end; }
+.chat-bubble-wrapper--own { align-items: flex-end; }
 
-.sid-bubble {
+.chat-bubble {
   max-width: 75%;
   padding: 9px 13px;
   border-radius: 16px;
@@ -502,27 +640,27 @@
   word-break: break-word;
 }
 
-.sid-bubble--own {
+.chat-bubble--own {
   background: var(--accent);
   color: #fff;
   border-radius: 16px 16px 4px 16px;
 }
 
-.sid-bubble--other {
+.chat-bubble--other {
   background: var(--bg-input);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
   border-radius: 16px 16px 16px 4px;
 }
 
-.sid-bubble__time {
+.chat-bubble__time {
   font-family: "Poppins", sans-serif;
   font-size: 10px;
   color: var(--text-muted);
   padding: 0 4px;
 }
 
-.sid-chat__input-row {
+.chat-modal__input-row {
   display: flex;
   gap: 8px;
   padding: 12px 14px;
@@ -532,7 +670,7 @@
   align-items: flex-end;
 }
 
-.sid-chat__textarea {
+.chat-modal__textarea {
   flex: 1;
   resize: none;
   border: 1.5px solid var(--border-input);
@@ -548,12 +686,12 @@
   transition: border-color 0.15s ease;
 }
 
-.sid-chat__textarea:focus {
+.chat-modal__textarea:focus {
   border-color: var(--accent);
   background: var(--bg-card);
 }
 
-.sid-chat__send {
+.chat-modal__send {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -569,23 +707,22 @@
   flex-shrink: 0;
 }
 
-.sid-chat__send--active {
+.chat-modal__send--active {
   background: var(--accent);
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 40%, rgba(0,0,0,0.1));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 40%, rgba(0, 0, 0, 0.1));
 }
 
-.sid-chat__send--active:hover {
+.chat-modal__send--active:hover {
   background: var(--accent-hover);
   transform: scale(1.05);
 }
 
 /* ── Responsive ── */
 @media (max-width: 720px) {
-  .sid-page { padding: 16px 14px 40px; }
-  .sid-layout { grid-template-columns: 1fr; gap: 20px; }
-  .sid-image-col { position: static; }
-  .sid-title { font-size: 1.6rem; }
-  .sid-title-row { flex-direction: column; align-items: flex-start; }
+  .detail-page    { padding: 16px 14px 40px; }
+  .detail-layout  { grid-template-columns: 1fr; gap: 20px; }
+  .detail-image-col { position: static; }
+  .detail-title   { font-size: 1.6rem; }
 }

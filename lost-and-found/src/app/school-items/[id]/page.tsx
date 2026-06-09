@@ -18,7 +18,7 @@ import ImageGallery from "@/app/components/ImageGallery";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import LocationMap from "@/app/components/LocationMap";
 import { getConversationId } from "@/app/components/MessagingSystem";
-import "./item-detail.css";
+import "./school-item-detail.css";
 
 const REPORT_REASONS = [
   "Inappropriate content",
