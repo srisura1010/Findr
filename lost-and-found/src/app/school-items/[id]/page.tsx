@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
-import { useItems } from "@/context/ItemsContext";
 import {
   FaFlag,
   FaMessage,
@@ -47,14 +46,12 @@ interface Message {
   created_at: string;
 }
 
-export default function ItemDetailPage() {
+export default function SchoolItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { items, lostItems, updateItemStatus, removeLostItem } = useItems();
 
   const [item, setItem] = useState<any>(null);
-  const [isLost, setIsLost] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAdmin] = useState(() =>
     typeof window !== "undefined"
@@ -79,103 +76,53 @@ export default function ItemDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMsg, setActionMsg] = useState("");
 
-  // Resolve item from context or fetch from DB
+  // Fetch from school_items table
   useEffect(() => {
     if (!isLoaded) return;
 
     const idNum = parseInt(id, 10);
 
-    const found = items?.find((i) => i.id === idNum);
-    if (found) {
-      setItem({ ...found });
-      setIsLost(false);
-      setLoading(false);
-      return;
-    }
-
-    const lost = lostItems?.find((i) => i.id === idNum);
-    if (lost) {
-      setItem({ ...lost });
-      setIsLost(true);
-      setLoading(false);
-      return;
-    }
-
     const fetchItem = async () => {
-      const { data: foundData } = await supabase
-        .from("items")
+      const { data } = await supabase
+        .from("school_items")
         .select("*")
         .eq("id", idNum)
         .maybeSingle();
 
-      if (foundData) {
-        const imageArray = normalizeImages(
-          foundData.image_urls || foundData.image_url,
-        );
+      if (data) {
+        const imageArray = normalizeImages(data.image_urls || data.image_url);
         setItem({
-          id: foundData.id,
-          name: foundData.name,
-          description: foundData.description,
+          id: data.id,
+          name: data.name,
+          description: data.description,
           image: imageArray[0] || "",
           images: imageArray,
-          authorName: foundData.author_name,
-          authorAvatar: foundData.author_avatar,
-          authorId: foundData.author_id,
-          authorEmail: foundData.author_email,
-          status: foundData.status,
-          aiKeywords: foundData.ai_keywords,
-          category: foundData.category ?? null,
-          date_found: foundData.date_found,
-          location: foundData.location ?? null,
-          latitude: foundData.latitude ?? null,
-          longitude: foundData.longitude ?? null,
+          authorName: data.author_name,
+          authorAvatar: data.author_avatar,
+          authorId: data.author_id,
+          authorEmail: data.author_email,
+          status: data.status,
+          aiKeywords: data.ai_keywords,
+          category: data.category ?? null,
+          date_found: data.date_found,
+          location: data.location ?? null,
+          latitude: data.latitude ?? null,
+          longitude: data.longitude ?? null,
+          school_id: data.school_id,
         });
-        setIsLost(false);
-        setLoading(false);
-        return;
-      }
-
-      const { data: lostData } = await supabase
-        .from("lost_items")
-        .select("*")
-        .eq("id", idNum)
-        .maybeSingle();
-
-      if (lostData) {
-        const imageArray = normalizeImages(
-          lostData.image_urls || lostData.image_url,
-        );
-        setItem({
-          id: lostData.id,
-          name: lostData.name,
-          description: lostData.description,
-          image: imageArray[0] || "",
-          images: imageArray,
-          authorName: lostData.author_name,
-          authorAvatar: lostData.author_avatar,
-          authorId: lostData.author_id,
-          authorEmail: lostData.author_email,
-          status: lostData.status,
-          category: lostData.category ?? null,
-          date_found: lostData.created_at,
-          location: lostData.location ?? null,
-          latitude: lostData.latitude ?? null,
-          longitude: lostData.longitude ?? null,
-        });
-        setIsLost(true);
       }
 
       setLoading(false);
     };
 
     fetchItem();
-  }, [id, items, lostItems, isLoaded]);
+  }, [id, isLoaded]);
 
   // Chat subscription
   useEffect(() => {
     if (!showChat || !item || !user) return;
     const convId = getConversationId(
-      { id: String(item.id) + (isLost ? "_lost" : ""), title: item.name },
+      { id: String(item.id) + "_school", title: item.name },
       { uid: user.id, displayName: user.fullName || "Me" },
       { uid: item.authorId, displayName: item.authorName || "Owner" },
     );
@@ -212,7 +159,7 @@ export default function ItemDetailPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [showChat, item, user, isLost]);
+  }, [showChat, item, user]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -221,7 +168,7 @@ export default function ItemDetailPage() {
   const conversationId =
     item && user
       ? getConversationId(
-          { id: String(item.id) + (isLost ? "_lost" : ""), title: item.name },
+          { id: String(item.id) + "_school", title: item.name },
           { uid: user.id, displayName: user.fullName || "Me" },
           { uid: item.authorId, displayName: item.authorName || "Owner" },
         )
@@ -231,7 +178,7 @@ export default function ItemDetailPage() {
     if (!user || !item) return;
     setActionLoading(true);
     const { error } = await supabase
-      .from("items")
+      .from("school_items")
       .update({
         status: "pending",
         claimer_email: user.primaryEmailAddress?.emailAddress,
@@ -251,11 +198,6 @@ export default function ItemDetailPage() {
         }),
       }).catch(console.error);
 
-      updateItemStatus(
-        item.id,
-        "pending",
-        user.primaryEmailAddress?.emailAddress,
-      );
       setItem((prev: any) => ({ ...prev, status: "pending" }));
       setActionMsg("Request sent! The owner has been notified.");
     }
@@ -265,11 +207,13 @@ export default function ItemDetailPage() {
   const handleConfirmClaimed = async () => {
     if (!item) return;
     setActionLoading(true);
-    const { error } = await supabase.from("items").delete().eq("id", item.id);
+    const { error } = await supabase
+      .from("school_items")
+      .delete()
+      .eq("id", item.id);
     if (!error) {
-      updateItemStatus(item.id, "claimed");
       setActionMsg("Item marked as claimed!");
-      setTimeout(() => router.push("/dashboard"), 1200);
+      setTimeout(() => router.back(), 1200);
     }
     setActionLoading(false);
   };
@@ -277,27 +221,12 @@ export default function ItemDetailPage() {
   const handleDelete = async () => {
     if (!item || !confirm("Delete this item permanently?")) return;
     setActionLoading(true);
-    const table = isLost ? "lost_items" : "items";
-    const { error } = await supabase.from(table).delete().eq("id", item.id);
-    if (!error) {
-      if (isLost) removeLostItem(item.id);
-      else updateItemStatus(item.id, "claimed");
-      router.push("/dashboard");
-    }
-    setActionLoading(false);
-  };
-
-  const handleMarkFound = async () => {
-    if (!item) return;
-    setActionLoading(true);
     const { error } = await supabase
-      .from("lost_items")
+      .from("school_items")
       .delete()
       .eq("id", item.id);
     if (!error) {
-      removeLostItem(item.id);
-      setActionMsg("Marked as found!");
-      setTimeout(() => router.push("/dashboard"), 1200);
+      router.back();
     }
     setActionLoading(false);
   };
@@ -361,11 +290,8 @@ export default function ItemDetailPage() {
     return (
       <div className="detail-not-found">
         <p>Item not found.</p>
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="detail-back-btn"
-        >
-          ← Back to Dashboard
+        <button onClick={() => router.back()} className="detail-back-btn">
+          ← Back
         </button>
       </div>
     );
@@ -382,10 +308,10 @@ export default function ItemDetailPage() {
     : null;
 
   const hasLocation =
-  item.latitude != null &&
-  item.longitude != null &&
-  !isNaN(Number(item.latitude)) &&
-  !isNaN(Number(item.longitude));
+    item.latitude != null &&
+    item.longitude != null &&
+    !isNaN(Number(item.latitude)) &&
+    !isNaN(Number(item.longitude));
 
   return (
     <div className="detail-page">
@@ -396,9 +322,7 @@ export default function ItemDetailPage() {
           <span>Back</span>
         </button>
         <span className="detail-breadcrumb__sep">/</span>
-        <span className="detail-breadcrumb__label">
-          {isLost ? "Lost Items" : "Found Items"}
-        </span>
+        <span className="detail-breadcrumb__label">School Items</span>
         <span className="detail-breadcrumb__sep">/</span>
         <span className="detail-breadcrumb__current">{item.name}</span>
       </div>
@@ -414,22 +338,18 @@ export default function ItemDetailPage() {
           <div
             className={`detail-status-badge detail-status-badge--${currentStatus}`}
           >
-            {isLost
-              ? "🔍 Still Looking"
-              : currentStatus === "waiting"
-                ? "✓ Available"
-                : currentStatus === "pending"
-                  ? "⏳ Claim Pending"
-                  : "✓ Claimed"}
+            {currentStatus === "waiting"
+              ? "✓ Available"
+              : currentStatus === "pending"
+                ? "⏳ Claim Pending"
+                : "✓ Claimed"}
           </div>
         </div>
 
         {/* RIGHT: Info + Actions */}
         <div className="detail-info-col">
           {/* Type pill */}
-          <div className="detail-type-pill">
-            {isLost ? "Lost Item" : "Found Item"}
-          </div>
+          <div className="detail-type-pill">School Found Item</div>
 
           {/* Title */}
           <div
@@ -451,13 +371,15 @@ export default function ItemDetailPage() {
                   Report
                 </button>
               )}
-              {isItemOwner && (
+              {(isItemOwner || isAdmin) && (
                 <button
                   className="detail-secondary-btn detail-secondary-btn--danger"
                   onClick={handleDelete}
                 >
                   <FaTrash style={{ marginRight: 6 }} />
-                  Delete My Post
+                  {isAdmin && !isItemOwner
+                    ? "Delete (Admin)"
+                    : "Delete My Post"}
                 </button>
               )}
             </div>
@@ -473,9 +395,7 @@ export default function ItemDetailPage() {
               />
             )}
             <div className="detail-poster__info">
-              <span className="detail-poster__label">
-                {isLost ? "Lost by" : "Found by"}
-              </span>
+              <span className="detail-poster__label">Found by</span>
               <span className="detail-poster__name">
                 {item.authorName || "Anonymous"}
               </span>
@@ -489,9 +409,7 @@ export default function ItemDetailPage() {
             {dateLabel && (
               <div className="detail-meta-chip">
                 <FaCalendar className="detail-meta-chip__icon" />
-                <span>
-                  {isLost ? "Reported" : "Found"} {dateLabel}
-                </span>
+                <span>Found {dateLabel}</span>
               </div>
             )}
             {item.location && (
@@ -528,7 +446,7 @@ export default function ItemDetailPage() {
                   margin: "0 0 8px",
                 }}
               >
-                {isLost ? "Last seen location" : "Found location"}
+                Found location
               </p>
               <LocationMap
                 lat={Number(item.latitude)}
@@ -547,7 +465,7 @@ export default function ItemDetailPage() {
 
           {/* PRIMARY ACTIONS */}
           <div className="detail-actions">
-            {!isLost && !isItemOwner && currentStatus === "waiting" && (
+            {!isItemOwner && currentStatus === "waiting" && (
               <button
                 className="detail-btn detail-btn--primary"
                 onClick={handleRetrieve}
@@ -559,13 +477,13 @@ export default function ItemDetailPage() {
               </button>
             )}
 
-            {!isLost && !isItemOwner && currentStatus === "pending" && (
+            {!isItemOwner && currentStatus === "pending" && (
               <button className="detail-btn detail-btn--disabled" disabled>
                 ⏳ Claim Pending Confirmation
               </button>
             )}
 
-            {!isLost && isItemOwner && currentStatus === "pending" && (
+            {isItemOwner && currentStatus === "pending" && (
               <button
                 className="detail-btn detail-btn--success"
                 onClick={handleConfirmClaimed}
@@ -575,46 +493,13 @@ export default function ItemDetailPage() {
               </button>
             )}
 
-            {isLost && !isItemOwner && (
-              <button
-                className="detail-btn detail-btn--primary"
-                onClick={() => setShowChat(true)}
-                disabled={actionLoading}
-              >
-                I Found This! — Message Owner
-              </button>
-            )}
-
-            {isLost && isItemOwner && (
-              <button
-                className="detail-btn detail-btn--success"
-                onClick={handleMarkFound}
-                disabled={actionLoading}
-              >
-                {actionLoading ? "Updating..." : "✓ Mark as Found"}
-              </button>
-            )}
-
-            {!isLost && !isItemOwner && (
+            {!isItemOwner && (
               <button
                 className="detail-btn detail-btn--secondary"
                 onClick={() => setShowChat(true)}
               >
                 <FaMessage style={{ marginRight: 8 }} />
                 Message Finder
-              </button>
-            )}
-          </div>
-
-          {/* SECONDARY ACTIONS */}
-          <div className="detail-secondary-actions">
-            {isAdmin && (
-              <button
-                className="detail-secondary-btn detail-secondary-btn--danger"
-                onClick={handleDelete}
-              >
-                <FaTrash style={{ marginRight: 6 }} />
-                Delete (Admin)
               </button>
             )}
           </div>
