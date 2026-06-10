@@ -209,7 +209,6 @@ body.colorblind {
   z-index: 10;
 }
 
-/* Top accent stripe — same as dashboard */
 .sc-sidebar::before {
   content: '';
   display: block;
@@ -218,7 +217,6 @@ body.colorblind {
   flex-shrink: 0;
 }
 
-/* ── Brand header — mirrors .dashboard-sidebar__brand ── */
 .sc-sidebar__brand {
   display: flex;
   align-items: center;
@@ -253,7 +251,6 @@ body.colorblind {
   letter-spacing: 0.6px;
 }
 
-/* ── Tab list — mirrors .sidebar-tabs ── */
 .sc-sidebar__tabs {
   display: flex;
   flex-direction: column;
@@ -262,7 +259,6 @@ body.colorblind {
   flex: 1;
 }
 
-/* ── Individual tab — mirrors .sidebar-tab exactly ── */
 .sc-sidebar__tab {
   display: flex;
   align-items: center;
@@ -288,7 +284,6 @@ body.colorblind {
   transform: translateX(2px);
 }
 
-/* Active state — mirrors .sidebar-tab--active */
 .sc-sidebar__tab--active {
   background: var(--accent-light);
   color: var(--text-active-tab);
@@ -306,7 +301,6 @@ body.colorblind {
   background: var(--accent);
 }
 
-/* ── Tab icon — mirrors .sidebar-tab__icon ── */
 .sc-sidebar__tab-icon {
   font-size: 14px;
   width: 18px;
@@ -319,7 +313,6 @@ body.colorblind {
   opacity: 1;
 }
 
-/* ── Tab pip — mirrors .sidebar-tab__pip ── */
 .sc-sidebar__tab-pip {
   width: 6px;
   height: 6px;
@@ -335,7 +328,6 @@ body.colorblind {
   to   { transform: scale(1); opacity: 1; }
 }
 
-/* ── Schools quick-access section at bottom of sidebar ── */
 .sc-sidebar__schools {
   padding: 12px 10px 16px;
   border-top: 1px solid var(--border-default);
@@ -437,7 +429,6 @@ body.colorblind {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Section title — same scale as .main-panel-section-title */
 .sc-section-title {
   font-family: "Ubuntu", sans-serif;
   font-size: 22px;
@@ -1033,7 +1024,7 @@ body.colorblind {
 }
 
 /* ═══════════════════════════════════════════
-   FORMS
+   FORMS — aligned with dashboard panel-form
 ═══════════════════════════════════════════ */
 .sc-form {
   display: flex;
@@ -1047,6 +1038,7 @@ body.colorblind {
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
+/* Matches .panel-form__label */
 .sc-form__label {
   font-size: 10.5px;
   font-weight: 700;
@@ -1057,6 +1049,7 @@ body.colorblind {
   margin-bottom: -6px;
 }
 
+/* Matches .panel-form__input */
 .sc-form__input,
 .sc-form__textarea {
   border: 1.5px solid var(--border-input);
@@ -1081,14 +1074,6 @@ body.colorblind {
 .sc-form__input::placeholder,
 .sc-form__textarea::placeholder { color: var(--text-muted); }
 
-.sc-form__input--code {
-  font-size: max(16px, 15px);
-  font-weight: 700;
-  letter-spacing: 2px;
-  font-family: "Ubuntu", sans-serif;
-  text-transform: uppercase;
-}
-
 .sc-form__textarea {
   resize: vertical;
   min-height: 80px;
@@ -1105,6 +1090,7 @@ body.colorblind {
 
 .sc-form__file { display: none; }
 
+/* Matches .panel-form__file-label */
 .sc-form__file-label {
   display: flex;
   align-items: center;
@@ -1158,37 +1144,11 @@ body.colorblind {
   font-weight: 600;
 }
 
+/* Matches .panel-form__actions */
 .sc-form__actions {
   display: flex;
   gap: 8px;
   margin-top: 4px;
-}
-
-.sc-form__submit {
-  width: 100%;
-  padding: 12px 0;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: "Poppins", sans-serif;
-  transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
-  min-height: 48px;
-  letter-spacing: 0.2px;
-}
-.sc-form__submit:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
-}
-.sc-form__submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .sc-form__previews {
@@ -1537,7 +1497,7 @@ body.colorblind {
 }
 
 /* ═══════════════════════════════════════════
-   SCHOOL BOARD
+   SCHOOL BOARD — mirrors dashboard-layout structure
 ═══════════════════════════════════════════ */
 .sc-board {
   min-height: calc(100vh - 54px);
@@ -1547,6 +1507,7 @@ body.colorblind {
   animation: sc-slide-in 0.2s ease;
 }
 
+/* Header — matches dashboard admin-banner row height/padding */
 .sc-board__header {
   display: flex;
   align-items: center;
@@ -1557,6 +1518,7 @@ body.colorblind {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   flex-wrap: wrap;
   transition: background 0.3s ease;
+  flex-shrink: 0;
 }
 
 .sc-board__back {
@@ -1663,15 +1625,17 @@ body.colorblind {
 }
 .sc-admin-badge__exit:hover { filter: brightness(0.88); }
 
+/* ── Inner layout: sidebar + main — mirrors dashboard-layout exactly ── */
 .sc-board__layout {
   display: flex;
   flex: 1;
+  min-height: 0;
 }
 
-/* Board sidebar — same structure as .dashboard-sidebar but scoped inside board */
+/* Board sidebar — mirrors .dashboard-sidebar */
 .sc-board__sidebar {
-  width: 210px;
-  min-width: 210px;
+  width: 240px;
+  min-width: 240px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-default);
   display: flex;
@@ -1680,12 +1644,26 @@ body.colorblind {
   gap: 2px;
   position: sticky;
   top: 54px;
-  height: calc(100vh - 54px - 63px); /* account for board header */
+  /* subtract nav (54px) + board header (~63px) */
+  height: calc(100vh - 54px - 63px);
   overflow-y: auto;
   overflow-x: hidden;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--sidebar-shadow);
+  flex-shrink: 0;
 }
 
+/* Top accent stripe on board sidebar — matches dashboard */
+.sc-board__sidebar::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--sc-color, var(--accent)), transparent);
+  flex-shrink: 0;
+  margin: -12px -10px 10px;
+}
+
+/* Board tab — mirrors .sidebar-tab */
 .sc-board__tab {
   display: flex;
   align-items: center;
@@ -1709,6 +1687,8 @@ body.colorblind {
   color: var(--text-primary);
   transform: translateX(2px);
 }
+
+/* Active tab — mirrors .sidebar-tab--active */
 .sc-board__tab--active {
   font-weight: 600;
 }
@@ -1723,16 +1703,22 @@ body.colorblind {
   background: var(--sc-color, var(--accent));
 }
 
+/* Tab icon — mirrors .sidebar-tab__icon */
 .sc-board__tab-icon {
   font-size: 14px;
   width: 18px;
   text-align: center;
   flex-shrink: 0;
   opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.sc-board__tab--active .sc-board__tab-icon { opacity: 1; }
 
 .sc-board__tab-label { flex: 1; }
 
+/* Pip — mirrors .sidebar-tab__pip */
 .sc-board__tab-pip {
   width: 6px;
   height: 6px;
@@ -1742,11 +1728,46 @@ body.colorblind {
   animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Board main — mirrors .dashboard-main */
 .sc-board__main {
   flex: 1;
   min-width: 0;
   padding: 24px 24px 48px;
   background: var(--bg-page);
+  overflow-y: auto;
+}
+
+/* ── Add-item pill toggle — mirrors dashboard ReportItemToggle ── */
+.sc-add-toggle {
+  display: flex;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: 100px;
+  padding: 4px;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sc-add-toggle__btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.sc-add-toggle__btn--active {
+  background: var(--sc-color, var(--accent));
+  color: #fff;
+  transform: scale(1.02);
 }
 
 /* Search */
@@ -1792,6 +1813,7 @@ body.colorblind {
 }
 .sc-search__clear:hover { color: var(--text-secondary); }
 
+/* Found/Lost sub-tabs — matches dashboard board tabs */
 .sc-tabs-row {
   display: flex;
   gap: 8px;
@@ -2042,6 +2064,7 @@ body.colorblind {
   .sc-about__stats { grid-template-columns: 1fr; }
   .sc-about__features { grid-template-columns: 1fr; }
 
+  /* Board mobile — pill tabs */
   .sc-board__layout { flex-direction: column; }
   .sc-board__sidebar {
     width: 100%;
@@ -2056,7 +2079,9 @@ body.colorblind {
     padding: 10px 12px;
     gap: 8px;
     overflow: visible;
+    box-shadow: none;
   }
+  .sc-board__sidebar::before { display: none; }
   .sc-board__tab {
     flex: 0 1 auto;
     width: auto;

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
-import { FaTrash } from "react-icons/fa6";
+import { FaTrash, FaPlus } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -169,8 +169,10 @@ interface BoardStrings {
   adminBadge: string;
   exitAdmin: string;
   itemsTab: string;
+  // merged tab
   addItemTab: string;
-  reportLostTab: string;
+  toggleFound: string;
+  toggleLost: string;
   adminTab: string;
   reportsTab: string;
   searchPlaceholder: string;
@@ -221,8 +223,9 @@ const DEFAULT_BOARD: BoardStrings = {
   adminBadge: "School Admin",
   exitAdmin: "Exit",
   itemsTab: "Items",
-  addItemTab: "Report Found",
-  reportLostTab: "Report Lost",
+  addItemTab: "Add Item",
+  toggleFound: "Found an Item",
+  toggleLost: "Lost an Item",
   adminTab: "Admin",
   reportsTab: "Reports",
   searchPlaceholder: "Search items...",
@@ -310,8 +313,9 @@ export default function SchoolBoardPage() {
         ["adminBadge", "School Admin", "sc_board_adminBadge"],
         ["exitAdmin", "Exit", "sc_board_exitAdmin"],
         ["itemsTab", "Items", "sc_board_itemsTab"],
-        ["addItemTab", "Report Found", "sc_board_addItemTab"],
-        ["reportLostTab", "Report Lost", "sc_board_reportLostTab"],
+        ["addItemTab", "Add Item", "sc_board_addItemTab"],
+        ["toggleFound", "Found an Item", "sc_board_toggleFound"],
+        ["toggleLost", "Lost an Item", "sc_board_toggleLost"],
         ["adminTab", "Admin", "sc_board_adminTab"],
         ["reportsTab", "Reports", "sc_board_reportsTab"],
         ["searchPlaceholder", "Search items...", "sc_board_searchPlaceholder"],
@@ -661,11 +665,13 @@ function SchoolBoard({
   onBack: () => void;
   s: BoardStrings;
 }) {
-  type BoardTab = "items" | "add-item" | "report-lost" | "admin-login" | "reports";
+  type BoardTab = "items" | "add-item" | "admin-login" | "reports";
 
   const router = useRouter();
 
   const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
+  // ── pill toggle state (mirrors dashboard reportMode) ────────────────────────
+  const [addMode, setAddMode] = useState<"found" | "lost">("found");
 
   useEffect(() => {
     setIsSchoolAdmin(
@@ -673,11 +679,10 @@ function SchoolBoard({
     );
   }, [school.id]);
 
-  // Build tab list dynamically — Reports only visible when school admin
-  const BOARD_TABS: { id: BoardTab; label: string }[] = [
+  // Build tab list dynamically
+  const BOARD_TABS: { id: BoardTab; label: string; icon?: React.ReactNode }[] = [
     { id: "items", label: s.itemsTab },
-    { id: "add-item", label: s.addItemTab },
-    { id: "report-lost", label: s.reportLostTab },
+    { id: "add-item", label: s.addItemTab, icon: <FaPlus style={{ fontSize: 11 }} /> },
     { id: "admin-login", label: s.adminTab },
     ...(isSchoolAdmin ? [{ id: "reports" as BoardTab, label: s.reportsTab }] : []),
   ];
@@ -901,7 +906,6 @@ function SchoolBoard({
     setLostItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  // Called by SchoolReportsPanel when it deletes an item
   const handleReportDeleteItem = (itemId: number) => {
     setItems((prev) => prev.filter((i) => i.id !== itemId));
   };
@@ -938,6 +942,53 @@ function SchoolBoard({
     cursor: "pointer",
     boxSizing: "border-box" as any,
   };
+
+  // ── Pill toggle (mirrors dashboard ReportItemToggle) ────────────────────────
+  const AddItemToggle = () => (
+    <div
+      style={{
+        display: "flex",
+        background: "var(--bg-input)",
+        border: "1.5px solid var(--border-input)",
+        borderRadius: "100px",
+        padding: "4px",
+        gap: "2px",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      {(["found", "lost"] as const).map((mode) => {
+        const isActive = addMode === mode;
+        return (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => setAddMode(mode)}
+            style={{
+              flex: 1,
+              padding: "9px 0",
+              borderRadius: "100px",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "13px",
+              fontWeight: 700,
+              letterSpacing: "0.1px",
+              transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              background: isActive ? color : "transparent",
+              color: isActive ? "#fff" : "var(--text-muted)",
+              boxShadow: isActive
+                ? `0 2px 10px ${hexToRgba(color, 0.35)}`
+                : "none",
+              transform: isActive ? "scale(1.02)" : "scale(1)",
+            }}
+          >
+            {mode === "found" ? s.toggleFound : s.toggleLost}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div
@@ -1015,7 +1066,6 @@ function SchoolBoard({
               onClick={() => {
                 localStorage.removeItem(`findr_school_admin_${school.id}`);
                 setIsSchoolAdmin(false);
-                // If currently on reports tab, go back to items
                 if (activeTab === "reports") setActiveTab("items");
               }}
             >
@@ -1037,6 +1087,11 @@ function SchoolBoard({
               }
               onClick={() => setActiveTab(tab.id)}
             >
+              {tab.icon && (
+                <span className="sc-board__tab-icon" aria-hidden="true">
+                  {tab.icon}
+                </span>
+              )}
               <span className="sc-board__tab-label">{tab.label}</span>
               {activeTab === tab.id && (
                 <span
@@ -1237,257 +1292,267 @@ function SchoolBoard({
             </>
           )}
 
-          {/* ── ADD FOUND ITEM ── */}
+          {/* ── ADD ITEM (merged found + lost with pill toggle) ── */}
           {activeTab === "add-item" && (
             <div className="sc-panel-content">
-              <div className="sc-section-title">{s.reportFoundTitle}</div>
-              {foundSuccess ? (
-                <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
-                  <p>{s.itemPostedMsg}</p>
-                </div>
-              ) : (
-                <form className="sc-form" onSubmit={handleAddFound}>
-                  <label className="sc-form__label">{s.itemNameLabel}</label>
-                  <input
-                    className="sc-form__input"
-                    type="text"
-                    placeholder={s.itemNamePlaceholder}
-                    required
-                    value={foundName}
-                    onChange={(e) => setFoundName(e.target.value)}
-                  />
+              <div className="sc-section-title">
+                {addMode === "found" ? s.reportFoundTitle : s.reportLostTitle}
+              </div>
 
-                  <label className="sc-form__label">Category</label>
-                  <select
-                    style={selectStyle}
-                    value={foundCategory}
-                    onChange={(e) => setFoundCategory(e.target.value)}
-                  >
-                    <option value="">Select a category</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+              {/* ── Pill toggle ── */}
+              <AddItemToggle />
 
-                  <label className="sc-form__label">{s.descLabel}</label>
-                  <textarea
-                    className="sc-form__textarea"
-                    placeholder={s.descFoundPlaceholder}
-                    required
-                    value={foundDesc}
-                    onChange={(e) => setFoundDesc(e.target.value)}
-                  />
-
-                  <label className="sc-form__label">Where was it found?</label>
-                  <input
-                    className="sc-form__input"
-                    type="text"
-                    placeholder="e.g. Room 204, near the gym, front office..."
-                    value={foundLocation}
-                    onChange={(e) => setFoundLocation(e.target.value)}
-                  />
-
-                  <label className="sc-form__label">Date Found</label>
-                  <input
-                    className="sc-form__input"
-                    type="date"
-                    value={foundDate}
-                    onChange={(e) => setFoundDate(e.target.value)}
-                    style={{ colorScheme: "dark" }}
-                  />
-
-                  <label className="sc-form__label">{s.photosLabel}</label>
-                  <label
-                    className="sc-form__file-label"
-                    htmlFor="sc-found-upload"
-                  >
-                    <span className="sc-form__file-icon">+</span>
-                    <span>
-                      {foundFiles.length > 0
-                        ? `${foundFiles.length} ${s.photosSelected}`
-                        : s.uploadPhotos}
-                    </span>
-                  </label>
-                  <input
-                    id="sc-found-upload"
-                    className="sc-form__file"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) =>
-                      e.target.files &&
-                      setFoundFiles(Array.from(e.target.files).slice(0, 3))
-                    }
-                  />
-                  {foundFiles.length > 0 && (
-                    <div className="sc-form__previews">
-                      {foundFiles.map((file, idx) => (
-                        <div key={idx} className="sc-form__preview-wrap">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`preview ${idx + 1}`}
-                            className="sc-form__preview"
-                          />
-                          <button
-                            type="button"
-                            className="sc-form__preview-remove"
-                            onClick={() =>
-                              setFoundFiles(
-                                foundFiles.filter((_, i) => i !== idx),
-                              )
-                            }
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+              {/* ── Found form ── */}
+              {addMode === "found" && (
+                <>
+                  {foundSuccess ? (
+                    <div className="sc-success">
+                      <span className="sc-success__icon">✓</span>
+                      <p>{s.itemPostedMsg}</p>
                     </div>
+                  ) : (
+                    <form className="sc-form" onSubmit={handleAddFound}>
+                      <label className="sc-form__label">{s.itemNameLabel}</label>
+                      <input
+                        className="sc-form__input"
+                        type="text"
+                        placeholder={s.itemNamePlaceholder}
+                        required
+                        value={foundName}
+                        onChange={(e) => setFoundName(e.target.value)}
+                      />
+
+                      <label className="sc-form__label">Category</label>
+                      <select
+                        style={selectStyle}
+                        value={foundCategory}
+                        onChange={(e) => setFoundCategory(e.target.value)}
+                      >
+                        <option value="">Select a category</option>
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+
+                      <label className="sc-form__label">{s.descLabel}</label>
+                      <textarea
+                        className="sc-form__textarea"
+                        placeholder={s.descFoundPlaceholder}
+                        required
+                        value={foundDesc}
+                        onChange={(e) => setFoundDesc(e.target.value)}
+                      />
+
+                      <label className="sc-form__label">Where was it found?</label>
+                      <input
+                        className="sc-form__input"
+                        type="text"
+                        placeholder="e.g. Room 204, near the gym, front office..."
+                        value={foundLocation}
+                        onChange={(e) => setFoundLocation(e.target.value)}
+                      />
+
+                      <label className="sc-form__label">Date Found</label>
+                      <input
+                        className="sc-form__input"
+                        type="date"
+                        value={foundDate}
+                        onChange={(e) => setFoundDate(e.target.value)}
+                        style={{ colorScheme: "dark" }}
+                      />
+
+                      <label className="sc-form__label">{s.photosLabel}</label>
+                      <label
+                        className="sc-form__file-label"
+                        htmlFor="sc-found-upload"
+                      >
+                        <span className="sc-form__file-icon">+</span>
+                        <span>
+                          {foundFiles.length > 0
+                            ? `${foundFiles.length} ${s.photosSelected}`
+                            : s.uploadPhotos}
+                        </span>
+                      </label>
+                      <input
+                        id="sc-found-upload"
+                        className="sc-form__file"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) =>
+                          e.target.files &&
+                          setFoundFiles(Array.from(e.target.files).slice(0, 3))
+                        }
+                      />
+                      {foundFiles.length > 0 && (
+                        <div className="sc-form__previews">
+                          {foundFiles.map((file, idx) => (
+                            <div key={idx} className="sc-form__preview-wrap">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`preview ${idx + 1}`}
+                                className="sc-form__preview"
+                              />
+                              <button
+                                type="button"
+                                className="sc-form__preview-remove"
+                                onClick={() =>
+                                  setFoundFiles(
+                                    foundFiles.filter((_, i) => i !== idx),
+                                  )
+                                }
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="sc-form__actions">
+                        <button
+                          type="button"
+                          className="sc-btn sc-btn--ghost"
+                          onClick={() => setActiveTab("items")}
+                        >
+                          {s.cancelBtn}
+                        </button>
+                        <button
+                          type="submit"
+                          className="sc-btn sc-btn--primary"
+                          style={{ background: color, borderColor: color }}
+                          disabled={foundUploading}
+                        >
+                          {foundUploading ? s.postingBtn : s.postItemBtn}
+                        </button>
+                      </div>
+                    </form>
                   )}
-                  <div className="sc-form__actions">
-                    <button
-                      type="button"
-                      className="sc-btn sc-btn--ghost"
-                      onClick={() => setActiveTab("items")}
-                    >
-                      {s.cancelBtn}
-                    </button>
-                    <button
-                      type="submit"
-                      className="sc-btn sc-btn--primary"
-                      style={{ background: color, borderColor: color }}
-                      disabled={foundUploading}
-                    >
-                      {foundUploading ? s.postingBtn : s.postItemBtn}
-                    </button>
-                  </div>
-                </form>
+                </>
               )}
-            </div>
-          )}
 
-          {/* ── REPORT LOST ── */}
-          {activeTab === "report-lost" && (
-            <div className="sc-panel-content">
-              <div className="sc-section-title">{s.reportLostTitle}</div>
-              {lostSuccess ? (
-                <div className="sc-success">
-                  <span className="sc-success__icon">✓</span>
-                  <p>{s.lostPostedMsg}</p>
-                </div>
-              ) : (
-                <form className="sc-form" onSubmit={handleAddLost}>
-                  <label className="sc-form__label">{s.whatLostLabel}</label>
-                  <input
-                    className="sc-form__input"
-                    type="text"
-                    placeholder={s.lostItemPlaceholder}
-                    required
-                    value={lostName}
-                    onChange={(e) => setLostName(e.target.value)}
-                  />
-
-                  <label className="sc-form__label">Category</label>
-                  <select
-                    style={selectStyle}
-                    value={lostCategory}
-                    onChange={(e) => setLostCategory(e.target.value)}
-                  >
-                    <option value="">Select a category</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label className="sc-form__label">{s.descLabel}</label>
-                  <textarea
-                    className="sc-form__textarea"
-                    placeholder={s.descLostPlaceholder}
-                    required
-                    value={lostDesc}
-                    onChange={(e) => setLostDesc(e.target.value)}
-                  />
-
-                  <label className="sc-form__label">Last seen where?</label>
-                  <input
-                    className="sc-form__input"
-                    type="text"
-                    placeholder="e.g. Cafeteria, locker room, room 101..."
-                    value={lostLocation}
-                    onChange={(e) => setLostLocation(e.target.value)}
-                  />
-
-                  <label className="sc-form__label">
-                    {s.photosOptionalLabel}
-                  </label>
-                  <label
-                    className="sc-form__file-label"
-                    htmlFor="sc-lost-upload"
-                  >
-                    <span className="sc-form__file-icon">+</span>
-                    <span>
-                      {lostFiles.length > 0
-                        ? `${lostFiles.length} ${s.photosSelected}`
-                        : s.uploadPhotos}
-                    </span>
-                  </label>
-                  <input
-                    id="sc-lost-upload"
-                    className="sc-form__file"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) =>
-                      e.target.files &&
-                      setLostFiles(Array.from(e.target.files).slice(0, 3))
-                    }
-                  />
-                  {lostFiles.length > 0 && (
-                    <div className="sc-form__previews">
-                      {lostFiles.map((file, idx) => (
-                        <div key={idx} className="sc-form__preview-wrap">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`preview ${idx + 1}`}
-                            className="sc-form__preview"
-                          />
-                          <button
-                            type="button"
-                            className="sc-form__preview-remove"
-                            onClick={() =>
-                              setLostFiles(
-                                lostFiles.filter((_, i) => i !== idx),
-                              )
-                            }
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+              {/* ── Lost form ── */}
+              {addMode === "lost" && (
+                <>
+                  {lostSuccess ? (
+                    <div className="sc-success">
+                      <span className="sc-success__icon">✓</span>
+                      <p>{s.lostPostedMsg}</p>
                     </div>
+                  ) : (
+                    <form className="sc-form" onSubmit={handleAddLost}>
+                      <label className="sc-form__label">{s.whatLostLabel}</label>
+                      <input
+                        className="sc-form__input"
+                        type="text"
+                        placeholder={s.lostItemPlaceholder}
+                        required
+                        value={lostName}
+                        onChange={(e) => setLostName(e.target.value)}
+                      />
+
+                      <label className="sc-form__label">Category</label>
+                      <select
+                        style={selectStyle}
+                        value={lostCategory}
+                        onChange={(e) => setLostCategory(e.target.value)}
+                      >
+                        <option value="">Select a category</option>
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+
+                      <label className="sc-form__label">{s.descLabel}</label>
+                      <textarea
+                        className="sc-form__textarea"
+                        placeholder={s.descLostPlaceholder}
+                        required
+                        value={lostDesc}
+                        onChange={(e) => setLostDesc(e.target.value)}
+                      />
+
+                      <label className="sc-form__label">Last seen where?</label>
+                      <input
+                        className="sc-form__input"
+                        type="text"
+                        placeholder="e.g. Cafeteria, locker room, room 101..."
+                        value={lostLocation}
+                        onChange={(e) => setLostLocation(e.target.value)}
+                      />
+
+                      <label className="sc-form__label">
+                        {s.photosOptionalLabel}
+                      </label>
+                      <label
+                        className="sc-form__file-label"
+                        htmlFor="sc-lost-upload"
+                      >
+                        <span className="sc-form__file-icon">+</span>
+                        <span>
+                          {lostFiles.length > 0
+                            ? `${lostFiles.length} ${s.photosSelected}`
+                            : s.uploadPhotos}
+                        </span>
+                      </label>
+                      <input
+                        id="sc-lost-upload"
+                        className="sc-form__file"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) =>
+                          e.target.files &&
+                          setLostFiles(Array.from(e.target.files).slice(0, 3))
+                        }
+                      />
+                      {lostFiles.length > 0 && (
+                        <div className="sc-form__previews">
+                          {lostFiles.map((file, idx) => (
+                            <div key={idx} className="sc-form__preview-wrap">
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt={`preview ${idx + 1}`}
+                                className="sc-form__preview"
+                              />
+                              <button
+                                type="button"
+                                className="sc-form__preview-remove"
+                                onClick={() =>
+                                  setLostFiles(
+                                    lostFiles.filter((_, i) => i !== idx),
+                                  )
+                                }
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="sc-form__actions">
+                        <button
+                          type="button"
+                          className="sc-btn sc-btn--ghost"
+                          onClick={() => setActiveTab("items")}
+                        >
+                          {s.cancelBtn}
+                        </button>
+                        <button
+                          type="submit"
+                          className="sc-btn sc-btn--primary"
+                          style={{ background: color, borderColor: color }}
+                          disabled={lostUploading}
+                        >
+                          {lostUploading ? s.postingLostBtn : s.postLostBtn}
+                        </button>
+                      </div>
+                    </form>
                   )}
-                  <div className="sc-form__actions">
-                    <button
-                      type="button"
-                      className="sc-btn sc-btn--ghost"
-                      onClick={() => setActiveTab("items")}
-                    >
-                      {s.cancelBtn}
-                    </button>
-                    <button
-                      type="submit"
-                      className="sc-btn sc-btn--primary"
-                      style={{ background: color, borderColor: color }}
-                      disabled={lostUploading}
-                    >
-                      {lostUploading ? s.postingLostBtn : s.postLostBtn}
-                    </button>
-                  </div>
-                </form>
+                </>
               )}
             </div>
           )}
