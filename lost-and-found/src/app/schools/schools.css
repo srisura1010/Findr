@@ -42,6 +42,14 @@ body.light {
 
   --scrollbar-track: #f1f5f9;
   --scrollbar-thumb: #93c5fd;
+
+  /* Glass surface tokens (light) */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  --glass-blur: blur(16px);
+  --glass-input-bg: rgba(248, 250, 252, 0.80);
+  --glass-sidebar-bg: rgba(255, 255, 255, 0.78);
 }
 
 body.dark {
@@ -84,6 +92,14 @@ body.dark {
 
   --scrollbar-track: #0b1120;
   --scrollbar-thumb: #253352;
+
+  /* Glass surface tokens (dark) */
+  --glass-bg: rgba(13, 20, 40, 0.70);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --glass-blur: blur(18px);
+  --glass-input-bg: rgba(26, 37, 64, 0.85);
+  --glass-sidebar-bg: rgba(11, 17, 32, 0.82);
 }
 
 body.high-contrast {
@@ -125,6 +141,13 @@ body.high-contrast {
 
   --scrollbar-track: #000;
   --scrollbar-thumb: #ffff00;
+
+  --glass-bg: #000000;
+  --glass-border: #ffff00;
+  --glass-shadow: none;
+  --glass-blur: none;
+  --glass-input-bg: #000000;
+  --glass-sidebar-bg: #000000;
 }
 
 body.colorblind {
@@ -166,6 +189,13 @@ body.colorblind {
 
   --scrollbar-track: #dbeafe;
   --scrollbar-thumb: #93c5fd;
+
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(0, 51, 102, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 51, 102, 0.10);
+  --glass-blur: blur(14px);
+  --glass-input-bg: rgba(240, 246, 255, 0.88);
+  --glass-sidebar-bg: rgba(255, 255, 255, 0.82);
 }
 
 * {
@@ -1038,7 +1068,6 @@ body.colorblind {
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-/* Matches .panel-form__label */
 .sc-form__label {
   font-size: 10.5px;
   font-weight: 700;
@@ -1049,7 +1078,6 @@ body.colorblind {
   margin-bottom: -6px;
 }
 
-/* Matches .panel-form__input */
 .sc-form__input,
 .sc-form__textarea {
   border: 1.5px solid var(--border-input);
@@ -1090,7 +1118,6 @@ body.colorblind {
 
 .sc-form__file { display: none; }
 
-/* Matches .panel-form__file-label */
 .sc-form__file-label {
   display: flex;
   align-items: center;
@@ -1144,7 +1171,6 @@ body.colorblind {
   font-weight: 600;
 }
 
-/* Matches .panel-form__actions */
 .sc-form__actions {
   display: flex;
   gap: 8px;
@@ -1192,7 +1218,6 @@ body.colorblind {
 }
 .sc-form__preview-remove:hover { background: rgba(0, 0, 0, 0.88); }
 
-/* Color pickers */
 .sc-color-row {
   display: flex;
   align-items: center;
@@ -1497,7 +1522,7 @@ body.colorblind {
 }
 
 /* ═══════════════════════════════════════════
-   SCHOOL BOARD — mirrors dashboard-layout structure
+   SCHOOL BOARD — glassmorphic redesign
 ═══════════════════════════════════════════ */
 .sc-board {
   min-height: calc(100vh - 54px);
@@ -1505,165 +1530,264 @@ body.colorblind {
   display: flex;
   flex-direction: column;
   animation: sc-slide-in 0.2s ease;
+  position: relative;
 }
 
-/* Header — matches dashboard admin-banner row height/padding */
+/* ── Background canvas: school bg image + subtle color wash ── */
+.sc-board__bg {
+  position: fixed;
+  inset: 54px 0 0 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sc-board__bg-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.sc-board__bg-wash {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+}
+
+/* Anything above the bg */
+.sc-board__header,
+.sc-board__layout {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Header ── */
 .sc-board__header {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 24px;
-  background: var(--bg-card);
-  border-bottom: 3px solid var(--sc-color, var(--accent));
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 0 24px;
+  min-height: 72px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1.5px solid var(--glass-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   flex-wrap: wrap;
   transition: background 0.3s ease;
   flex-shrink: 0;
+  /* Bottom accent stripe in school color */
+  border-bottom-color: color-mix(in srgb, var(--sc-color, var(--accent)) 60%, var(--glass-border));
+}
+
+/* School color accent stripe at top of header */
+.sc-board__header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--sc-color, var(--accent)),
+    var(--sc-color-2, var(--accent-hover)) 60%,
+    transparent
+  );
 }
 
 .sc-board__back {
-  background: none;
-  border: 1.5px solid var(--border-input);
-  border-radius: 8px;
-  padding: 7px 14px;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 9px;
+  padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
   color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-  min-height: 36px;
+  min-height: 38px;
   flex-shrink: 0;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 .sc-board__back:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  border-color: var(--sc-color, var(--accent));
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 12%, var(--glass-bg));
+  color: var(--sc-color, var(--accent));
+  border-color: color-mix(in srgb, var(--sc-color, var(--accent)) 45%, transparent);
 }
 
+/* ── School identity block ── */
 .sc-board__identity {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
   min-width: 0;
 }
 
 .sc-board__logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 7px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
-  border: 1px solid var(--border-default);
+  /* Subtle glow ring in school color */
+  box-shadow:
+    0 0 0 2px var(--glass-bg),
+    0 0 0 4px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
+  border: 1.5px solid var(--glass-border);
 }
 
 .sc-board__initial {
-  width: 36px;
-  height: 36px;
-  border-radius: 7px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 16px;
+  color: var(--sc-text-on-color, #fff);
+  font-size: 18px;
   font-weight: 700;
   font-family: "Ubuntu", sans-serif;
   flex-shrink: 0;
+  box-shadow:
+    0 0 0 2px var(--glass-bg),
+    0 0 0 4px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
+}
+
+.sc-board__name-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .sc-board__name {
   font-family: "Ubuntu", sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s ease;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.sc-board__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .sc-board__code {
   font-family: "Poppins", sans-serif;
   font-size: 10px;
-  color: var(--text-muted);
-  margin: 1px 0 0;
-  font-weight: 600;
+  color: var(--sc-color, var(--accent));
+  margin: 0;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: color 0.2s ease;
+  letter-spacing: 1px;
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 12%, var(--glass-bg));
+  border: 1px solid color-mix(in srgb, var(--sc-color, var(--accent)) 30%, transparent);
+  padding: 2px 8px;
+  border-radius: 20px;
 }
 
+.sc-board__item-counts {
+  display: flex;
+  gap: 6px;
+}
+
+.sc-board__count-pill {
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── Admin badge ── */
 .sc-admin-badge {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: color-mix(in srgb, var(--warning) 12%, var(--bg-card));
-  border: 1.5px solid var(--warning);
-  border-radius: 8px;
+  background: color-mix(in srgb, var(--sc-color-2, var(--warning)) 14%, var(--glass-bg));
+  border: 1.5px solid color-mix(in srgb, var(--sc-color-2, var(--warning)) 50%, transparent);
+  border-radius: 9px;
   font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 700;
-  color: var(--warning-text);
+  color: var(--text-primary);
   flex-shrink: 0;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .sc-admin-badge__exit {
-  background: var(--warning-text);
+  background: color-mix(in srgb, var(--sc-color-2, var(--warning)) 80%, #000 20%);
   color: #fff;
   border: none;
-  border-radius: 5px;
-  padding: 3px 10px;
+  border-radius: 6px;
+  padding: 4px 10px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
-  transition: background 0.15s ease;
+  transition: filter 0.15s ease;
   min-height: 28px;
 }
 .sc-admin-badge__exit:hover { filter: brightness(0.88); }
 
-/* ── Inner layout: sidebar + main — mirrors dashboard-layout exactly ── */
+/* ── Inner layout: sidebar + main ── */
 .sc-board__layout {
   display: flex;
   flex: 1;
   min-height: 0;
 }
 
-/* Board sidebar — mirrors .dashboard-sidebar */
+/* ── Board sidebar — glassmorphic, mirrors .dashboard-sidebar ── */
 .sc-board__sidebar {
   width: 240px;
   min-width: 240px;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-default);
+  background: var(--glass-sidebar-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
-  padding: 12px 10px;
+  padding: 16px 10px 12px;
   gap: 2px;
   position: sticky;
   top: 54px;
-  /* subtract nav (54px) + board header (~63px) */
-  height: calc(100vh - 54px - 63px);
+  height: calc(100vh - 54px - 72px);
   overflow-y: auto;
   overflow-x: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
-  box-shadow: var(--sidebar-shadow);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 }
 
-/* Top accent stripe on board sidebar — matches dashboard */
+/* Top accent stripe on board sidebar */
 .sc-board__sidebar::before {
   content: '';
   display: block;
   height: 3px;
   background: linear-gradient(90deg, var(--sc-color, var(--accent)), transparent);
   flex-shrink: 0;
-  margin: -12px -10px 10px;
+  margin: -16px -10px 14px;
 }
 
-/* Board tab — mirrors .sidebar-tab */
+/* ── Board tab — mirrors .sidebar-tab ── */
 .sc-board__tab {
   display: flex;
   align-items: center;
@@ -1683,14 +1807,16 @@ body.colorblind {
   width: 100%;
 }
 .sc-board__tab:hover {
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 8%, var(--glass-bg));
   color: var(--text-primary);
   transform: translateX(2px);
 }
 
-/* Active tab — mirrors .sidebar-tab--active */
+/* Active tab */
 .sc-board__tab--active {
   font-weight: 600;
+  color: var(--sc-color, var(--accent));
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 10%, var(--glass-bg));
 }
 .sc-board__tab--active::before {
   content: "";
@@ -1703,7 +1829,6 @@ body.colorblind {
   background: var(--sc-color, var(--accent));
 }
 
-/* Tab icon — mirrors .sidebar-tab__icon */
 .sc-board__tab-icon {
   font-size: 14px;
   width: 18px;
@@ -1718,30 +1843,59 @@ body.colorblind {
 
 .sc-board__tab-label { flex: 1; }
 
-/* Pip — mirrors .sidebar-tab__pip */
 .sc-board__tab-pip {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  background: var(--sc-color-2, var(--accent));
   flex-shrink: 0;
   margin-left: auto;
   animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Board main — mirrors .dashboard-main */
+/* ── Board main — glass panels over bg ── */
 .sc-board__main {
   flex: 1;
   min-width: 0;
   padding: 24px 24px 48px;
-  background: var(--bg-page);
+  background: transparent;
   overflow-y: auto;
 }
 
-/* ── Add-item pill toggle — mirrors dashboard ReportItemToggle ── */
+/* ── Panel content inside board — glass card wrapper ── */
+.sc-board__main .sc-panel-content {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: var(--glass-shadow);
+  max-width: 640px;
+  margin: 0 auto;
+  gap: 18px;
+}
+
+/* Form inside board also gets glass treatment */
+.sc-board__main .sc-form {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Inputs inside board forms — slightly more opaque */
+.sc-board__main .sc-form__input,
+.sc-board__main .sc-form__textarea {
+  background: var(--glass-input-bg);
+}
+
+/* ── Add-item pill toggle ── */
 .sc-add-toggle {
   display: flex;
-  background: var(--bg-input);
-  border: 1.5px solid var(--border-input);
+  background: var(--glass-input-bg);
+  border: 1.5px solid var(--glass-border);
   border-radius: 100px;
   padding: 4px;
   gap: 2px;
@@ -1766,11 +1920,11 @@ body.colorblind {
 
 .sc-add-toggle__btn--active {
   background: var(--sc-color, var(--accent));
-  color: #fff;
+  color: var(--sc-text-on-color, #fff);
   transform: scale(1.02);
 }
 
-/* Search */
+/* ── Search bar ── */
 .sc-search-row { margin-bottom: 14px; }
 
 .sc-search-wrap {
@@ -1781,9 +1935,11 @@ body.colorblind {
 .sc-search {
   width: 100%;
   padding: 10px 36px 10px 14px;
-  border: 1.5px solid var(--border-input);
+  border: 1.5px solid var(--glass-border);
   border-radius: 10px;
-  background: var(--bg-input);
+  background: var(--glass-input-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--text-primary);
   font-family: "Poppins", sans-serif;
   font-size: 13px;
@@ -1793,7 +1949,7 @@ body.colorblind {
 }
 .sc-search:focus {
   border-color: var(--sc-color, var(--accent));
-  background: var(--bg-card);
+  background: var(--glass-bg);
 }
 .sc-search::placeholder { color: var(--text-muted); }
 
@@ -1813,38 +1969,43 @@ body.colorblind {
 }
 .sc-search__clear:hover { color: var(--text-secondary); }
 
-/* Found/Lost sub-tabs — matches dashboard board tabs */
+/* ── Found/Lost sub-tabs ── */
 .sc-tabs-row {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--border-default);
-  padding-bottom: 14px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 12px;
 }
 
 .sc-tab-btn {
   padding: 8px 20px;
-  border-radius: 8px 8px 0 0;
-  border: none;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 13px;
   font-family: "Poppins", sans-serif;
-  background: var(--bg-page);
+  background: var(--glass-input-bg);
   color: var(--text-muted);
   transition: all 0.15s ease;
   min-height: 38px;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 .sc-tab-btn:hover {
-  background: var(--bg-hover);
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 8%, var(--glass-bg));
   color: var(--text-secondary);
+  border-color: color-mix(in srgb, var(--sc-color, var(--accent)) 30%, transparent);
 }
 .sc-tab-btn--active {
   font-weight: 700;
-  color: #fff;
+  color: var(--sc-text-on-color, #fff);
+  border-color: transparent;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, rgba(0,0,0,0.12));
 }
 
-/* Item cards */
+/* ── Item cards in the board ── */
 .sc-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1852,20 +2013,24 @@ body.colorblind {
 }
 
 .sc-item-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--glass-shadow);
   transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 .sc-item-card:hover {
-  box-shadow: var(--card-hover-shadow);
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.18),
+    0 0 0 1.5px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
   transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--sc-color, var(--accent)) 30%, transparent);
+  border-color: color-mix(in srgb, var(--sc-color, var(--accent)) 35%, transparent);
 }
 
 .sc-item-card::before {
@@ -1895,7 +2060,7 @@ body.colorblind {
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: var(--bg-input);
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 6%, var(--bg-input));
   flex-shrink: 0;
 }
 .sc-item-card__img {
@@ -2073,13 +2238,13 @@ body.colorblind {
     position: relative;
     top: 0;
     border-right: none;
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--glass-border);
     flex-direction: row;
     flex-wrap: wrap;
     padding: 10px 12px;
     gap: 8px;
     overflow: visible;
-    box-shadow: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   }
   .sc-board__sidebar::before { display: none; }
   .sc-board__tab {
@@ -2087,14 +2252,14 @@ body.colorblind {
     width: auto;
     padding: 8px 14px;
     border-radius: 20px;
-    border: 1.5px solid var(--border-default);
-    background: var(--bg-input);
+    border: 1.5px solid var(--glass-border);
+    background: var(--glass-input-bg);
     font-size: 12px;
     white-space: nowrap;
     transform: none !important;
   }
   .sc-board__tab--active {
-    color: #fff !important;
+    color: var(--sc-text-on-color, #fff) !important;
     border-color: transparent !important;
     background: var(--sc-color, var(--accent)) !important;
   }
@@ -2102,7 +2267,18 @@ body.colorblind {
   .sc-board__tab-pip { display: none; }
   .sc-board__tab-icon { display: none; }
 
+  .sc-board__header {
+    padding: 10px 16px;
+    gap: 10px;
+    min-height: 60px;
+  }
+  .sc-board__logo,
+  .sc-board__initial { width: 36px; height: 36px; font-size: 15px; }
+  .sc-board__name { font-size: 14px; }
+  .sc-admin-badge { font-size: 11px; padding: 5px 10px; }
+
   .sc-board__main { padding: 16px 14px 40px; }
+  .sc-board__main .sc-panel-content { padding: 20px 16px; border-radius: 16px; }
 
   .sc-items-grid { grid-template-columns: 1fr; gap: 12px; }
   .sc-item-card {
@@ -2121,9 +2297,6 @@ body.colorblind {
 
   .sc-school-cards { grid-template-columns: 1fr; }
   .sc-form { padding: 16px; border-radius: 12px; }
-  .sc-board__header { padding: 10px 16px; gap: 10px; }
-  .sc-board__name { font-size: 13px; }
-  .sc-admin-badge { font-size: 11px; padding: 5px 10px; }
   .sc-carousel__card { flex: 0 0 16rem; }
   .sc-gradient-row { gap: 6px; }
   .sc-gradient-opt { height: 40px; }
@@ -2132,7 +2305,7 @@ body.colorblind {
 @media (max-width: 480px) {
   .sc-about__title { font-size: clamp(2rem, 8vw, 2.8rem); }
   .sc-tabs-row { flex-direction: column; }
-  .sc-tab-btn { border-radius: 8px; border: 1.5px solid var(--border-default); }
+  .sc-tab-btn { border-radius: 8px; border: 1.5px solid var(--glass-border); }
   .sc-panel-content { padding: 20px 0; }
 }
 
@@ -2150,11 +2323,32 @@ body.dark .sc-about__register-cta {
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
+body.dark .sc-board__header {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.dark .sc-item-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.30);
+}
+
+body.dark .sc-item-card:hover {
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.45),
+    0 0 0 1.5px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
+}
+
 body.high-contrast .sc-about__hero,
 body.high-contrast .sc-carousel__card,
 body.high-contrast .sc-about__feature,
 body.high-contrast .sc-about__register-cta,
 body.high-contrast .sc-about__hero-card,
-body.high-contrast .sc-about__stat {
+body.high-contrast .sc-about__stat,
+body.high-contrast .sc-board__header,
+body.high-contrast .sc-board__sidebar,
+body.high-contrast .sc-item-card,
+body.high-contrast .sc-board__main .sc-panel-content,
+body.high-contrast .sc-board__main .sc-form {
   border-width: 2px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

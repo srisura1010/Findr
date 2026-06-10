@@ -125,6 +125,19 @@ function hexToRgba(hex: string, a: number): string {
   return `rgba(${r},${g},${b},${a})`;
 }
 
+function getLuminance(hex: string): number {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const toLinear = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+function textOnColor(hex: string): string {
+  return getLuminance(hex) > 0.35 ? "#1a1a2e" : "#ffffff";
+}
+
 function gradStyles(hex: string): string[] {
   return [
     `linear-gradient(to top, ${hexToRgba(hex, 0.97)} 0%, ${hexToRgba(hex, 0.72)} 40%, ${hexToRgba(hex, 0.2)} 75%, transparent 100%)`,
@@ -606,8 +619,9 @@ function SchoolReportsPanel({
               }}
             >
               Reported by {report.reporter_name}
-              {report.reporter_email ? ` · ${report.reporter_email}` : ""} ·{" "}
-              {new Date(report.created_at).toLocaleDateString()}
+              {report.reporter_email
+                ? ` · ${report.reporter_email}`
+                : ""} · {new Date(report.created_at).toLocaleDateString()}
             </p>
           </div>
           <div
@@ -683,12 +697,33 @@ function SchoolBoard({
   }, [school.id]);
 
   // Build tab list dynamically
-  const BOARD_TABS: { id: BoardTab; label: string; icon?: React.ReactNode }[] = [
-    { id: "items", label: s.itemsTab, icon: <HiOutlineMagnifyingGlass style={{ fontSize: 20 }} /> },
-    { id: "add-item", label: s.addItemTab, icon: <FaPlus style={{ fontSize: 11 }} /> },
-    { id: "admin-login", label: s.adminTab, icon: <CiLogin style={{ fontSize: 20 }} /> },
-    ...(isSchoolAdmin ? [{ id: "reports" as BoardTab, label: s.reportsTab, icon: <MdFlagCircle style={{ fontSize: 20 }} /> }] : []),
-  ];
+  const BOARD_TABS: { id: BoardTab; label: string; icon?: React.ReactNode }[] =
+    [
+      {
+        id: "items",
+        label: s.itemsTab,
+        icon: <HiOutlineMagnifyingGlass style={{ fontSize: 20 }} />,
+      },
+      {
+        id: "add-item",
+        label: s.addItemTab,
+        icon: <FaPlus style={{ fontSize: 11 }} />,
+      },
+      {
+        id: "admin-login",
+        label: s.adminTab,
+        icon: <CiLogin style={{ fontSize: 20 }} />,
+      },
+      ...(isSchoolAdmin
+        ? [
+            {
+              id: "reports" as BoardTab,
+              label: s.reportsTab,
+              icon: <MdFlagCircle style={{ fontSize: 20 }} />,
+            },
+          ]
+        : []),
+    ];
 
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
@@ -699,6 +734,7 @@ function SchoolBoard({
 
   const color = school.color;
   const color2 = school.secondary_color ?? "#f5c842";
+  const textOn = textOnColor(color);
   const gradOverlay = gradStyles(color)[school.gradient_mode ?? 0];
   const hasBg = !!school.bg_image_url;
 
@@ -997,7 +1033,11 @@ function SchoolBoard({
     <div
       className="sc-board"
       style={
-        { "--sc-color": color, "--sc-color-2": color2 } as React.CSSProperties
+        {
+          "--sc-color": color,
+          "--sc-color-2": color2,
+          "--sc-text-on-color": textOn, // add this
+        } as React.CSSProperties
       }
     >
       {/* ── Header ── */}
@@ -1315,7 +1355,9 @@ function SchoolBoard({
                     </div>
                   ) : (
                     <form className="sc-form" onSubmit={handleAddFound}>
-                      <label className="sc-form__label">{s.itemNameLabel}</label>
+                      <label className="sc-form__label">
+                        {s.itemNameLabel}
+                      </label>
                       <input
                         className="sc-form__input"
                         type="text"
@@ -1348,7 +1390,9 @@ function SchoolBoard({
                         onChange={(e) => setFoundDesc(e.target.value)}
                       />
 
-                      <label className="sc-form__label">Where was it found?</label>
+                      <label className="sc-form__label">
+                        Where was it found?
+                      </label>
                       <input
                         className="sc-form__input"
                         type="text"
@@ -1445,7 +1489,9 @@ function SchoolBoard({
                     </div>
                   ) : (
                     <form className="sc-form" onSubmit={handleAddLost}>
-                      <label className="sc-form__label">{s.whatLostLabel}</label>
+                      <label className="sc-form__label">
+                        {s.whatLostLabel}
+                      </label>
                       <input
                         className="sc-form__input"
                         type="text"
