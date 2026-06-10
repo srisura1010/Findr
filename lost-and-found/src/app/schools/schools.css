@@ -1566,7 +1566,7 @@ body.colorblind {
   z-index: 1;
 }
 
-/* ── Header ── */
+/* ── Header — solid surface, matches dashboard admin-banner row ── */
 .sc-board__header {
   display: flex;
   align-items: center;
@@ -1574,53 +1574,34 @@ body.colorblind {
   padding: 0 20px;
   min-height: 60px;
   height: 60px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1.5px solid color-mix(in srgb, var(--sc-color, var(--accent)) 55%, transparent);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--sc-color, var(--accent));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   flex-wrap: nowrap;
-  transition: background 0.3s ease;
+  transition: background 0.2s ease;
   flex-shrink: 0;
   position: relative;
-}
-
-/* School color accent stripe at top of header */
-.sc-board__header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--sc-color, var(--accent)),
-    var(--sc-color-2, var(--accent-hover)) 60%,
-    transparent
-  );
+  z-index: 2;
 }
 
 .sc-board__back {
-  background: var(--glass-bg);
-  border: 1.5px solid var(--glass-border);
-  border-radius: 9px;
-  padding: 8px 16px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: 8px;
+  padding: 7px 14px;
   font-size: 13px;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
   color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-  min-height: 38px;
+  min-height: 36px;
   flex-shrink: 0;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
 }
 .sc-board__back:hover {
-  background: color-mix(in srgb, var(--sc-color, var(--accent)) 12%, var(--glass-bg));
-  color: var(--sc-color, var(--accent));
-  border-color: color-mix(in srgb, var(--sc-color, var(--accent)) 45%, transparent);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--sc-color, var(--accent));
 }
 
 /* ── School identity block ── */
@@ -1638,11 +1619,10 @@ body.colorblind {
   border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
-  /* Subtle glow ring in school color */
   box-shadow:
-    0 0 0 2px var(--glass-bg),
-    0 0 0 4px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
-  border: 1.5px solid var(--glass-border);
+    0 0 0 2px var(--bg-card),
+    0 0 0 4px color-mix(in srgb, var(--sc-color, var(--accent)) 45%, transparent);
+  border: none;
 }
 
 .sc-board__initial {
@@ -1658,21 +1638,24 @@ body.colorblind {
   font-family: "Ubuntu", sans-serif;
   flex-shrink: 0;
   box-shadow:
-    0 0 0 2px var(--glass-bg),
-    0 0 0 4px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
+    0 0 0 2px var(--bg-card),
+    0 0 0 4px color-mix(in srgb, var(--sc-color, var(--accent)) 45%, transparent);
 }
 
 .sc-board__name-block {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .sc-board__name {
   font-family: "Ubuntu", sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
+  /* Light mode: dark text; dark mode overridden below */
   color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
@@ -1680,14 +1663,14 @@ body.colorblind {
   text-overflow: ellipsis;
   letter-spacing: -0.3px;
   line-height: 1.2;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
-.sc-board__meta-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+/* In dark mode the name should be white */
+body.dark .sc-board__name { color: #e8edf5; }
+body.high-contrast .sc-board__name { color: var(--text-primary); }
+body.colorblind .sc-board__name { color: var(--text-primary); }
 
 .sc-board__code {
   font-family: "Poppins", sans-serif;
@@ -1702,6 +1685,7 @@ body.colorblind {
   padding: 3px 9px;
   border-radius: 20px;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .sc-board__item-counts {
@@ -1726,16 +1710,14 @@ body.colorblind {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: color-mix(in srgb, var(--sc-color-2, var(--warning)) 14%, var(--glass-bg));
-  border: 1.5px solid color-mix(in srgb, var(--sc-color-2, var(--warning)) 50%, transparent);
-  border-radius: 9px;
+  background: color-mix(in srgb, var(--sc-color-2, var(--warning)) 15%, var(--bg-card));
+  border: 1.5px solid var(--sc-color-2, var(--warning));
+  border-radius: 8px;
   font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: var(--text-primary);
   flex-shrink: 0;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .sc-admin-badge__exit {
@@ -1760,14 +1742,12 @@ body.colorblind {
   min-height: 0;
 }
 
-/* ── Board sidebar — glassmorphic, mirrors .dashboard-sidebar ── */
+/* ── Board sidebar — solid like dashboard, NOT glass ── */
 .sc-board__sidebar {
   width: 240px;
   min-width: 240px;
-  background: var(--glass-sidebar-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-right: 1px solid var(--glass-border);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-default);
   display: flex;
   flex-direction: column;
   padding: 16px 10px 12px;
@@ -1778,8 +1758,9 @@ body.colorblind {
   overflow-y: auto;
   overflow-x: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
-  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--sidebar-shadow);
   flex-shrink: 0;
+  z-index: 2;
 }
 
 /* Top accent stripe on board sidebar */
@@ -1792,7 +1773,7 @@ body.colorblind {
   margin: -16px -10px 14px;
 }
 
-/* ── Board tab — mirrors .sidebar-tab ── */
+/* ── Board tab — mirrors .sidebar-tab exactly ── */
 .sc-board__tab {
   display: flex;
   align-items: center;
@@ -1812,7 +1793,7 @@ body.colorblind {
   width: 100%;
 }
 .sc-board__tab:hover {
-  background: color-mix(in srgb, var(--sc-color, var(--accent)) 8%, var(--glass-bg));
+  background: var(--bg-hover);
   color: var(--text-primary);
   transform: translateX(2px);
 }
@@ -1821,7 +1802,7 @@ body.colorblind {
 .sc-board__tab--active {
   font-weight: 600;
   color: var(--sc-color, var(--accent));
-  background: color-mix(in srgb, var(--sc-color, var(--accent)) 10%, var(--glass-bg));
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 10%, var(--bg-sidebar));
 }
 .sc-board__tab--active::before {
   content: "";
@@ -1858,25 +1839,30 @@ body.colorblind {
   animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ── Board main — transparent so school bg shows through ── */
+/* ── Board main — matches .dashboard-main padding exactly ── */
 .sc-board__main {
   flex: 1;
   min-width: 0;
-  padding: 24px 24px 48px;
+  padding: 28px 24px;
   background: transparent;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
-/* ── Panel content inside board — layout container only, no extra glass card ── */
+/* ── Panel content — exact copy of .main-panel-content ── */
 .sc-board__main .sc-panel-content {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   background: transparent;
   border: none;
-  border-radius: 0;
-  padding: 0;
   box-shadow: none;
-  max-width: 640px;
-  margin: 0 auto;
-  gap: 18px;
+  box-sizing: border-box;
 }
 
 /* ── Section title inside board ── */
@@ -1886,45 +1872,46 @@ body.colorblind {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
 }
 
-/* Form inside board — this IS the glass surface ── */
+/* Form inside board — matches dashboard .panel-form with frosted overlay ── */
 .sc-board__main .sc-form {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: 18px;
-  box-shadow: var(--glass-shadow);
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
   padding: 20px;
+  gap: 12px;
 }
 
-/* Inputs inside board forms — more opaque so they're legible over the bg ── */
+/* Inputs inside board forms */
 .sc-board__main .sc-form__input,
 .sc-board__main .sc-form__textarea {
-  background: var(--glass-input-bg);
-  border-color: color-mix(in srgb, var(--border-input) 70%, var(--glass-border));
+  background: var(--bg-input);
+  border-color: var(--border-input);
 }
 .sc-board__main .sc-form__input:focus,
 .sc-board__main .sc-form__textarea:focus {
-  background: var(--glass-bg);
+  background: var(--bg-card);
   border-color: var(--sc-color, var(--border-focus));
 }
 
 /* File label in board */
 .sc-board__main .sc-form__file-label {
-  background: var(--glass-input-bg);
-  border-color: color-mix(in srgb, var(--border-input) 70%, var(--glass-border));
+  background: var(--bg-input);
+  border-color: var(--border-input);
 }
 .sc-board__main .sc-form__file-label:hover {
-  background: color-mix(in srgb, var(--sc-color, var(--accent)) 10%, var(--glass-bg));
+  background: color-mix(in srgb, var(--sc-color, var(--accent)) 8%, var(--bg-card));
   border-color: var(--sc-color, var(--accent));
   color: var(--sc-color, var(--accent));
 }
 
-/* ── Add-item pill toggle ── */
-.sc-add-toggle {
+/* ── Add-item mode toggle — solid, always visible ── */
+.sc-mode-toggle {
   display: flex;
-  background: var(--glass-input-bg);
-  border: 1.5px solid var(--glass-border);
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
   border-radius: 100px;
   padding: 4px;
   gap: 2px;
@@ -1932,53 +1919,71 @@ body.colorblind {
   box-sizing: border-box;
 }
 
-.sc-add-toggle__btn {
+.sc-mode-toggle__btn {
   flex: 1;
-  padding: 10px 0;
+  padding: 9px 0;
   border-radius: 100px;
   border: none;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
-  font-weight: 700;
+  /* Never change font-weight — causes layout shift */
+  font-weight: 600;
   letter-spacing: 0.1px;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
   background: transparent;
   color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
 }
 
-.sc-add-toggle__btn--active {
+.sc-mode-toggle__btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+/* Active state: school color bg, text computed by luminance */
+.sc-mode-toggle__btn--active {
   background: var(--sc-color, var(--accent));
-  color: var(--sc-text-on-color, #fff);
-  transform: scale(1.02);
+  color: var(--sc-text-on-color, #ffffff);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, rgba(0,0,0,0.15));
 }
 
-/* ── Search bar ── */
-.sc-search-row { margin-bottom: 14px; }
+/* Light mode: inactive text is dark */
+body.light .sc-mode-toggle__btn,
+:root .sc-mode-toggle__btn {
+  color: #64748b;
+}
+
+/* Dark mode: inactive text is lighter */
+body.dark .sc-mode-toggle__btn {
+  color: #4a5a7a;
+}
+
+/* ── Search bar — solid, readable ── */
+.sc-search-row { margin-bottom: 16px; }
 
 .sc-search-wrap {
   position: relative;
-  max-width: 400px;
+  max-width: 440px;
 }
 
 .sc-search {
   width: 100%;
   padding: 10px 36px 10px 14px;
-  border: 1.5px solid var(--glass-border);
+  border: 1.5px solid var(--border-input);
   border-radius: 10px;
-  background: var(--glass-input-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: var(--bg-card);
   color: var(--text-primary);
   font-family: "Poppins", sans-serif;
   font-size: 13px;
   outline: none;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease;
   box-sizing: border-box;
+  box-shadow: var(--card-shadow);
 }
 .sc-search:focus {
   border-color: var(--sc-color, var(--accent));
-  background: var(--glass-bg);
 }
 .sc-search::placeholder { color: var(--text-muted); }
 
@@ -1998,44 +2003,61 @@ body.colorblind {
 }
 .sc-search__clear:hover { color: var(--text-secondary); }
 
-/* ── Found/Lost sub-tabs ── */
+/* ── Found/Lost segmented control — full width, equal halves, no layout shift ── */
 .sc-tabs-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--glass-border);
-  padding-bottom: 12px;
+  gap: 3px;
+  margin-bottom: 18px;
+  padding: 3px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
 }
 
 .sc-tab-btn {
-  padding: 8px 20px;
-  border-radius: 8px;
-  border: 1.5px solid transparent;
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 7px;
+  border: none;
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
   font-family: "Poppins", sans-serif;
-  background: var(--glass-input-bg);
-  color: var(--text-muted);
-  transition: all 0.15s ease;
-  min-height: 38px;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-}
-.sc-tab-btn:hover {
-  background: color-mix(in srgb, var(--sc-color-2, var(--sc-color, var(--accent))) 10%, var(--glass-bg));
-  color: var(--text-primary);
-  border-color: color-mix(in srgb, var(--sc-color-2, var(--sc-color, var(--accent))) 40%, transparent);
-}
-.sc-tab-btn--active {
-  font-weight: 700;
-  background: var(--sc-color-2, var(--sc-color, var(--accent)));
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--sc-color-2, var(--sc-color, var(--accent))) 45%, rgba(0,0,0,0.15));
+  background: transparent;
+  /* Light mode default — readable dark text */
+  color: #64748b;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  min-height: 34px;
+  white-space: nowrap;
+  text-align: center;
 }
 
-/* ── Item cards in the board — sized to match dashboard .item-card exactly ── */
+body.dark .sc-tab-btn { color: #4a5a7a; }
+
+.sc-tab-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Active: school color bg + luminance-aware text via sc-text-on-color */
+.sc-tab-btn--active {
+  background: var(--sc-color-2, var(--sc-color, var(--accent)));
+  /* Use sc-text-on-color so it works on any school color */
+  color: var(--sc-text-on-color, #ffffff);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--sc-color-2, var(--sc-color, var(--accent))) 40%, rgba(0,0,0,0.15));
+}
+
+/* Explicit overrides to ensure white/black on active regardless of theme */
+body.light .sc-tab-btn--active,
+body.dark .sc-tab-btn--active,
+body.colorblind .sc-tab-btn--active {
+  color: var(--sc-text-on-color, #ffffff);
+}
+
+/* ── Item cards — glass surface over bg ── */
 .sc-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -2044,23 +2066,21 @@ body.colorblind {
 }
 
 .sc-item-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, var(--border-default) 60%, transparent);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
   transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
   display: flex;
   flex-direction: column;
   position: relative;
-  /* match dashboard margin */
-  margin-top: 0;
 }
 .sc-item-card:hover {
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.20),
+    0 12px 36px rgba(0, 0, 0, 0.18),
     0 0 0 1.5px color-mix(in srgb, var(--sc-color, var(--accent)) 50%, transparent);
   transform: translateY(-4px);
   border-color: color-mix(in srgb, var(--sc-color, var(--accent)) 40%, transparent);
@@ -2292,13 +2312,13 @@ body.colorblind {
     position: relative;
     top: 0;
     border-right: none;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--border-default);
     flex-direction: row;
     flex-wrap: wrap;
     padding: 10px 12px;
     gap: 8px;
     overflow: visible;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
   .sc-board__sidebar::before { display: none; }
   .sc-board__tab {
@@ -2306,8 +2326,8 @@ body.colorblind {
     width: auto;
     padding: 8px 14px;
     border-radius: 20px;
-    border: 1.5px solid var(--glass-border);
-    background: var(--glass-input-bg);
+    border: 1.5px solid var(--border-default);
+    background: var(--bg-input);
     font-size: 12px;
     white-space: nowrap;
     transform: none !important;
@@ -2331,9 +2351,10 @@ body.colorblind {
   .sc-board__name { font-size: 14px; }
   .sc-admin-badge { font-size: 11px; padding: 5px 10px; }
 
-  .sc-board__main { padding: 16px 14px 40px; }
-  .sc-board__main .sc-panel-content { padding: 0; border-radius: 0; }
+  .sc-board__main { padding: 16px 14px 40px; scrollbar-gutter: auto; }
+  .sc-board__main .sc-panel-content { padding: 20px 0; }
   .sc-board__main .sc-form { border-radius: 14px; padding: 16px; }
+  .sc-tabs-row { max-width: 100%; }
 
   .sc-items-grid { grid-template-columns: 1fr; gap: 12px; }
   .sc-item-card {
@@ -2361,8 +2382,8 @@ body.colorblind {
 
 @media (max-width: 480px) {
   .sc-about__title { font-size: clamp(2rem, 8vw, 2.8rem); }
-  .sc-tabs-row { flex-direction: column; }
-  .sc-tab-btn { border-radius: 8px; border: 1.5px solid var(--glass-border); }
+  .sc-tabs-row { flex-wrap: wrap; width: 100%; }
+  .sc-tab-btn { flex: 1; text-align: center; }
   .sc-panel-content { padding: 20px 0; }
 }
 
@@ -2405,52 +2426,60 @@ body.high-contrast .sc-board__sidebar,
 body.high-contrast .sc-item-card,
 body.high-contrast .sc-board__main .sc-form {
   border-width: 2px;
+}
+
+body.high-contrast .sc-board__main .sc-form {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  background: var(--bg-card);
 }
 
 /* ═══════════════════════════════════════════
    SELECT — fix OS dark override inside board
+   Must beat inline style specificity
 ═══════════════════════════════════════════ */
 .sc-board__main select,
-.sc-form select {
-  border: 1.5px solid var(--border-input);
-  border-radius: 9px;
-  padding: 10px 13px;
-  outline: none;
-  font-family: "Poppins", sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-  background: var(--bg-input);
-  transition: border-color 0.15s ease, background 0.15s ease;
-  width: 100%;
-  box-sizing: border-box;
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: pointer;
-  /* Custom dropdown arrow */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
+.sc-form select,
+select.sc-form__select {
+  border: 1.5px solid var(--border-input) !important;
+  border-radius: 9px !important;
+  padding: 10px 32px 10px 13px !important;
+  outline: none !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+  background-color: var(--bg-input) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 12px !important;
+  transition: border-color 0.15s ease, background-color 0.15s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  cursor: pointer !important;
 }
 
 .sc-board__main select:focus,
-.sc-form select:focus {
-  border-color: var(--border-focus);
-  background-color: var(--bg-card);
+.sc-form select:focus,
+select.sc-form__select:focus {
+  border-color: var(--border-focus) !important;
+  background-color: var(--bg-card) !important;
+  outline: none !important;
 }
 
-/* Inside board, use glass input bg */
+/* Inside board glass form */
 .sc-board__main .sc-form select {
-  background-color: var(--glass-input-bg);
-  border-color: color-mix(in srgb, var(--glass-border) 80%, var(--border-input));
+  background-color: var(--glass-input-bg) !important;
+  border-color: color-mix(in srgb, var(--border-input) 70%, var(--glass-border)) !important;
 }
 
 .sc-board__main .sc-form select:focus {
-  border-color: var(--sc-color, var(--border-focus));
-  background-color: var(--glass-bg);
+  border-color: var(--sc-color, var(--border-focus)) !important;
+  background-color: var(--glass-bg) !important;
 }
 
 /* ═══════════════════════════════════════════
