@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
-import { FaTrash, FaPlus } from "react-icons/fa6";
+import { FaTrash, FaPlus, FaChevronDown } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useSettings } from "@/context/SettingsContext";
 import { MdFlagCircle } from "react-icons/md";
@@ -212,6 +212,10 @@ interface BoardStrings {
   myLostReported: string;
   noMyItems: string;
   signInToView: string;
+  filterCategory: string;
+  filterDateFrom: string;
+  filterDateTo: string;
+  clearFilters: string;
 }
 
 const DEFAULT_BOARD: BoardStrings = {
@@ -270,6 +274,10 @@ const DEFAULT_BOARD: BoardStrings = {
   myLostReported: "Lost Items I Reported",
   noMyItems: "You haven't posted any items here yet.",
   signInToView: "Sign in to view your items.",
+  filterCategory: "Category",
+  filterDateFrom: "Date from",
+  filterDateTo: "Date to",
+  clearFilters: "Clear filters",
 };
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
@@ -354,6 +362,10 @@ export default function SchoolBoardPage() {
         ["myLostReported", "Lost Items I Reported", "sc_board_myLostReported"],
         ["noMyItems", "You haven't posted any items here yet.", "sc_board_noMyItems"],
         ["signInToView", "Sign in to view your items.", "sc_board_signInToView"],
+        ["filterCategory", "Category", "sc_board_filterCategory"],
+        ["filterDateFrom", "Date from", "sc_board_filterDateFrom"],
+        ["filterDateTo", "Date to", "sc_board_filterDateTo"],
+        ["clearFilters", "Clear filters", "sc_board_clearFilters"],
       ];
       await Promise.all(pairs.map(([field, key, cacheKey]) =>
         fetchTranslation(key, language, cacheKey, (val) => setS((prev) => ({ ...prev, [field]: val })))
@@ -575,6 +587,20 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ── Filter state ─────────────────────────────────────────────────────────────
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+
+  const hasActiveFilters = !!filterCategory || !!filterDateFrom || !!filterDateTo;
+
+  const clearFilters = () => {
+    setFilterCategory("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+  };
+
   const [items, setItems] = useState<SchoolItem[]>([]);
   const [lostItems, setLostItems] = useState<SchoolLostItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -647,6 +673,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [lostDesc, setLostDesc] = useState("");
   const [lostCategory, setLostCategory] = useState("");
   const [lostLocation, setLostLocation] = useState("");
+  const [lostDate, setLostDate] = useState("");
   const [lostFiles, setLostFiles] = useState<File[]>([]);
   const [lostUploading, setLostUploading] = useState(false);
   const [lostSuccess, setLostSuccess] = useState(false);
@@ -665,13 +692,14 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     const { data: inserted } = await supabase.from("school_lost_items").insert({
       school_id: school.id, name: lostName, description: lostDesc,
       category: lostCategory || null, location: lostLocation || null,
+      date_lost: lostDate ? new Date(lostDate).toISOString() : new Date().toISOString(),
       image_url: imageUrls[0] || null, image_urls: imageUrls.length > 0 ? imageUrls : null,
       author_name: user.fullName || user.username || "Anonymous",
       author_avatar: user.imageUrl, author_id: user.id,
       author_email: user.primaryEmailAddress?.emailAddress, status: "looking",
     }).select().single();
     if (inserted) setLostItems((prev) => [inserted, ...prev]);
-    setLostName(""); setLostDesc(""); setLostCategory(""); setLostLocation(""); setLostFiles([]);
+    setLostName(""); setLostDesc(""); setLostCategory(""); setLostLocation(""); setLostDate(""); setLostFiles([]);
     setLostSuccess(true);
     setTimeout(() => { setLostSuccess(false); setActiveTab("items"); setBoardTab("lost"); }, 1500);
     setLostUploading(false);
@@ -727,12 +755,32 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   };
   const handleReportDeleteItem = (itemId: number) => setItems((prev) => prev.filter((i) => i.id !== itemId));
 
-  const filteredFound = searchQuery.trim()
+  // ── Filtering ───────────────────────────────────────────────────────────────
+  const applyFilters = <T extends { name: string; description: string; date_found?: string; created_at: string; category?: string | null }>(
+    list: T[],
+  ): T[] =>
+    list.filter((item) => {
+      if (filterCategory && (item.category ?? "") !== filterCategory) return false;
+      if (filterDateFrom) {
+        const d = item.date_found || item.created_at;
+        if (!d || new Date(d) < new Date(filterDateFrom)) return false;
+      }
+      if (filterDateTo) {
+        const d = item.date_found || item.created_at;
+        if (!d || new Date(d) > new Date(filterDateTo + "T23:59:59")) return false;
+      }
+      return true;
+    });
+
+  const baseFound = searchQuery.trim()
     ? items.filter((i) => `${i.name} ${i.description}`.toLowerCase().includes(searchQuery.toLowerCase()))
     : items;
-  const filteredLost = searchQuery.trim()
+  const baseLost = searchQuery.trim()
     ? lostItems.filter((i) => `${i.name} ${i.description}`.toLowerCase().includes(searchQuery.toLowerCase()))
     : lostItems;
+
+  const filteredFound = applyFilters(baseFound as any) as SchoolItem[];
+  const filteredLost = applyFilters(baseLost as any) as SchoolLostItem[];
 
   // ── Pill toggle ─────────────────────────────────────────────────────────────
   const AddItemToggle = () => (
@@ -762,7 +810,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {school.logo_url
             ? <img src={school.logo_url} alt={school.name} className="sc-board__logo" />
             : <div className="sc-board__initial" style={{ background: color }}>{school.name[0]}</div>}
-          {/* Name + code pill on one line */}
           <div className="sc-board__name-block">
             <p className="sc-board__name">{school.name}</p>
             <span className="sc-board__code">{school.code}</span>
@@ -804,12 +851,175 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {/* ── ITEMS ── */}
           {activeTab === "items" && (
             <>
-              <div className="sc-search-row">
-                <div className="sc-search-wrap">
-                  <input className="sc-search" placeholder={s.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                  {searchQuery && <button className="sc-search__clear" onClick={() => setSearchQuery("")}>×</button>}
+              {/* ── Unified search + filter bar ── */}
+              <div style={{
+                marginBottom: 16,
+                background: "var(--bg-card)",
+                border: "1.5px solid var(--border-default)",
+                borderRadius: 16,
+                padding: "14px 16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+              }}>
+                {/* Search row */}
+                <div className="sc-search-wrap" style={{ maxWidth: "100%" }}>
+                  <input
+                    className="sc-search"
+                    placeholder={s.searchPlaceholder}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ maxWidth: "100%" }}
+                  />
+                  {searchQuery && (
+                    <button className="sc-search__clear" onClick={() => setSearchQuery("")}>×</button>
+                  )}
                 </div>
+
+                {/* Filter row */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr 1fr auto",
+                  gap: 8,
+                  alignItems: "center",
+                }}>
+                  {/* Category */}
+                  <div style={{ position: "relative" }}>
+                    <select
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 28px 8px 10px",
+                        borderRadius: 8,
+                        border: "1.5px solid var(--border-input)",
+                        background: filterCategory ? "var(--sc-color, var(--accent))" : "var(--bg-input)",
+                        color: filterCategory ? "var(--sc-text-on-color, #fff)" : "var(--text-muted)",
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        appearance: "none",
+                        WebkitAppearance: "none",
+                        outline: "none",
+                        transition: "all 0.15s ease",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <option value="">{s.filterCategory}</option>
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>{cat}</option>
+                      ))}
+                    </select>
+                    <FaChevronDown style={{
+                      position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)",
+                      color: filterCategory ? "rgba(255,255,255,0.7)" : "var(--text-muted)",
+                      fontSize: 10, pointerEvents: "none",
+                    }} />
+                  </div>
+
+                  {/* Date from */}
+                  <input
+                    type="date"
+                    value={filterDateFrom}
+                    onChange={(e) => setFilterDateFrom(e.target.value)}
+                    title={s.filterDateFrom}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      border: "1.5px solid var(--border-input)",
+                      background: filterDateFrom ? "var(--sc-color, var(--accent))" : "var(--bg-input)",
+                      color: filterDateFrom ? "var(--sc-text-on-color, #fff)" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      outline: "none",
+                      transition: "all 0.15s ease",
+                      boxSizing: "border-box",
+                      colorScheme: "dark",
+                    }}
+                  />
+
+                  {/* Date to */}
+                  <input
+                    type="date"
+                    value={filterDateTo}
+                    onChange={(e) => setFilterDateTo(e.target.value)}
+                    title={s.filterDateTo}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      border: "1.5px solid var(--border-input)",
+                      background: filterDateTo ? "var(--sc-color, var(--accent))" : "var(--bg-input)",
+                      color: filterDateTo ? "var(--sc-text-on-color, #fff)" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      outline: "none",
+                      transition: "all 0.15s ease",
+                      boxSizing: "border-box",
+                      colorScheme: "dark",
+                    }}
+                  />
+
+                  {/* Clear */}
+                  <button
+                    onClick={clearFilters}
+                    disabled={!hasActiveFilters}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1.5px solid var(--border-input)",
+                      background: hasActiveFilters ? "var(--danger)" : "var(--bg-input)",
+                      color: hasActiveFilters ? "#fff" : "var(--text-muted)",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: hasActiveFilters ? "pointer" : "not-allowed",
+                      opacity: hasActiveFilters ? 1 : 0.45,
+                      transition: "all 0.15s ease",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {s.clearFilters}
+                  </button>
+                </div>
+
+                {/* Active filter chips */}
+                {hasActiveFilters && (
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {filterCategory && (
+                      <span onClick={() => setFilterCategory("")} style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "3px 10px", borderRadius: 100,
+                        background: `${color}22`, border: `1px solid ${color}`,
+                        color: color, fontFamily: "Poppins, sans-serif",
+                        fontSize: 11, fontWeight: 600, cursor: "pointer",
+                      }}>
+                        {filterCategory} <span style={{ opacity: 0.7 }}>×</span>
+                      </span>
+                    )}
+                    {(filterDateFrom || filterDateTo) && (
+                      <span onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }} style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "3px 10px", borderRadius: 100,
+                        background: `${color}22`, border: `1px solid ${color}`,
+                        color: color, fontFamily: "Poppins, sans-serif",
+                        fontSize: 11, fontWeight: 600, cursor: "pointer",
+                      }}>
+                        📅 {filterDateFrom || "…"} – {filterDateTo || "…"} <span style={{ opacity: 0.7 }}>×</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* ── Found / Lost tabs ── */}
               <div className="sc-tabs-row">
                 {(["found", "lost"] as const).map((t) => (
                   <button
@@ -961,6 +1171,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
                     <label className="sc-form__label">Last seen where?</label>
                     <input className="sc-form__input" type="text" placeholder="e.g. Cafeteria, locker room, room 101..." value={lostLocation} onChange={(e) => setLostLocation(e.target.value)} />
+
+                    <label className="sc-form__label">Date Lost</label>
+                    <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} style={{ colorScheme: "dark" }} />
 
                     <label className="sc-form__label">{s.photosOptionalLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-lost-upload">
