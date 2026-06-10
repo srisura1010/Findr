@@ -53,11 +53,7 @@ export default function SchoolItemDetailPage() {
 
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin] = useState(() =>
-    typeof window !== "undefined"
-      ? localStorage.getItem("findr_is_admin") === "true"
-      : false,
-  );
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
 
   // Report modal
   const [showReport, setShowReport] = useState(false);
@@ -110,6 +106,13 @@ export default function SchoolItemDetailPage() {
           longitude: data.longitude ?? null,
           school_id: data.school_id,
         });
+
+        // Check if the current user is a school admin for this school
+        if (typeof window !== "undefined") {
+          setIsSchoolAdmin(
+            localStorage.getItem(`findr_school_admin_${data.school_id}`) === "true"
+          );
+        }
       }
 
       setLoading(false);
@@ -231,10 +234,12 @@ export default function SchoolItemDetailPage() {
     setActionLoading(false);
   };
 
+  // Reports now go to school_reports, scoped to the school
   const handleReportSubmit = async () => {
     if (!reportReason || !user || !item) return;
     setReportSubmitting(true);
-    await supabase.from("reports").insert({
+    await supabase.from("school_reports").insert({
+      school_id: item.school_id,
       item_id: item.id,
       item_name: item.name,
       item_image: item.image || null,
@@ -297,6 +302,7 @@ export default function SchoolItemDetailPage() {
     );
 
   const isItemOwner = user?.id === item.authorId;
+  const canDelete = isItemOwner || isSchoolAdmin;
   const currentStatus = item.status || "waiting";
 
   const dateLabel = item.date_found
@@ -371,14 +377,14 @@ export default function SchoolItemDetailPage() {
                   Report
                 </button>
               )}
-              {(isItemOwner || isAdmin) && (
+              {canDelete && (
                 <button
                   className="detail-secondary-btn detail-secondary-btn--danger"
                   onClick={handleDelete}
                 >
                   <FaTrash style={{ marginRight: 6 }} />
-                  {isAdmin && !isItemOwner
-                    ? "Delete (Admin)"
+                  {isSchoolAdmin && !isItemOwner
+                    ? "Delete (School Admin)"
                     : "Delete My Post"}
                 </button>
               )}

@@ -56,6 +56,19 @@ interface SchoolLostItem {
   created_at: string;
 }
 
+interface SchoolReport {
+  id: number;
+  school_id: string;
+  item_id: number;
+  item_name: string;
+  item_image: string | null;
+  reporter_id: string;
+  reporter_name: string;
+  reporter_email: string | null;
+  reason: string;
+  created_at: string;
+}
+
 // ─── Cache helpers ─────────────────────────────────────────────────────────────
 const SCHOOL_BOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -159,6 +172,7 @@ interface BoardStrings {
   addItemTab: string;
   reportLostTab: string;
   adminTab: string;
+  reportsTab: string;
   searchPlaceholder: string;
   foundTabLabel: string;
   lostTabLabel: string;
@@ -210,6 +224,7 @@ const DEFAULT_BOARD: BoardStrings = {
   addItemTab: "Report Found",
   reportLostTab: "Report Lost",
   adminTab: "Admin",
+  reportsTab: "Reports",
   searchPlaceholder: "Search items...",
   foundTabLabel: "Found Items",
   lostTabLabel: "Lost Items",
@@ -298,6 +313,7 @@ export default function SchoolBoardPage() {
         ["addItemTab", "Report Found", "sc_board_addItemTab"],
         ["reportLostTab", "Report Lost", "sc_board_reportLostTab"],
         ["adminTab", "Admin", "sc_board_adminTab"],
+        ["reportsTab", "Reports", "sc_board_reportsTab"],
         ["searchPlaceholder", "Search items...", "sc_board_searchPlaceholder"],
         ["foundTabLabel", "Found Items", "sc_board_foundTabLabel"],
         ["lostTabLabel", "Lost Items", "sc_board_lostTabLabel"],
@@ -435,9 +451,6 @@ export default function SchoolBoardPage() {
 }
 
 // ─── SchoolBoard ───────────────────────────────────────────────────────────────
-// Replace your existing SchoolBoard function with this one.
-// Everything else in the file stays the same.
-
 const CATEGORIES = [
   "Electronics",
   "Clothing & Accessories",
@@ -460,6 +473,183 @@ const CATEGORIES = [
   "Other",
 ];
 
+// ─── SchoolReportsPanel ────────────────────────────────────────────────────────
+function SchoolReportsPanel({
+  school,
+  onDeleteItem,
+  color,
+}: {
+  school: School;
+  onDeleteItem: (itemId: number) => void;
+  color: string;
+}) {
+  const [reports, setReports] = useState<SchoolReport[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      const { data } = await supabase
+        .from("school_reports")
+        .select("*")
+        .eq("school_id", school.id)
+        .order("created_at", { ascending: false });
+      if (data) setReports(data as SchoolReport[]);
+      setLoading(false);
+    };
+    fetchReports();
+  }, [school.id]);
+
+  const handleDismiss = async (reportId: number) => {
+    await supabase.from("school_reports").delete().eq("id", reportId);
+    setReports((prev) => prev.filter((r) => r.id !== reportId));
+  };
+
+  const handleDeleteItem = async (report: SchoolReport) => {
+    if (!confirm(`Delete "${report.item_name}" permanently?`)) return;
+    await supabase.from("school_items").delete().eq("id", report.item_id);
+    await supabase
+      .from("school_reports")
+      .delete()
+      .eq("item_id", report.item_id);
+    onDeleteItem(report.item_id);
+    setReports((prev) => prev.filter((r) => r.item_id !== report.item_id));
+  };
+
+  if (loading)
+    return (
+      <div className="sc-empty" style={{ padding: "32px 0" }}>
+        Loading...
+      </div>
+    );
+
+  if (reports.length === 0)
+    return (
+      <div className="sc-empty" style={{ padding: "32px 0" }}>
+        No reports — all clear!
+      </div>
+    );
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        padding: "4px 0",
+      }}
+    >
+      {reports.map((report) => (
+        <div
+          key={report.id}
+          style={{
+            background: "var(--bg-card, #16161e)",
+            border: "1.5px solid var(--border-default, #2a2a3a)",
+            borderRadius: 12,
+            padding: "14px 16px",
+            display: "flex",
+            gap: 14,
+            alignItems: "flex-start",
+          }}
+        >
+          {report.item_image && (
+            <img
+              src={report.item_image}
+              alt={report.item_name}
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 8,
+                objectFit: "cover",
+                flexShrink: 0,
+              }}
+            />
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                color: "var(--text-primary, #e8e8f0)",
+                margin: "0 0 3px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {report.item_name}
+            </p>
+            <p
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "0.82rem",
+                color: "var(--danger, #e05252)",
+                margin: "0 0 4px",
+                fontWeight: 600,
+              }}
+            >
+              {report.reason}
+            </p>
+            <p
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "0.74rem",
+                color: "var(--text-muted, #888)",
+                margin: 0,
+              }}
+            >
+              Reported by {report.reporter_name}
+              {report.reporter_email ? ` · ${report.reporter_email}` : ""} ·{" "}
+              {new Date(report.created_at).toLocaleDateString()}
+            </p>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            <button
+              onClick={() => handleDismiss(report.id)}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 7,
+                border: "1.5px solid var(--border-default, #2a2a3a)",
+                background: "transparent",
+                color: "var(--text-muted, #888)",
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Dismiss
+            </button>
+            <button
+              onClick={() => handleDeleteItem(report)}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 7,
+                border: "none",
+                background: "var(--danger, #e05252)",
+                color: "#fff",
+                fontFamily: "Poppins, sans-serif",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Delete Item
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SchoolBoard({
   school,
   user,
@@ -471,15 +661,25 @@ function SchoolBoard({
   onBack: () => void;
   s: BoardStrings;
 }) {
-  type BoardTab = "items" | "add-item" | "report-lost" | "admin-login";
+  type BoardTab = "items" | "add-item" | "report-lost" | "admin-login" | "reports";
 
   const router = useRouter();
 
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsSchoolAdmin(
+      localStorage.getItem(`findr_school_admin_${school.id}`) === "true",
+    );
+  }, [school.id]);
+
+  // Build tab list dynamically — Reports only visible when school admin
   const BOARD_TABS: { id: BoardTab; label: string }[] = [
     { id: "items", label: s.itemsTab },
     { id: "add-item", label: s.addItemTab },
     { id: "report-lost", label: s.reportLostTab },
     { id: "admin-login", label: s.adminTab },
+    ...(isSchoolAdmin ? [{ id: "reports" as BoardTab, label: s.reportsTab }] : []),
   ];
 
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
@@ -488,18 +688,11 @@ function SchoolBoard({
   const [items, setItems] = useState<SchoolItem[]>([]);
   const [lostItems, setLostItems] = useState<SchoolLostItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
-  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
 
   const color = school.color;
   const color2 = school.secondary_color ?? "#f5c842";
   const gradOverlay = gradStyles(color)[school.gradient_mode ?? 0];
   const hasBg = !!school.bg_image_url;
-
-  useEffect(() => {
-    setIsSchoolAdmin(
-      localStorage.getItem(`findr_school_admin_${school.id}`) === "true",
-    );
-  }, [school.id]);
 
   useEffect(() => {
     const cachedBoard = readSchoolBoardCache(school.id);
@@ -708,6 +901,11 @@ function SchoolBoard({
     setLostItems((prev) => prev.filter((i) => i.id !== id));
   };
 
+  // Called by SchoolReportsPanel when it deletes an item
+  const handleReportDeleteItem = (itemId: number) => {
+    setItems((prev) => prev.filter((i) => i.id !== itemId));
+  };
+
   const filteredFound = searchQuery.trim()
     ? items.filter((i) =>
         `${i.name} ${i.description}`
@@ -817,6 +1015,8 @@ function SchoolBoard({
               onClick={() => {
                 localStorage.removeItem(`findr_school_admin_${school.id}`);
                 setIsSchoolAdmin(false);
+                // If currently on reports tab, go back to items
+                if (activeTab === "reports") setActiveTab("items");
               }}
             >
               {s.exitAdmin}
@@ -1327,6 +1527,29 @@ function SchoolBoard({
                   </button>
                 </form>
               )}
+            </div>
+          )}
+
+          {/* ── REPORTS (school admin only) ── */}
+          {activeTab === "reports" && isSchoolAdmin && (
+            <div className="sc-panel-content">
+              <div className="sc-section-title">Reports</div>
+              <p
+                style={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "0.82rem",
+                  color: "var(--text-muted, #888)",
+                  margin: "0 0 16px",
+                }}
+              >
+                Items reported by users in this school board. Only you (school
+                admin) can see and act on these.
+              </p>
+              <SchoolReportsPanel
+                school={school}
+                onDeleteItem={handleReportDeleteItem}
+                color={color}
+              />
             </div>
           )}
         </main>
