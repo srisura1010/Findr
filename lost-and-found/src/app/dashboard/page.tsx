@@ -1935,7 +1935,8 @@ export default function DashboardPage() {
                 ) : (
                   <form className="panel-form" onSubmit={handleSubmit}>
                     <label className="panel-form__label">
-                      {s.itemNameLabel}
+                      {s.itemNameLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
                     </label>
                     <input
                       type="text"
@@ -1947,7 +1948,8 @@ export default function DashboardPage() {
                     />
 
                     <label className="panel-form__label">
-                      {s.categoryLabel}
+                      {s.categoryLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
                     </label>
                     <CategorySelect
                       value={newItemCategory}
@@ -1956,7 +1958,8 @@ export default function DashboardPage() {
                     />
 
                     <label className="panel-form__label">
-                      {s.descriptionLabel}
+                      {s.descriptionLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
                     </label>
                     <textarea
                       placeholder={s.descriptionPlaceholder}
@@ -2074,7 +2077,8 @@ export default function DashboardPage() {
                 ) : (
                   <form className="panel-form" onSubmit={handleLostSubmit}>
                     <label className="panel-form__label">
-                      {s.whatLostLabel}
+                      {s.whatLostLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
                     </label>
                     <input
                       type="text"
@@ -2086,7 +2090,8 @@ export default function DashboardPage() {
                     />
 
                     <label className="panel-form__label">
-                      {s.categoryLabel}
+                      {s.categoryLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
                     </label>
                     <CategorySelect
                       value={lostItemCategory}
@@ -2095,7 +2100,8 @@ export default function DashboardPage() {
                     />
 
                     <label className="panel-form__label">
-                      {s.descriptionLabel}
+                      {s.descriptionLabel}{" "}
+                      <span style={{ color: "var(--danger)" }}>*</span>
                     </label>
                     <textarea
                       placeholder={s.descLostPlaceholder}
