@@ -16,6 +16,7 @@ import {
 } from "react-icons/md";
 import { useSettings } from "@/context/SettingsContext";
 import { SUPER_ADMINS } from "@/lib/superAdmin";
+import AISearchButton from "./AISearchButton";
 
 export default function Navbar() {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -185,8 +186,9 @@ export default function Navbar() {
 
         {/* Right cluster */}
         <div className="topbar__right">
-          <button
-            className="topbar__icon-btn topbar__icon-btn--settings"
+  <AISearchButton />
+  <button
+    className="topbar__icon-btn topbar__icon-btn--settings"
             onClick={() => router.push("/settings")}
             aria-label="Settings"
             title="Settings"
