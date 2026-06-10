@@ -1052,16 +1052,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                         </div>
                         {item.status === "pending" && <span className="sc-item-card__status sc-item-card__status--pending">{s.claimPending}</span>}
                       </div>
-                      {(isSchoolAdmin || user?.id === item.author_id) && (
-                        <div className="sc-item-card__actions">
-                          {user?.id === item.author_id && item.status === "pending" && (
-                            <button className="sc-btn sc-btn--success sc-btn--sm" onClick={(e) => handleMarkClaimed(e, item.id)}>{s.confirmClaimed}</button>
-                          )}
-                          <div className="sc-item-card__actions-row">
-                            <button className="sc-btn sc-btn--danger sc-btn--sm sc-btn--icon" onClick={(e) => handleDeleteFound(e, item.id)}><FaTrash /></button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                   {filteredFound.filter((i) => i.status !== "claimed").length === 0 && <div className="sc-empty">{s.noFoundItems}</div>}
@@ -1081,14 +1071,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                           <span>{s.lostBy} {item.author_name}</span>
                         </div>
                       </div>
-                      {(isSchoolAdmin || user?.id === item.author_id) && (
-                        <div className="sc-item-card__actions">
-                          {user?.id === item.author_id && <button className="sc-btn sc-btn--success sc-btn--sm" onClick={(e) => handleMarkFound(e, item.id)}>{s.markFound}</button>}
-                          <div className="sc-item-card__actions-row">
-                            <button className="sc-btn sc-btn--danger sc-btn--sm sc-btn--icon" onClick={(e) => handleDeleteLost(e, item.id)}><FaTrash /></button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                   {filteredLost.length === 0 && <div className="sc-empty">{s.noLostItems}</div>}
