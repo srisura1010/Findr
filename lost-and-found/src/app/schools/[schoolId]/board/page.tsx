@@ -7,6 +7,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { FaTrash, FaPlus } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useSettings } from "@/context/SettingsContext";
+import { MdFlagCircle } from "react-icons/md";
+import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
+import { CiLogin } from "react-icons/ci";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface School {
@@ -681,10 +684,10 @@ function SchoolBoard({
 
   // Build tab list dynamically
   const BOARD_TABS: { id: BoardTab; label: string; icon?: React.ReactNode }[] = [
-    { id: "items", label: s.itemsTab },
+    { id: "items", label: s.itemsTab, icon: <HiOutlineMagnifyingGlass style={{ fontSize: 20 }} /> },
     { id: "add-item", label: s.addItemTab, icon: <FaPlus style={{ fontSize: 11 }} /> },
-    { id: "admin-login", label: s.adminTab },
-    ...(isSchoolAdmin ? [{ id: "reports" as BoardTab, label: s.reportsTab }] : []),
+    { id: "admin-login", label: s.adminTab, icon: <CiLogin style={{ fontSize: 20 }} /> },
+    ...(isSchoolAdmin ? [{ id: "reports" as BoardTab, label: s.reportsTab, icon: <MdFlagCircle style={{ fontSize: 20 }} /> }] : []),
   ];
 
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
