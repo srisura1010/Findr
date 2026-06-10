@@ -1,5 +1,7 @@
 "use client";
 
+import "../../schools.css";
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
