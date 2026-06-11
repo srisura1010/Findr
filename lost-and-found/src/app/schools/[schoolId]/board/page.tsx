@@ -13,6 +13,7 @@ import { MdFlagCircle } from "react-icons/md";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { CiLogin } from "react-icons/ci";
 import { FaClipboard } from "react-icons/fa";
+import Cropper from "react-easy-crop";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface School {
@@ -136,6 +137,248 @@ function gradStyles(hex: string): string[] {
     `linear-gradient(135deg, ${hexToRgba(hex, 0.92)} 0%, ${hexToRgba(hex, 0.5)} 55%, transparent 100%)`,
     `linear-gradient(to bottom, ${hexToRgba(hex, 0.85)} 0%, ${hexToRgba(hex, 0.55)} 100%)`,
   ];
+}
+
+// ─── Crop helper ──────────────────────────────────────────────────────────────
+async function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number },
+  rotation = 0,
+): Promise<File> {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.addEventListener("load", () => resolve(img));
+    img.addEventListener("error", reject);
+    img.src = imageSrc;
+  });
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+  const maxSize = Math.max(image.width, image.height);
+  const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
+  canvas.width = safeArea;
+  canvas.height = safeArea;
+  ctx.translate(safeArea / 2, safeArea / 2);
+  ctx.rotate((rotation * Math.PI) / 180);
+  ctx.translate(-safeArea / 2, -safeArea / 2);
+  ctx.drawImage(
+    image,
+    safeArea / 2 - image.width * 0.5,
+    safeArea / 2 - image.height * 0.5,
+  );
+  const data = ctx.getImageData(0, 0, safeArea, safeArea);
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+  ctx.putImageData(
+    data,
+    Math.round(0 - safeArea / 2 + image.width * 0.5 - pixelCrop.x),
+    Math.round(0 - safeArea / 2 + image.height * 0.5 - pixelCrop.y),
+  );
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => resolve(new File([blob!], "cropped.jpg", { type: "image/jpeg" })),
+      "image/jpeg",
+      0.92,
+    );
+  });
+}
+
+// ─── CropModal ────────────────────────────────────────────────────────────────
+function CropModal({
+  src,
+  queueIndex,
+  queueTotal,
+  onConfirm,
+  onSkip,
+}: {
+  src: string;
+  queueIndex: number;
+  queueTotal: number;
+  onConfirm: (pixels: { x: number; y: number; width: number; height: number }, rotation: number) => void;
+  onSkip: () => void;
+}) {
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    x: number; y: number; width: number; height: number;
+  } | null>(null);
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.88)",
+        zIndex: 2000,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px",
+        gap: "14px",
+      }}
+    >
+      <p
+        style={{
+          color: "#fff",
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 700,
+          fontSize: "15px",
+          margin: 0,
+          letterSpacing: "-0.1px",
+        }}
+      >
+        Crop Photo
+        {queueTotal > 1 ? ` (${queueIndex + 1} of ${queueTotal})` : ""}
+      </p>
+
+      <div
+        style={{
+          position: "relative",
+          width: "min(90vw, 600px)",
+          aspectRatio: "4 / 3",
+          borderRadius: "12px",
+          overflow: "hidden",
+          border: "2px solid rgba(255,255,255,0.12)",
+        }}
+      >
+        <Cropper
+          image={src}
+          crop={crop}
+          zoom={zoom}
+          rotation={rotation}
+          aspect={6 / 5}
+          onCropChange={setCrop}
+          onZoomChange={setZoom}
+          onRotationChange={setRotation}
+          onCropComplete={(_area, pixels) => setCroppedAreaPixels(pixels)}
+        />
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          width: "min(90vw, 600px)",
+          background: "rgba(255,255,255,0.06)",
+          borderRadius: "10px",
+          padding: "14px 16px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.6px",
+              minWidth: 44,
+            }}
+          >
+            Zoom
+          </span>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.05}
+            value={zoom}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            style={{ flex: 1, accentColor: "var(--accent)" }}
+          />
+          <span
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              minWidth: 32,
+              textAlign: "right",
+            }}
+          >
+            {zoom.toFixed(1)}×
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.6px",
+              minWidth: 44,
+            }}
+          >
+            Rotate
+          </span>
+          <input
+            type="range"
+            min={-180}
+            max={180}
+            step={1}
+            value={rotation}
+            onChange={(e) => setRotation(Number(e.target.value))}
+            style={{ flex: 1, accentColor: "var(--accent)" }}
+          />
+          <span
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              minWidth: 32,
+              textAlign: "right",
+            }}
+          >
+            {rotation}°
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", width: "min(90vw, 600px)" }}>
+        <button
+          onClick={onSkip}
+          style={{
+            flex: 1,
+            padding: "13px 0",
+            borderRadius: "9px",
+            border: "1.5px solid rgba(255,255,255,0.2)",
+            background: "transparent",
+            color: "rgba(255,255,255,0.7)",
+            fontFamily: "Poppins, sans-serif",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "border-color 0.15s ease, color 0.15s ease",
+          }}
+        >
+          Skip crop
+        </button>
+        <button
+          onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels, rotation)}
+          style={{
+            flex: 2,
+            padding: "13px 0",
+            borderRadius: "9px",
+            border: "none",
+            background: "var(--accent)",
+            color: "#fff",
+            fontFamily: "Poppins, sans-serif",
+            fontSize: "13px",
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "background 0.15s ease, transform 0.12s ease",
+          }}
+        >
+          Apply Crop
+        </button>
+      </div>
+    </div>
+  );
 }
 
 // ─── Translation helper ────────────────────────────────────────────────────────
@@ -633,7 +876,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     fetchItems();
   }, [school.id]);
 
-  // ── Add Found Item ──────────────────────────────────────────────────────────
+  // ── Found item form state ───────────────────────────────────────────────────
   const [foundName, setFoundName] = useState("");
   const [foundDesc, setFoundDesc] = useState("");
   const [foundCategory, setFoundCategory] = useState("");
@@ -643,6 +886,105 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [foundUploading, setFoundUploading] = useState(false);
   const [foundSuccess, setFoundSuccess] = useState(false);
 
+  // ── Found crop state ────────────────────────────────────────────────────────
+  const [foundCropQueue, setFoundCropQueue] = useState<File[]>([]);
+  const [foundCropIndex, setFoundCropIndex] = useState(0);
+  const [foundCropSrc, setFoundCropSrc] = useState<string | null>(null);
+  const [foundCropResults, setFoundCropResults] = useState<File[]>([]);
+
+  const startFoundCropQueue = (files: File[]) => {
+    setFoundCropResults([]);
+    setFoundCropQueue(files);
+    setFoundCropIndex(0);
+    setFoundCropSrc(URL.createObjectURL(files[0]));
+  };
+
+  const advanceFoundCrop = (results: File[], queue: File[], idx: number) => {
+    URL.revokeObjectURL(foundCropSrc!);
+    if (idx + 1 < queue.length) {
+      setFoundCropResults(results);
+      setFoundCropIndex(idx + 1);
+      setFoundCropSrc(URL.createObjectURL(queue[idx + 1]));
+    } else {
+      setFoundFiles(results);
+      setFoundCropSrc(null);
+      setFoundCropQueue([]);
+      setFoundCropResults([]);
+    }
+  };
+
+  const handleFoundCropConfirm = async (
+    pixels: { x: number; y: number; width: number; height: number },
+    rotation: number,
+  ) => {
+    if (!foundCropSrc) return;
+    const cropped = await getCroppedImg(foundCropSrc, pixels, rotation);
+    const newResults = [...foundCropResults, cropped];
+    advanceFoundCrop(newResults, foundCropQueue, foundCropIndex);
+  };
+
+  const handleFoundCropSkip = () => {
+    if (!foundCropSrc) return;
+    const original = foundCropQueue[foundCropIndex];
+    const newResults = [...foundCropResults, original];
+    advanceFoundCrop(newResults, foundCropQueue, foundCropIndex);
+  };
+
+  // ── Lost item form state ────────────────────────────────────────────────────
+  const [lostName, setLostName] = useState("");
+  const [lostDesc, setLostDesc] = useState("");
+  const [lostCategory, setLostCategory] = useState("");
+  const [lostLocation, setLostLocation] = useState("");
+  const [lostDate, setLostDate] = useState("");
+  const [lostFiles, setLostFiles] = useState<File[]>([]);
+  const [lostUploading, setLostUploading] = useState(false);
+  const [lostSuccess, setLostSuccess] = useState(false);
+
+  // ── Lost crop state ─────────────────────────────────────────────────────────
+  const [lostCropQueue, setLostCropQueue] = useState<File[]>([]);
+  const [lostCropIndex, setLostCropIndex] = useState(0);
+  const [lostCropSrc, setLostCropSrc] = useState<string | null>(null);
+  const [lostCropResults, setLostCropResults] = useState<File[]>([]);
+
+  const startLostCropQueue = (files: File[]) => {
+    setLostCropResults([]);
+    setLostCropQueue(files);
+    setLostCropIndex(0);
+    setLostCropSrc(URL.createObjectURL(files[0]));
+  };
+
+  const advanceLostCrop = (results: File[], queue: File[], idx: number) => {
+    URL.revokeObjectURL(lostCropSrc!);
+    if (idx + 1 < queue.length) {
+      setLostCropResults(results);
+      setLostCropIndex(idx + 1);
+      setLostCropSrc(URL.createObjectURL(queue[idx + 1]));
+    } else {
+      setLostFiles(results);
+      setLostCropSrc(null);
+      setLostCropQueue([]);
+      setLostCropResults([]);
+    }
+  };
+
+  const handleLostCropConfirm = async (
+    pixels: { x: number; y: number; width: number; height: number },
+    rotation: number,
+  ) => {
+    if (!lostCropSrc) return;
+    const cropped = await getCroppedImg(lostCropSrc, pixels, rotation);
+    const newResults = [...lostCropResults, cropped];
+    advanceLostCrop(newResults, lostCropQueue, lostCropIndex);
+  };
+
+  const handleLostCropSkip = () => {
+    if (!lostCropSrc) return;
+    const original = lostCropQueue[lostCropIndex];
+    const newResults = [...lostCropResults, original];
+    advanceLostCrop(newResults, lostCropQueue, lostCropIndex);
+  };
+
+  // ── Submit handlers ─────────────────────────────────────────────────────────
   const handleAddFound = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !foundName || !foundDesc) return;
@@ -669,16 +1011,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     setTimeout(() => { setFoundSuccess(false); setActiveTab("items"); }, 1500);
     setFoundUploading(false);
   };
-
-  // ── Add Lost Item ───────────────────────────────────────────────────────────
-  const [lostName, setLostName] = useState("");
-  const [lostDesc, setLostDesc] = useState("");
-  const [lostCategory, setLostCategory] = useState("");
-  const [lostLocation, setLostLocation] = useState("");
-  const [lostDate, setLostDate] = useState("");
-  const [lostFiles, setLostFiles] = useState<File[]>([]);
-  const [lostUploading, setLostUploading] = useState(false);
-  const [lostSuccess, setLostSuccess] = useState(false);
 
   const handleAddLost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1087,6 +1419,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               <div className="sc-section-title">{addMode === "found" ? s.reportFoundTitle : s.reportLostTitle}</div>
               <AddItemToggle />
 
+              {/* ── Found form ── */}
               {addMode === "found" && (
                 foundSuccess ? (
                   <div className="sc-success"><span className="sc-success__icon">✓</span><p>{s.itemPostedMsg}</p></div>
@@ -1115,7 +1448,19 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <span className="sc-form__file-icon">+</span>
                       <span>{foundFiles.length > 0 ? `${foundFiles.length} ${s.photosSelected}` : s.uploadPhotos}</span>
                     </label>
-                    <input id="sc-found-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => e.target.files && setFoundFiles(Array.from(e.target.files).slice(0, 3))} />
+                    <input
+                      id="sc-found-upload"
+                      className="sc-form__file"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          const files = Array.from(e.target.files).slice(0, 3);
+                          if (files.length > 0) startFoundCropQueue(files);
+                        }
+                      }}
+                    />
                     {foundFiles.length > 0 && (
                       <div className="sc-form__previews">
                         {foundFiles.map((file, idx) => (
@@ -1136,6 +1481,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                 )
               )}
 
+              {/* ── Lost form ── */}
               {addMode === "lost" && (
                 lostSuccess ? (
                   <div className="sc-success"><span className="sc-success__icon">✓</span><p>{s.lostPostedMsg}</p></div>
@@ -1164,7 +1510,19 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <span className="sc-form__file-icon">+</span>
                       <span>{lostFiles.length > 0 ? `${lostFiles.length} ${s.photosSelected}` : s.uploadPhotos}</span>
                     </label>
-                    <input id="sc-lost-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => e.target.files && setLostFiles(Array.from(e.target.files).slice(0, 3))} />
+                    <input
+                      id="sc-lost-upload"
+                      className="sc-form__file"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          const files = Array.from(e.target.files).slice(0, 3);
+                          if (files.length > 0) startLostCropQueue(files);
+                        }
+                      }}
+                    />
                     {lostFiles.length > 0 && (
                       <div className="sc-form__previews">
                         {lostFiles.map((file, idx) => (
@@ -1235,6 +1593,28 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           )}
         </main>
       </div>
+
+      {/* ── FOUND CROP MODAL ── */}
+      {foundCropSrc && (
+        <CropModal
+          src={foundCropSrc}
+          queueIndex={foundCropIndex}
+          queueTotal={foundCropQueue.length}
+          onConfirm={handleFoundCropConfirm}
+          onSkip={handleFoundCropSkip}
+        />
+      )}
+
+      {/* ── LOST CROP MODAL ── */}
+      {lostCropSrc && (
+        <CropModal
+          src={lostCropSrc}
+          queueIndex={lostCropIndex}
+          queueTotal={lostCropQueue.length}
+          onConfirm={handleLostCropConfirm}
+          onSkip={handleLostCropSkip}
+        />
+      )}
     </div>
   );
 }
