@@ -127,12 +127,12 @@ export default function AISearchPage() {
           font-family: Poppins, sans-serif;
           font-size: 18px;
           font-weight: 700;
-          color: var(--text-primary);
+          color: var(--text-primary, #1a1f2e);
         }
         .ai-search-subtitle {
           font-family: Poppins, sans-serif;
           font-size: 12px;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           margin: 0;
           text-align: center;
         }
@@ -146,9 +146,9 @@ export default function AISearchPage() {
           flex: 1;
           padding: 11px 16px;
           border-radius: 12px;
-          border: 1.5px solid var(--border-input);
-          background: var(--bg-input);
-          color: var(--text-primary);
+          border: 1.5px solid var(--border-input, #d1d5db);
+          background: var(--bg-input, #ffffff);
+          color: var(--text-primary, #1a1f2e);
           font-family: Poppins, sans-serif;
           font-size: 13px;
           font-weight: 500;
@@ -156,13 +156,13 @@ export default function AISearchPage() {
           transition: border-color 0.15s;
         }
         .ai-search-input:focus {
-          border-color: var(--accent);
+          border-color: var(--accent, #2f80ed);
         }
         .ai-search-btn {
           padding: 11px 22px;
           border-radius: 12px;
           border: none;
-          background: var(--accent);
+          background: var(--accent, #2f80ed);
           color: #fff;
           font-family: Poppins, sans-serif;
           font-size: 13px;
@@ -202,7 +202,7 @@ export default function AISearchPage() {
           height: 320px;
           transform: translate(-50%, -50%);
           border-radius: 50%;
-          border: 1px dashed var(--border-default, rgba(0, 0, 0, 0.1));
+          border: 1px dashed var(--border-default, #e5e7eb);
           pointer-events: none;
         }
         .ai-orbit-hub {
@@ -213,8 +213,8 @@ export default function AISearchPage() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: var(--bg-card);
-          border: 1.5px solid var(--border-default);
+          background: var(--bg-card, #ffffff);
+          border: 1.5px solid var(--border-default, #e5e7eb);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -226,8 +226,8 @@ export default function AISearchPage() {
         .ai-hub-spinner {
           width: 22px;
           height: 22px;
-          border: 2.5px solid var(--border-default);
-          border-top-color: var(--accent);
+          border: 2.5px solid var(--border-default, #e5e7eb);
+          border-top-color: var(--accent, #2f80ed);
           border-radius: 50%;
           animation: ai-spin 0.7s linear infinite;
           display: inline-block;
@@ -237,21 +237,21 @@ export default function AISearchPage() {
         }
         .ai-hub-icon {
           font-size: 22px;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           display: flex;
           align-items: center;
         }
         .ai-hub-count {
           font-size: 20px;
           font-weight: 700;
-          color: var(--text-primary);
+          color: var(--text-primary, #1a1f2e);
           font-family: Poppins, sans-serif;
           line-height: 1.1;
         }
         .ai-hub-label {
           font-size: 10px;
           font-weight: 600;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           font-family: Poppins, sans-serif;
           text-align: center;
           white-space: pre-line;
@@ -274,7 +274,7 @@ export default function AISearchPage() {
           width: 52px;
           height: 52px;
           border-radius: 12px;
-          border: 2px solid var(--bg-card);
+          border: 2px solid var(--bg-card, #ffffff);
           box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
           transform: scale(1);
           transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
@@ -284,46 +284,46 @@ export default function AISearchPage() {
           object-fit: cover;
         }
         .ai-chip__placeholder {
-          background: var(--bg-input);
+          background: var(--bg-input, #f3f4f6);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 18px;
           font-weight: 700;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           font-family: Poppins, sans-serif;
         }
         .ai-chip--active .ai-chip__img,
         .ai-chip--active .ai-chip__placeholder {
-          border: 2.5px solid var(--accent);
+          border: 2.5px solid var(--accent, #2f80ed);
           box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.25);
           transform: scale(1.15);
         }
         .ai-chip__label {
           font-size: 10px;
           font-weight: 600;
-          color: var(--text-secondary);
+          color: var(--text-secondary, #4b5563);
           text-align: center;
           white-space: nowrap;
           max-width: 80px;
           overflow: hidden;
           text-overflow: ellipsis;
-          background: var(--bg-card);
+          background: var(--bg-card, #ffffff);
           padding: 2px 6px;
           border-radius: 99px;
-          border: 0.5px solid var(--border-default);
+          border: 0.5px solid var(--border-default, #e5e7eb);
           font-family: Poppins, sans-serif;
           transition: color 0.2s;
         }
         .ai-chip--active .ai-chip__label {
-          color: var(--accent);
+          color: var(--accent, #2f80ed);
         }
         .ai-detail-card {
           width: 100%;
           max-width: 500px;
           min-height: 96px;
-          background: var(--bg-card);
-          border: 1.5px solid var(--border-default);
+          background: var(--bg-card, #ffffff);
+          border: 1.5px solid var(--border-default, #e5e7eb);
           border-radius: 16px;
           display: flex;
           align-items: center;
@@ -333,11 +333,11 @@ export default function AISearchPage() {
           transition: border-color 0.2s;
         }
         .ai-detail-card--active {
-          border-color: var(--accent);
+          border-color: var(--accent, #2f80ed);
         }
         .ai-detail-empty {
           font-size: 13px;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           margin: 0;
           font-weight: 500;
           text-align: center;
@@ -352,20 +352,20 @@ export default function AISearchPage() {
           width: 72px;
           height: 72px;
           border-radius: 12px;
-          border: 1.5px solid var(--border-default);
+          border: 1.5px solid var(--border-default, #e5e7eb);
           display: block;
         }
         img.ai-detail-thumb {
           object-fit: cover;
         }
         .ai-detail-thumb--placeholder {
-          background: var(--bg-input);
+          background: var(--bg-input, #f3f4f6);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 26px;
           font-weight: 700;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           font-family: Poppins, sans-serif;
         }
         .ai-detail-status {
@@ -398,7 +398,7 @@ export default function AISearchPage() {
         .ai-detail-name {
           font-size: 15px;
           font-weight: 700;
-          color: var(--text-primary);
+          color: var(--text-primary, #1a1f2e);
           margin: 0;
           font-family: Poppins, sans-serif;
           overflow: hidden;
@@ -416,14 +416,14 @@ export default function AISearchPage() {
           font-weight: 600;
           padding: 2px 8px;
           border-radius: 99px;
-          background: var(--accent);
+          background: var(--accent, #2f80ed);
           color: #fff;
           font-family: Poppins, sans-serif;
         }
         .ai-detail-location {
           font-size: 11px;
           font-weight: 500;
-          color: var(--text-muted);
+          color: var(--text-muted, #6b7280);
           font-family: Poppins, sans-serif;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -435,7 +435,7 @@ export default function AISearchPage() {
           padding: 7px 14px;
           border-radius: 9px;
           border: none;
-          background: var(--accent);
+          background: var(--accent, #2f80ed);
           color: #fff;
           font-family: Poppins, sans-serif;
           font-size: 12px;
@@ -465,7 +465,7 @@ export default function AISearchPage() {
         {/* Page header */}
         <div className="ai-search-header">
           <div className="ai-search-title">
-            <HiSparkles size={20} color="var(--accent)" />
+            <HiSparkles size={20} color="var(--accent, #2f80ed)" />
             <span>AI Search</span>
           </div>
           <p className="ai-search-subtitle">
