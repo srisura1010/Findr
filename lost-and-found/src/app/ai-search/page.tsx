@@ -17,49 +17,44 @@ interface CircleItem {
   score: number;
 }
 
-interface SelectedItem extends CircleItem { index: number; }
-
 // ── constants ─────────────────────────────────────────────────────────
-const STAGE      = 620;
-const CX         = STAGE / 2;
-const CY         = STAGE / 2;
-const ORBIT_R    = 248;
+const STAGE = 620;
+const CX = STAGE / 2;
+const CY = STAGE / 2;
+const ORBIT_R = 248;
 const SPIN_SPEED = 0.00016; // rad/ms
 
 export default function AISearchPage() {
-  const router   = useRouter();
+  const router = useRouter();
   const { user } = useUser();
 
-  // ── identical to doc-9 feature state ────────────────────────────
-  const rafRef      = useRef<number | null>(null);
-  const lastTsRef   = useRef<number>(0);
-  const anglesRef   = useRef<number[]>([]);
-  const pausedRef   = useRef(false);
+  const rafRef = useRef<number | null>(null);
+  const lastTsRef = useRef<number>(0);
+  const anglesRef = useRef<number[]>([]);
 
-  // master copy — loaded once, never removed
-  const masterRef   = useRef<CircleItem[]>([]);
+  const masterRef = useRef<CircleItem[]>([]);
 
-  const [items,         setItems]         = useState<CircleItem[]>([]);
-  const [selected,      setSelected]      = useState<SelectedItem | null>(null);
-  const [query,         setQuery]         = useState("");
-  const [loading,       setLoading]       = useState(false);
-  const [initialLoad,   setInitialLoad]   = useState(true);
-  const [searched,      setSearched]      = useState(false);
-  const [chipPositions, setChipPositions] = useState<{x:number;y:number}[]>([]);
-  const [hoveredId,     setHoveredId]     = useState<number | null>(null);
-  const [trayItems,     setTrayItems]     = useState<CircleItem[]>([]);
+  const [items, setItems] = useState<CircleItem[]>([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [searched, setSearched] = useState(false);
+  const [chipPositions, setChipPositions] = useState<
+    { x: number; y: number }[]
+  >([]);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
-  // ── animation loop — identical to doc-9 ─────────────────────────
+  // ── animation loop ───────────────────────────────────────────────
   const tick = useCallback((ts: number) => {
     const dt = lastTsRef.current ? Math.min(ts - lastTsRef.current, 50) : 16;
     lastTsRef.current = ts;
-    if (!pausedRef.current && anglesRef.current.length > 0) {
+    if (anglesRef.current.length > 0) {
       anglesRef.current = anglesRef.current.map((a) => a + SPIN_SPEED * dt);
       setChipPositions(
         anglesRef.current.map((angle) => ({
           x: CX + ORBIT_R * Math.cos(angle),
           y: CY + ORBIT_R * Math.sin(angle),
-        }))
+        })),
       );
     }
     rafRef.current = requestAnimationFrame(tick);
@@ -67,30 +62,30 @@ export default function AISearchPage() {
 
   useEffect(() => {
     rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, [tick]);
 
-  // ── helpers — identical to doc-9 ────────────────────────────────
+  // ── helpers ──────────────────────────────────────────────────────
   const startItems = (newItems: CircleItem[]) => {
     anglesRef.current = newItems.map(
-      (_, i) => (2 * Math.PI * i) / newItems.length - Math.PI / 2
+      (_, i) => (2 * Math.PI * i) / newItems.length - Math.PI / 2,
     );
-    pausedRef.current = false;
     setItems(newItems);
-    setSelected(null);
     setChipPositions(
       anglesRef.current.map((angle) => ({
         x: CX + ORBIT_R * Math.cos(angle),
         y: CY + ORBIT_R * Math.sin(angle),
-      }))
+      })),
     );
   };
 
-  // ── initial load — direct Supabase, no Gemini call ───────────────
+  // ── initial load ─────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       try {
-        const res  = await fetch("/api/recent-items");
+        const res = await fetch("/api/recent-items");
         const data = await res.json();
         const loaded = (data.items ?? []).slice(0, 15) as CircleItem[];
         masterRef.current = loaded;
@@ -100,19 +95,17 @@ export default function AISearchPage() {
     })();
   }, []);
 
-  // ── search — identical logic to doc-9 ───────────────────────────
+  // ── search ───────────────────────────────────────────────────────
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
     setLoading(true);
     setSearched(true);
-    setSelected(null);
-    pausedRef.current = false;
     try {
-      const res  = await fetch("/api/circle-search", {
-        method:  "POST",
+      const res = await fetch("/api/circle-search", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ query: q }),
+        body: JSON.stringify({ query: q }),
       });
       const data = await res.json();
       startItems(data.items ?? []);
@@ -128,24 +121,9 @@ export default function AISearchPage() {
     setQuery("");
   };
 
-  const handleChipClick = (item: CircleItem, index: number) => {
-    pausedRef.current = true;
-    setSelected({ ...item, index });
-    // also add to tray if not already there and room exists
-    setTrayItems((prev) => {
-      if (prev.find((s) => s.id === item.id)) return prev;
-      if (prev.length >= 5) return prev;
-      return [...prev, item];
-    });
+  const handleChipClick = (item: CircleItem) => {
+    router.push(`/items/${item.id}`);
   };
-
-  const handleDeselect = () => {
-    pausedRef.current = false;
-    setSelected(null);
-  };
-
-  const removeTray = (id: number) =>
-    setTrayItems((prev) => prev.filter((s) => s.id !== id));
 
   const popupBelow = (angle: number) => {
     const a = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
@@ -256,12 +234,6 @@ export default function AISearchPage() {
           font-size:28px; font-weight:700; color:var(--text-muted,#9ca3af);
           transition:transform 0.18s;
         }
-        .aisp-chip--active .aisp-chip-img,
-        .aisp-chip--active .aisp-chip-ph {
-          border-color:var(--accent,#2f80ed);
-          box-shadow:0 0 0 4px rgba(47,128,237,0.22),0 4px 20px rgba(0,0,0,0.15);
-          transform:scale(1.1);
-        }
         .aisp-chip:hover .aisp-chip-img,
         .aisp-chip:hover .aisp-chip-ph {
           transform:scale(1.08);
@@ -302,70 +274,6 @@ export default function AISearchPage() {
           display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
         }
         .aisp-popup-cta { font-size:11px; font-weight:700; color:var(--accent,#2f80ed); }
-
-        /* ── Tray ── */
-        .aisp-tray {
-          position: fixed;
-          right: 20px;
-          top: 50%;
-          transform: translateY(-50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 10px;
-          z-index: 40;
-        }
-        .aisp-tray-label {
-          font-size: 9px; font-weight: 700;
-          color: var(--text-muted,#9ca3af);
-          text-transform: uppercase; letter-spacing: 0.06em;
-          writing-mode: vertical-rl;
-          margin-bottom: 2px;
-        }
-        .aisp-tray-slot {
-          width: 52px; height: 52px;
-          border-radius: 14px;
-          border: 1.5px dashed var(--border-default,#d1d5db);
-          background: var(--bg-input,#f9fafb);
-          flex-shrink: 0;
-        }
-        .aisp-tray-item {
-          position: relative; width: 52px; height: 52px; flex-shrink: 0;
-        }
-        .aisp-tray-img {
-          width: 52px; height: 52px;
-          border-radius: 14px; object-fit: cover;
-          border: 2.5px solid var(--accent,#2f80ed);
-          box-shadow: 0 2px 10px rgba(47,128,237,0.22);
-          display: block;
-        }
-        .aisp-tray-ph {
-          width: 52px; height: 52px;
-          border-radius: 14px;
-          background: var(--bg-input,#f3f4f6);
-          border: 2.5px solid var(--accent,#2f80ed);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 18px; font-weight: 700; color: var(--text-muted,#9ca3af);
-        }
-        .aisp-tray-x {
-          position: absolute; top: -5px; right: -5px;
-          width: 17px; height: 17px;
-          border-radius: 50%; border: none;
-          background: #ef4444; color: #fff;
-          font-size: 10px; font-weight: 700;
-          cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.18);
-          padding: 0; z-index: 2;
-        }
-        .aisp-tray-view {
-          width: 52px; padding: 6px 0;
-          border-radius: 10px; border: none;
-          background: var(--accent,#2f80ed); color: #fff;
-          font-family: Poppins,sans-serif; font-size: 10px; font-weight: 700;
-          cursor: pointer; text-align: center;
-          box-shadow: 0 2px 8px rgba(47,128,237,0.28);
-        }
 
         /* ── Bottom bar ── */
         .aisp-bar {
@@ -419,16 +327,12 @@ export default function AISearchPage() {
         @keyframes aisp-spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 680px) {
-          .aisp-bar  { left: 0; padding: 12px 16px 18px; }
-          .aisp-tray { right: 6px; }
+          .aisp-bar { left: 0; padding: 12px 16px 18px; }
         }
       `}</style>
 
       <div className="aisp-page">
-        <div
-          className="aisp-stage"
-          onClick={selected ? handleDeselect : undefined}
-        >
+        <div className="aisp-stage">
           <div className="aisp-glow" />
           <div className="aisp-ring" />
 
@@ -449,82 +353,69 @@ export default function AISearchPage() {
             {initialLoad
               ? "Loading items…"
               : loading
-              ? "AI is thinking…"
-              : searched && items.length === 0
-              ? "No matches found"
-              : searched
-              ? `${items.length} match${items.length !== 1 ? "es" : ""} found`
-              : `${items.length} items in orbit`}
+                ? "AI is thinking…"
+                : searched && items.length === 0
+                  ? "No matches found"
+                  : searched
+                    ? `${items.length} match${items.length !== 1 ? "es" : ""} found`
+                    : `${items.length} items in orbit`}
           </div>
 
           {/* Chips */}
           {items.map((item, i) => {
-            const pos      = chipPositions[i];
+            const pos = chipPositions[i];
             if (!pos) return null;
-            const isActive  = selected?.id === item.id;
             const isHovered = hoveredId === item.id;
-            const below     = popupBelow(anglesRef.current[i] ?? 0);
+            const below = popupBelow(anglesRef.current[i] ?? 0);
 
             return (
               <button
                 key={item.id}
-                className={`aisp-chip${isActive ? " aisp-chip--active" : ""}`}
+                className="aisp-chip"
                 style={{ left: pos.x, top: pos.y }}
                 onMouseEnter={() => setHoveredId(item.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  isActive ? handleDeselect() : handleChipClick(item, i);
-                }}
+                onClick={() => handleChipClick(item)}
                 aria-label={item.name}
               >
                 {item.image ? (
-                  <img src={item.image} alt={item.name} className="aisp-chip-img" draggable={false} />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="aisp-chip-img"
+                    draggable={false}
+                  />
                 ) : (
-                  <div className="aisp-chip-ph">{item.name?.[0]?.toUpperCase() ?? "?"}</div>
+                  <div className="aisp-chip-ph">
+                    {item.name?.[0]?.toUpperCase() ?? "?"}
+                  </div>
                 )}
 
-                {isHovered && !isActive && (
-                  <div className={`aisp-popup aisp-popup--${below ? "below" : "above"}`}>
+                {isHovered && (
+                  <div
+                    className={`aisp-popup aisp-popup--${below ? "below" : "above"}`}
+                  >
                     <p className="aisp-popup-name">{item.name}</p>
                     <div className="aisp-popup-tags">
-                      {item.category && <span className="aisp-popup-cat">{item.category}</span>}
-                      {item.location  && <span className="aisp-popup-loc">📍 {item.location}</span>}
+                      {item.category && (
+                        <span className="aisp-popup-cat">{item.category}</span>
+                      )}
+                      {item.location && (
+                        <span className="aisp-popup-loc">
+                          📍 {item.location}
+                        </span>
+                      )}
                     </div>
                     {item.description && (
                       <p className="aisp-popup-desc">{item.description}</p>
                     )}
-                    <span className="aisp-popup-cta">Click to add to tray →</span>
+                    <span className="aisp-popup-cta">Click to view item →</span>
                   </div>
                 )}
               </button>
             );
           })}
         </div>
-      </div>
-
-      {/* Selection tray */}
-      <div className="aisp-tray">
-        <span className="aisp-tray-label">My Items</span>
-        {Array.from({ length: 5 }).map((_, i) => {
-          const item = trayItems[i];
-          return item ? (
-            <div key={item.id} className="aisp-tray-item">
-              {item.image
-                ? <img src={item.image} alt={item.name} className="aisp-tray-img" />
-                : <div className="aisp-tray-ph">{item.name?.[0]?.toUpperCase() ?? "?"}</div>
-              }
-              <button className="aisp-tray-x" onClick={() => removeTray(item.id)} aria-label={`Remove ${item.name}`}>✕</button>
-            </div>
-          ) : (
-            <div key={i} className="aisp-tray-slot" />
-          );
-        })}
-        {trayItems.length > 0 && (
-          <button className="aisp-tray-view" onClick={() => router.push(`/items/${trayItems[0].id}`)}>
-            View
-          </button>
-        )}
       </div>
 
       {/* Bottom bar */}
@@ -540,17 +431,22 @@ export default function AISearchPage() {
             autoFocus
           />
           {searched && (
-            <button className="aisp-bar-reset" onClick={handleReset}>Reset</button>
+            <button className="aisp-bar-reset" onClick={handleReset}>
+              Reset
+            </button>
           )}
           <button
             className="aisp-bar-btn"
             onClick={handleSearch}
             disabled={loading || initialLoad}
           >
-            {loading
-              ? <span className="aisp-spinner" />
-              : <><HiSparkles size={15} /> Search</>
-            }
+            {loading ? (
+              <span className="aisp-spinner" />
+            ) : (
+              <>
+                <HiSparkles size={15} /> Search
+              </>
+            )}
           </button>
         </div>
       </div>
