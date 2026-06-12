@@ -127,7 +127,7 @@ function getLuminance(hex: string): number {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 function textOnColor(hex: string): string {
-  return getLuminance(hex) > 0.35 ? "#1a1a2e" : "#1a1a2e";
+  return getLuminance(hex) > 0.35 ? "#94A3B8" : "#94A3B8";
 }
 
 function gradStyles(hex: string): string[] {
