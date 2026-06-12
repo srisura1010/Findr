@@ -205,7 +205,7 @@ export default function Home() {
         <div className="hero-left">
           <div className="hero-eyebrow">
             <span className="eyebrow-dot" />
-            Built for schools
+            Built for students, by students
           </div>
           <h1>
             <span className="hero-typing">
