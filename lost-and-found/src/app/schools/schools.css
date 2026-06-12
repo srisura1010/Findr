@@ -743,7 +743,7 @@ body.colorblind {
 }
 
 /* ═══════════════════════════════════════════
-   CAROUSEL
+   CAROUSEL — matches home page exactly
 ═══════════════════════════════════════════ */
 .sc-about__carousel-section {
   display: flex;
@@ -768,12 +768,19 @@ body.colorblind {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
+/* ── Track: continuous scroll, pauses on hover exactly like home ── */
 .sc-carousel__track {
   display: flex;
   width: max-content;
   gap: 16px;
   will-change: transform;
   animation: sc-carousel-scroll 24s linear infinite;
+  padding: 8px 0;
+}
+
+/* Pause when hovering anywhere on the track (including cards) */
+.sc-carousel__track:hover {
+  animation-play-state: paused;
 }
 
 .sc-carousel__group {
@@ -787,58 +794,62 @@ body.colorblind {
   to   { transform: translateX(-50%); }
 }
 
+/* ── Cards: tinted accent surface, matching home's branded carousel cards ── */
 .sc-carousel__card {
-  flex: 0 0 18rem;
-  min-height: 14rem;
-  padding: 24px;
-  border-radius: 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  flex: 0 0 260px;
+  min-height: unset;
+  padding: 22px 20px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border-default));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  gap: 10px;
+  transition: all 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .sc-carousel__card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
+/* ── Icon box: flat tinted accent chip, matching home's .feat-icon-wrap ── */
 .sc-carousel__icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.2));
+  font-size: 18px;
   flex-shrink: 0;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border-default));
+  color: var(--accent);
 }
 
 .sc-carousel__card h3 {
-  margin: 0;
-  font-family: "Ubuntu", sans-serif;
-  font-size: 1rem;
+  margin: 0 0 6px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.9rem;
   font-weight: 700;
-  line-height: 1.2;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .sc-carousel__card p {
   margin: 0;
   font-family: "Poppins", sans-serif;
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 0.8rem;
+  line-height: 1.55;
   color: var(--text-secondary);
 }
 
 /* ═══════════════════════════════════════════
-   FEATURE CARDS
+   FEATURE CARDS — compact, matching home .feat-card
 ═══════════════════════════════════════════ */
 .sc-about__features {
   display: grid;
@@ -847,47 +858,51 @@ body.colorblind {
 }
 
 .sc-about__feature {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 20px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border-default));
+  border-radius: 16px;
   padding: 22px 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .sc-about__feature:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
+  border-color: var(--accent);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
   transform: translateY(-4px);
 }
 
+/* ── Feature icon: flat tinted accent chip, matching home .feat-icon-wrap ── */
 .sc-about__feature-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 30%, rgba(0, 0, 0, 0.18));
+  font-size: 18px;
   flex-shrink: 0;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border-default));
+  color: var(--accent);
 }
 
 .sc-about__feature h3 {
-  font-family: "Ubuntu", sans-serif;
-  font-size: 15px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.93rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0;
+  margin: 0 0 7px;
+  line-height: 1.3;
 }
 
 .sc-about__feature p {
   font-family: "Poppins", sans-serif;
-  font-size: 12.5px;
+  font-size: 0.82rem;
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.6;
@@ -1530,14 +1545,12 @@ body.colorblind {
   flex-direction: column;
   animation: sc-slide-in 0.2s ease;
   position: relative;
-  /* School bg image fills the whole board canvas */
   background-color: var(--bg-page);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
 }
 
-/* ── Background canvas: school bg image + subtle color wash ── */
 .sc-board__bg {
   position: fixed;
   inset: 54px 0 0 0;
@@ -1559,14 +1572,12 @@ body.colorblind {
   opacity: 0.18;
 }
 
-/* Anything above the bg */
 .sc-board__header,
 .sc-board__layout {
   position: relative;
   z-index: 1;
 }
 
-/* ── Header — solid surface, matches dashboard admin-banner row ── */
 .sc-board__header {
   display: flex;
   align-items: center;
@@ -1604,7 +1615,6 @@ body.colorblind {
   border-color: var(--sc-color, var(--accent));
 }
 
-/* ── School identity block ── */
 .sc-board__identity {
   display: flex;
   align-items: center;
@@ -1655,7 +1665,6 @@ body.colorblind {
   font-family: "Ubuntu", sans-serif;
   font-size: 16px;
   font-weight: 700;
-  /* Light mode: dark text; dark mode overridden below */
   color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
@@ -1667,7 +1676,6 @@ body.colorblind {
   min-width: 0;
 }
 
-/* In dark mode the name should be white */
 body.dark .sc-board__name { color: #e8edf5; }
 body.high-contrast .sc-board__name { color: var(--text-primary); }
 body.colorblind .sc-board__name { color: var(--text-primary); }
@@ -1704,7 +1712,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   border-radius: 20px;
 }
 
-/* ── Admin badge ── */
 .sc-admin-badge {
   display: flex;
   align-items: center;
@@ -1735,14 +1742,12 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
 }
 .sc-admin-badge__exit:hover { filter: brightness(0.88); }
 
-/* ── Inner layout: sidebar + main ── */
 .sc-board__layout {
   display: flex;
   flex: 1;
   min-height: 0;
 }
 
-/* ── Board sidebar — solid like dashboard, NOT glass ── */
 .sc-board__sidebar {
   width: 240px;
   min-width: 240px;
@@ -1763,7 +1768,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   z-index: 2;
 }
 
-/* Top accent stripe on board sidebar */
 .sc-board__sidebar::before {
   content: '';
   display: block;
@@ -1773,7 +1777,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   margin: -16px -10px 14px;
 }
 
-/* ── Board tab — mirrors .sidebar-tab exactly ── */
 .sc-board__tab {
   display: flex;
   align-items: center;
@@ -1798,7 +1801,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   transform: translateX(2px);
 }
 
-/* Active tab */
 .sc-board__tab--active {
   font-weight: 600;
   color: var(--sc-color, var(--accent));
@@ -1839,7 +1841,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   animation: sc-pip-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ── Board main — matches .dashboard-main padding exactly ── */
 .sc-board__main {
   flex: 1;
   min-width: 0;
@@ -1850,7 +1851,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   scrollbar-gutter: stable;
 }
 
-/* ── Panel content — exact copy of .main-panel-content ── */
 .sc-board__main .sc-panel-content {
   max-width: 600px;
   width: 100%;
@@ -1865,14 +1865,11 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   box-sizing: border-box;
 }
 
-/* ── Section title inside board ── */
 .sc-board__main .sc-section-title {
   color: var(--text-primary);
-  /* subtle text-shadow so it reads over any bg */
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
 }
 
-/* Form inside board — matches dashboard .panel-form with frosted overlay ── */
 .sc-board__main .sc-form {
   background: color-mix(in srgb, var(--bg-card) 92%, transparent);
   backdrop-filter: blur(20px);
@@ -1884,7 +1881,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   gap: 12px;
 }
 
-/* Inputs inside board forms */
 .sc-board__main .sc-form__input,
 .sc-board__main .sc-form__textarea {
   background: var(--bg-input);
@@ -1896,7 +1892,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   border-color: var(--sc-color, var(--border-focus));
 }
 
-/* File label in board */
 .sc-board__main .sc-form__file-label {
   background: var(--bg-input);
   border-color: var(--border-input);
@@ -1907,7 +1902,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   color: var(--sc-color, var(--accent));
 }
 
-/* ── Add-item mode toggle — solid, always visible ── */
 .sc-mode-toggle {
   display: flex;
   background: var(--bg-input);
@@ -1927,7 +1921,6 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
-  /* Never change font-weight — causes layout shift */
   font-weight: 600;
   letter-spacing: 0.1px;
   transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
@@ -1942,25 +1935,21 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   background: var(--bg-hover);
 }
 
-/* Active state: school color bg, text computed by luminance */
 .sc-mode-toggle__btn--active {
   background: var(--sc-color, var(--accent));
   color: var(--sc-text-on-color, #ffffff);
   box-shadow: 0 2px 10px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, rgba(0,0,0,0.15));
 }
 
-/* Light mode: inactive text is dark */
 body.light .sc-mode-toggle__btn,
 :root .sc-mode-toggle__btn {
   color: #64748b;
 }
 
-/* Dark mode: inactive text is lighter */
 body.dark .sc-mode-toggle__btn {
   color: #4a5a7a;
 }
 
-/* ── Search bar — solid, readable ── */
 .sc-search-row { margin-bottom: 16px; }
 
 .sc-search-wrap {
@@ -2003,7 +1992,6 @@ body.dark .sc-mode-toggle__btn {
 }
 .sc-search__clear:hover { color: var(--text-secondary); }
 
-/* ── Found/Lost segmented control — full width, equal halves, no layout shift ── */
 .sc-tabs-row {
   display: flex;
   gap: 3px;
@@ -2027,7 +2015,6 @@ body.dark .sc-mode-toggle__btn {
   font-size: 13px;
   font-family: "Poppins", sans-serif;
   background: transparent;
-  /* Light mode default — readable dark text */
   color: #64748b;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   min-height: 34px;
@@ -2042,22 +2029,18 @@ body.dark .sc-tab-btn { color: #4a5a7a; }
   color: var(--text-primary);
 }
 
-/* Active: school color bg + luminance-aware text via sc-text-on-color */
 .sc-tab-btn--active {
   background: var(--sc-color-2, var(--sc-color, var(--accent)));
-  /* Use sc-text-on-color so it works on any school color */
   color: var(--sc-text-on-color, #ffffff);
   box-shadow: 0 2px 10px color-mix(in srgb, var(--sc-color-2, var(--sc-color, var(--accent))) 40%, rgba(0,0,0,0.15));
 }
 
-/* Explicit overrides to ensure white/black on active regardless of theme */
 body.light .sc-tab-btn--active,
 body.dark .sc-tab-btn--active,
 body.colorblind .sc-tab-btn--active {
   color: var(--sc-text-on-color, #ffffff);
 }
 
-/* ── Item cards — glass surface over bg ── */
 .sc-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -2109,7 +2092,6 @@ body.colorblind .sc-tab-btn--active {
   box-shadow: 0 0 0 3px var(--sc-color, var(--accent));
 }
 
-/* Image — matches dashboard 6/5 ratio */
 .sc-item-card__img-wrap {
   width: 100%;
   aspect-ratio: 6 / 5;
@@ -2137,7 +2119,6 @@ body.colorblind .sc-tab-btn--active {
   font-family: "Poppins", sans-serif;
 }
 
-/* Info section — matches dashboard .item-info padding/gap exactly */
 .sc-item-card__info {
   display: flex;
   flex-direction: column;
@@ -2171,7 +2152,6 @@ body.colorblind .sc-tab-btn--active {
   overflow: hidden;
 }
 
-/* Posted-by row — matches dashboard .posted-by */
 .sc-item-card__by {
   display: flex;
   align-items: center;
@@ -2202,7 +2182,6 @@ body.colorblind .sc-tab-btn--active {
   color: var(--sc-color, var(--accent));
 }
 
-/* Actions row — matches dashboard .button-group */
 .sc-item-card__actions {
   display: flex;
   flex-direction: column;
@@ -2303,7 +2282,6 @@ body.colorblind .sc-tab-btn--active {
   .sc-about__stats { grid-template-columns: 1fr; }
   .sc-about__features { grid-template-columns: 1fr; }
 
-  /* Board mobile — pill tabs */
   .sc-board__layout { flex-direction: column; }
   .sc-board__sidebar {
     width: 100%;
@@ -2375,7 +2353,7 @@ body.colorblind .sc-tab-btn--active {
 
   .sc-school-cards { grid-template-columns: 1fr; }
   .sc-form { padding: 16px; border-radius: 12px; }
-  .sc-carousel__card { flex: 0 0 16rem; }
+  .sc-carousel__card { flex: 0 0 220px; }
   .sc-gradient-row { gap: 6px; }
   .sc-gradient-opt { height: 40px; }
 }
@@ -2390,12 +2368,6 @@ body.colorblind .sc-tab-btn--active {
 /* ═══════════════════════════════════════════
    DARK MODE ADJUSTMENTS
 ═══════════════════════════════════════════ */
-body.dark .sc-carousel__card,
-body.dark .sc-about__feature {
-  background: var(--bg-card);
-  border-color: var(--border-default);
-}
-
 body.dark .sc-about__register-cta {
   background: var(--bg-card);
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
@@ -2436,7 +2408,6 @@ body.high-contrast .sc-board__main .sc-form {
 
 /* ═══════════════════════════════════════════
    SELECT — fix OS dark override inside board
-   Must beat inline style specificity
 ═══════════════════════════════════════════ */
 .sc-board__main select,
 .sc-form select,
@@ -2471,7 +2442,6 @@ select.sc-form__select:focus {
   outline: none !important;
 }
 
-/* Inside board glass form */
 .sc-board__main .sc-form select {
   background-color: var(--glass-input-bg) !important;
   border-color: color-mix(in srgb, var(--border-input) 70%, var(--glass-border)) !important;
@@ -2484,8 +2454,6 @@ select.sc-form__select:focus {
 
 /* ═══════════════════════════════════════════
    BOARD COLOR WASH OVERLAY
-   A subtle tint of the school color over the
-   whole bg so non-glass areas aren't raw white
 ═══════════════════════════════════════════ */
 .sc-board__layout {
   display: flex;
@@ -2494,8 +2462,6 @@ select.sc-form__select:focus {
   position: relative;
 }
 
-/* The school bg image is set via inline style on .sc-board;
-   this pseudo-element adds the color wash on top */
 .sc-board::after {
   content: '';
   position: fixed;
@@ -2505,7 +2471,6 @@ select.sc-form__select:focus {
   z-index: 0;
 }
 
-/* Ensure header + layout sit above the wash */
 .sc-board__header {
   z-index: 2;
 }
