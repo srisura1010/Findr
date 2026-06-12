@@ -2,16 +2,14 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
   ReactNode,
 } from "react";
-
-type Theme = "light" | "dark" | "high-contrast" | "colorblind";
+import { ThemeId } from "@/lib/themes";
 
 interface ThemeContextProps {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  theme: ThemeId;
+  setTheme: (theme: ThemeId) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps>({
@@ -19,45 +17,26 @@ const ThemeContext = createContext<ThemeContextProps>({
   setTheme: () => {},
 });
 
-const THEME_STYLES: Record<Theme, { spinner: string; track: string }> = {
-  light: { spinner: "#7c3aed", track: "#e8eaf0" },
-  dark: { spinner: "#7c3aed", track: "#1e2d45" },
-  "high-contrast": { spinner: "#ffff00", track: "#333300" },
-  colorblind: { spinner: "#003366", track: "#bfdbfe" },
+const THEME_STYLES: Record<ThemeId, { spinner: string; track: string }> = {
+  light:          { spinner: "#2f80ed", track: "#e8eaf0" },
+  dark:           { spinner: "#7c3aed", track: "#1e2d45" },
+  midnight:       { spinner: "#6366f1", track: "#1e2d45" },
+  ocean:          { spinner: "#06b6d4", track: "#1a3040" },
+  forest:         { spinner: "#22c55e", track: "#1a3828" },
+  sunset:         { spinner: "#f97316", track: "#3a2210" },
+  "high-contrast":{ spinner: "#ffff00", track: "#333300" },
+  protanope:      { spinner: "#0050cc", track: "#a8bcd8" },
+  deuteranope:    { spinner: "#003366", track: "#bfdbfe" },
+  tritanope:      { spinner: "#ec4899", track: "#f9a8d4" },
 };
 
-function getInitialTheme(): Theme {
+function getInitialTheme(): ThemeId {
   if (typeof window === "undefined") return "light";
-  return (localStorage.getItem("theme") as Theme) || "light";
+  return (localStorage.getItem("theme") as ThemeId) || "light";
 }
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Read localStorage synchronously — no flash, no re-render needed
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    document.body.classList.remove(
-      "light",
-      "dark",
-      "high-contrast",
-      "colorblind",
-    );
-    document.body.classList.add(theme);
-    document.documentElement.setAttribute("data-theme", theme);
-    document.documentElement.classList.remove(
-      "light",
-      "dark",
-      "high-contrast",
-      "colorblind",
-    );
-    document.documentElement.classList.add(theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  const [theme, setTheme] = useState<ThemeId>(getInitialTheme);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -67,7 +46,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-function ThemedLoader({ theme }: { theme: Theme }) {
+function ThemedLoader({ theme }: { theme: ThemeId }) {
   const { spinner, track } = THEME_STYLES[theme] ?? THEME_STYLES["light"];
 
   return (

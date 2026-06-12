@@ -36,8 +36,17 @@ const SettingsPage = () => {
   const [languageText, setLanguageText] = useState("Language");
   const [lightText, setLightText] = useState("Light");
   const [darkText, setDarkText] = useState("Dark");
+  const [midnightText, setMidnightText] = useState("Midnight");
+  const [oceanText, setOceanText] = useState("Ocean");
+  const [forestText, setForestText] = useState("Forest");
+  const [sunsetText, setSunsetText] = useState("Sunset");
   const [highContrastText, setHighContrastText] = useState("High Contrast");
-  const [colorblindText, setColorblindText] = useState("Colorblind Mode");
+  const [protanopeText, setProtanopeText] = useState("Protanope");
+  const [deuteranopeText, setDeuteranopeText] = useState("Deuteranope");
+  const [tritanopeText, setTritanopeText] = useState("Tritanope");
+  const [standardGroupText, setStandardGroupText] = useState("Standard");
+  const [darkVariantsGroupText, setDarkVariantsGroupText] = useState("Dark Variants");
+  const [accessibilityGroupText, setAccessibilityGroupText] = useState("Accessibility");
   const [ttsText, setTTSText] = useState("Text-to-Speech");
   const [enableTTSText, setEnableTTSText] = useState("Enable TTS");
   const [disableTTSText, setDisableTTSText] = useState("Disable TTS");
@@ -85,8 +94,17 @@ const SettingsPage = () => {
       setLanguageText("Language");
       setLightText("Light");
       setDarkText("Dark");
+      setMidnightText("Midnight");
+      setOceanText("Ocean");
+      setForestText("Forest");
+      setSunsetText("Sunset");
       setHighContrastText("High Contrast");
-      setColorblindText("Colorblind Mode");
+      setProtanopeText("Protanope");
+      setDeuteranopeText("Deuteranope");
+      setTritanopeText("Tritanope");
+      setStandardGroupText("Standard");
+      setDarkVariantsGroupText("Dark Variants");
+      setAccessibilityGroupText("Accessibility");
       setTTSText("Text-to-Speech");
       setEnableTTSText("Enable TTS");
       setDisableTTSText("Disable TTS");
@@ -119,16 +137,17 @@ const SettingsPage = () => {
         },
         { key: "Light", setter: setLightText, cacheKey: "settings_light" },
         { key: "Dark", setter: setDarkText, cacheKey: "settings_dark" },
-        {
-          key: "High Contrast",
-          setter: setHighContrastText,
-          cacheKey: "settings_highContrast",
-        },
-        {
-          key: "Colorblind Mode",
-          setter: setColorblindText,
-          cacheKey: "settings_colorblind",
-        },
+        { key: "Midnight", setter: setMidnightText, cacheKey: "settings_midnight" },
+        { key: "Ocean", setter: setOceanText, cacheKey: "settings_ocean" },
+        { key: "Forest", setter: setForestText, cacheKey: "settings_forest" },
+        { key: "Sunset", setter: setSunsetText, cacheKey: "settings_sunset" },
+        { key: "High Contrast", setter: setHighContrastText, cacheKey: "settings_highContrast" },
+        { key: "Protanope", setter: setProtanopeText, cacheKey: "settings_protanope" },
+        { key: "Deuteranope", setter: setDeuteranopeText, cacheKey: "settings_deuteranope" },
+        { key: "Tritanope", setter: setTritanopeText, cacheKey: "settings_tritanope" },
+        { key: "Standard", setter: setStandardGroupText, cacheKey: "settings_standard" },
+        { key: "Dark Variants", setter: setDarkVariantsGroupText, cacheKey: "settings_darkVariants" },
+        { key: "Accessibility", setter: setAccessibilityGroupText, cacheKey: "settings_accessibility" },
         { key: "Text-to-Speech", setter: setTTSText, cacheKey: "settings_tts" },
         {
           key: "Enable TTS",
@@ -196,6 +215,7 @@ const SettingsPage = () => {
 
         <section className="settings-section">
           <h3>{appearanceText}</h3>
+          <p className="settings-description">{standardGroupText}</p>
           <div className="theme-options">
             <button
               className={theme === "light" ? "active" : ""}
@@ -209,6 +229,36 @@ const SettingsPage = () => {
             >
               {darkText}
             </button>
+          </div>
+          <p className="settings-description" style={{ marginTop: "14px" }}>{darkVariantsGroupText}</p>
+          <div className="theme-options">
+            <button
+              className={theme === "midnight" ? "active" : ""}
+              onClick={() => setTheme("midnight")}
+            >
+              {midnightText}
+            </button>
+            <button
+              className={theme === "ocean" ? "active" : ""}
+              onClick={() => setTheme("ocean")}
+            >
+              {oceanText}
+            </button>
+            <button
+              className={theme === "forest" ? "active" : ""}
+              onClick={() => setTheme("forest")}
+            >
+              {forestText}
+            </button>
+            <button
+              className={theme === "sunset" ? "active" : ""}
+              onClick={() => setTheme("sunset")}
+            >
+              {sunsetText}
+            </button>
+          </div>
+          <p className="settings-description" style={{ marginTop: "14px" }}>{accessibilityGroupText}</p>
+          <div className="theme-options">
             <button
               className={theme === "high-contrast" ? "active" : ""}
               onClick={() => setTheme("high-contrast")}
@@ -216,10 +266,22 @@ const SettingsPage = () => {
               {highContrastText}
             </button>
             <button
-              className={theme === "colorblind" ? "active" : ""}
-              onClick={() => setTheme("colorblind")}
+              className={theme === "protanope" ? "active" : ""}
+              onClick={() => setTheme("protanope")}
             >
-              {colorblindText}
+              {protanopeText}
+            </button>
+            <button
+              className={theme === "deuteranope" ? "active" : ""}
+              onClick={() => setTheme("deuteranope")}
+            >
+              {deuteranopeText}
+            </button>
+            <button
+              className={theme === "tritanope" ? "active" : ""}
+              onClick={() => setTheme("tritanope")}
+            >
+              {tritanopeText}
             </button>
           </div>
         </section>

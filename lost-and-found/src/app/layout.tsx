@@ -45,11 +45,17 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{
               __html: `
             html, body { margin: 0; padding: 0; }
-            body                                    { background-color: #f0f2f8; }
-            html[data-theme="light"]   body         { background-color: #f0f2f8; }
-            html[data-theme="dark"]    body         { background-color: #0b1120; }
-            html[data-theme="high-contrast"] body   { background-color: #000000; }
-            html[data-theme="colorblind"]    body   { background-color: #e6f0ff; }
+            body                                      { background-color: #f0f2f8; }
+            html[data-theme="light"]         body     { background-color: #f0f2f8; }
+            html[data-theme="dark"]          body     { background-color: #0b1120; }
+            html[data-theme="midnight"]      body     { background-color: #0b1120; }
+            html[data-theme="ocean"]         body     { background-color: #071420; }
+            html[data-theme="forest"]        body     { background-color: #071410; }
+            html[data-theme="sunset"]        body     { background-color: #180c06; }
+            html[data-theme="high-contrast"] body     { background-color: #000000; }
+            html[data-theme="protanope"]     body     { background-color: #f8f9ff; }
+            html[data-theme="deuteranope"]   body     { background-color: #e6f0ff; }
+            html[data-theme="tritanope"]     body     { background-color: #fff0f8; }
           `,
             }}
           />

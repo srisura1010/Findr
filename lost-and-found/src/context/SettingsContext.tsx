@@ -1,24 +1,18 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-
-// The SettingsContext stores user preferences that affect global UI rendering.
-//
-// These values are:
-// - persisted to localStorage so they survive refreshes
-// - applied to <html>/<body> via classes and data attributes so CSS can react
-//   without prop-drilling values into every component.
-type Theme = "light" | "dark" | "high-contrast" | "colorblind";
+import { ThemeId } from "@/lib/themes";
+import { applyTheme } from "@/lib/applyTheme";
 type FontSize = "sm" | "md" | "lg" | "xl";
 type FontFamily = "sans" | "serif" | "mono";
 type Language = "en" | "es" | "fr" | "de";
 
 interface SettingsContextType {
-  theme: Theme;
+  theme: ThemeId;
   fontSize: FontSize;
   fontFamily: FontFamily;
   language: Language;
-  setTheme: (t: Theme) => void;
+  setTheme: (t: ThemeId) => void;
   setFontSize: (s: FontSize) => void;
   setFontFamily: (f: FontFamily) => void;
   setLanguage: (l: Language) => void;
@@ -35,29 +29,20 @@ function getInitial<T extends string>(key: string, fallback: T): T {
 }
 
 export function SettingsProvider({ children }: { children: React.ReactNode; }) {
-  // Defaults represent the baseline UX until the persisted values are loaded.
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<ThemeId>("light");
   const [fontSize, setFontSize] = useState<FontSize>("md");
   const [fontFamily, setFontFamily] = useState<FontFamily>("sans");
   const [language, setLanguage] = useState<Language>("en");
 
-  // On initial mount, load settings from localStorage.
-  // We do this in an effect so SSR output is deterministic.
   useEffect(() => {
-    setTheme(getInitial("theme", "light"));
+    setTheme(getInitial<ThemeId>("theme", "light"));
     setFontSize(getInitial("fontSize", "md"));
     setFontFamily(getInitial("fontFamily", "sans"));
     setLanguage(getInitial("language", "en"));
   }, []);
 
-  // Apply settings to the DOM for global CSS selectors.
-  //
-  // - theme: applied as a class and `data-theme`
-  // - font size/family: stored as `data-font-size` / `data-font-family`
   useEffect(() => {
-    document.body.classList.remove("light", "dark", "high-contrast", "colorblind");
-    document.body.classList.add(theme);
-    document.documentElement.setAttribute("data-theme", theme);
+    applyTheme(theme);
     document.documentElement.dataset.fontSize = fontSize;
     document.documentElement.dataset.fontFamily = fontFamily;
   }, [theme, fontSize, fontFamily]);
