@@ -12,6 +12,7 @@ import { FaSchool } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useSettings } from "@/context/SettingsContext";
+import Cropper from "react-easy-crop";
 
 const ABOUT_CAROUSEL_ITEMS: { icon: ReactNode; title: string; body: string }[] =
   [
@@ -205,7 +206,7 @@ interface MySchoolsStrings {
   leaveBtn: string;
 }
 
-// ─── Gradient helpers (needed for register preview) ───────────────────────────
+// ─── Gradient helpers ─────────────────────────────────────────────────────────
 function hexToRgba(hex: string, a: number): string {
   const h = hex.replace("#", "");
   const r = parseInt(h.slice(0, 2), 16);
@@ -221,6 +222,246 @@ function gradStyles(hex: string): string[] {
     `linear-gradient(135deg, ${hexToRgba(hex, 0.92)} 0%, ${hexToRgba(hex, 0.5)} 55%, transparent 100%)`,
     `linear-gradient(to bottom, ${hexToRgba(hex, 0.85)} 0%, ${hexToRgba(hex, 0.55)} 100%)`,
   ];
+}
+
+// ─── Crop helper ──────────────────────────────────────────────────────────────
+async function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number },
+  rotation = 0,
+): Promise<File> {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.addEventListener("load", () => resolve(img));
+    img.addEventListener("error", reject);
+    img.src = imageSrc;
+  });
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+  const maxSize = Math.max(image.width, image.height);
+  const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
+  canvas.width = safeArea;
+  canvas.height = safeArea;
+  ctx.translate(safeArea / 2, safeArea / 2);
+  ctx.rotate((rotation * Math.PI) / 180);
+  ctx.translate(-safeArea / 2, -safeArea / 2);
+  ctx.drawImage(
+    image,
+    safeArea / 2 - image.width * 0.5,
+    safeArea / 2 - image.height * 0.5,
+  );
+  const data = ctx.getImageData(0, 0, safeArea, safeArea);
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+  ctx.putImageData(
+    data,
+    Math.round(0 - safeArea / 2 + image.width * 0.5 - pixelCrop.x),
+    Math.round(0 - safeArea / 2 + image.height * 0.5 - pixelCrop.y),
+  );
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => resolve(new File([blob!], "cropped.jpg", { type: "image/jpeg" })),
+      "image/jpeg",
+      0.92,
+    );
+  });
+}
+
+// ─── CropModal ────────────────────────────────────────────────────────────────
+function CropModal({
+  src,
+  aspect,
+  onConfirm,
+  onSkip,
+}: {
+  src: string;
+  /** aspect ratio for the crop — 1 for square logos */
+  aspect: number;
+  onConfirm: (pixels: { x: number; y: number; width: number; height: number }, rotation: number) => void;
+  onSkip: () => void;
+}) {
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    x: number; y: number; width: number; height: number;
+  } | null>(null);
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.88)",
+        zIndex: 2000,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px",
+        gap: "14px",
+      }}
+    >
+      <p
+        style={{
+          color: "#fff",
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 700,
+          fontSize: "15px",
+          margin: 0,
+          letterSpacing: "-0.1px",
+        }}
+      >
+        Crop Photo
+      </p>
+
+      <div
+        style={{
+          position: "relative",
+          width: "min(90vw, 600px)",
+          aspectRatio: "4 / 3",
+          borderRadius: "12px",
+          overflow: "hidden",
+          border: "2px solid rgba(255,255,255,0.12)",
+        }}
+      >
+        <Cropper
+          image={src}
+          crop={crop}
+          zoom={zoom}
+          rotation={rotation}
+          aspect={aspect}
+          onCropChange={setCrop}
+          onZoomChange={setZoom}
+          onRotationChange={setRotation}
+          onCropComplete={(_area, pixels) => setCroppedAreaPixels(pixels)}
+        />
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          width: "min(90vw, 600px)",
+          background: "rgba(255,255,255,0.06)",
+          borderRadius: "10px",
+          padding: "14px 16px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.6px",
+              minWidth: 44,
+            }}
+          >
+            Zoom
+          </span>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.05}
+            value={zoom}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            style={{ flex: 1, accentColor: "var(--accent)" }}
+          />
+          <span
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              minWidth: 32,
+              textAlign: "right",
+            }}
+          >
+            {zoom.toFixed(1)}×
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <span
+            style={{
+              color: "rgba(255,255,255,0.55)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.6px",
+              minWidth: 44,
+            }}
+          >
+            Rotate
+          </span>
+          <input
+            type="range"
+            min={-180}
+            max={180}
+            step={1}
+            value={rotation}
+            onChange={(e) => setRotation(Number(e.target.value))}
+            style={{ flex: 1, accentColor: "var(--accent)" }}
+          />
+          <span
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontFamily: "Poppins, sans-serif",
+              fontSize: "11px",
+              minWidth: 32,
+              textAlign: "right",
+            }}
+          >
+            {rotation}°
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", width: "min(90vw, 600px)" }}>
+        <button
+          onClick={onSkip}
+          style={{
+            flex: 1,
+            padding: "13px 0",
+            borderRadius: "9px",
+            border: "1.5px solid rgba(255,255,255,0.2)",
+            background: "transparent",
+            color: "rgba(255,255,255,0.7)",
+            fontFamily: "Poppins, sans-serif",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "border-color 0.15s ease, color 0.15s ease",
+          }}
+        >
+          Skip crop
+        </button>
+        <button
+          onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels, rotation)}
+          style={{
+            flex: 2,
+            padding: "13px 0",
+            borderRadius: "9px",
+            border: "none",
+            background: "var(--accent)",
+            color: "#fff",
+            fontFamily: "Poppins, sans-serif",
+            fontSize: "13px",
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "background 0.15s ease, transform 0.12s ease",
+          }}
+        >
+          Apply Crop
+        </button>
+      </div>
+    </div>
+  );
 }
 
 // ─── About / Landing Panel ────────────────────────────────────────────────────
@@ -486,9 +727,16 @@ function EnterCodePanel({
 function RegisterSchoolPanel({
   user,
   s,
+  onRequestLogoCrop,
+  logoFile,
+  logoPreviewUrl,
 }: {
   user: any;
   s: RegisterStrings;
+  /** Called when user picks a logo file — parent opens the crop modal */
+  onRequestLogoCrop: (file: File) => void;
+  logoFile: File | null;
+  logoPreviewUrl: string | null;
 }) {
   const { theme } = useSettings();
   const [form, setForm] = useState({
@@ -500,7 +748,7 @@ function RegisterSchoolPanel({
     secondaryColor: "#f5c842",
     gradientMode: 0,
   });
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+
   const [bgFile, setBgFile] = useState<File | null>(null);
   const [bgPreviewUrl, setBgPreviewUrl] = useState<string | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
@@ -511,7 +759,8 @@ function RegisterSchoolPanel({
     return () => {
       if (bgPreviewUrl) URL.revokeObjectURL(bgPreviewUrl);
     };
-  }, [bgPreviewUrl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -519,6 +768,13 @@ function RegisterSchoolPanel({
     if (bgPreviewUrl) URL.revokeObjectURL(bgPreviewUrl);
     setBgFile(file);
     setBgPreviewUrl(URL.createObjectURL(file));
+  };
+
+  // Hand off to the parent to open the crop modal
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    onRequestLogoCrop(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -637,6 +893,7 @@ function RegisterSchoolPanel({
           readOnly
         />
 
+        {/* ── Logo upload + crop preview ── */}
         <label className="sc-form__label">{s.logoLabel}</label>
         <label className="sc-form__file-label" htmlFor="school-logo-upload">
           <span className="sc-form__file-icon">+</span>
@@ -647,8 +904,33 @@ function RegisterSchoolPanel({
           className="sc-form__file"
           type="file"
           accept="image/*"
-          onChange={(e) => e.target.files?.[0] && setLogoFile(e.target.files[0])}
+          onChange={handleLogoChange}
         />
+        {/* Logo preview with re-crop option */}
+        {logoPreviewUrl && (
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+            <img
+              src={logoPreviewUrl}
+              alt="Logo preview"
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 10,
+                objectFit: "cover",
+                border: "2px solid var(--border-default)",
+              }}
+            />
+            <button
+              type="button"
+              className="sc-btn sc-btn--ghost sc-btn--sm"
+              onClick={() => {
+                document.getElementById("school-logo-upload")?.click();
+              }}
+            >
+              Change / Re-crop
+            </button>
+          </div>
+        )}
 
         <label className="sc-form__label">{s.primaryColorLabel}</label>
         <div className="sc-color-row">
@@ -999,6 +1281,42 @@ export default function SchoolsPage() {
   const [mySchools, setMySchools] = useState<School[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(false);
 
+  // ── Logo crop state (lifted here so modal renders at page root) ──────────
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [logoCropSrc, setLogoCropSrc] = useState<string | null>(null);
+  const [logoCropRawFile, setLogoCropRawFile] = useState<File | null>(null);
+
+  const handleRequestLogoCrop = (file: File) => {
+    if (logoCropSrc) URL.revokeObjectURL(logoCropSrc);
+    if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl);
+    setLogoPreviewUrl(null);
+    setLogoCropRawFile(file);
+    setLogoCropSrc(URL.createObjectURL(file));
+  };
+
+  const handleLogoCropConfirm = async (
+    pixels: { x: number; y: number; width: number; height: number },
+    rotation: number,
+  ) => {
+    if (!logoCropSrc) return;
+    const cropped = await getCroppedImg(logoCropSrc, pixels, rotation);
+    URL.revokeObjectURL(logoCropSrc);
+    setLogoCropSrc(null);
+    setLogoCropRawFile(null);
+    setLogoFile(cropped);
+    setLogoPreviewUrl(URL.createObjectURL(cropped));
+  };
+
+  const handleLogoCropSkip = () => {
+    if (!logoCropSrc || !logoCropRawFile) return;
+    URL.revokeObjectURL(logoCropSrc);
+    setLogoCropSrc(null);
+    setLogoFile(logoCropRawFile);
+    setLogoPreviewUrl(URL.createObjectURL(logoCropRawFile));
+    setLogoCropRawFile(null);
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -1232,111 +1550,129 @@ export default function SchoolsPage() {
     return <LoadingSpinner />;
 
   return (
-    <div className="sc-page">
-      <div className="sc-layout">
-        <aside className="sc-sidebar">
-          <div className="sc-sidebar__brand">
-            <span className="sc-sidebar__icon">
-              <FaGraduationCap />
-            </span>
-            <div>
-              <p className="sc-sidebar__title">Findr Campus</p>
-              <p className="sc-sidebar__sub">{schoolBoardsText}</p>
+    <>
+      <div className="sc-page">
+        <div className="sc-layout">
+          <aside className="sc-sidebar">
+            <div className="sc-sidebar__brand">
+              <span className="sc-sidebar__icon">
+                <FaGraduationCap />
+              </span>
+              <div>
+                <p className="sc-sidebar__title">Findr Campus</p>
+                <p className="sc-sidebar__sub">{schoolBoardsText}</p>
+              </div>
             </div>
-          </div>
 
-          <div className="sc-sidebar__tabs">
-            {TOP_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                className={`sc-sidebar__tab${activeTab === tab.id ? " sc-sidebar__tab--active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <span className="sc-sidebar__tab-icon">{tab.icon}</span>
-                <span>{tab.label}</span>
-                {activeTab === tab.id && (
-                  <span className="sc-sidebar__tab-pip" />
-                )}
-              </button>
-            ))}
-          </div>
-
-          {mySchools.length > 0 && (
-            <div className="sc-sidebar__schools">
-              <p className="sc-sidebar__schools-label">{yourSchoolsText}</p>
-              {mySchools.map((s) => (
+            <div className="sc-sidebar__tabs">
+              {TOP_TABS.map((tab) => (
                 <button
-                  key={s.id}
-                  className="sc-sidebar__school-btn"
-                  style={{ borderLeftColor: s.color }}
-                  onClick={() => router.push(`/schools/${s.id}/board`)}
+                  key={tab.id}
+                  className={`sc-sidebar__tab${activeTab === tab.id ? " sc-sidebar__tab--active" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
                 >
-                  {s.logo_url ? (
-                    <img
-                      src={s.logo_url}
-                      alt={s.name}
-                      className="sc-sidebar__school-logo"
-                    />
-                  ) : (
-                    <div
-                      className="sc-sidebar__school-initial"
-                      style={{ background: s.color }}
-                    >
-                      {s.name[0]}
-                    </div>
+                  <span className="sc-sidebar__tab-icon">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  {activeTab === tab.id && (
+                    <span className="sc-sidebar__tab-pip" />
                   )}
-                  <span className="sc-sidebar__school-name">{s.name}</span>
                 </button>
               ))}
             </div>
-          )}
-        </aside>
 
-        <main className="sc-main">
-          <section
-            className="sc-tab-panel"
-            hidden={activeTab !== "about"}
-            aria-hidden={activeTab !== "about"}
-          >
-            <AboutPanel
-              onEnterCode={() => setActiveTab("enter-code")}
-              onRegister={() => setActiveTab("register")}
-              s={aboutStrings}
-            />
-          </section>
-          <section
-            className="sc-tab-panel"
-            hidden={activeTab !== "enter-code"}
-            aria-hidden={activeTab !== "enter-code"}
-          >
-            <EnterCodePanel
-              user={user}
-              mySchools={mySchools}
-              onJoined={handleJoined}
-              s={enterCodeStrings}
-            />
-          </section>
-          <section
-            className="sc-tab-panel"
-            hidden={activeTab !== "my-schools"}
-            aria-hidden={activeTab !== "my-schools"}
-          >
-            <MySchoolsPanel
-              mySchools={mySchools}
-              user={user}
-              onLeave={handleLeave}
-              s={mySchoolsStrings}
-            />
-          </section>
-          <section
-            className="sc-tab-panel"
-            hidden={activeTab !== "register"}
-            aria-hidden={activeTab !== "register"}
-          >
-            <RegisterSchoolPanel user={user} s={registerStrings} />
-          </section>
-        </main>
+            {mySchools.length > 0 && (
+              <div className="sc-sidebar__schools">
+                <p className="sc-sidebar__schools-label">{yourSchoolsText}</p>
+                {mySchools.map((s) => (
+                  <button
+                    key={s.id}
+                    className="sc-sidebar__school-btn"
+                    style={{ borderLeftColor: s.color }}
+                    onClick={() => router.push(`/schools/${s.id}/board`)}
+                  >
+                    {s.logo_url ? (
+                      <img
+                        src={s.logo_url}
+                        alt={s.name}
+                        className="sc-sidebar__school-logo"
+                      />
+                    ) : (
+                      <div
+                        className="sc-sidebar__school-initial"
+                        style={{ background: s.color }}
+                      >
+                        {s.name[0]}
+                      </div>
+                    )}
+                    <span className="sc-sidebar__school-name">{s.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </aside>
+
+          <main className="sc-main">
+            <section
+              className="sc-tab-panel"
+              hidden={activeTab !== "about"}
+              aria-hidden={activeTab !== "about"}
+            >
+              <AboutPanel
+                onEnterCode={() => setActiveTab("enter-code")}
+                onRegister={() => setActiveTab("register")}
+                s={aboutStrings}
+              />
+            </section>
+            <section
+              className="sc-tab-panel"
+              hidden={activeTab !== "enter-code"}
+              aria-hidden={activeTab !== "enter-code"}
+            >
+              <EnterCodePanel
+                user={user}
+                mySchools={mySchools}
+                onJoined={handleJoined}
+                s={enterCodeStrings}
+              />
+            </section>
+            <section
+              className="sc-tab-panel"
+              hidden={activeTab !== "my-schools"}
+              aria-hidden={activeTab !== "my-schools"}
+            >
+              <MySchoolsPanel
+                mySchools={mySchools}
+                user={user}
+                onLeave={handleLeave}
+                s={mySchoolsStrings}
+              />
+            </section>
+            <section
+              className="sc-tab-panel"
+              hidden={activeTab !== "register"}
+              aria-hidden={activeTab !== "register"}
+            >
+              <RegisterSchoolPanel
+                user={user}
+                s={registerStrings}
+                onRequestLogoCrop={handleRequestLogoCrop}
+                logoFile={logoFile}
+                logoPreviewUrl={logoPreviewUrl}
+              />
+            </section>
+          </main>
+        </div>
       </div>
-    </div>
+
+      {/* ── Logo Crop Modal — rendered at page root to escape any stacking context ── */}
+      {logoCropSrc && (
+        <CropModal
+          src={logoCropSrc}
+          aspect={1}
+          onConfirm={handleLogoCropConfirm}
+          onSkip={handleLogoCropSkip}
+        />
+      )}
+    </>
   );
 }
