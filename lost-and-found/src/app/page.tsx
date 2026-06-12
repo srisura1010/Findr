@@ -1,7 +1,7 @@
 "use client";
 
 import "./home.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { useRouter } from "next/navigation";
 import {
   FaSearch,
@@ -10,6 +10,8 @@ import {
   FaSlidersH,
   FaSchool,
   FaEnvelope,
+  FaBell,
+  FaComment,
 } from "react-icons/fa";
 import { IoFolder } from "react-icons/io5";
 import { useSettings } from "@/context/SettingsContext";
@@ -19,99 +21,9 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { TbReportSearch } from "react-icons/tb";
 import { FaHandshake } from "react-icons/fa";
 
-// draggable floating item that bounces around in the hero zone
-function FloatingItem({
-  src,
-  label,
-  x,
-  y,
-  animDelay,
-}: {
-  src: string;
-  label: string;
-  x: number;
-  y: number;
-  animDelay: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const pos = useRef({ x, y });
-  const dragging = useRef(false);
-  const offset = useRef({ x: 0, y: 0 });
-  const [hovered, setHovered] = useState(false);
-  const [, forceUpdate] = useState(0); // just used to trigger a re-render on drag
+// Lazy-load the Three.js box so it doesn't block SSR
+const FindrBox = lazy(() => import("./FindrBox"));
 
-  // get bounds of the floating zone so items don't escape
-  const getHeroBounds = () => {
-    const zone = document.getElementById("floating-zone");
-    if (!zone) return null;
-    const zoneRect = zone.getBoundingClientRect();
-    return {
-      minX: 0,
-      maxX: zoneRect.width - 90,
-      minY: 0,
-      maxY: zoneRect.height - 90,
-    };
-  };
-
-  const clamp = (val: number, min: number, max: number) =>
-    Math.min(Math.max(val, min), max);
-
-  const onMouseDown = (e: React.MouseEvent) => {
-    dragging.current = true;
-    offset.current = {
-      x: e.clientX - pos.current.x,
-      y: e.clientY - pos.current.y,
-    };
-    e.preventDefault();
-  };
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!dragging.current) return;
-      const b = getHeroBounds();
-      if (!b) return;
-      let nx = e.clientX - offset.current.x;
-      let ny = e.clientY - offset.current.y;
-      // clamp so item stays inside the hero zone
-      nx = clamp(nx, b.minX, b.maxX);
-      ny = clamp(ny, b.minY, b.maxY);
-      pos.current = { x: nx, y: ny };
-      forceUpdate((n) => n + 1);
-    };
-    const onMouseUp = () => {
-      dragging.current = false;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`floating-item${hovered ? " hovered" : ""}`}
-      style={{
-        left: pos.current.x,
-        top: pos.current.y,
-        animationDelay: `${animDelay}s`,
-        // pause animation while dragging
-        animationPlayState: dragging.current ? "paused" : "running",
-        cursor: dragging.current ? "grabbing" : "grab",
-      }}
-      onMouseDown={onMouseDown}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <img src={src} alt={label} draggable={false} />
-      {hovered && <span className="floating-label">{label}</span>}
-    </div>
-  );
-}
-
-// phrases that cycle through in the hero typing animation
 const TYPING_PHRASES = [
   "Lost Your Keys?",
   "Lost a Wallet?",
@@ -123,6 +35,17 @@ const TYPING_PHRASES = [
   "Lost Earbuds?",
 ];
 
+const CAROUSEL_CARDS = [
+  { icon: <IoFolder />,         title: "One Place for Everything",   body: "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place." },
+  { icon: <FaSchool />,         title: "Designed for Campuses",      body: "Built specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks." },
+  { icon: <FaSearch />,         title: "Find Items Faster",          body: "Quickly match lost items with found ones and get belongings back to students in days, not weeks." },
+  { icon: <FaSlidersH />,       title: "Search What Matters",        body: "Filter by category, location, and time to instantly narrow down results and spot your item." },
+  { icon: <FaHandsHelping />,   title: "Students Helping Students",  body: "Anyone can report a found item, creating a trusted, school-wide system that actually works." },
+  { icon: <FaShieldAlt />,      title: "Secure by Design",           body: "Only your school community sees your items, keeping reports private and protected." },
+  { icon: <FaBell />,           title: "Real-Time Notifications",    body: "Get alerted the moment something matching your item shows up on the board." },
+  { icon: <FaComment />,        title: "Built-In Messaging",         body: "Connect finders and owners directly inside the platform — no sharing personal info." },
+];
+
 export default function Home() {
   const { language } = useSettings();
   const router = useRouter();
@@ -130,45 +53,33 @@ export default function Home() {
   const [isReady, setIsReady] = useState(false);
   const [banChecked, setBanChecked] = useState(false);
 
-  // typing effect state
+  // typing effect
   const [displayText, setDisplayText] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // all the translatable strings on this page
+  // translatable strings
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
   const [connectingText, setConnectingText] = useState(
-    "Connecting student, staff, and schools and reuniting them with their lost items",
+    "Connecting students, staff, and schools — reuniting everyone with what they've lost."
   );
   const [browseText, setBrowseText] = useState("Browse Lost Items");
-  const [reportText, setReportText] = useState("Report a Lost Item");
+  const [reportText, setReportText] = useState("Report a Found Item");
   const [card1Title, setCard1Title] = useState("One Place for Everything");
   const [card2Title, setCard2Title] = useState("Designed for Campuses");
   const [card3Title, setCard3Title] = useState("Find Items Faster");
   const [card4Title, setCard4Title] = useState("Search What Matters");
   const [card5Title, setCard5Title] = useState("Students Helping Students");
   const [card6Title, setCard6Title] = useState("Secure by Design");
-  const [card1Body, setCard1Body] = useState(
-    "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
-  );
-  const [card2Body, setCard2Body] = useState(
-    "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
-  );
-  const [card3Body, setCard3Body] = useState(
-    "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
-  );
-  const [card4Body, setCard4Body] = useState(
-    "Filter by category, location, and time to instantly narrow down results and spot your item.",
-  );
-  const [card5Body, setCard5Body] = useState(
-    "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
-  );
-  const [card6Body, setCard6Body] = useState(
-    "Only your school community sees your items, keeping reports private and protected.",
-  );
+  const [card1Body, setCard1Body] = useState("Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.");
+  const [card2Body, setCard2Body] = useState("Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.");
+  const [card3Body, setCard3Body] = useState("Quickly match lost items with found ones and get belongings back to students in days, not weeks.");
+  const [card4Body, setCard4Body] = useState("Filter by category, location, and time to instantly narrow down results and spot your item.");
+  const [card5Body, setCard5Body] = useState("Anyone can report a found item, creating a trusted, school-wide system that actually works.");
+  const [card6Body, setCard6Body] = useState("Only your school community sees your items, keeping reports private and protected.");
 
-  // typing animation — types out phrase, waits, then deletes it
+  // typing animation
   useEffect(() => {
     const current = TYPING_PHRASES[phraseIndex];
     const timeout = setTimeout(() => {
@@ -176,7 +87,6 @@ export default function Home() {
         setDisplayText(current.slice(0, charIndex + 1));
         setCharIndex((c) => c + 1);
         if (charIndex + 1 === current.length) {
-          // pause before starting to delete
           setTimeout(() => setIsDeleting(true), 1400);
         }
       } else {
@@ -187,18 +97,14 @@ export default function Home() {
           setPhraseIndex((p) => (p + 1) % TYPING_PHRASES.length);
         }
       }
-    }, isDeleting ? 45 : 85);
-
+    }, isDeleting ? 42 : 82);
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, phraseIndex]);
 
-  // check if the user is banned before showing anything
+  // ban check
   useEffect(() => {
     if (!isLoaded) return;
-    if (!user) {
-      setBanChecked(true);
-      return;
-    }
+    if (!user) { setBanChecked(true); return; }
     const checkBan = async () => {
       const { data } = await supabase
         .from("banned_users")
@@ -207,109 +113,58 @@ export default function Home() {
         .single();
       if (data) {
         const isPermanent = !data.suspended_until;
-        const isSuspended =
-          data.suspended_until && new Date(data.suspended_until) > new Date();
-        if (isPermanent || isSuspended) {
-          router.push("/banned");
-          return;
-        }
+        const isSuspended = data.suspended_until && new Date(data.suspended_until) > new Date();
+        if (isPermanent || isSuspended) { router.push("/banned"); return; }
       }
       setBanChecked(true);
     };
     checkBan();
   }, [user, isLoaded]);
 
-  // handle translations — english just sets defaults, other languages hit the api
+  // translations
   useEffect(() => {
     if (language === "en") {
       setDontPanicText("Don't Panic.");
-      setConnectingText(
-        "Connecting student, staff, and schools and reuniting them with their lost items",
-      );
+      setConnectingText("Connecting students, staff, and schools — reuniting everyone with what they've lost.");
       setBrowseText("Browse Lost Items");
-      setReportText("Report a Lost Item");
+      setReportText("Report a Found Item");
       setCard1Title("One Place for Everything");
       setCard2Title("Designed for Campuses");
       setCard3Title("Find Items Faster");
       setCard4Title("Search What Matters");
       setCard5Title("Students Helping Students");
       setCard6Title("Secure by Design");
-      setCard1Body(
-        "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
-      );
-      setCard2Body(
-        "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
-      );
-      setCard3Body(
-        "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
-      );
-      setCard4Body(
-        "Filter by category, location, and time to instantly narrow down results and spot your item.",
-      );
-      setCard5Body(
-        "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
-      );
-      setCard6Body(
-        "Only your school community sees your items, keeping reports private and protected.",
-      );
+      setCard1Body("Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.");
+      setCard2Body("Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.");
+      setCard3Body("Quickly match lost items with found ones and get belongings back to students in days, not weeks.");
+      setCard4Body("Filter by category, location, and time to instantly narrow down results and spot your item.");
+      setCard5Body("Anyone can report a found item, creating a trusted, school-wide system that actually works.");
+      setCard6Body("Only your school community sees your items, keeping reports private and protected.");
       setIsReady(true);
       return;
     }
     const translateAndCache = async () => {
-      // list of everything we need to translate on this page
       const translations = [
-        { key: "Don't Panic.", setter: setDontPanicText, cacheKey: "home_panic" },
-        {
-          key: "Connecting student, staff, and schools and reuniting them with their lost items",
-          setter: setConnectingText,
-          cacheKey: "home_connecting",
-        },
-        { key: "Browse Lost Items", setter: setBrowseText, cacheKey: "home_browse" },
-        { key: "Report a Lost Item", setter: setReportText, cacheKey: "home_report" },
-        { key: "One Place for Everything", setter: setCard1Title, cacheKey: "home_card1Title" },
-        { key: "Designed for Campuses", setter: setCard2Title, cacheKey: "home_card2Title" },
-        { key: "Find Items Faster", setter: setCard3Title, cacheKey: "home_card3Title" },
-        { key: "Search What Matters", setter: setCard4Title, cacheKey: "home_card4Title" },
-        { key: "Students Helping Students", setter: setCard5Title, cacheKey: "home_card5Title" },
-        { key: "Secure by Design", setter: setCard6Title, cacheKey: "home_card6Title" },
-        {
-          key: "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
-          setter: setCard1Body,
-          cacheKey: "home_card1Body",
-        },
-        {
-          key: "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
-          setter: setCard2Body,
-          cacheKey: "home_card2Body",
-        },
-        {
-          key: "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
-          setter: setCard3Body,
-          cacheKey: "home_card3Body",
-        },
-        {
-          key: "Filter by category, location, and time to instantly narrow down results and spot your item.",
-          setter: setCard4Body,
-          cacheKey: "home_card4Body",
-        },
-        {
-          key: "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
-          setter: setCard5Body,
-          cacheKey: "home_card5Body",
-        },
-        {
-          key: "Only your school community sees your items, keeping reports private and protected.",
-          setter: setCard6Body,
-          cacheKey: "home_card6Body",
-        },
+        { key: "Don't Panic.",                                setter: setDontPanicText,   cacheKey: "home_panic" },
+        { key: "Connecting students, staff, and schools — reuniting everyone with what they've lost.", setter: setConnectingText, cacheKey: "home_connecting" },
+        { key: "Browse Lost Items",                           setter: setBrowseText,       cacheKey: "home_browse" },
+        { key: "Report a Found Item",                         setter: setReportText,       cacheKey: "home_report" },
+        { key: "One Place for Everything",                    setter: setCard1Title,       cacheKey: "home_card1Title" },
+        { key: "Designed for Campuses",                       setter: setCard2Title,       cacheKey: "home_card2Title" },
+        { key: "Find Items Faster",                           setter: setCard3Title,       cacheKey: "home_card3Title" },
+        { key: "Search What Matters",                         setter: setCard4Title,       cacheKey: "home_card4Title" },
+        { key: "Students Helping Students",                   setter: setCard5Title,       cacheKey: "home_card5Title" },
+        { key: "Secure by Design",                            setter: setCard6Title,       cacheKey: "home_card6Title" },
+        { key: "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.", setter: setCard1Body, cacheKey: "home_card1Body" },
+        { key: "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.", setter: setCard2Body, cacheKey: "home_card2Body" },
+        { key: "Quickly match lost items with found ones and get belongings back to students in days, not weeks.", setter: setCard3Body, cacheKey: "home_card3Body" },
+        { key: "Filter by category, location, and time to instantly narrow down results and spot your item.", setter: setCard4Body, cacheKey: "home_card4Body" },
+        { key: "Anyone can report a found item, creating a trusted, school-wide system that actually works.", setter: setCard5Body, cacheKey: "home_card5Body" },
+        { key: "Only your school community sees your items, keeping reports private and protected.", setter: setCard6Body, cacheKey: "home_card6Body" },
       ];
       for (const { key, setter, cacheKey } of translations) {
-        // use cached version if we have it so we don't spam the translate api
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
-        if (cached) {
-          setter(cached);
-          continue;
-        }
+        if (cached) { setter(cached); continue; }
         try {
           const res = await fetch("/api/translate", {
             method: "POST",
@@ -322,174 +177,149 @@ export default function Home() {
             setter(translated);
             localStorage.setItem(`${cacheKey}_${language}`, translated);
           }
-        } catch {
-          // just keep whatever was already set
-        }
+        } catch { /* keep defaults */ }
       }
       setIsReady(true);
     };
     translateAndCache();
   }, [language]);
 
-  // don't render until auth + ban check + translations are done
   if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
 
+  const featureCards = [
+    { icon: <IoFolder className="feat-icon-svg" />,       title: card1Title, body: card1Body },
+    { icon: <FaSchool className="feat-icon-svg" />,       title: card2Title, body: card2Body },
+    { icon: <FaSearch className="feat-icon-svg" />,       title: card3Title, body: card3Body },
+    { icon: <FaSlidersH className="feat-icon-svg" />,     title: card4Title, body: card4Body },
+    { icon: <FaHandsHelping className="feat-icon-svg" />, title: card5Title, body: card5Body },
+    { icon: <FaShieldAlt className="feat-icon-svg" />,    title: card6Title, body: card6Body },
+  ];
+
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="home-root">
       <div className="grid-background dark:block light:hidden" />
       <div className="grid-background-light dark:hidden light:block" />
 
-      {/* floating item icons in the hero — aria-hidden so screen readers skip them */}
-      <div className="floating-items" id="floating-zone" aria-hidden="true">
-        {[
-          { src: "/items/airpods.png", label: "AirPods", x: 60, y: 120 },
-          { src: "/items/keys.png", label: "Keys", x: 1320, y: 120 },
-          { src: "/items/wallet.png", label: "Wallet", x: 140, y: 500 },
-          { src: "/items/water-bottle.png", label: "Water Bottle", x: 1400, y: 380 },
-          { src: "/items/red_backpack_image.png", label: "Backpack", x: 250, y: 350 },
-          { src: "/items/phone.png", label: "Phone", x: 1250, y: 510 },
-        ].map((item, i) => (
-          <FloatingItem key={i} {...item} animDelay={i * 0.6} />
-        ))}
-      </div>
-
-      <div className="hero-card relative z-[15]">
-        <h1>
-          <span className="lostHero">
-            {displayText}
-            <span className="typing-cursor">|</span>
-          </span> <br />
-          <span className="panicHero">{dontPanicText}</span>
-        </h1>
-        <p>{connectingText}</p>
-        {/* show dashboard link if signed in, otherwise open sign in modal */}
-        {isSignedIn ? (
-          <button className="browse" onClick={() => router.push("/dashboard")}>
-            {browseText}
-          </button>
-        ) : (
-          <SignInButton mode="modal">
-            <button className="browse">{browseText}</button>
-          </SignInButton>
-        )} 
-        {isSignedIn ? (/* boolean for sign states */
-          <button className="report" onClick={() => router.push("/dashboard")}>
-            {reportText}
-          </button>
-        ) : (
-          <SignInButton mode="modal">
-            <button className="report">{reportText}</button>
-          </SignInButton>
-        )}
-      </div>
-
-      {/* scrolling feature card carousel — duplicated so the loop looks seamless */}
-      <div className="carousel relative z-10">
-        <div className="track">
-          <div className="card">
-            <span className="card-icon"><IoFolder className="text-blue-500" /></span>
-            <h3 className="card-title">{card1Title}</h3>
-            <p className="card-body">{card1Body}</p>
+      {/* ── HERO ── */}
+      <section className="hero-section">
+        <div className="hero-left">
+          <div className="hero-eyebrow">
+            <span className="eyebrow-dot" />
+            Built for schools
           </div>
-          <div className="card">
-            <span className="card-icon"><FaSchool className="text-blue-500" /></span>
-            <h3 className="card-title">{card2Title}</h3>
-            <p className="card-body">{card2Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaSearch className="text-blue-500" /></span>
-            <h3 className="card-title">{card3Title}</h3>
-            <p className="card-body">{card3Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaSlidersH className="text-blue-500" /></span>
-            <h3 className="card-title">{card4Title}</h3>
-            <p className="card-body">{card4Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaHandsHelping className="text-blue-500" /></span>
-            <h3 className="card-title">{card5Title}</h3>
-            <p className="card-body">{card5Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaShieldAlt className="text-blue-500" /></span>
-            <h3 className="card-title">{card6Title}</h3>
-            <p className="card-body">{card6Body}</p>
-          </div>
-          {/* duplicate set for infinite scroll effect */}
-          <div className="card">
-            <span className="card-icon"><IoFolder className="text-blue-500" /></span>
-            <h3 className="card-title">{card1Title}</h3>
-            <p className="card-body">{card1Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaSchool className="text-blue-500" /></span>
-            <h3 className="card-title">{card2Title}</h3>
-            <p className="card-body">{card2Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaSearch className="text-blue-500" /></span>
-            <h3 className="card-title">{card3Title}</h3>
-            <p className="card-body">{card3Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaSlidersH className="text-blue-500" /></span>
-            <h3 className="card-title">{card4Title}</h3>
-            <p className="card-body">{card4Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaHandsHelping className="text-blue-500" /></span>
-            <h3 className="card-title">{card5Title}</h3>
-            <p className="card-body">{card5Body}</p>
-          </div>
-          <div className="card">
-            <span className="card-icon"><FaShieldAlt className="text-blue-500" /></span>
-            <h3 className="card-title">{card6Title}</h3>
-            <p className="card-body">{card6Body}</p>
+          <h1>
+            <span className="hero-typing">
+              {displayText}
+              <span className="typing-cursor">|</span>
+            </span>
+            <span className="hero-static">{dontPanicText}</span>
+          </h1>
+          <p className="hero-sub">{connectingText}</p>
+          <div className="hero-btns">
+            {isSignedIn ? (
+              <button className="btn-primary" onClick={() => router.push("/dashboard")}>{browseText}</button>
+            ) : (
+              <SignInButton mode="modal"><button className="btn-primary">{browseText}</button></SignInButton>
+            )}
+            {isSignedIn ? (
+              <button className="btn-outline" onClick={() => router.push("/dashboard")}>{reportText}</button>
+            ) : (
+              <SignInButton mode="modal"><button className="btn-outline">{reportText}</button></SignInButton>
+            )}
           </div>
         </div>
-      </div>
 
-      <section className="how-it-works relative z-10">
-        <h2 className="section-title">How Findr Works</h2>
-        <p className="section-subtitle">
-          Three simple steps to reunite students with their belongings.
-        </p>
+        {/* ── THREE.JS BOX ── */}
+        <div className="hero-right">
+          <div className="box-canvas-wrap">
+            <Suspense fallback={<div className="box-loading">Loading...</div>}>
+              <FindrBox />
+            </Suspense>
+          </div>
+          <p className="box-hint">hover to open · drag to rotate</p>
+        </div>
+      </section>
+
+      {/* wave: hero → features */}
+      <svg className="wave-divider" viewBox="0 0 1440 56" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,0 C380,56 1060,0 1440,46 L1440,56 L0,56 Z" className="wave-fill-feat" />
+      </svg>
+
+      {/* ── FEATURES ── */}
+      <section className="features-section">
+        <p className="section-label">Why Findr</p>
+        <h2 className="section-title">Everything you need to find it</h2>
+        <p className="section-sub">One platform for your entire campus — no bulletin boards, no missed pickups.</p>
+        <div className="features-grid">
+          {featureCards.map(({ icon, title, body }, i) => (
+            <div className="feat-card" key={i}>
+              <div className="feat-icon-wrap">{icon}</div>
+              <div className="feat-title">{title}</div>
+              <p className="feat-body">{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* diagonal: features → how it works */}
+      <div className="diagonal-feat-hiw" aria-hidden="true" />
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="hiw-section">
+        <p className="section-label">How it works</p>
+        <h2 className="section-title">Three steps to reunited</h2>
+        <p className="section-sub">Simple enough for anyone on campus, powerful enough for every item.</p>
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-number">01</div>
             <div className="step-icon"><TbReportSearch /></div>
             <h3 className="step-title">Report It</h3>
-            <p className="step-body">
-              Found something? Submit it in seconds — snap a photo, pick a
-              category, and drop the location. It goes live instantly.
-            </p>
+            <p className="step-body">Found something? Snap a photo, pick a category, drop the location. It goes live instantly.</p>
           </div>
-          <div className="step-connector" aria-hidden="true">→</div>
+          <div className="step-connector" aria-hidden="true">· · ·</div>
           <div className="step-card">
             <div className="step-number">02</div>
             <div className="step-icon"><FaSearch /></div>
-            <h3 className="step-title">Search & Match</h3>
-            <p className="step-body">
-              Lost something? Browse the board, filter by type and location, or
-              get notified when something matching your item shows up.
-            </p>
+            <h3 className="step-title">Search &amp; Match</h3>
+            <p className="step-body">Browse the board, filter by type and location, or get notified when a match appears.</p>
           </div>
-          <div className="step-connector" aria-hidden="true">→</div>
+          <div className="step-connector" aria-hidden="true">· · ·</div>
           <div className="step-card">
             <div className="step-number">03</div>
             <div className="step-icon"><FaHandshake /></div>
             <h3 className="step-title">Get It Back</h3>
-            <p className="step-body">
-              Message the finder directly through Findr, confirm it's yours, and
-              arrange a pickup — all within the platform.
-            </p>
+            <p className="step-body">Message the finder directly through Findr, confirm it's yours, and arrange a pickup.</p>
           </div>
         </div>
       </section>
 
-      <section className="stats-banner relative z-10">
-        <div className="stats-grid">
+      {/* wave: hiw → carousel */}
+      <svg className="wave-divider" viewBox="0 0 1440 52" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,52 C480,0 960,52 1440,16 L1440,52 Z" className="wave-fill-car" />
+      </svg>
+
+      {/* ── CAROUSEL ── */}
+      <section className="carousel-section">
+        <p className="section-label" style={{ marginBottom: "28px" }}>Features at a glance</p>
+        <div className="carousel-wrap">
+          <div className="carousel-track">
+            {[...CAROUSEL_CARDS, ...CAROUSEL_CARDS].map(({ icon, title, body }, i) => (
+              <div className="carousel-card" key={i}>
+                <span className="carousel-icon">{icon}</span>
+                <h3 className="carousel-title">{title}</h3>
+                <p className="carousel-body">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* diagonal: carousel → stats */}
+      <div className="diagonal-car-stats" aria-hidden="true" />
+
+      {/* ── STATS ── */}
+      <section className="stats-section">
+        <div className="stats-inner">
           <div className="stat-item">
             <span className="stat-number">3</span>
             <span className="stat-label">Steps to Recovery</span>
@@ -502,7 +332,7 @@ export default function Home() {
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
             <span className="stat-number">0</span>
-            <span className="stat-label">Bulletin Boards Needed</span>
+            <span className="stat-label">Bulletin Boards</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
@@ -512,27 +342,30 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="cta-strip relative z-10">
-        <h2 className="cta-title">Ready to find what you lost?</h2>
-        <p className="cta-sub">
-          Join your school community on Findr today — it only takes a moment to sign up.
-        </p>
-        {isSignedIn ? (
-          <button className="cta-btn" onClick={() => router.push("/dashboard")}>
-            Go to Dashboard →
-          </button>
-        ) : (
-          <SignInButton mode="modal">
-            <button className="cta-btn">Get Started →</button>
-          </SignInButton>
-        )}
+      {/* wave: stats → cta */}
+      <svg className="wave-divider" viewBox="0 0 1440 56" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,28 C500,56 940,0 1440,38 L1440,56 L0,56 Z" className="wave-fill-cta" />
+      </svg>
+
+      {/* ── CTA ── */}
+      <section className="cta-section">
+        <div className="cta-inner">
+          <h2 className="cta-title">Ready to find what you lost?</h2>
+          <p className="cta-sub">Join your school community on Findr today — it only takes a moment to sign up.</p>
+          {isSignedIn ? (
+            <button className="cta-btn" onClick={() => router.push("/dashboard")}>Go to Dashboard →</button>
+          ) : (
+            <SignInButton mode="modal"><button className="cta-btn">Get Started →</button></SignInButton>
+          )}
+        </div>
       </section>
 
-      <footer className="site-footer relative z-10">
+      {/* ── FOOTER ── */}
+      <footer className="site-footer">
         <div className="footer-inner">
           <div className="footer-brand">
             <span className="footer-logo">Findr</span>
-            <p className="footer-tagline">Lost & found, built for schools.</p>
+            <p className="footer-tagline">Lost &amp; found, built for schools.</p>
           </div>
           <div className="footer-links">
             <div className="footer-col">
@@ -540,22 +373,12 @@ export default function Home() {
               {isSignedIn ? (
                 <button className="footer-link" onClick={() => router.push("/dashboard")}>Dashboard</button>
               ) : (
-                <SignInButton mode="modal">
-                  <button className="footer-link">Sign In</button>
-                </SignInButton>
+                <SignInButton mode="modal"><button className="footer-link">Sign In</button></SignInButton>
               )}
-              {isSignedIn && (
-                <button className="footer-link" onClick={() => router.push("/messages")}>Messages</button>
-              )}
-              {isSignedIn && (
-                <button className="footer-link" onClick={() => router.push("../schools")}>For Schools</button>
-              )}
-              {isSignedIn && (
-                <button className="footer-link" onClick={() => router.push("/help")}>Help</button>
-              )}
-              {isSignedIn && (
-                <button className="footer-link" onClick={() => router.push("/settings")}>Settings</button>
-              )}
+              {isSignedIn && <button className="footer-link" onClick={() => router.push("/messages")}>Messages</button>}
+              {isSignedIn && <button className="footer-link" onClick={() => router.push("../schools")}>For Schools</button>}
+              {isSignedIn && <button className="footer-link" onClick={() => router.push("/help")}>Help</button>}
+              {isSignedIn && <button className="footer-link" onClick={() => router.push("/settings")}>Settings</button>}
             </div>
             <div className="footer-col">
               <span className="footer-col-heading">Contact</span>
