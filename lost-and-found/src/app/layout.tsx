@@ -2,11 +2,17 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ItemsProvider } from "@/context/ItemsContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { TTSProvider } from "@/context/TTSContext";
+import { GlobalChatProvider } from "@/context/GlobalChatContext";
 import Navbar from "./components/Navbar";
+import GlobalChatbot from "./components/GlobalChatbot";
 import { ThemeProvider } from "./ThemeProvider";
 import "./global.css";
 
-export default function RootLayout({ children }: { children: React.ReactNode; }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
@@ -21,9 +27,11 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
 
             Note: this intentionally runs inline in <head> so it executes ASAP.
           */}
-          <script dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme')||'light';document.documentElement.setAttribute('data-theme',t);document.documentElement.classList.add(t);document.body.className=t;}catch(e){}})();`
-          }} />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('theme')||'light';document.documentElement.setAttribute('data-theme',t);document.documentElement.classList.add(t);document.body.className=t;}catch(e){}})();`,
+            }}
+          />
 
           {/* Intentionally left blank */}
 
@@ -33,14 +41,18 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
             We keep this inline to avoid a layout flash while global CSS is still
             loading, and to ensure the background matches the early theme script.
           */}
-          <style dangerouslySetInnerHTML={{ __html: `
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             html, body { margin: 0; padding: 0; }
             body                                    { background-color: #f0f2f8; }
             html[data-theme="light"]   body         { background-color: #f0f2f8; }
             html[data-theme="dark"]    body         { background-color: #0b1120; }
             html[data-theme="high-contrast"] body   { background-color: #000000; }
             html[data-theme="colorblind"]    body   { background-color: #e6f0ff; }
-          ` }} />
+          `,
+            }}
+          />
         </head>
 
         {/* Intentionally left blank */}
@@ -53,26 +65,30 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
             - Theme (applies DOM classes/attributes)
             - Items (Supabase-backed items + realtime updates)
             - TTS (screen-reader style text-to-speech announcements)
+            - GlobalChat (persistent floating support chatbot state)
           */}
           <SettingsProvider>
             <ThemeProvider>
               <ItemsProvider>
                 <TTSProvider>
-                  <Navbar />
-                  {/*
-                    Offset the main content so it isn't hidden behind the fixed
-                    top bar (48px) and left sidebar (56px).
-                    On mobile the sidebar is hidden, so padding-left drops to 0.
-                  */}
-                  <main
-                    id="main-content"
-                    style={{
-                      paddingTop: "54px",
-                      paddingLeft: "68px",
-                    }}
-                  >
-                    {children}
-                  </main>
+                  <GlobalChatProvider>
+                    <Navbar />
+                    {/*
+                      Offset the main content so it isn't hidden behind the fixed
+                      top bar (48px) and left sidebar (56px).
+                      On mobile the sidebar is hidden, so padding-left drops to 0.
+                    */}
+                    <main
+                      id="main-content"
+                      style={{
+                        paddingTop: "54px",
+                        paddingLeft: "68px",
+                      }}
+                    >
+                      {children}
+                    </main>
+                    <GlobalChatbot />
+                  </GlobalChatProvider>
                 </TTSProvider>
               </ItemsProvider>
             </ThemeProvider>
