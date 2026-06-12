@@ -17,12 +17,22 @@ interface CircleItem {
   score: number;
 }
 
+interface SpawningChip {
+  item: CircleItem;
+  index: number;
+  total: number;
+  startTime: number;
+}
+
 // ── constants ─────────────────────────────────────────────────────────
 const STAGE = 620;
 const CX = STAGE / 2;
 const CY = STAGE / 2;
 const ORBIT_R = 248;
-const SPIN_SPEED = 0.00016; // rad/ms
+const SPIN_SPEED = 0.00016;       // rad/ms — normal cruise
+const EXIT_SPIN_SPEED = 0.00048;  // rad/ms — slightly faster during exit
+const SPAWN_DURATION = 700;       // ms per chip to travel center → orbit
+const SPAWN_STAGGER = 90;         // ms between each chip spawning
 
 export default function AISearchPage() {
   const router = useRouter();
@@ -31,25 +41,34 @@ export default function AISearchPage() {
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number>(0);
   const anglesRef = useRef<number[]>([]);
-
   const masterRef = useRef<CircleItem[]>([]);
+  const transitionPhaseRef = useRef<"idle" | "exit" | "spawning">("idle");
+  const nowRef = useRef<number>(0); // updated every RAF tick
 
   const [items, setItems] = useState<CircleItem[]>([]);
+  const [exitItems, setExitItems] = useState<CircleItem[]>([]);
+  const [exitAngles, setExitAngles] = useState<number[]>([]);
+  const [spawningChips, setSpawningChips] = useState<SpawningChip[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [searched, setSearched] = useState(false);
-  const [chipPositions, setChipPositions] = useState<
-    { x: number; y: number }[]
-  >([]);
+  const [chipPositions, setChipPositions] = useState<{ x: number; y: number }[]>([]);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [transitionPhase, setTransitionPhase] = useState<"idle" | "exit" | "spawning">("idle");
+  const [, forceRender] = useState(0); // used to trigger re-renders during spawn animation
 
   // ── animation loop ───────────────────────────────────────────────
   const tick = useCallback((ts: number) => {
     const dt = lastTsRef.current ? Math.min(ts - lastTsRef.current, 50) : 16;
     lastTsRef.current = ts;
+    nowRef.current = ts;
+
+    const speed =
+      transitionPhaseRef.current === "exit" ? EXIT_SPIN_SPEED : SPIN_SPEED;
+
     if (anglesRef.current.length > 0) {
-      anglesRef.current = anglesRef.current.map((a) => a + SPIN_SPEED * dt);
+      anglesRef.current = anglesRef.current.map((a) => a + speed * dt);
       setChipPositions(
         anglesRef.current.map((angle) => ({
           x: CX + ORBIT_R * Math.cos(angle),
@@ -57,8 +76,18 @@ export default function AISearchPage() {
         })),
       );
     }
+
+    // Keep re-rendering during spawn phase for smooth animation
+    if (transitionPhaseRef.current === "spawning") {
+      forceRender((n) => n + 1);
+    }
+
     rafRef.current = requestAnimationFrame(tick);
   }, []);
+
+  useEffect(() => {
+    transitionPhaseRef.current = transitionPhase;
+  }, [transitionPhase]);
 
   useEffect(() => {
     rafRef.current = requestAnimationFrame(tick);
@@ -95,12 +124,68 @@ export default function AISearchPage() {
     })();
   }, []);
 
+  // ── spawn new items from center outward ───────────────────────────
+  const spawnItems = useCallback((newItems: CircleItem[]) => {
+    if (newItems.length === 0) {
+      startItems([]);
+      setSpawningChips([]);
+      setTransitionPhase("idle");
+      transitionPhaseRef.current = "idle";
+      return;
+    }
+
+    // Pre-set the final angles so the orbit is already spinning correctly
+    const finalAngles = newItems.map(
+      (_, i) => (2 * Math.PI * i) / newItems.length - Math.PI / 2,
+    );
+    anglesRef.current = finalAngles;
+    setItems(newItems);
+    setChipPositions(
+      finalAngles.map((angle) => ({
+        x: CX + ORBIT_R * Math.cos(angle),
+        y: CY + ORBIT_R * Math.sin(angle),
+      })),
+    );
+
+    const now = nowRef.current;
+    const chips: SpawningChip[] = newItems.map((item, i) => ({
+      item,
+      index: i,
+      total: newItems.length,
+      startTime: now + i * SPAWN_STAGGER,
+    }));
+
+    setSpawningChips(chips);
+    setTransitionPhase("spawning");
+    transitionPhaseRef.current = "spawning";
+
+    // Clear spawning state after all chips have finished traveling
+    const totalDuration = SPAWN_DURATION + (newItems.length - 1) * SPAWN_STAGGER + 100;
+    setTimeout(() => {
+      setSpawningChips([]);
+      setTransitionPhase("idle");
+      transitionPhaseRef.current = "idle";
+    }, totalDuration);
+  }, []);
+
   // ── search ───────────────────────────────────────────────────────
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
     setLoading(true);
     setSearched(true);
+
+    // Capture current items + angles for the exit animation
+    const currentItems = [...items];
+    const currentAngles = [...anglesRef.current];
+    setExitItems(currentItems);
+    setExitAngles(currentAngles);
+    setItems([]);
+    setChipPositions([]);
+    anglesRef.current = [];
+    setTransitionPhase("exit");
+    transitionPhaseRef.current = "exit";
+
     try {
       const res = await fetch("/api/circle-search", {
         method: "POST",
@@ -108,17 +193,42 @@ export default function AISearchPage() {
         body: JSON.stringify({ query: q }),
       });
       const data = await res.json();
-      startItems(data.items ?? []);
+
+      // Exit animation runs for 600ms, then spawn new items
+      setTimeout(() => {
+        setExitItems([]);
+        setExitAngles([]);
+        spawnItems(data.items ?? []);
+      }, 600);
     } catch {
-      startItems([]);
+      setTimeout(() => {
+        setExitItems([]);
+        setExitAngles([]);
+        spawnItems([]);
+      }, 600);
     }
+
     setLoading(false);
   };
 
   const handleReset = () => {
-    startItems(masterRef.current);
-    setSearched(false);
-    setQuery("");
+    const currentItems = [...items];
+    const currentAngles = [...anglesRef.current];
+    setExitItems(currentItems);
+    setExitAngles(currentAngles);
+    setItems([]);
+    setChipPositions([]);
+    anglesRef.current = [];
+    setTransitionPhase("exit");
+    transitionPhaseRef.current = "exit";
+
+    setTimeout(() => {
+      setExitItems([]);
+      setExitAngles([]);
+      setSearched(false);
+      setQuery("");
+      spawnItems(masterRef.current);
+    }, 600);
   };
 
   const handleChipClick = (item: CircleItem) => {
@@ -129,6 +239,10 @@ export default function AISearchPage() {
     const a = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
     return a < Math.PI;
   };
+
+  // ── easing ───────────────────────────────────────────────────────
+  // Cubic ease-out for the outward travel
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
   const profileImage = user?.imageUrl;
 
@@ -166,7 +280,11 @@ export default function AISearchPage() {
             transparent 76%);
           filter: blur(22px);
           pointer-events: none; z-index: 1;
+          transition: opacity 0.3s ease;
         }
+        .aisp-stage[data-phase="exit"] .aisp-glow { opacity: 0.4; }
+        .aisp-stage[data-phase="spawning"] .aisp-glow { opacity: 0.85; }
+
         .aisp-ring {
           position: absolute;
           top: 50%; left: 50%;
@@ -175,7 +293,26 @@ export default function AISearchPage() {
           border-radius: 50%;
           border: 1px dashed rgba(0,0,0,0.07);
           pointer-events: none; z-index: 2;
+          transition: border-color 0.3s ease, opacity 0.3s ease;
         }
+        .aisp-stage[data-phase="exit"] .aisp-ring {
+          border-color: rgba(140,110,255,0.4);
+          animation: aisp-ring-exit 0.6s ease-in forwards;
+        }
+        @keyframes aisp-ring-exit {
+          0%   { border-color: rgba(0,0,0,0.07); }
+          50%  { border-color: rgba(140,110,255,0.5); }
+          100% { border-color: rgba(140,110,255,0.1); opacity: 0.3; }
+        }
+        .aisp-stage[data-phase="spawning"] .aisp-ring {
+          border-color: rgba(47,128,237,0.25);
+          animation: aisp-ring-spawn 1s ease-out forwards;
+        }
+        @keyframes aisp-ring-spawn {
+          0%   { border-color: rgba(47,128,237,0.5); }
+          100% { border-color: rgba(0,0,0,0.07); }
+        }
+
         .aisp-hub {
           position: absolute;
           top: 50%; left: 50%;
@@ -188,6 +325,10 @@ export default function AISearchPage() {
           display: flex; align-items: center; justify-content: center;
           z-index: 5;
           box-shadow: 0 0 0 10px rgba(140,110,255,0.08), 0 4px 28px rgba(0,0,0,0.11);
+          transition: box-shadow 0.4s ease;
+        }
+        .aisp-stage[data-phase="spawning"] .aisp-hub {
+          box-shadow: 0 0 0 18px rgba(47,128,237,0.1), 0 4px 28px rgba(0,0,0,0.14);
         }
         .aisp-hub img { width:100%; height:100%; object-fit:cover; }
         .aisp-hub-fallback { font-size:34px; font-weight:700; color:var(--text-muted,#9ca3af); }
@@ -206,9 +347,11 @@ export default function AISearchPage() {
           color:var(--accent,#7c6fe0);
           letter-spacing:0.02em; white-space:nowrap;
           z-index:6; pointer-events:none;
+          transition: opacity 0.2s ease;
         }
+        .aisp-stage[data-phase="exit"] .aisp-stage-label { opacity: 0; }
 
-        /* ── Chips ── */
+        /* ── Idle chips (normal orbit) ── */
         .aisp-chip {
           position:absolute;
           transform:translate(-50%,-50%);
@@ -238,6 +381,32 @@ export default function AISearchPage() {
         .aisp-chip:hover .aisp-chip-ph {
           transform:scale(1.08);
           box-shadow:0 8px 28px rgba(47,128,237,0.26);
+        }
+
+        /* ── Exit chips — staggered, deliberate one-by-one dismissal ── */
+        .aisp-chip-exit {
+          position:absolute;
+          background:none; border:none; padding:0;
+          pointer-events:none; z-index:3;
+          display:flex; flex-direction:column; align-items:center;
+        }
+        .aisp-chip-exit .aisp-chip-img,
+        .aisp-chip-exit .aisp-chip-ph {
+          animation: aisp-chip-dismiss var(--exit-dur, 0.28s) var(--exit-delay, 0s) ease-in both;
+        }
+        @keyframes aisp-chip-dismiss {
+          0%   { opacity:1; transform: translate(-50%,-50%) scale(1);    filter: blur(0px); }
+          30%  { opacity:1; transform: translate(-50%,-50%) scale(0.92); filter: blur(0px); }
+          70%  { opacity:0.4; transform: translate(-50%,-50%) scale(1.08); filter: blur(2px); }
+          100% { opacity:0;   transform: translate(-50%,-50%) scale(0.6); filter: blur(6px); }
+        }
+
+        /* ── Spawning chips — travel center → orbit ── */
+        .aisp-chip-spawning {
+          position:absolute;
+          background:none; border:none; padding:0;
+          pointer-events:none; z-index:4;
+          display:flex; flex-direction:column; align-items:center;
         }
 
         /* ── Hover popup ── */
@@ -332,7 +501,7 @@ export default function AISearchPage() {
       `}</style>
 
       <div className="aisp-page">
-        <div className="aisp-stage">
+        <div className="aisp-stage" data-phase={transitionPhase}>
           <div className="aisp-glow" />
           <div className="aisp-ring" />
 
@@ -354,17 +523,133 @@ export default function AISearchPage() {
               ? "Loading items…"
               : loading
                 ? "AI is thinking…"
-                : searched && items.length === 0
+                : searched && items.length === 0 && transitionPhase === "idle"
                   ? "No matches found"
-                  : searched
+                  : searched && transitionPhase === "idle"
                     ? `${items.length} match${items.length !== 1 ? "es" : ""} found`
-                    : `${items.length} items in orbit`}
+                    : transitionPhase === "idle"
+                      ? `${items.length} items in orbit`
+                      : ""}
           </div>
 
-          {/* Chips */}
+          {/* ── Exit chips — rendered at their last known positions ── */}
+          {exitItems.map((item, i) => {
+            const angle = exitAngles[i] ?? 0;
+            const x = CX + ORBIT_R * Math.cos(angle);
+            const y = CY + ORBIT_R * Math.sin(angle);
+            // Stagger: each chip exits ~50ms after the previous one
+            const delay = i * 0.045;
+            const dur = 0.28;
+
+            return (
+              <div
+                key={`exit-${item.id}`}
+                className="aisp-chip-exit"
+                style={{
+                  left: x,
+                  top: y,
+                  ["--exit-delay" as string]: `${delay}s`,
+                  ["--exit-dur" as string]: `${dur}s`,
+                }}
+              >
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="aisp-chip-img"
+                    draggable={false}
+                  />
+                ) : (
+                  <div className="aisp-chip-ph">
+                    {item.name?.[0]?.toUpperCase() ?? "?"}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* ── Spawning chips — travel from center to orbit position ── */}
+          {spawningChips.map((chip) => {
+            const now = nowRef.current;
+            const elapsed = now - chip.startTime;
+
+            // Not started yet — render invisible at center
+            if (elapsed < 0) {
+              return (
+                <div
+                  key={`spawn-${chip.item.id}`}
+                  className="aisp-chip-spawning"
+                  style={{ left: CX, top: CY, opacity: 0 }}
+                >
+                  {chip.item.image ? (
+                    <img src={chip.item.image} alt={chip.item.name} className="aisp-chip-img" draggable={false} />
+                  ) : (
+                    <div className="aisp-chip-ph">{chip.item.name?.[0]?.toUpperCase() ?? "?"}</div>
+                  )}
+                </div>
+              );
+            }
+
+            const rawT = Math.min(elapsed / SPAWN_DURATION, 1);
+            const t = easeOutCubic(rawT);
+
+            // Current angle from the orbit (already spinning in anglesRef)
+            const finalAngle = anglesRef.current[chip.index] ?? (
+              (2 * Math.PI * chip.index) / chip.total - Math.PI / 2
+            );
+
+            // Interpolate from center (r=0) to orbit (r=ORBIT_R)
+            const r = t * ORBIT_R;
+            const x = CX + r * Math.cos(finalAngle);
+            const y = CY + r * Math.sin(finalAngle);
+
+            // Scale: starts tiny (0.2), grows to full (1) with slight overshoot
+            const scale = rawT < 1
+              ? 0.2 + t * 0.85 + (rawT > 0.7 ? Math.sin((rawT - 0.7) / 0.3 * Math.PI) * 0.08 : 0)
+              : 1;
+
+            // Blur: dissipates as it reaches orbit
+            const blur = (1 - t) * 6;
+
+            // Opacity: fades in quickly then holds
+            const opacity = Math.min(rawT * 3, 1);
+
+            // Done traveling — don't render (the idle chip will take over)
+            if (rawT >= 1) return null;
+
+            return (
+              <div
+                key={`spawn-${chip.item.id}`}
+                className="aisp-chip-spawning"
+                style={{
+                  left: x,
+                  top: y,
+                  opacity,
+                  filter: `blur(${blur}px)`,
+                  transform: `translate(-50%, -50%) scale(${scale})`,
+                }}
+              >
+                {chip.item.image ? (
+                  <img src={chip.item.image} alt={chip.item.name} className="aisp-chip-img" draggable={false} />
+                ) : (
+                  <div className="aisp-chip-ph">{chip.item.name?.[0]?.toUpperCase() ?? "?"}</div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* ── Idle/orbit chips — hidden while spawning (spawning chip covers) ── */}
           {items.map((item, i) => {
             const pos = chipPositions[i];
             if (!pos) return null;
+
+            // Check if this item is still spawning — hide the orbit chip until done
+            const spawning = spawningChips.find((s) => s.index === i);
+            if (spawning) {
+              const elapsed = nowRef.current - spawning.startTime;
+              if (elapsed < SPAWN_DURATION) return null;
+            }
+
             const isHovered = hoveredId === item.id;
             const below = popupBelow(anglesRef.current[i] ?? 0);
 
@@ -391,7 +676,7 @@ export default function AISearchPage() {
                   </div>
                 )}
 
-                {isHovered && (
+                {isHovered && transitionPhase === "idle" && (
                   <div
                     className={`aisp-popup aisp-popup--${below ? "below" : "above"}`}
                   >
@@ -438,7 +723,7 @@ export default function AISearchPage() {
           <button
             className="aisp-bar-btn"
             onClick={handleSearch}
-            disabled={loading || initialLoad}
+            disabled={loading || initialLoad || transitionPhase !== "idle"}
           >
             {loading ? (
               <span className="aisp-spinner" />
