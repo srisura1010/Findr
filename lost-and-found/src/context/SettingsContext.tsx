@@ -5,7 +5,12 @@ import { ThemeId } from "@/lib/themes";
 import { applyTheme } from "@/lib/applyTheme";
 type FontSize = "sm" | "md" | "lg" | "xl";
 type FontFamily = "sans" | "serif" | "mono";
-type Language = "en" | "es" | "fr" | "de";
+type Language = 
+  | "en" | "es" | "fr" | "de"
+  | "zh" | "hi" | "ar" | "pt"
+  | "bn" | "ru" | "ja" | "ko"
+  | "it" | "tr" | "vi" | "pl"
+  | "nl" | "uk" | "fa" | "sw";
 
 interface SettingsContextType {
   theme: ThemeId;

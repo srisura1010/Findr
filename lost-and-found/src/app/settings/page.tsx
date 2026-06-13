@@ -9,6 +9,29 @@ import { useRouter } from "next/navigation";
 import "./settings.css";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "de", label: "Deutsch" },
+  { code: "zh", label: "中文" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "ar", label: "العربية" },
+  { code: "pt", label: "Português" },
+  { code: "bn", label: "বাংলা" },
+  { code: "ru", label: "Русский" },
+  { code: "ja", label: "日本語" },
+  { code: "ko", label: "한국어" },
+  { code: "it", label: "Italiano" },
+  { code: "tr", label: "Türkçe" },
+  { code: "vi", label: "Tiếng Việt" },
+  { code: "pl", label: "Polski" },
+  { code: "nl", label: "Nederlands" },
+  { code: "uk", label: "Українська" },
+  { code: "fa", label: "فارسی" },
+  { code: "sw", label: "Kiswahili" },
+] as const;
+
 const SettingsPage = () => {
   const {
     theme,
@@ -120,21 +143,9 @@ const SettingsPage = () => {
     }
     const translateAndCache = async () => {
       const translations = [
-        {
-          key: "Settings",
-          setter: setSettingsTitleText,
-          cacheKey: "settings_title",
-        },
-        {
-          key: "Appearance",
-          setter: setAppearanceText,
-          cacheKey: "settings_appearance",
-        },
-        {
-          key: "Language",
-          setter: setLanguageText,
-          cacheKey: "settings_language",
-        },
+        { key: "Settings", setter: setSettingsTitleText, cacheKey: "settings_title" },
+        { key: "Appearance", setter: setAppearanceText, cacheKey: "settings_appearance" },
+        { key: "Language", setter: setLanguageText, cacheKey: "settings_language" },
         { key: "Light", setter: setLightText, cacheKey: "settings_light" },
         { key: "Dark", setter: setDarkText, cacheKey: "settings_dark" },
         { key: "Midnight", setter: setMidnightText, cacheKey: "settings_midnight" },
@@ -149,35 +160,15 @@ const SettingsPage = () => {
         { key: "Dark Variants", setter: setDarkVariantsGroupText, cacheKey: "settings_darkVariants" },
         { key: "Accessibility", setter: setAccessibilityGroupText, cacheKey: "settings_accessibility" },
         { key: "Text-to-Speech", setter: setTTSText, cacheKey: "settings_tts" },
-        {
-          key: "Enable TTS",
-          setter: setEnableTTSText,
-          cacheKey: "settings_enableTTS",
-        },
-        {
-          key: "Disable TTS",
-          setter: setDisableTTSText,
-          cacheKey: "settings_disableTTS",
-        },
-        {
-          key: "Speed",
-          setter: setTTSSpeedText,
-          cacheKey: "settings_ttsSpeed",
-        },
+        { key: "Enable TTS", setter: setEnableTTSText, cacheKey: "settings_enableTTS" },
+        { key: "Disable TTS", setter: setDisableTTSText, cacheKey: "settings_disableTTS" },
+        { key: "Speed", setter: setTTSSpeedText, cacheKey: "settings_ttsSpeed" },
         { key: "Font", setter: setFontText, cacheKey: "settings_font" },
-        {
-          key: "Font Size",
-          setter: setFontSizeText,
-          cacheKey: "settings_fontSize",
-        },
+        { key: "Font Size", setter: setFontSizeText, cacheKey: "settings_fontSize" },
         { key: "Small", setter: setSmallText, cacheKey: "settings_small" },
         { key: "Medium", setter: setMediumText, cacheKey: "settings_medium" },
         { key: "Large", setter: setLargeText, cacheKey: "settings_large" },
-        {
-          key: "Extra Large",
-          setter: setExtraLargeText,
-          cacheKey: "settings_extraLarge",
-        },
+        { key: "Extra Large", setter: setExtraLargeText, cacheKey: "settings_extraLarge" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
@@ -343,30 +334,15 @@ const SettingsPage = () => {
         <section className="settings-section">
           <h3>{languageText}</h3>
           <div className="theme-options">
-            <button
-              className={language === "en" ? "active" : ""}
-              onClick={() => setLanguage("en")}
-            >
-              English
-            </button>
-            <button
-              className={language === "es" ? "active" : ""}
-              onClick={() => setLanguage("es")}
-            >
-              Español
-            </button>
-            <button
-              className={language === "fr" ? "active" : ""}
-              onClick={() => setLanguage("fr")}
-            >
-              Français
-            </button>
-            <button
-              className={language === "de" ? "active" : ""}
-              onClick={() => setLanguage("de")}
-            >
-              Deutsch
-            </button>
+            {LANGUAGES.map(({ code, label }) => (
+              <button
+                key={code}
+                className={language === code ? "active" : ""}
+                onClick={() => setLanguage(code)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </section>
 
