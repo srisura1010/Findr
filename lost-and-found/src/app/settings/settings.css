@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Merriweather:wght@400;700&family=Source+Code+Pro:wght@400;500&family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;600&family=Lora:wght@400;500&display=swap");
 
 
 :root,
@@ -35,13 +35,7 @@ body.light {
 }
 
 
-body.colorblind .theme-options button.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #ffffff;
-  box-shadow: none;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+body.colorblind .theme-card.active {
   outline: 3px solid #002244;
   outline-offset: 2px;
 }
@@ -72,7 +66,7 @@ body.colorblind *:focus-visible {
 
 
 .settings-card {
-  width: 650px;
+  width: 720px;
   max-width: 95%;
   background: var(--bg-card);
   color: var(--text-primary);
@@ -121,10 +115,192 @@ body.colorblind *:focus-visible {
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+}
+
+.settings-description {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
 }
 
 
+/* ── THEME GRID ── */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.theme-card {
+  border-radius: 12px;
+  border: 2px solid var(--border-input);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  font-size: 0;
+}
+
+.theme-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  box-shadow: 0 4px 12px rgba(47,128,237,0.12);
+}
+
+.theme-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 16px rgba(47,128,237,0.22);
+  transform: translateY(-1px);
+}
+
+body.high-contrast .theme-card.active {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.theme-card-preview {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: block;
+  flex-shrink: 0;
+  vertical-align: top;
+  margin: 0;
+  padding: 0;
+}
+
+.theme-card-label {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 7px 4px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-input);
+  letter-spacing: 0.1px;
+}
+
+.theme-card.active .theme-card-label {
+  color: var(--accent);
+}
+
+
+/* ── FONT BUTTONS ── */
+.font-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.font-btn {
+  flex: 1;
+  min-width: 110px;
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-input);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.font-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+}
+
+.font-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
+  transform: translateY(-1px);
+}
+
+.font-btn-name {
+  font-size: 0.72rem;
+  opacity: 0.7;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.font-btn.active .font-btn-name {
+  opacity: 0.85;
+}
+
+.font-btn-sans       { font-family: "DM Sans", "Inter", sans-serif; }
+.font-btn-serif      { font-family: "Merriweather", "Lora", serif; }
+.font-btn-mono       { font-family: "Source Code Pro", monospace; }
+.font-btn-inter      { font-family: "Inter", sans-serif; }
+.font-btn-playfair   { font-family: "Playfair Display", serif; }
+.font-btn-poppins    { font-family: "Poppins", sans-serif; }
+.font-btn-ubuntu     { font-family: "Ubuntu", sans-serif; }
+.font-btn-lora       { font-family: "Lora", serif; }
+
+
+/* ── SIZE BUTTONS ── */
+.size-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.size-btn {
+  flex: 1;
+  min-width: 90px;
+  min-height: 62px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-input);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.size-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+}
+
+.size-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
+  transform: translateY(-1px);
+}
+
+.size-btn-sm   { font-size: 0.75rem; }
+.size-btn-md   { font-size: 0.95rem; }
+.size-btn-lg   { font-size: 1.1rem; }
+.size-btn-xl   { font-size: 1.3rem; }
+
+
+/* ── LANGUAGE GRID ── */
 .theme-options {
   display: flex;
   gap: 10px;
@@ -158,7 +334,7 @@ body.colorblind *:focus-visible {
   background: var(--accent);
   border-color: var(--accent);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
   transform: translateY(-1px);
 }
 
@@ -174,6 +350,7 @@ body.high-contrast .theme-options button.active {
 }
 
 
+/* ── TTS ── */
 .tts-toggle {
   display: flex;
   align-items: center;
@@ -230,7 +407,6 @@ body.high-contrast .theme-options button.active {
   transform: translateX(20px);
 }
 
-
 .tts-rate {
   display: flex;
   flex-direction: column;
@@ -245,12 +421,6 @@ body.high-contrast .theme-options button.active {
   background: var(--bg-input);
 }
 
-.tts-rate label {
-  font-weight: 600;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-
 .tts-rate input[type="range"] {
   width: 100%;
   accent-color: var(--accent);
@@ -258,7 +428,6 @@ body.high-contrast .theme-options button.active {
   height: 4px;
   border-radius: 2px;
 }
-
 
 .settings-select {
   width: 100%;
@@ -286,7 +455,6 @@ body.high-contrast .theme-options button.active {
   background: var(--bg-card);
 }
 
-
 .settings-save-btn {
   display: inline-flex;
   align-items: center;
@@ -308,10 +476,6 @@ body.high-contrast .theme-options button.active {
 .settings-save-btn:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
-}
-
-body.light .settings-save-btn:hover {
   box-shadow: 0 4px 14px rgba(47, 128, 237, 0.35);
 }
 
@@ -319,7 +483,6 @@ body.high-contrast .settings-save-btn {
   color: #000000;
   box-shadow: none;
 }
-
 
 .settings-section p,
 .settings-description {
@@ -348,6 +511,24 @@ body.high-contrast .settings-save-btn {
 
   .settings-section h3 {
     font-size: 9px;
+  }
+
+  .theme-grid {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 8px;
+  }
+
+  .font-options {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .font-btn {
+    width: 100%;
+  }
+
+  .size-options {
+    gap: 8px;
   }
 
   .theme-options {

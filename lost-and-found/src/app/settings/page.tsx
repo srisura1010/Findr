@@ -32,6 +32,82 @@ const LANGUAGES = [
   { code: "sw", label: "Kiswahili" },
 ] as const;
 
+const THEME_PREVIEWS: Record<
+  string,
+  { sky: string; ground: string; mountain: string; sun: string; stroke: string; label: string }
+> = {
+  light:           { sky: "#dbeafe", ground: "#e0f2fe", mountain: "#bfdbfe", sun: "#fde68a", stroke: "#93c5fd",  label: "Light" },
+  dark:            { sky: "#1e293b", ground: "#0f172a", mountain: "#334155", sun: "#f59e0b", stroke: "#475569",  label: "Dark" },
+  midnight:        { sky: "#0f0c29", ground: "#1a1040", mountain: "#2d1f6e", sun: "#c084fc", stroke: "#4c1d95",  label: "Midnight" },
+  ocean:           { sky: "#0c4a6e", ground: "#075985", mountain: "#0369a1", sun: "#38bdf8", stroke: "#0284c7",  label: "Ocean" },
+  forest:          { sky: "#14532d", ground: "#166534", mountain: "#15803d", sun: "#fbbf24", stroke: "#16a34a",  label: "Forest" },
+  sunset:          { sky: "#7c2d12", ground: "#9a3412", mountain: "#c2410c", sun: "#fb923c", stroke: "#ea580c",  label: "Sunset" },
+  "high-contrast": { sky: "#000000", ground: "#111111", mountain: "#ffffff", sun: "#ffff00", stroke: "#ffffff",  label: "High Contrast" },
+  protanope:       { sky: "#1e3a5f", ground: "#162d47", mountain: "#2c5282", sun: "#ecc94b", stroke: "#3182ce",  label: "Protanope" },
+  deuteranope:     { sky: "#1a365d", ground: "#153e75", mountain: "#2b6cb0", sun: "#f6e05e", stroke: "#3182ce",  label: "Deuteranope" },
+  tritanope:       { sky: "#322659", ground: "#44337a", mountain: "#553c9a", sun: "#f687b3", stroke: "#6b46c1",  label: "Tritanope" },
+};
+
+const ThemePreviewSVG = ({
+  sky, ground, mountain, sun, stroke,
+}: {
+  sky: string; ground: string; mountain: string; sun: string; stroke: string;
+}) => (
+  <svg
+    className="theme-card-preview"
+    viewBox="0 0 120 90"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <defs>
+      <clipPath id="theme-preview-clip">
+        <rect width="120" height="90" rx="8" ry="8" />
+      </clipPath>
+    </defs>
+    <g clipPath="url(#theme-preview-clip)">
+      <rect width="120" height="90" fill={sky} />
+      <rect y="62" width="120" height="28" fill={ground} />
+      <circle cx="94" cy="22" r="11" fill={sun} stroke={stroke} strokeWidth="1.5" />
+      <polygon
+        points="66,10 111,62 21,62"
+        fill={mountain}
+        stroke={stroke}
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <polygon
+        points="34,32 68,62 0,62"
+        fill={mountain}
+        stroke={stroke}
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+    </g>
+  </svg>
+);
+
+const STANDARD_THEMES = ["light", "dark"];
+const DARK_THEMES     = ["midnight", "ocean", "forest", "sunset"];
+const A11Y_THEMES     = ["high-contrast", "protanope", "deuteranope", "tritanope"];
+
+const FONT_OPTIONS = [
+  { value: "sans",     label: "Aa", name: "DM Sans",     className: "font-btn-sans" },
+  { value: "inter",    label: "Aa", name: "Inter",        className: "font-btn-inter" },
+  { value: "poppins",  label: "Aa", name: "Poppins",      className: "font-btn-poppins" },
+  { value: "ubuntu",   label: "Aa", name: "Ubuntu",       className: "font-btn-ubuntu" },
+  { value: "serif",    label: "Aa", name: "Merriweather", className: "font-btn-serif" },
+  { value: "playfair", label: "Aa", name: "Playfair",     className: "font-btn-playfair" },
+  { value: "lora",     label: "Aa", name: "Lora",         className: "font-btn-lora" },
+  { value: "mono",     label: "Aa", name: "Source Code",  className: "font-btn-mono" },
+];
+
+const SIZE_OPTIONS = [
+  { value: "sm", labelKey: "small",      sizeClass: "size-btn-sm" },
+  { value: "md", labelKey: "medium",     sizeClass: "size-btn-md" },
+  { value: "lg", labelKey: "large",      sizeClass: "size-btn-lg" },
+  { value: "xl", labelKey: "extraLarge", sizeClass: "size-btn-xl" },
+];
+
 const SettingsPage = () => {
   const {
     theme,
@@ -82,7 +158,26 @@ const SettingsPage = () => {
   const [largeText, setLargeText] = useState("Large");
   const [extraLargeText, setExtraLargeText] = useState("Extra Large");
 
-  // ── Ban check ──
+  const sizeLabels: Record<string, string> = {
+    small: smallText,
+    medium: mediumText,
+    large: largeText,
+    extraLarge: extraLargeText,
+  };
+
+  const themeLabels: Record<string, string> = {
+    light: lightText,
+    dark: darkText,
+    midnight: midnightText,
+    ocean: oceanText,
+    forest: forestText,
+    sunset: sunsetText,
+    "high-contrast": highContrastText,
+    protanope: protanopeText,
+    deuteranope: deuteranopeText,
+    tritanope: tritanopeText,
+  };
+
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) {
@@ -109,7 +204,6 @@ const SettingsPage = () => {
     checkBan();
   }, [user, isLoaded]);
 
-  // ── Translations ──
   useEffect(() => {
     if (language === "en") {
       setSettingsTitleText("Settings");
@@ -143,32 +237,32 @@ const SettingsPage = () => {
     }
     const translateAndCache = async () => {
       const translations = [
-        { key: "Settings", setter: setSettingsTitleText, cacheKey: "settings_title" },
-        { key: "Appearance", setter: setAppearanceText, cacheKey: "settings_appearance" },
-        { key: "Language", setter: setLanguageText, cacheKey: "settings_language" },
-        { key: "Light", setter: setLightText, cacheKey: "settings_light" },
-        { key: "Dark", setter: setDarkText, cacheKey: "settings_dark" },
-        { key: "Midnight", setter: setMidnightText, cacheKey: "settings_midnight" },
-        { key: "Ocean", setter: setOceanText, cacheKey: "settings_ocean" },
-        { key: "Forest", setter: setForestText, cacheKey: "settings_forest" },
-        { key: "Sunset", setter: setSunsetText, cacheKey: "settings_sunset" },
-        { key: "High Contrast", setter: setHighContrastText, cacheKey: "settings_highContrast" },
-        { key: "Protanope", setter: setProtanopeText, cacheKey: "settings_protanope" },
-        { key: "Deuteranope", setter: setDeuteranopeText, cacheKey: "settings_deuteranope" },
-        { key: "Tritanope", setter: setTritanopeText, cacheKey: "settings_tritanope" },
-        { key: "Standard", setter: setStandardGroupText, cacheKey: "settings_standard" },
-        { key: "Dark Variants", setter: setDarkVariantsGroupText, cacheKey: "settings_darkVariants" },
-        { key: "Accessibility", setter: setAccessibilityGroupText, cacheKey: "settings_accessibility" },
-        { key: "Text-to-Speech", setter: setTTSText, cacheKey: "settings_tts" },
-        { key: "Enable TTS", setter: setEnableTTSText, cacheKey: "settings_enableTTS" },
-        { key: "Disable TTS", setter: setDisableTTSText, cacheKey: "settings_disableTTS" },
-        { key: "Speed", setter: setTTSSpeedText, cacheKey: "settings_ttsSpeed" },
-        { key: "Font", setter: setFontText, cacheKey: "settings_font" },
-        { key: "Font Size", setter: setFontSizeText, cacheKey: "settings_fontSize" },
-        { key: "Small", setter: setSmallText, cacheKey: "settings_small" },
-        { key: "Medium", setter: setMediumText, cacheKey: "settings_medium" },
-        { key: "Large", setter: setLargeText, cacheKey: "settings_large" },
-        { key: "Extra Large", setter: setExtraLargeText, cacheKey: "settings_extraLarge" },
+        { key: "Settings",       setter: setSettingsTitleText,     cacheKey: "settings_title" },
+        { key: "Appearance",     setter: setAppearanceText,        cacheKey: "settings_appearance" },
+        { key: "Language",       setter: setLanguageText,          cacheKey: "settings_language" },
+        { key: "Light",          setter: setLightText,             cacheKey: "settings_light" },
+        { key: "Dark",           setter: setDarkText,              cacheKey: "settings_dark" },
+        { key: "Midnight",       setter: setMidnightText,          cacheKey: "settings_midnight" },
+        { key: "Ocean",          setter: setOceanText,             cacheKey: "settings_ocean" },
+        { key: "Forest",         setter: setForestText,            cacheKey: "settings_forest" },
+        { key: "Sunset",         setter: setSunsetText,            cacheKey: "settings_sunset" },
+        { key: "High Contrast",  setter: setHighContrastText,      cacheKey: "settings_highContrast" },
+        { key: "Protanope",      setter: setProtanopeText,         cacheKey: "settings_protanope" },
+        { key: "Deuteranope",    setter: setDeuteranopeText,       cacheKey: "settings_deuteranope" },
+        { key: "Tritanope",      setter: setTritanopeText,         cacheKey: "settings_tritanope" },
+        { key: "Standard",       setter: setStandardGroupText,     cacheKey: "settings_standard" },
+        { key: "Dark Variants",  setter: setDarkVariantsGroupText, cacheKey: "settings_darkVariants" },
+        { key: "Accessibility",  setter: setAccessibilityGroupText,cacheKey: "settings_accessibility" },
+        { key: "Text-to-Speech", setter: setTTSText,               cacheKey: "settings_tts" },
+        { key: "Enable TTS",     setter: setEnableTTSText,         cacheKey: "settings_enableTTS" },
+        { key: "Disable TTS",    setter: setDisableTTSText,        cacheKey: "settings_disableTTS" },
+        { key: "Speed",          setter: setTTSSpeedText,          cacheKey: "settings_ttsSpeed" },
+        { key: "Font",           setter: setFontText,              cacheKey: "settings_font" },
+        { key: "Font Size",      setter: setFontSizeText,          cacheKey: "settings_fontSize" },
+        { key: "Small",          setter: setSmallText,             cacheKey: "settings_small" },
+        { key: "Medium",         setter: setMediumText,            cacheKey: "settings_medium" },
+        { key: "Large",          setter: setLargeText,             cacheKey: "settings_large" },
+        { key: "Extra Large",    setter: setExtraLargeText,        cacheKey: "settings_extraLarge" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
@@ -199,6 +293,28 @@ const SettingsPage = () => {
 
   if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
 
+  const renderThemeGroup = (keys: string[]) =>
+    keys.map((key) => {
+      const p = THEME_PREVIEWS[key];
+      return (
+        <button
+          key={key}
+          className={`theme-card${theme === key ? " active" : ""}`}
+          onClick={() => setTheme(key as Parameters<typeof setTheme>[0])}
+          aria-label={themeLabels[key] ?? key}
+        >
+          <ThemePreviewSVG
+            sky={p.sky}
+            ground={p.ground}
+            mountain={p.mountain}
+            sun={p.sun}
+            stroke={p.stroke}
+          />
+          <span className="theme-card-label">{themeLabels[key] ?? p.label}</span>
+        </button>
+      );
+    });
+
   return (
     <div className="settings-page" id="settings-page">
       <div className="settings-card">
@@ -206,128 +322,51 @@ const SettingsPage = () => {
 
         <section className="settings-section">
           <h3>{appearanceText}</h3>
+
           <p className="settings-description">{standardGroupText}</p>
-          <div className="theme-options">
-            <button
-              className={theme === "light" ? "active" : ""}
-              onClick={() => setTheme("light")}
-            >
-              {lightText}
-            </button>
-            <button
-              className={theme === "dark" ? "active" : ""}
-              onClick={() => setTheme("dark")}
-            >
-              {darkText}
-            </button>
+          <div className="theme-grid" style={{ marginBottom: "18px" }}>
+            {renderThemeGroup(STANDARD_THEMES)}
           </div>
-          <p className="settings-description" style={{ marginTop: "14px" }}>{darkVariantsGroupText}</p>
-          <div className="theme-options">
-            <button
-              className={theme === "midnight" ? "active" : ""}
-              onClick={() => setTheme("midnight")}
-            >
-              {midnightText}
-            </button>
-            <button
-              className={theme === "ocean" ? "active" : ""}
-              onClick={() => setTheme("ocean")}
-            >
-              {oceanText}
-            </button>
-            <button
-              className={theme === "forest" ? "active" : ""}
-              onClick={() => setTheme("forest")}
-            >
-              {forestText}
-            </button>
-            <button
-              className={theme === "sunset" ? "active" : ""}
-              onClick={() => setTheme("sunset")}
-            >
-              {sunsetText}
-            </button>
+
+          <p className="settings-description">{darkVariantsGroupText}</p>
+          <div className="theme-grid" style={{ marginBottom: "18px" }}>
+            {renderThemeGroup(DARK_THEMES)}
           </div>
-          <p className="settings-description" style={{ marginTop: "14px" }}>{accessibilityGroupText}</p>
-          <div className="theme-options">
-            <button
-              className={theme === "high-contrast" ? "active" : ""}
-              onClick={() => setTheme("high-contrast")}
-            >
-              {highContrastText}
-            </button>
-            <button
-              className={theme === "protanope" ? "active" : ""}
-              onClick={() => setTheme("protanope")}
-            >
-              {protanopeText}
-            </button>
-            <button
-              className={theme === "deuteranope" ? "active" : ""}
-              onClick={() => setTheme("deuteranope")}
-            >
-              {deuteranopeText}
-            </button>
-            <button
-              className={theme === "tritanope" ? "active" : ""}
-              onClick={() => setTheme("tritanope")}
-            >
-              {tritanopeText}
-            </button>
+
+          <p className="settings-description">{accessibilityGroupText}</p>
+          <div className="theme-grid">
+            {renderThemeGroup(A11Y_THEMES)}
           </div>
         </section>
 
         <section className="settings-section">
           <h3>{fontText}</h3>
-          <div className="theme-options">
-            <button
-              className={fontFamily === "sans" ? "active" : ""}
-              onClick={() => setFontFamily("sans")}
-            >
-              Sans-serif
-            </button>
-            <button
-              className={fontFamily === "serif" ? "active" : ""}
-              onClick={() => setFontFamily("serif")}
-            >
-              Serif
-            </button>
-            <button
-              className={fontFamily === "mono" ? "active" : ""}
-              onClick={() => setFontFamily("mono")}
-            >
-              Monospace
-            </button>
+          <div className="font-options">
+            {FONT_OPTIONS.map(({ value, label, name, className }) => (
+              <button
+                key={value}
+                className={`font-btn ${className}${fontFamily === value ? " active" : ""}`}
+                onClick={() => setFontFamily(value as Parameters<typeof setFontFamily>[0])}
+              >
+                <span>{label}</span>
+                <span className="font-btn-name">{name}</span>
+              </button>
+            ))}
           </div>
         </section>
 
         <section className="settings-section">
           <h3>{fontSizeText}</h3>
-          <div className="theme-options">
-            <button
-              className={fontSize === "sm" ? "active" : ""}
-              onClick={() => setFontSize("sm")}
-            >
-              {smallText}
-            </button>
-            <button
-              className={fontSize === "md" ? "active" : ""}
-              onClick={() => setFontSize("md")}
-            >
-              {mediumText}
-            </button>
-            <button
-              className={fontSize === "lg" ? "active" : ""}
-              onClick={() => setFontSize("lg")}
-            >
-              {largeText}
-            </button>
-            <button
-              className={fontSize === "xl" ? "active" : ""}
-              onClick={() => setFontSize("xl")}
-            >
-              {extraLargeText}
-            </button>
+          <div className="size-options">
+            {SIZE_OPTIONS.map(({ value, labelKey, sizeClass }) => (
+              <button
+                key={value}
+                className={`size-btn ${sizeClass}${fontSize === value ? " active" : ""}`}
+                onClick={() => setFontSize(value as Parameters<typeof setFontSize>[0])}
+              >
+                {sizeLabels[labelKey]}
+              </button>
+            ))}
           </div>
         </section>
 
