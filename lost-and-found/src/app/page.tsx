@@ -79,47 +79,12 @@ const CAROUSEL_CARDS = [
 // Floating items — positions are % of the hero-right container
 // x: left%, y: top%, size: px, delay: animation-delay in s
 const FLOATING_ITEMS = [
-  {
-    src: "/items/airpods.png",
-    label: "AirPods",
-    x: 2,
-    y: 2,
-    size: 135,
-    delay: 0,
-  },
-  { src: "/items/keys.png", label: "Keys", x: 72, y: 0, size: 125, delay: 0.7 },
-  {
-    src: "/items/phone.png",
-    label: "Phone",
-    x: 36,
-    y: 30,
-    size: 130,
-    delay: 1.4,
-  },
-  {
-    src: "/items/red_backpack_image.png",
-    label: "Backpack",
-    x: 0,
-    y: 62,
-    size: 135,
-    delay: 0.4,
-  },
-  {
-    src: "/items/wallet.png",
-    label: "Wallet",
-    x: 74,
-    y: 58,
-    size: 120,
-    delay: 1.1,
-  },
-  {
-    src: "/items/water-bottle.png",
-    label: "Water Bottle",
-    x: 38,
-    y: 72,
-    size: 130,
-    delay: 1.8,
-  },
+  { src: "/items/airpods.png",            label: "AirPods",      x: -81, y: -5,  size: 135, delay: 0   },
+  { src: "/items/keys.png",               label: "Keys",         x: 50, y: 5,  size: 125, delay: 0.7 },
+  { src: "/items/phone.png",              label: "Phone",        x: -15, y: 38, size: 130, delay: 1.4 },
+  { src: "/items/red_backpack_image.png", label: "Backpack",     x: -70, y: 80, size: 135, delay: 0.4 },
+  { src: "/items/wallet.png",             label: "Wallet",       x: 78, y: 52, size: 120, delay: 1.1 },
+  { src: "/items/water-bottle.png",       label: "Water Bottle", x: 34, y: 82, size: 130, delay: 1.8 },
 ];
 
 export default function Home() {
