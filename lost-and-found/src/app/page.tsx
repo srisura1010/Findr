@@ -79,12 +79,47 @@ const CAROUSEL_CARDS = [
 // Floating items — positions are % of the hero-right container
 // x: left%, y: top%, size: px, delay: animation-delay in s
 const FLOATING_ITEMS = [
-  { src: "/items/airpods.png",            label: "AirPods",      x: -81, y: -5,  size: 135, delay: 0   },
-  { src: "/items/keys.png",               label: "Keys",         x: 50, y: 5,  size: 125, delay: 0.7 },
-  { src: "/items/phone.png",              label: "Phone",        x: -15, y: 38, size: 130, delay: 1.4 },
-  { src: "/items/red_backpack_image.png", label: "Backpack",     x: -70, y: 80, size: 135, delay: 0.4 },
-  { src: "/items/wallet.png",             label: "Wallet",       x: 78, y: 52, size: 120, delay: 1.1 },
-  { src: "/items/water-bottle.png",       label: "Water Bottle", x: 34, y: 82, size: 130, delay: 1.8 },
+  {
+    src: "/items/airpods.png",
+    label: "AirPods",
+    x: -81,
+    y: -5,
+    size: 135,
+    delay: 0,
+  },
+  { src: "/items/keys.png", label: "Keys", x: 50, y: 5, size: 125, delay: 0.7 },
+  {
+    src: "/items/phone.png",
+    label: "Phone",
+    x: -15,
+    y: 38,
+    size: 130,
+    delay: 1.4,
+  },
+  {
+    src: "/items/red_backpack_image.png",
+    label: "Backpack",
+    x: -70,
+    y: 80,
+    size: 135,
+    delay: 0.4,
+  },
+  {
+    src: "/items/wallet.png",
+    label: "Wallet",
+    x: 78,
+    y: 52,
+    size: 120,
+    delay: 1.1,
+  },
+  {
+    src: "/items/water-bottle.png",
+    label: "Water Bottle",
+    x: 34,
+    y: 82,
+    size: 130,
+    delay: 1.8,
+  },
 ];
 
 export default function Home() {
@@ -465,28 +500,32 @@ export default function Home() {
             {FLOATING_ITEMS.map((item, i) => (
               <div
                 key={i}
-                className="floating-item"
+                className={`floating-item${draggingIndex === i ? " is-dragging" : ""}`}
                 onPointerDown={(e) => onPointerDown(e, i)}
-                style={{
-                  left: `${item.x}%`,
-                  top: `${item.y}%`,
-                  width: `${item.size}px`,
-                  height: `${item.size}px`,
-                  animationDelay: `${item.delay}s`,
-                  transform: `translate(${(positions[i] ?? { x: 0 }).x}px, ${(positions[i] ?? { x: 0, y: 0 }).y}px)`,
-                  cursor: draggingIndex === i ? "grabbing" : "grab",
-                  touchAction: "none",
-                }}
+                style={
+                  {
+                    left: `${item.x}%`,
+                    top: `${item.y}%`,
+                    width: `${item.size}px`,
+                    height: `${item.size}px`,
+                    transform: `translate(${(positions[i] ?? { x: 0 }).x}px, ${(positions[i] ?? { x: 0, y: 0 }).y}px)`,
+                    cursor: draggingIndex === i ? "grabbing" : "grab",
+                    touchAction: "none",
+                    "--bob-delay": `${item.delay}s`,
+                  } as React.CSSProperties
+                }
               >
-                <Image
-                  src={item.src}
-                  alt={item.label}
-                  width={item.size}
-                  height={item.size}
-                  className="floating-item-img"
-                  draggable={false}
-                />
-                <span className="floating-item-label">{item.label}</span>
+                <div className="floating-item-bob">
+                  <Image
+                    src={item.src}
+                    alt={item.label}
+                    width={item.size}
+                    height={item.size}
+                    className="floating-item-img"
+                    draggable={false}
+                  />
+                  <span className="floating-item-label">{item.label}</span>
+                </div>
               </div>
             ))}
           </div>
