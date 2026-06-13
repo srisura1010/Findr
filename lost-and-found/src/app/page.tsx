@@ -21,6 +21,11 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { TbReportSearch } from "react-icons/tb";
 import { FaHandshake } from "react-icons/fa";
 import Image from "next/image";
+import {
+  PiNumberCircleTwoFill,
+  PiNumberCircleOneFill,
+  PiNumberCircleThreeFill,
+} from "react-icons/pi";
 
 const TYPING_PHRASES = [
   "Lost Your Keys?",
@@ -37,12 +42,12 @@ const CAROUSEL_CARDS = [
   {
     icon: <IoFolder />,
     title: "One Place for Everything",
-    body: "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
+    body: "Stop checking multiple offices or cardboard boxes throughout your school. All lost and found items live in one clean, searchable place.",
   },
   {
     icon: <FaSchool />,
     title: "Designed for Campuses",
-    body: "Built specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
+    body: "Built specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
   },
   {
     icon: <FaSearch />,
@@ -57,7 +62,7 @@ const CAROUSEL_CARDS = [
   {
     icon: <FaHandsHelping />,
     title: "Students Helping Students",
-    body: "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
+    body: "Anyone can report an item they found, creating a trusted, school-wide system that actually works.",
   },
   {
     icon: <FaShieldAlt />,
@@ -122,6 +127,51 @@ const FLOATING_ITEMS = [
   },
 ];
 
+// ── COUNT-UP HOOK ──
+function useCountUp(target: number, duration = 1500) {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started) setStarted(true);
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started) return;
+    let startTime: number;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [started, target, duration]);
+
+  return { count, ref };
+}
+
+// ── STAT NUMBER COMPONENT ──
+function StatNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const { count, ref } = useCountUp(value);
+  return (
+    <span className="stat-number" ref={ref}>
+      {count}{suffix}
+    </span>
+  );
+}
+
 export default function Home() {
   const { language } = useSettings();
   const router = useRouter();
@@ -149,10 +199,10 @@ export default function Home() {
   const [card5Title, setCard5Title] = useState("Students Helping Students");
   const [card6Title, setCard6Title] = useState("Secure by Design");
   const [card1Body, setCard1Body] = useState(
-    "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
+    "Stop checking multiple offices or cardboard boxes throughout your school. All lost and found items live in one clean, searchable place.",
   );
   const [card2Body, setCard2Body] = useState(
-    "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
+    "Findr is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
   );
   const [card3Body, setCard3Body] = useState(
     "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
@@ -161,7 +211,7 @@ export default function Home() {
     "Filter by category, location, and time to instantly narrow down results and spot your item.",
   );
   const [card5Body, setCard5Body] = useState(
-    "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
+    "Anyone can report an item they found, creating a trusted, school-wide system that actually works.",
   );
   const [card6Body, setCard6Body] = useState(
     "Only your school community sees your items, keeping reports private and protected.",
@@ -235,10 +285,10 @@ export default function Home() {
       setCard5Title("Students Helping Students");
       setCard6Title("Secure by Design");
       setCard1Body(
-        "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
+        "Stop checking multiple offices or cardboard boxes throughout your school. All lost and found items live in one clean, searchable place.",
       );
       setCard2Body(
-        "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
+        "Findr is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
       );
       setCard3Body(
         "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
@@ -247,7 +297,7 @@ export default function Home() {
         "Filter by category, location, and time to instantly narrow down results and spot your item.",
       );
       setCard5Body(
-        "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
+        "Anyone can report an item they found, creating a trusted, school-wide system that actually works.",
       );
       setCard6Body(
         "Only your school community sees your items, keeping reports private and protected.",
@@ -308,12 +358,12 @@ export default function Home() {
           cacheKey: "home_card6Title",
         },
         {
-          key: "Stop checking multiple offices or bulletin boards. All lost and found items live in one clean, searchable place.",
+          key: "Stop checking multiple offices or cardboard boxes throughout your school. All lost and found items live in one clean, searchable place.",
           setter: setCard1Body,
           cacheKey: "home_card1Body",
         },
         {
-          key: "Findr is made specifically for schools — from hallways to gyms to libraries — so nothing slips through the cracks.",
+          key: "Findr is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
           setter: setCard2Body,
           cacheKey: "home_card2Body",
         },
@@ -328,7 +378,7 @@ export default function Home() {
           cacheKey: "home_card4Body",
         },
         {
-          key: "Anyone can report a found item, creating a trusted, school-wide system that actually works.",
+          key: "Anyone can report an item they found, creating a trusted, school-wide system that actually works.",
           setter: setCard5Body,
           cacheKey: "home_card5Body",
         },
@@ -570,15 +620,16 @@ export default function Home() {
       {/* ── HOW IT WORKS ── */}
       <section className="hiw-section">
         <p className="section-label">How it works</p>
-        <h2 className="section-title">Three steps to reunited</h2>
+        <h2 className="section-title">
+          Just <i>3 Steps</i> to Finding Your Items
+        </h2>
         <p className="section-sub">
           Simple enough for anyone on campus, powerful enough for every item.
         </p>
         <div className="steps-grid">
           <div className="step-card">
-            <div className="step-number">01</div>
             <div className="step-icon">
-              <TbReportSearch />
+              <PiNumberCircleOneFill />
             </div>
             <h3 className="step-title">Report It</h3>
             <p className="step-body">
@@ -590,23 +641,21 @@ export default function Home() {
             · · ·
           </div>
           <div className="step-card">
-            <div className="step-number">02</div>
             <div className="step-icon">
-              <FaSearch />
+              <PiNumberCircleTwoFill />
             </div>
             <h3 className="step-title">Search &amp; Match</h3>
             <p className="step-body">
-              Browse the board, filter by type and location, or get notified
-              when a match appears.
+              Browse the dashboard with item listings, filter by type and
+              location, or get notified when a match appears.
             </p>
           </div>
           <div className="step-connector" aria-hidden="true">
             · · ·
           </div>
           <div className="step-card">
-            <div className="step-number">03</div>
             <div className="step-icon">
-              <FaHandshake />
+              <PiNumberCircleThreeFill />
             </div>
             <h3 className="step-title">Get It Back</h3>
             <p className="step-body">
@@ -657,8 +706,8 @@ export default function Home() {
       <section className="stats-section">
         <div className="stats-inner">
           <div className="stat-item">
-            <span className="stat-number">3</span>
-            <span className="stat-label">Steps to Recovery</span>
+            <StatNumber value={40} suffix="+" />
+            <span className="stat-label">Recoveries Made</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
@@ -667,12 +716,12 @@ export default function Home() {
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
-            <span className="stat-number">0</span>
-            <span className="stat-label">Bulletin Boards</span>
+            <StatNumber value={10} />
+            <span className="stat-label">Schools Connected</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
-            <span className="stat-number">∞</span>
+            <StatNumber value={250} suffix="+" />
             <span className="stat-label">Items Supported</span>
           </div>
         </div>
@@ -696,7 +745,7 @@ export default function Home() {
         <div className="cta-inner">
           <h2 className="cta-title">Ready to find what you lost?</h2>
           <p className="cta-sub">
-            Join your school community on Findr today — it only takes a moment
+            Join your school community on Findr today or browse the general dashboard. It only takes a moment
             to sign up.
           </p>
           {isSignedIn ? (
