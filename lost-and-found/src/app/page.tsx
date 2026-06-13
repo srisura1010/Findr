@@ -188,7 +188,7 @@ export default function Home() {
   // translatable strings
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
   const [connectingText, setConnectingText] = useState(
-    "Connecting students, staff, and schools — reuniting everyone with what they've lost.",
+    "Connecting students, staff, and schools and reuniting everyone with what they've lost.",
   );
   const [browseText, setBrowseText] = useState("Browse Lost Items");
   const [reportText, setReportText] = useState("Report a Found Item");
@@ -274,7 +274,7 @@ export default function Home() {
     if (language === "en") {
       setDontPanicText("Don't Panic.");
       setConnectingText(
-        "Connecting students, staff, and schools — reuniting everyone with what they've lost.",
+        "Connecting students, staff, and schools and reuniting everyone with what they've lost.",
       );
       setBrowseText("Browse Lost Items");
       setReportText("Report a Found Item");
@@ -313,7 +313,7 @@ export default function Home() {
           cacheKey: "home_panic",
         },
         {
-          key: "Connecting students, staff, and schools — reuniting everyone with what they've lost.",
+          key: "Connecting students, staff, and schools and reuniting everyone with what they've lost.",
           setter: setConnectingText,
           cacheKey: "home_connecting",
         },
