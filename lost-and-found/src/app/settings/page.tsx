@@ -185,7 +185,7 @@ const DARK_THEMES = ["midnight", "ocean", "forest", "sunset"];
 const A11Y_THEMES = ["high-contrast", "protanope", "deuteranope", "tritanope"];
 
 const FONT_OPTIONS = [
-  { value: "sans", name: "DM Sans", fontFamily: '"DM Sans", sans-serif' },
+  { value: "sans", name: "Sans Serif", fontFamily: "sans-serif" },
   { value: "inter", name: "Inter", fontFamily: '"Inter", sans-serif' },
   { value: "poppins", name: "Poppins", fontFamily: '"Poppins", sans-serif' },
   { value: "ubuntu", name: "Ubuntu", fontFamily: '"Ubuntu", sans-serif' },
