@@ -495,17 +495,17 @@ const SettingsPage = () => {
         <section className="settings-section">
           <h3>{appearanceText}</h3>
 
-          <p className="settings-description">{standardGroupText}</p>
+          <p className="settings-description"><i>{standardGroupText}</i></p>
           <div className="theme-grid" style={{ marginBottom: "18px" }}>
             {renderThemeGroup(STANDARD_THEMES)}
           </div>
 
-          <p className="settings-description">{darkVariantsGroupText}</p>
+          <p className="settings-description"><i>{darkVariantsGroupText}</i></p>
           <div className="theme-grid" style={{ marginBottom: "18px" }}>
             {renderThemeGroup(DARK_THEMES)}
           </div>
 
-          <p className="settings-description">{accessibilityGroupText}</p>
+          <p className="settings-description"><i>{accessibilityGroupText}</i></p>
           <div className="theme-grid">{renderThemeGroup(A11Y_THEMES)}</div>
         </section>
 
