@@ -34,24 +34,109 @@ const LANGUAGES = [
 
 const THEME_PREVIEWS: Record<
   string,
-  { sky: string; ground: string; mountain: string; sun: string; stroke: string; label: string }
+  {
+    sky: string;
+    ground: string;
+    mountain: string;
+    sun: string;
+    stroke: string;
+    label: string;
+  }
 > = {
-  light:           { sky: "#dbeafe", ground: "#e0f2fe", mountain: "#bfdbfe", sun: "#fde68a", stroke: "#93c5fd",  label: "Light" },
-  dark:            { sky: "#1e293b", ground: "#0f172a", mountain: "#334155", sun: "#f59e0b", stroke: "#475569",  label: "Dark" },
-  midnight:        { sky: "#0f0c29", ground: "#1a1040", mountain: "#2d1f6e", sun: "#c084fc", stroke: "#4c1d95",  label: "Midnight" },
-  ocean:           { sky: "#0c4a6e", ground: "#075985", mountain: "#0369a1", sun: "#38bdf8", stroke: "#0284c7",  label: "Ocean" },
-  forest:          { sky: "#14532d", ground: "#166534", mountain: "#15803d", sun: "#fbbf24", stroke: "#16a34a",  label: "Forest" },
-  sunset:          { sky: "#7c2d12", ground: "#9a3412", mountain: "#c2410c", sun: "#fb923c", stroke: "#ea580c",  label: "Sunset" },
-  "high-contrast": { sky: "#000000", ground: "#111111", mountain: "#ffffff", sun: "#ffff00", stroke: "#ffffff",  label: "High Contrast" },
-  protanope:       { sky: "#1e3a5f", ground: "#162d47", mountain: "#2c5282", sun: "#ecc94b", stroke: "#3182ce",  label: "Protanope" },
-  deuteranope:     { sky: "#1a365d", ground: "#153e75", mountain: "#2b6cb0", sun: "#f6e05e", stroke: "#3182ce",  label: "Deuteranope" },
-  tritanope:       { sky: "#322659", ground: "#44337a", mountain: "#553c9a", sun: "#f687b3", stroke: "#6b46c1",  label: "Tritanope" },
+  light: {
+    sky: "#dbeafe",
+    ground: "#e0f2fe",
+    mountain: "#bfdbfe",
+    sun: "#fde68a",
+    stroke: "#93c5fd",
+    label: "Light",
+  },
+  dark: {
+    sky: "#1e293b",
+    ground: "#0f172a",
+    mountain: "#334155",
+    sun: "#f59e0b",
+    stroke: "#475569",
+    label: "Dark",
+  },
+  midnight: {
+    sky: "#0f0c29",
+    ground: "#1a1040",
+    mountain: "#2d1f6e",
+    sun: "#c084fc",
+    stroke: "#4c1d95",
+    label: "Midnight",
+  },
+  ocean: {
+    sky: "#0c4a6e",
+    ground: "#075985",
+    mountain: "#0369a1",
+    sun: "#38bdf8",
+    stroke: "#0284c7",
+    label: "Ocean",
+  },
+  forest: {
+    sky: "#14532d",
+    ground: "#166534",
+    mountain: "#15803d",
+    sun: "#fbbf24",
+    stroke: "#16a34a",
+    label: "Forest",
+  },
+  sunset: {
+    sky: "#7c2d12",
+    ground: "#9a3412",
+    mountain: "#c2410c",
+    sun: "#fb923c",
+    stroke: "#ea580c",
+    label: "Sunset",
+  },
+  "high-contrast": {
+    sky: "#000000",
+    ground: "#111111",
+    mountain: "#ffffff",
+    sun: "#ffff00",
+    stroke: "#ffffff",
+    label: "High Contrast",
+  },
+  protanope: {
+    sky: "#1e3a5f",
+    ground: "#162d47",
+    mountain: "#2c5282",
+    sun: "#ecc94b",
+    stroke: "#3182ce",
+    label: "Protanope",
+  },
+  deuteranope: {
+    sky: "#1a365d",
+    ground: "#153e75",
+    mountain: "#2b6cb0",
+    sun: "#f6e05e",
+    stroke: "#3182ce",
+    label: "Deuteranope",
+  },
+  tritanope: {
+    sky: "#322659",
+    ground: "#44337a",
+    mountain: "#553c9a",
+    sun: "#f687b3",
+    stroke: "#6b46c1",
+    label: "Tritanope",
+  },
 };
 
 const ThemePreviewSVG = ({
-  sky, ground, mountain, sun, stroke,
+  sky,
+  ground,
+  mountain,
+  sun,
+  stroke,
 }: {
-  sky: string; ground: string; mountain: string; sun: string; stroke: string;
+  sky: string;
+  ground: string;
+  mountain: string;
+  sun: string;
+  stroke: string;
 }) => (
   <svg
     className="theme-card-preview"
@@ -67,16 +152,25 @@ const ThemePreviewSVG = ({
     <g clipPath="url(#theme-preview-clip)">
       <rect width="120" height="90" fill={sky} />
       <rect y="62" width="120" height="28" fill={ground} />
-      <circle cx="94" cy="22" r="11" fill={sun} stroke={stroke} strokeWidth="1.5" />
-      <polygon
-        points="66,10 111,62 21,62"
+      <circle
+        cx="94"
+        cy="22"
+        r="11"
+        fill={sun}
+        stroke={stroke}
+        strokeWidth="1.5"
+      />
+      {/* Back mountain — rounded peak via Q bezier */}
+      <path
+        d="M 21,62 L 62,14 Q 66,10 70,14 L 111,62 Z"
         fill={mountain}
         stroke={stroke}
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
-      <polygon
-        points="34,32 68,62 0,62"
+      {/* Front mountain — rounded peak via Q bezier */}
+      <path
+        d="M 0,62 L 30,36 Q 34,32 38,36 L 68,62 Z"
         fill={mountain}
         stroke={stroke}
         strokeWidth="1.2"
@@ -87,24 +181,34 @@ const ThemePreviewSVG = ({
 );
 
 const STANDARD_THEMES = ["light", "dark"];
-const DARK_THEMES     = ["midnight", "ocean", "forest", "sunset"];
-const A11Y_THEMES     = ["high-contrast", "protanope", "deuteranope", "tritanope"];
+const DARK_THEMES = ["midnight", "ocean", "forest", "sunset"];
+const A11Y_THEMES = ["high-contrast", "protanope", "deuteranope", "tritanope"];
 
 const FONT_OPTIONS = [
-  { value: "sans",     label: "Aa", name: "DM Sans",     className: "font-btn-sans" },
-  { value: "inter",    label: "Aa", name: "Inter",        className: "font-btn-inter" },
-  { value: "poppins",  label: "Aa", name: "Poppins",      className: "font-btn-poppins" },
-  { value: "ubuntu",   label: "Aa", name: "Ubuntu",       className: "font-btn-ubuntu" },
-  { value: "serif",    label: "Aa", name: "Merriweather", className: "font-btn-serif" },
-  { value: "playfair", label: "Aa", name: "Playfair",     className: "font-btn-playfair" },
-  { value: "lora",     label: "Aa", name: "Lora",         className: "font-btn-lora" },
-  { value: "mono",     label: "Aa", name: "Source Code",  className: "font-btn-mono" },
+  { value: "sans", name: "DM Sans", fontFamily: '"DM Sans", sans-serif' },
+  { value: "inter", name: "Inter", fontFamily: '"Inter", sans-serif' },
+  { value: "poppins", name: "Poppins", fontFamily: '"Poppins", sans-serif' },
+  { value: "ubuntu", name: "Ubuntu", fontFamily: '"Ubuntu", sans-serif' },
+  { value: "serif", name: "Merriweather", fontFamily: '"Merriweather", serif' },
+  {
+    value: "playfair",
+    name: "Playfair",
+    fontFamily: '"Playfair Display", serif',
+  },
+  { value: "lora", name: "Lora", fontFamily: '"Lora", serif' },
+  {
+    value: "mono",
+    name: "Source Code",
+    fontFamily: '"Source Code Pro", monospace',
+  },
+  { value: "nunito", name: "Nunito", fontFamily: '"Nunito", sans-serif' },
+  { value: "roboto", name: "Roboto Slab", fontFamily: '"Roboto Slab", serif' },
 ];
 
 const SIZE_OPTIONS = [
-  { value: "sm", labelKey: "small",      sizeClass: "size-btn-sm" },
-  { value: "md", labelKey: "medium",     sizeClass: "size-btn-md" },
-  { value: "lg", labelKey: "large",      sizeClass: "size-btn-lg" },
+  { value: "sm", labelKey: "small", sizeClass: "size-btn-sm" },
+  { value: "md", labelKey: "medium", sizeClass: "size-btn-md" },
+  { value: "lg", labelKey: "large", sizeClass: "size-btn-lg" },
   { value: "xl", labelKey: "extraLarge", sizeClass: "size-btn-xl" },
 ];
 
@@ -144,8 +248,10 @@ const SettingsPage = () => {
   const [deuteranopeText, setDeuteranopeText] = useState("Deuteranope");
   const [tritanopeText, setTritanopeText] = useState("Tritanope");
   const [standardGroupText, setStandardGroupText] = useState("Standard");
-  const [darkVariantsGroupText, setDarkVariantsGroupText] = useState("Dark Variants");
-  const [accessibilityGroupText, setAccessibilityGroupText] = useState("Accessibility");
+  const [darkVariantsGroupText, setDarkVariantsGroupText] =
+    useState("Dark Variants");
+  const [accessibilityGroupText, setAccessibilityGroupText] =
+    useState("Accessibility");
   const [ttsText, setTTSText] = useState("Text-to-Speech");
   const [enableTTSText, setEnableTTSText] = useState("Enable TTS");
   const [disableTTSText, setDisableTTSText] = useState("Disable TTS");
@@ -237,32 +343,96 @@ const SettingsPage = () => {
     }
     const translateAndCache = async () => {
       const translations = [
-        { key: "Settings",       setter: setSettingsTitleText,     cacheKey: "settings_title" },
-        { key: "Appearance",     setter: setAppearanceText,        cacheKey: "settings_appearance" },
-        { key: "Language",       setter: setLanguageText,          cacheKey: "settings_language" },
-        { key: "Light",          setter: setLightText,             cacheKey: "settings_light" },
-        { key: "Dark",           setter: setDarkText,              cacheKey: "settings_dark" },
-        { key: "Midnight",       setter: setMidnightText,          cacheKey: "settings_midnight" },
-        { key: "Ocean",          setter: setOceanText,             cacheKey: "settings_ocean" },
-        { key: "Forest",         setter: setForestText,            cacheKey: "settings_forest" },
-        { key: "Sunset",         setter: setSunsetText,            cacheKey: "settings_sunset" },
-        { key: "High Contrast",  setter: setHighContrastText,      cacheKey: "settings_highContrast" },
-        { key: "Protanope",      setter: setProtanopeText,         cacheKey: "settings_protanope" },
-        { key: "Deuteranope",    setter: setDeuteranopeText,       cacheKey: "settings_deuteranope" },
-        { key: "Tritanope",      setter: setTritanopeText,         cacheKey: "settings_tritanope" },
-        { key: "Standard",       setter: setStandardGroupText,     cacheKey: "settings_standard" },
-        { key: "Dark Variants",  setter: setDarkVariantsGroupText, cacheKey: "settings_darkVariants" },
-        { key: "Accessibility",  setter: setAccessibilityGroupText,cacheKey: "settings_accessibility" },
-        { key: "Text-to-Speech", setter: setTTSText,               cacheKey: "settings_tts" },
-        { key: "Enable TTS",     setter: setEnableTTSText,         cacheKey: "settings_enableTTS" },
-        { key: "Disable TTS",    setter: setDisableTTSText,        cacheKey: "settings_disableTTS" },
-        { key: "Speed",          setter: setTTSSpeedText,          cacheKey: "settings_ttsSpeed" },
-        { key: "Font",           setter: setFontText,              cacheKey: "settings_font" },
-        { key: "Font Size",      setter: setFontSizeText,          cacheKey: "settings_fontSize" },
-        { key: "Small",          setter: setSmallText,             cacheKey: "settings_small" },
-        { key: "Medium",         setter: setMediumText,            cacheKey: "settings_medium" },
-        { key: "Large",          setter: setLargeText,             cacheKey: "settings_large" },
-        { key: "Extra Large",    setter: setExtraLargeText,        cacheKey: "settings_extraLarge" },
+        {
+          key: "Settings",
+          setter: setSettingsTitleText,
+          cacheKey: "settings_title",
+        },
+        {
+          key: "Appearance",
+          setter: setAppearanceText,
+          cacheKey: "settings_appearance",
+        },
+        {
+          key: "Language",
+          setter: setLanguageText,
+          cacheKey: "settings_language",
+        },
+        { key: "Light", setter: setLightText, cacheKey: "settings_light" },
+        { key: "Dark", setter: setDarkText, cacheKey: "settings_dark" },
+        {
+          key: "Midnight",
+          setter: setMidnightText,
+          cacheKey: "settings_midnight",
+        },
+        { key: "Ocean", setter: setOceanText, cacheKey: "settings_ocean" },
+        { key: "Forest", setter: setForestText, cacheKey: "settings_forest" },
+        { key: "Sunset", setter: setSunsetText, cacheKey: "settings_sunset" },
+        {
+          key: "High Contrast",
+          setter: setHighContrastText,
+          cacheKey: "settings_highContrast",
+        },
+        {
+          key: "Protanope",
+          setter: setProtanopeText,
+          cacheKey: "settings_protanope",
+        },
+        {
+          key: "Deuteranope",
+          setter: setDeuteranopeText,
+          cacheKey: "settings_deuteranope",
+        },
+        {
+          key: "Tritanope",
+          setter: setTritanopeText,
+          cacheKey: "settings_tritanope",
+        },
+        {
+          key: "Standard",
+          setter: setStandardGroupText,
+          cacheKey: "settings_standard",
+        },
+        {
+          key: "Dark Variants",
+          setter: setDarkVariantsGroupText,
+          cacheKey: "settings_darkVariants",
+        },
+        {
+          key: "Accessibility",
+          setter: setAccessibilityGroupText,
+          cacheKey: "settings_accessibility",
+        },
+        { key: "Text-to-Speech", setter: setTTSText, cacheKey: "settings_tts" },
+        {
+          key: "Enable TTS",
+          setter: setEnableTTSText,
+          cacheKey: "settings_enableTTS",
+        },
+        {
+          key: "Disable TTS",
+          setter: setDisableTTSText,
+          cacheKey: "settings_disableTTS",
+        },
+        {
+          key: "Speed",
+          setter: setTTSSpeedText,
+          cacheKey: "settings_ttsSpeed",
+        },
+        { key: "Font", setter: setFontText, cacheKey: "settings_font" },
+        {
+          key: "Font Size",
+          setter: setFontSizeText,
+          cacheKey: "settings_fontSize",
+        },
+        { key: "Small", setter: setSmallText, cacheKey: "settings_small" },
+        { key: "Medium", setter: setMediumText, cacheKey: "settings_medium" },
+        { key: "Large", setter: setLargeText, cacheKey: "settings_large" },
+        {
+          key: "Extra Large",
+          setter: setExtraLargeText,
+          cacheKey: "settings_extraLarge",
+        },
       ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
@@ -310,7 +480,9 @@ const SettingsPage = () => {
             sun={p.sun}
             stroke={p.stroke}
           />
-          <span className="theme-card-label">{themeLabels[key] ?? p.label}</span>
+          <span className="theme-card-label">
+            {themeLabels[key] ?? p.label}
+          </span>
         </button>
       );
     });
@@ -334,21 +506,21 @@ const SettingsPage = () => {
           </div>
 
           <p className="settings-description">{accessibilityGroupText}</p>
-          <div className="theme-grid">
-            {renderThemeGroup(A11Y_THEMES)}
-          </div>
+          <div className="theme-grid">{renderThemeGroup(A11Y_THEMES)}</div>
         </section>
 
         <section className="settings-section">
           <h3>{fontText}</h3>
           <div className="font-options">
-            {FONT_OPTIONS.map(({ value, label, name, className }) => (
+            {FONT_OPTIONS.map(({ value, name, fontFamily: ff }) => (
               <button
                 key={value}
-                className={`font-btn ${className}${fontFamily === value ? " active" : ""}`}
-                onClick={() => setFontFamily(value as Parameters<typeof setFontFamily>[0])}
+                className={`font-btn${fontFamily === value ? " active" : ""}`}
+                onClick={() =>
+                  setFontFamily(value as Parameters<typeof setFontFamily>[0])
+                }
               >
-                <span>{label}</span>
+                <span style={{ fontFamily: ff }}>{"Aa"}</span>
                 <span className="font-btn-name">{name}</span>
               </button>
             ))}
@@ -362,7 +534,9 @@ const SettingsPage = () => {
               <button
                 key={value}
                 className={`size-btn ${sizeClass}${fontSize === value ? " active" : ""}`}
-                onClick={() => setFontSize(value as Parameters<typeof setFontSize>[0])}
+                onClick={() =>
+                  setFontSize(value as Parameters<typeof setFontSize>[0])
+                }
               >
                 {sizeLabels[labelKey]}
               </button>

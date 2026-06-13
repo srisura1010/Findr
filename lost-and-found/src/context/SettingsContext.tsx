@@ -4,13 +4,38 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { ThemeId } from "@/lib/themes";
 import { applyTheme } from "@/lib/applyTheme";
 type FontSize = "sm" | "md" | "lg" | "xl";
-type FontFamily = "sans" | "serif" | "mono";
-type Language = 
-  | "en" | "es" | "fr" | "de"
-  | "zh" | "hi" | "ar" | "pt"
-  | "bn" | "ru" | "ja" | "ko"
-  | "it" | "tr" | "vi" | "pl"
-  | "nl" | "uk" | "fa" | "sw";
+type FontFamily =
+  | "sans"
+  | "serif"
+  | "mono"
+  | "inter"
+  | "poppins"
+  | "ubuntu"
+  | "playfair"
+  | "lora"
+  | "nunito"
+  | "roboto";
+type Language =
+  | "en"
+  | "es"
+  | "fr"
+  | "de"
+  | "zh"
+  | "hi"
+  | "ar"
+  | "pt"
+  | "bn"
+  | "ru"
+  | "ja"
+  | "ko"
+  | "it"
+  | "tr"
+  | "vi"
+  | "pl"
+  | "nl"
+  | "uk"
+  | "fa"
+  | "sw";
 
 interface SettingsContextType {
   theme: ThemeId;
@@ -30,10 +55,10 @@ const SettingsContext = createContext<SettingsContextType | null>(null);
 // Note: During SSR, `window` does not exist, so we always return the fallback.
 function getInitial<T extends string>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
-  return localStorage.getItem(key) as T ?? fallback;
+  return (localStorage.getItem(key) as T) ?? fallback;
 }
 
-export function SettingsProvider({ children }: { children: React.ReactNode; }) {
+export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<ThemeId>("light");
   const [fontSize, setFontSize] = useState<FontSize>("md");
   const [fontFamily, setFontFamily] = useState<FontFamily>("sans");
@@ -46,10 +71,27 @@ export function SettingsProvider({ children }: { children: React.ReactNode; }) {
     setLanguage(getInitial("language", "en"));
   }, []);
 
+  const fontMap: Record<string, string> = {
+    sans: '"DM Sans", sans-serif',
+    inter: '"Inter", sans-serif',
+    poppins: '"Poppins", sans-serif',
+    ubuntu: '"Ubuntu", sans-serif',
+    serif: '"Merriweather", serif',
+    playfair: '"Playfair Display", serif',
+    lora: '"Lora", serif',
+    mono: '"Source Code Pro", monospace',
+    nunito: '"Nunito", sans-serif',
+    roboto: '"Roboto Slab", serif',
+  };
+
   useEffect(() => {
     applyTheme(theme);
     document.documentElement.dataset.fontSize = fontSize;
     document.documentElement.dataset.fontFamily = fontFamily;
+    document.documentElement.style.setProperty(
+      "--font-body",
+      fontMap[fontFamily] ?? '"DM Sans", sans-serif',
+    );
   }, [theme, fontSize, fontFamily]);
 
   // Persist changes.
@@ -61,7 +103,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode; }) {
   }, [theme, fontSize, fontFamily, language]);
 
   return (
-    <SettingsContext.Provider value={{ theme, fontSize, fontFamily, language, setTheme, setFontSize, setFontFamily, setLanguage }}>
+    <SettingsContext.Provider
+      value={{
+        theme,
+        fontSize,
+        fontFamily,
+        language,
+        setTheme,
+        setFontSize,
+        setFontFamily,
+        setLanguage,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );

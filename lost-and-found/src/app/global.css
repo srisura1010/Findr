@@ -1,14 +1,10 @@
-
 body {
   background-color: var(--bg);
   color: var(--fg);
+  font-family: var(--font-body, "DM Sans", sans-serif);
 }
 
-
-html[data-font-family="sans"] * { font-family: ui-sans-serif, system-ui, sans-serif !important; }
-html[data-font-family="serif"] * { font-family: ui-serif, Georgia, serif !important; }
-html[data-font-family="mono"] * { font-family: ui-monospace, "Cascadia Code", monospace !important; }
-
+html[data-font-family] * { font-family: var(--font-body, "DM Sans", sans-serif) !important; }
 
 html[data-font-size="sm"] { font-size: 14px; }
 html[data-font-size="md"] { font-size: 16px; }
