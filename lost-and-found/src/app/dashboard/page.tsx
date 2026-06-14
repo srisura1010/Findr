@@ -3380,7 +3380,7 @@ export default function DashboardPage() {
                     fontWeight: 600,
                     fontSize: "0.9rem",
                     fontFamily: "Poppins, sans-serif",
-                    background: boardTab === t ? "#285ebb" : "var(--bg-page)",
+                    background: boardTab === t ? "var(--accent)" : "var(--bg-page)",
                     color: boardTab === t ? "#fff" : "var(--text-muted)",
                     transition: "all 0.15s ease",
                   }}
