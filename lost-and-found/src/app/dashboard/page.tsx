@@ -1202,6 +1202,165 @@ function CategorySelect({
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────────
+function MyDashboardCharts({
+  chartKey,
+  chartData,
+  pieData,
+}: {
+  chartKey: string;
+  chartData: string;
+  pieData: string;
+}) {
+  useEffect(() => {
+    const { monthLabels, foundByMonth, lostByMonth, claimedByMonth } =
+      JSON.parse(chartData);
+    const { totalFound, totalLost, totalClaimed } = JSON.parse(pieData);
+
+    const loadChartJs = () => {
+      return new Promise<void>((resolve) => {
+        if ((window as any).Chart) {
+          resolve();
+          return;
+        }
+        const sc = document.createElement("script");
+        sc.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
+        sc.onload = () => resolve();
+        document.head.appendChild(sc);
+      });
+    };
+
+    loadChartJs().then(() => {
+      const C = (window as any).Chart;
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+      const tickColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)";
+
+      const barEl = document.getElementById(
+        `myDashBarChart-${chartKey}`,
+      ) as HTMLCanvasElement | null;
+      if (barEl) {
+        const existing = C.getChart(barEl);
+        if (existing) existing.destroy();
+        new C(barEl, {
+          type: "bar",
+          data: {
+            labels: monthLabels,
+            datasets: [
+              {
+                label: "Found",
+                data: foundByMonth,
+                backgroundColor: "#2f80ed",
+                borderRadius: 5,
+                borderSkipped: false,
+              },
+              {
+                label: "Lost",
+                data: lostByMonth,
+                backgroundColor: "#f59e0b",
+                borderRadius: 5,
+                borderSkipped: false,
+              },
+              {
+                label: "Claimed",
+                data: claimedByMonth,
+                backgroundColor: "#10b981",
+                borderRadius: 5,
+                borderSkipped: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+                padding: 10,
+                cornerRadius: 8,
+                bodyFont: { family: "Poppins, sans-serif", size: 12 },
+                titleFont: { family: "Poppins, sans-serif", size: 12 },
+              },
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { color: gridColor },
+                ticks: {
+                  color: tickColor,
+                  font: { family: "Poppins, sans-serif", size: 11 },
+                  autoSkip: false,
+                },
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                  color: tickColor,
+                  font: { family: "Poppins, sans-serif", size: 11 },
+                },
+                grid: { color: gridColor },
+              },
+            },
+          },
+        });
+      }
+
+      const pieEl = document.getElementById(
+        `myDashPieChart-${chartKey}`,
+      ) as HTMLCanvasElement | null;
+      if (pieEl && totalFound + totalLost + totalClaimed > 0) {
+        const existing = C.getChart(pieEl);
+        if (existing) existing.destroy();
+        new C(pieEl, {
+          type: "doughnut",
+          data: {
+            labels: ["Found posted", "Lost reported", "Claimed"],
+            datasets: [
+              {
+                data: [totalFound, totalLost, totalClaimed],
+                backgroundColor: ["#2f80ed", "#f59e0b", "#10b981"],
+                borderWidth: 2,
+                borderColor: isDark ? "#1e293b" : "#fff",
+                hoverOffset: 8,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "62%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                  label: (ctx: any) => {
+                    const total = [
+                      totalFound,
+                      totalLost,
+                      totalClaimed,
+                    ].reduce((a: number, b: number) => a + b, 0);
+                    return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / total) * 100)}%)`;
+                  },
+                },
+                bodyFont: { family: "Poppins, sans-serif", size: 12 },
+                titleFont: { family: "Poppins, sans-serif", size: 12 },
+              },
+            },
+          },
+        });
+      }
+    });
+  }, [chartKey]);
+
+  return null;
+}
+
 export default function DashboardPage() {
   const {
     items,
@@ -1847,7 +2006,7 @@ export default function DashboardPage() {
     adminOnly?: boolean;
   }[] = [
     { id: "items", label: s.tabItems, icon: <HiOutlineMagnifyingGlass /> },
-    { id: "my-items", label: s.tabMyItems, icon: <FaClipboard /> },
+    { id: "my-items", label: "My Dashboard", icon: <FaClipboard /> },
     { id: "report-item", label: s.tabReportItem, icon: <FaPlus /> },
     { id: "become-admin", label: s.tabBecomeAdmin, icon: <FaClipboard /> },
     { id: "admin-login", label: s.tabAdmin, icon: <CiLogin /> },
@@ -2291,201 +2450,558 @@ export default function DashboardPage() {
         const myLostItems = (lostItems ?? []).filter(
           (item) => item.authorId === user?.id,
         );
+
+        const totalFound = myFoundItems.length;
+        const totalLost = myLostItems.length;
+        const totalClaimed = (items ?? []).filter(
+          (item) => item.authorId === user?.id && item.status === "claimed",
+        ).length;
+        const totalActions = totalFound + totalLost + totalClaimed;
+
+        const now = new Date();
+        const months: string[] = [];
+        const monthLabels: string[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          months.push(
+            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+          );
+          monthLabels.push(d.toLocaleString("default", { month: "short" }));
+        }
+
+        const foundByMonth = months.map((m) =>
+          (items ?? []).filter((item) => {
+            if (item.authorId !== user?.id) return false;
+            const d = (item as any).date_found || (item as any).created_at || "";
+            return d.startsWith(m);
+          }).length,
+        );
+        const lostByMonth = months.map((m) =>
+          (lostItems ?? []).filter((item) => {
+            if (item.authorId !== user?.id) return false;
+            const d = (item as any).created_at || "";
+            return d.startsWith(m);
+          }).length,
+        );
+        const claimedByMonth = months.map((m) =>
+          (items ?? []).filter((item) => {
+            if (item.authorId !== user?.id || item.status !== "claimed") return false;
+            const d = (item as any).date_found || (item as any).created_at || "";
+            return d.startsWith(m);
+          }).length,
+        );
+
+        const chartDataJson = JSON.stringify({
+          monthLabels,
+          foundByMonth,
+          lostByMonth,
+          claimedByMonth,
+        });
+        const pieDataJson = JSON.stringify({ totalFound, totalLost, totalClaimed });
+        const chartKey = `${user?.id}-${totalActions}`;
+
         return (
-          <div className="main-panel-content" style={{ maxWidth: "960px" }}>
-            <div className="main-panel-section-title">{s.myItemsTitle}</div>
-            {!user ? (
-              <p className="panel-empty">{s.signInToView}</p>
-            ) : myFoundItems.length === 0 && myLostItems.length === 0 ? (
-              <p className="panel-empty">{s.noItemsYet}</p>
-            ) : (
-              <>
-                {myFoundItems.length > 0 && (
-                  <>
+          <div
+            style={{
+              maxWidth: 960,
+              width: "100%",
+              margin: "0 auto",
+              padding: "24px 0",
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+            }}
+          >
+            {/* ── Profile card ── */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                padding: "18px 20px",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-default)",
+                borderRadius: 16,
+                boxShadow: "var(--card-shadow)",
+              }}
+            >
+              {user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  alt="Profile"
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2.5px solid var(--accent)",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: "50%",
+                    background: "var(--accent-light)",
+                    color: "var(--accent)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 24,
+                    fontWeight: 700,
+                    fontFamily: "Poppins, sans-serif",
+                    flexShrink: 0,
+                  }}
+                >
+                  {(user?.fullName || user?.username || "?")[0]?.toUpperCase()}
+                </div>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    margin: "0 0 2px",
+                    fontFamily: "Ubuntu, sans-serif",
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {user?.fullName || user?.username || "Anonymous"}
+                </p>
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  {user?.primaryEmailAddress?.emailAddress || ""}
+                </p>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: "3px 10px",
+                    borderRadius: 20,
+                    background: "var(--accent-light)",
+                    color: "var(--accent)",
+                    fontFamily: "Poppins, sans-serif",
+                  }}
+                >
+                  ✓ Active member
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
+                {(
+                  [
+                    ["Posted", totalFound, "#2f80ed"],
+                    ["Returned", totalClaimed, "#10b981"],
+                    ["Lost", totalLost, "#f59e0b"],
+                  ] as const
+                ).map(([label, val, color]) => (
+                  <div key={label} style={{ textAlign: "center" }}>
                     <p
-                      className="panel-section-title"
-                      style={{ marginBottom: 8 }}
-                    >
-                      {s.foundItemsPosted} ({myFoundItems.length})
-                    </p>
-                    <div className="items-container" style={{ margin: 0 }}>
-                      {myFoundItems.map((item) => (
-                        <div key={item.id} className="item-card">
-                          <div className="item-image-wrapper">
-                            <img
-                              className="item-image"
-                              src={item.image}
-                              alt={item.name}
-                            />
-                          </div>
-                          <div className="item-info">
-                            <h3>{item.name}</h3>
-                            <p>{item.description}</p>
-                            {(item as any).category && (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  fontSize: "0.68rem",
-                                  fontWeight: 600,
-                                  padding: "2px 8px",
-                                  borderRadius: "100px",
-                                  background: "var(--accent)",
-                                  color: "#fff",
-                                  fontFamily: "Poppins, sans-serif",
-                                  marginTop: 4,
-                                  marginBottom: 2,
-                                }}
-                              >
-                                {(item as any).category}
-                              </span>
-                            )}
-                            {item.location && (
-                              <p
-                                style={{
-                                  fontSize: "0.72rem",
-                                  color: "var(--text-muted)",
-                                  marginTop: 2,
-                                  fontFamily: "Poppins, sans-serif",
-                                }}
-                              >
-                                📍 {item.location}
-                              </p>
-                            )}
-                            <p
-                              style={{
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                                marginTop: 4,
-                                color:
-                                  item.status === "pending"
-                                    ? "var(--accent)"
-                                    : "var(--success)",
-                                fontFamily: "Poppins, sans-serif",
-                              }}
-                            >
-                              {item.status === "pending"
-                                ? s.claimPendingStatus
-                                : s.activeStatus}
-                            </p>
-                          </div>
-                          <div className="button-group">
-                            {item.status === "pending" && (
-                              <button
-                                className="confirm-button"
-                                onClick={() => handleConfirmClaimed(item.id)}
-                              >
-                                {s.confirmClaimed}
-                              </button>
-                            )}
-                            <div className="button-group__row">
-                              <button
-                                className="delete-button"
-                                onClick={() => handleDelete(item.id)}
-                              >
-                                <FaTrash />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {myLostItems.length > 0 && (
-                  <>
-                    <p
-                      className="panel-section-title"
                       style={{
-                        marginBottom: 8,
-                        marginTop: myFoundItems.length > 0 ? 24 : 0,
+                        margin: 0,
+                        fontFamily: "Ubuntu, sans-serif",
+                        fontSize: 22,
+                        fontWeight: 700,
+                        color,
                       }}
                     >
-                      {s.lostItemsReported} ({myLostItems.length})
+                      {val}
                     </p>
-                    <div className="items-container" style={{ margin: 0 }}>
-                      {myLostItems.map((item) => (
-                        <div key={item.id} className="item-card">
-                          <div className="item-image-wrapper">
-                            {item.image ? (
-                              <img
-                                className="item-image"
-                                src={item.image}
-                                alt={item.name}
-                              />
-                            ) : (
-                              <div
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  background: "var(--bg-input)",
-                                  color: "var(--text-muted)",
-                                  fontSize: "2rem",
-                                  fontFamily: "Poppins, sans-serif",
-                                }}
-                              >
-                                ?
-                              </div>
-                            )}
-                          </div>
-                          <div className="item-info">
-                            <h3>{item.name}</h3>
-                            <p>{item.description}</p>
-                            {(item as any).category && (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  fontSize: "0.68rem",
-                                  fontWeight: 600,
-                                  padding: "2px 8px",
-                                  borderRadius: "100px",
-                                  background: "var(--accent)",
-                                  color: "#fff",
-                                  fontFamily: "Poppins, sans-serif",
-                                  marginTop: 4,
-                                  marginBottom: 2,
-                                }}
-                              >
-                                {(item as any).category}
-                              </span>
-                            )}
-                            {item.location && (
-                              <p
-                                style={{
-                                  fontSize: "0.72rem",
-                                  color: "var(--text-muted)",
-                                  marginTop: 2,
-                                  fontFamily: "Poppins, sans-serif",
-                                }}
-                              >
-                                📍 {item.location}
-                              </p>
-                            )}
-                          </div>
-                          <div className="button-group">
-                            <button
-                              className="confirm-button"
-                              onClick={() => handleMarkFound(item.id)}
-                            >
-                              {s.markAsFound}
-                            </button>
-                            <div className="button-group__row">
-                              <button
-                                className="delete-button"
-                                onClick={() => handleDeleteLostItem(item.id)}
-                              >
-                                <FaTrash />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: 10,
+                        color: "var(--text-muted)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      {label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Charts row ── */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {/* Bar chart */}
+              <div
+                style={{
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-default)",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  boxShadow: "var(--card-shadow)",
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 10px",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  Monthly activity
+                </p>
+                <div
+                  style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}
+                >
+                  {(
+                    [
+                      ["Found", "#2f80ed"],
+                      ["Lost", "#f59e0b"],
+                      ["Claimed", "#10b981"],
+                    ] as const
+                  ).map(([l, c]) => (
+                    <span
+                      key={l}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: 11,
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 9,
+                          height: 9,
+                          borderRadius: 2,
+                          background: c,
+                          flexShrink: 0,
+                        }}
+                      />
+                      {l}
+                    </span>
+                  ))}
+                </div>
+                <div style={{ position: "relative", height: 180 }}>
+                  <canvas
+                    id={`myDashBarChart-${chartKey}`}
+                    role="img"
+                    aria-label="Bar chart showing monthly found, lost, and claimed item activity"
+                  >
+                    Monthly activity chart.
+                  </canvas>
+                </div>
+              </div>
+
+              {/* Doughnut chart */}
+              <div
+                style={{
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-default)",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  boxShadow: "var(--card-shadow)",
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 10px",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  Action breakdown
+                </p>
+                {totalActions === 0 ? (
+                  <p
+                    style={{
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: 12,
+                      color: "var(--text-muted)",
+                      padding: "20px 0",
+                    }}
+                  >
+                    No activity yet.
+                  </p>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        marginBottom: 12,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {(
+                        [
+                          ["Found posted", "#2f80ed", totalFound],
+                          ["Lost reported", "#f59e0b", totalLost],
+                          ["Claimed", "#10b981", totalClaimed],
+                        ] as const
+                      ).map(([l, c, v]) => (
+                        <span
+                          key={l}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 5,
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 11,
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: 9,
+                              height: 9,
+                              borderRadius: 2,
+                              background: c,
+                              flexShrink: 0,
+                            }}
+                          />
+                          {l}{" "}
+                          {totalActions > 0
+                            ? Math.round((v / totalActions) * 100)
+                            : 0}
+                          %
+                        </span>
                       ))}
+                    </div>
+                    <div style={{ position: "relative", height: 180 }}>
+                      <canvas
+                        id={`myDashPieChart-${chartKey}`}
+                        role="img"
+                        aria-label="Doughnut chart showing breakdown of user actions"
+                      >
+                        Action breakdown chart.
+                      </canvas>
                     </div>
                   </>
                 )}
-              </>
+              </div>
+            </div>
+
+            {/* ── Chart init ── */}
+            <MyDashboardCharts
+              chartKey={chartKey}
+              chartData={chartDataJson}
+              pieData={pieDataJson}
+            />
+
+            {/* ── Found items ── */}
+            {myFoundItems.length > 0 && (
+              <div>
+                <p
+                  style={{
+                    margin: "0 0 10px",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                  }}
+                >
+                  {s.foundItemsPosted} ({myFoundItems.length})
+                </p>
+                <div className="items-container" style={{ margin: 0 }}>
+                  {myFoundItems.map((item) => (
+                    <div key={item.id} className="item-card">
+                      <div className="item-image-wrapper">
+                        <img className="item-image" src={item.image} alt={item.name} />
+                      </div>
+                      <div className="item-info">
+                        <h3>{item.name}</h3>
+                        <p>{item.description}</p>
+                        {(item as any).category && (
+                          <span
+                            style={{
+                              display: "inline-block",
+                              fontSize: "0.68rem",
+                              fontWeight: 600,
+                              padding: "2px 8px",
+                              borderRadius: "100px",
+                              background: "var(--accent)",
+                              color: "#fff",
+                              fontFamily: "Poppins, sans-serif",
+                              marginTop: 4,
+                              marginBottom: 2,
+                            }}
+                          >
+                            {(item as any).category}
+                          </span>
+                        )}
+                        {item.location && (
+                          <p
+                            style={{
+                              fontSize: "0.72rem",
+                              color: "var(--text-muted)",
+                              marginTop: 2,
+                              fontFamily: "Poppins, sans-serif",
+                            }}
+                          >
+                            📍 {item.location}
+                          </p>
+                        )}
+                        <p
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            marginTop: 4,
+                            color:
+                              item.status === "pending"
+                                ? "var(--accent)"
+                                : "var(--success)",
+                            fontFamily: "Poppins, sans-serif",
+                          }}
+                        >
+                          {item.status === "pending"
+                            ? s.claimPendingStatus
+                            : s.activeStatus}
+                        </p>
+                      </div>
+                      <div className="button-group">
+                        {item.status === "pending" && (
+                          <button
+                            className="confirm-button"
+                            onClick={() => handleConfirmClaimed(item.id)}
+                          >
+                            {s.confirmClaimed}
+                          </button>
+                        )}
+                        <div className="button-group__row">
+                          <button
+                            className="delete-button"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Lost items ── */}
+            {myLostItems.length > 0 && (
+              <div>
+                <p
+                  style={{
+                    margin: "0 0 10px",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                  }}
+                >
+                  {s.lostItemsReported} ({myLostItems.length})
+                </p>
+                <div className="items-container" style={{ margin: 0 }}>
+                  {myLostItems.map((item) => (
+                    <div key={item.id} className="item-card">
+                      <div className="item-image-wrapper">
+                        {item.image ? (
+                          <img
+                            className="item-image"
+                            src={item.image}
+                            alt={item.name}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              background: "var(--bg-input)",
+                              color: "var(--text-muted)",
+                              fontSize: "2rem",
+                              fontFamily: "Poppins, sans-serif",
+                            }}
+                          >
+                            ?
+                          </div>
+                        )}
+                      </div>
+                      <div className="item-info">
+                        <h3>{item.name}</h3>
+                        <p>{item.description}</p>
+                        {(item as any).category && (
+                          <span
+                            style={{
+                              display: "inline-block",
+                              fontSize: "0.68rem",
+                              fontWeight: 600,
+                              padding: "2px 8px",
+                              borderRadius: "100px",
+                              background: "var(--accent)",
+                              color: "#fff",
+                              fontFamily: "Poppins, sans-serif",
+                              marginTop: 4,
+                              marginBottom: 2,
+                            }}
+                          >
+                            {(item as any).category}
+                          </span>
+                        )}
+                        {item.location && (
+                          <p
+                            style={{
+                              fontSize: "0.72rem",
+                              color: "var(--text-muted)",
+                              marginTop: 2,
+                              fontFamily: "Poppins, sans-serif",
+                            }}
+                          >
+                            📍 {item.location}
+                          </p>
+                        )}
+                      </div>
+                      <div className="button-group">
+                        <button
+                          className="confirm-button"
+                          onClick={() => handleMarkFound(item.id)}
+                        >
+                          {s.markAsFound}
+                        </button>
+                        <div className="button-group__row">
+                          <button
+                            className="delete-button"
+                            onClick={() => handleDeleteLostItem(item.id)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!user && <p className="panel-empty">{s.signInToView}</p>}
+            {user && myFoundItems.length === 0 && myLostItems.length === 0 && (
+              <p className="panel-empty">{s.noItemsYet}</p>
             )}
           </div>
         );
