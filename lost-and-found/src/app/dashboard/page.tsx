@@ -1977,7 +1977,7 @@ export default function DashboardPage() {
       ? (items ?? []).filter((item) => {
           const q = searchQuery.toLowerCase();
           const haystack =
-            `${item.name} ${item.description} ${(item as any).aiKeywords ?? ""} ${(item as any).category ?? ""}`.toLowerCase();
+            `${item.name} ${item.description} ${(item as any).aiKeywords ?? ""} ${item.category ?? ""}`.toLowerCase();
           return (
             haystack.includes(q) ||
             q.split(/\s+/).some((word) => haystack.includes(word))
@@ -1991,7 +1991,7 @@ export default function DashboardPage() {
       ? (lostItems ?? []).filter((item) => {
           const q = searchQuery.toLowerCase();
           const haystack =
-            `${item.name} ${item.description} ${(item as any).category ?? ""}`.toLowerCase();
+            `${item.name} ${item.description} ${item.category ?? ""}`.toLowerCase();
           return (
             haystack.includes(q) ||
             q.split(/\s+/).some((word) => haystack.includes(word))
@@ -2835,7 +2835,7 @@ export default function DashboardPage() {
                       <div className="item-info">
                         <h3>{item.name}</h3>
                         <p>{item.description}</p>
-                        {(item as any).category && (
+                        {item.category && (
                           <span
                             style={{
                               display: "inline-block",
@@ -2850,7 +2850,7 @@ export default function DashboardPage() {
                               marginBottom: 2,
                             }}
                           >
-                            {(item as any).category}
+                            {item.category}
                           </span>
                         )}
                         {item.location && (
@@ -2953,7 +2953,7 @@ export default function DashboardPage() {
                       <div className="item-info">
                         <h3>{item.name}</h3>
                         <p>{item.description}</p>
-                        {(item as any).category && (
+                        {item.category && (
                           <span
                             style={{
                               display: "inline-block",
@@ -2968,7 +2968,7 @@ export default function DashboardPage() {
                               marginBottom: 2,
                             }}
                           >
-                            {(item as any).category}
+                            {item.category}
                           </span>
                         )}
                         {item.location && (
@@ -3076,7 +3076,7 @@ export default function DashboardPage() {
             {/* ── Search + Filter box ── */}
             <div
               style={{
-                margin: "16px 20px 0",
+                margin: "16px 0 0",
                 background: "var(--bg-card)",
                 border: "1.5px solid var(--border-default)",
                 borderRadius: "16px",
@@ -3117,6 +3117,7 @@ export default function DashboardPage() {
                 {/* Category filter */}
                 <div style={{ position: "relative" }}>
                   <select
+                    className="dash-filter-select"
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
                     style={{
@@ -3172,6 +3173,7 @@ export default function DashboardPage() {
                 <div style={{ position: "relative" }}>
                   <form autoComplete="off" style={{ margin: 0 }}>
                     <input
+                      className="dash-filter-location"
                       value={filterLocation}
                       onChange={(e) => setFilterLocation(e.target.value)}
                       placeholder={s.filterLocation}
@@ -3364,7 +3366,7 @@ export default function DashboardPage() {
               style={{
                 display: "flex",
                 gap: "8px",
-                padding: "16px 20px 0",
+                padding: "16px 0 0",
                 borderBottom: "1px solid var(--border-default)",
               }}
             >
@@ -3440,6 +3442,18 @@ export default function DashboardPage() {
                             }}
                           >
                             📍 {(item as any).location}
+                          </p>
+                        )}
+                        {item.category && (
+                          <p
+                            style={{
+                              fontSize: "0.72rem",
+                              color: "var(--text-muted)",
+                              marginTop: 4,
+                              fontFamily: "Poppins, sans-serif",
+                            }}
+                          >
+                            🏷️ {item.category}
                           </p>
                         )}
                         {item.status === "pending" && (
@@ -3536,6 +3550,18 @@ export default function DashboardPage() {
                           }}
                         >
                           📍 {item.location}
+                        </p>
+                      )}
+                      {item.category && (
+                        <p
+                          style={{
+                            fontSize: "0.72rem",
+                            color: "var(--text-muted)",
+                            marginTop: 4,
+                            fontFamily: "Poppins, sans-serif",
+                          }}
+                        >
+                          🏷️ {item.category}
                         </p>
                       )}
                     </div>

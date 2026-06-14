@@ -1093,7 +1093,7 @@ function MySchoolsPanel({
   }
 
   return (
-    <div className="sc-panel-content">
+    <div className="sc-panel-content" style={{ maxWidth: "none", margin: 0, padding: "32px 0 0" }}>
       <div className="sc-section-title">{s.title}</div>
       <div className="sc-school-cards">
         {mySchools.map((school) => (

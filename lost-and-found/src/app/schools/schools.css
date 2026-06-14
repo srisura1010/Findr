@@ -1787,12 +1787,12 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   letter-spacing: 0.1px;
   transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-primary);
   text-align: center;
   white-space: nowrap;
 }
 
-.sc-mode-toggle__btn:hover {
+.sc-mode-toggle__btn:not(.sc-mode-toggle__btn--active):hover {
   color: var(--text-secondary);
   background: var(--bg-hover);
 }
@@ -1805,11 +1805,11 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
 
 body.light .sc-mode-toggle__btn,
 :root .sc-mode-toggle__btn {
-  color: #64748b;
+  color: var(--text-primary);
 }
 
 body.dark .sc-mode-toggle__btn {
-  color: #4a5a7a;
+  color: var(--text-primary);
 }
 
 .sc-search-row { margin-bottom: 16px; }
@@ -2281,7 +2281,7 @@ select.sc-form__select {
   font-family: "Poppins", sans-serif !important;
   font-size: 13px !important;
   font-weight: 500 !important;
-  color: var(--text-primary) !important;
+  color: var(--text-primary);
   background-color: var(--bg-input) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
@@ -2312,6 +2312,11 @@ select.sc-form__select:focus {
 .sc-board__main .sc-form select:focus {
   border-color: var(--sc-color, var(--border-focus)) !important;
   background-color: var(--glass-bg) !important;
+}
+
+.sc-board__main .sc-form select:has(option[value=""]:checked),
+.sc-form select:has(option[value=""]:checked) {
+  color: var(--text-secondary);
 }
 
 /* ═══════════════════════════════════════════

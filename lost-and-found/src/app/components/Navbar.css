@@ -238,7 +238,7 @@ body.colorblind    { background-color: #e6f0ff; }
   font-family: "Ubuntu", sans-serif;
   font-size: 10.75px;
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   max-width: 70px;

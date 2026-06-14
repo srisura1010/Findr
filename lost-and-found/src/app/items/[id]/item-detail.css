@@ -336,14 +336,14 @@
 }
 
 .detail-btn--primary {
-  background: var(--warning);
-  color: var(--warning-text);
+  background: var(--accent);
+  color: #fff;
 }
 
 .detail-btn--primary:hover:not(:disabled) {
-  filter: brightness(1.06);
+  background: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255,216,20,0.35);
+  box-shadow: 0 6px 20px rgba(47,128,237,0.35);
 }
 
 .detail-btn--success {
@@ -358,14 +358,15 @@
 }
 
 .detail-btn--secondary {
-  background: var(--accent);
-  color: #fff;
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
 }
 
 .detail-btn--secondary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: var(--accent-light);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124,58,237,0.35);
+  box-shadow: 0 6px 20px rgba(47,128,237,0.18);
 }
 
 .detail-btn--disabled {

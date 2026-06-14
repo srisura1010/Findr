@@ -275,12 +275,20 @@ body.light {
   border: none;
   outline: none;
   font-size: 13px;
+  font-weight: 600;
   color: var(--text-primary);
   background: transparent;
   font-family: "Poppins", sans-serif;
 }
 
-.panel-search__input::placeholder { color: var(--text-muted); }
+.panel-search__input::placeholder { color: var(--text-muted); font-weight: 600; }
+
+/* Filter bar — consistent placeholder color across inputs (Issue 8) */
+.dash-filter-location::placeholder { color: var(--text-muted); font-weight: 600; }
+
+/* Category select — explicit muted color for placeholder state (Issue 3) */
+.dash-filter-select { color: var(--text-muted); }
+.dash-filter-select:has(option[value=""]:checked) { color: var(--text-muted); }
 
 .panel-search__clear {
   background: none;

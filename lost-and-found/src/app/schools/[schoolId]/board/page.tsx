@@ -1293,7 +1293,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       outline: "none",
                       transition: "all 0.15s ease",
                       boxSizing: "border-box",
-                      colorScheme: "dark",
                     }}
                   />
 
@@ -1316,7 +1315,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       outline: "none",
                       transition: "all 0.15s ease",
                       boxSizing: "border-box",
-                      colorScheme: "dark",
                     }}
                   />
 
@@ -1400,6 +1398,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
+                        {(item as any).category && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {(item as any).category}</span>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.foundBy} {item.author_name}</span>
@@ -1420,6 +1419,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
+                        {(item as any).category && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {(item as any).category}</span>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.lostBy} {item.author_name}</span>
@@ -1461,7 +1461,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <input className="sc-form__input" type="text" placeholder="e.g. Room 204, near the gym, front office..." value={foundLocation} onChange={(e) => setFoundLocation(e.target.value)} />
 
                     <label className="sc-form__label">Date Found</label>
-                    <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} style={{ colorScheme: "dark" }} />
+                    <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} />
 
                     <label className="sc-form__label">{s.photosLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-found-upload">
@@ -1523,7 +1523,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <input className="sc-form__input" type="text" placeholder="e.g. Cafeteria, locker room, room 101..." value={lostLocation} onChange={(e) => setLostLocation(e.target.value)} />
 
                     <label className="sc-form__label">Date Lost</label>
-                    <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} style={{ colorScheme: "dark" }} />
+                    <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} />
 
                     <label className="sc-form__label">{s.photosOptionalLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-lost-upload">
@@ -1567,8 +1567,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
           {/* ── MY ITEMS ── */}
           {activeTab === "my-items" && (
-            <div className="sc-panel-content">
-              <div className="sc-section-title">{s.myItemsTab}</div>
+            <div className="sc-panel-content" style={{ maxWidth: "none", margin: 0, padding: "0" }}>
+              <div className="sc-section-title" style={{ marginBottom: 16 }}>{s.myItemsTab}</div>
               <MyItemsPanel
                 items={items} lostItems={lostItems} user={user} color={color} s={s}
                 onDeleteFound={handleDeleteFound} onDeleteLost={handleDeleteLost}

@@ -30,6 +30,7 @@ export interface Item {
   location?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  category?: string | null;
 }
 
 export interface LostItem {
@@ -174,6 +175,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
           latitude: item.latitude ?? null,
           longitude: item.longitude ?? null,
           school_id: item.school_id ?? null,
+          category: item.category ?? null,
         };
       });
       setRawItems(formatted);
@@ -221,6 +223,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
           location: item.location ?? null,
           latitude: item.latitude ?? null,
           longitude: item.longitude ?? null,
+          category: item.category ?? null,
         };
       });
       setLostItems(formatted);

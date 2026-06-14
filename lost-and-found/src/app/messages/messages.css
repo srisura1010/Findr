@@ -739,8 +739,19 @@ body.high-contrast .report-modal__submit {
   font-family: "Poppins", sans-serif;
   text-align: left;
   width: 100%;
+  min-width: 0;
   transition: border-color 0.15s ease, background 0.15s ease;
   margin-bottom: 8px;
+}
+
+.admin-select-btn > div:not(.admin-select-avatar):not(.admin-select-tag) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-select-tag {
+  flex-shrink: 0;
 }
 
 .admin-select-btn:hover {
