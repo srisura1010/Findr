@@ -72,6 +72,10 @@ export default function SchoolItemDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMsg, setActionMsg] = useState("");
 
+  // Related items
+  const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
+
   // Fetch from school_items table
   useEffect(() => {
     if (!isLoaded) return;
@@ -290,6 +294,30 @@ export default function SchoolItemDetailPage() {
     setChatSending(false);
   };
 
+  // Auto-fetch related items when the item loads
+  useEffect(() => {
+    if (!item?.category || !item?.school_id) return;
+    const fetch = async () => {
+      setRelatedLoading(true);
+      try {
+        const { data } = await supabase
+          .from("school_items")
+          .select("id, name, image_url, image_urls, category, status")
+          .eq("school_id", item.school_id)
+          .eq("category", item.category)
+          .neq("id", item.id)
+          .neq("status", "claimed")
+          .limit(6);
+        setRelatedItems(data || []);
+      } catch {
+        setRelatedItems([]);
+      } finally {
+        setRelatedLoading(false);
+      }
+    };
+    fetch();
+  }, [item]);
+
   if (!isLoaded || loading) return <LoadingSpinner />;
   if (!item)
     return (
@@ -432,6 +460,22 @@ export default function SchoolItemDetailPage() {
             )}
           </div>
 
+          {/* AI keyword chips */}
+          {item.aiKeywords && (
+            <div className="detail-tags-row">
+              {item.aiKeywords
+                .split(",")
+                .map((kw: string) => kw.trim())
+                .filter(Boolean)
+                .slice(0, 8)
+                .map((kw: string) => (
+                  <span key={kw} className="detail-tag-chip">
+                    {kw}
+                  </span>
+                ))}
+            </div>
+          )}
+
           {/* Description */}
           <div className="detail-description-box">
             <p className="detail-description-label">Description</p>
@@ -511,6 +555,49 @@ export default function SchoolItemDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Related items */}
+      {(relatedLoading || relatedItems.length > 0) && (
+        <div className="related-section">
+          <div className="related-section__header">
+            <p className="related-section__title">Similar items</p>
+          </div>
+          <div className="related-grid">
+            {relatedLoading ? (
+              <p className="related-loading">Finding similar items...</p>
+            ) : (
+              relatedItems.map((ri: any) => {
+                const img = Array.isArray(ri.image_urls)
+                  ? ri.image_urls[0]
+                  : ri.image_url || null;
+                return (
+                  <a
+                    key={ri.id}
+                    href={`/school-items/${ri.id}`}
+                    className="related-card"
+                  >
+                    {img ? (
+                      <img
+                        src={img}
+                        alt={ri.name}
+                        className="related-card__img"
+                      />
+                    ) : (
+                      <div className="related-card__img-placeholder">📦</div>
+                    )}
+                    <div className="related-card__body">
+                      <p className="related-card__name">{ri.name}</p>
+                      {ri.category && (
+                        <p className="related-card__cat">{ri.category}</p>
+                      )}
+                    </div>
+                  </a>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── REPORT MODAL ── */}
       {showReport && (

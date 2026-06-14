@@ -12,6 +12,7 @@ import {
   FaArrowLeft,
   FaCalendar,
   FaMapPin,
+  FaTag,
 } from "react-icons/fa6";
 import ImageGallery from "@/app/components/ImageGallery";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
@@ -78,6 +79,10 @@ export default function ItemDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMsg, setActionMsg] = useState("");
 
+  // Related items
+  const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
+
   // Resolve item from context or fetch from DB
   useEffect(() => {
     if (!isLoaded) return;
@@ -123,6 +128,7 @@ export default function ItemDetailPage() {
           authorEmail: foundData.author_email,
           status: foundData.status,
           aiKeywords: foundData.ai_keywords,
+          category: foundData.category ?? null,
           date_found: foundData.date_found,
           location: foundData.location ?? null,
           latitude: foundData.latitude ?? null,
@@ -353,6 +359,29 @@ export default function ItemDetailPage() {
     setChatSending(false);
   };
 
+  // Auto-fetch related items when the item loads
+  useEffect(() => {
+    if (!item) return;
+    const query = item.category || item.name;
+    if (!query) return;
+    setRelatedLoading(true);
+    fetch("/api/circle-search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setRelatedItems(
+          (data.items || [])
+            .filter((i: any) => i.id !== parseInt(id, 10))
+            .slice(0, 6),
+        );
+      })
+      .catch(() => setRelatedItems([]))
+      .finally(() => setRelatedLoading(false));
+  }, [item, id]);
+
   if (!isLoaded || loading) return <LoadingSpinner />;
   if (!item)
     return (
@@ -505,6 +534,32 @@ export default function ItemDetailPage() {
             <p className="detail-description-text">{item.description}</p>
           </div>
 
+          {/* Tags */}
+          {(item.category || item.aiKeywords) && (
+            <div className="detail-tags-section">
+              <p className="detail-tags-label">Tags</p>
+              <div className="detail-tags-row">
+                {item.category && (
+                  <span className="detail-tag-chip">
+                    <FaTag style={{ fontSize: "9px" }} />
+                    {item.category}
+                  </span>
+                )}
+                {item.aiKeywords &&
+                  item.aiKeywords
+                    .split(",")
+                    .map((kw: string) => kw.trim())
+                    .filter(Boolean)
+                    .slice(0, 8)
+                    .map((kw: string) => (
+                      <span key={kw} className="detail-tag-chip">
+                        {kw}
+                      </span>
+                    ))}
+              </div>
+            </div>
+          )}
+
           {/* Location map */}
           {hasLocation && (
             <div style={{ marginTop: "4px" }}>
@@ -611,6 +666,44 @@ export default function ItemDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Related items */}
+      {(relatedLoading || relatedItems.length > 0) && (
+        <div className="related-section">
+          <div className="related-section__header">
+            <p className="related-section__title">Similar items</p>
+          </div>
+          <div className="related-grid">
+            {relatedLoading ? (
+              <p className="related-loading">Finding similar items...</p>
+            ) : (
+              relatedItems.map((ri: any) => (
+                <a
+                  key={ri.id}
+                  href={`/items/${ri.id}`}
+                  className="related-card"
+                >
+                  {ri.image ? (
+                    <img
+                      src={ri.image}
+                      alt={ri.name}
+                      className="related-card__img"
+                    />
+                  ) : (
+                    <div className="related-card__img-placeholder">📦</div>
+                  )}
+                  <div className="related-card__body">
+                    <p className="related-card__name">{ri.name}</p>
+                    {ri.category && (
+                      <p className="related-card__cat">{ri.category}</p>
+                    )}
+                  </div>
+                </a>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── REPORT MODAL ── */}
       {showReport && (
