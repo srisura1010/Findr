@@ -8,7 +8,12 @@ import { useRouter } from "next/navigation";
 import { useSettings } from "@/context/SettingsContext";
 import { FaFlag, FaShieldHalved } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-import { MdOutlineMessage } from "react-icons/md";
+import { MdOutlineMessage, MdOutlineSchool } from "react-icons/md";
+import {
+  SchoolAdminContactModal,
+  SchoolAdminConvData,
+} from "@/app/components/SchoolAdminContactModal";
+import { schoolIdFromConversationId } from "@/app/components/MessagingSystem";
 
 interface Message {
   id: number;
@@ -34,6 +39,8 @@ interface Conversation {
   lastMessageAt: string;
   unread: boolean;
   isAdminConv?: boolean;
+  isSchoolAdminConv?: boolean;
+  schoolId?: string;
 }
 
 interface Admin {
@@ -225,6 +232,7 @@ export default function MessagesPage() {
   const [sending, setSending] = useState(false);
   const [reportingUser, setReportingUser] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [showSchoolAdminModal, setShowSchoolAdminModal] = useState(false);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminsLoading, setAdminsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -297,6 +305,18 @@ export default function MessagesPage() {
     checkBan();
   }, [user]);
 
+  // Open a school admin conversation stored by another page (e.g. board)
+  useEffect(() => {
+    if (!banChecked || !user) return;
+    const raw = localStorage.getItem("findr_open_school_conv");
+    if (!raw) return;
+    localStorage.removeItem("findr_open_school_conv");
+    try {
+      const data: SchoolAdminConvData = JSON.parse(raw);
+      handleSelectSchoolAdmin(data);
+    } catch {}
+  }, [banChecked, user]);
+
   const handleOpenAdminModal = async () => {
     setShowAdminModal(true);
     setAdminsLoading(true);
@@ -330,6 +350,31 @@ export default function MessagesPage() {
     setReportingUser(false);
   };
 
+  const handleSelectSchoolAdmin = (data: SchoolAdminConvData) => {
+    setShowSchoolAdminModal(false);
+    const { conversationId, schoolId, schoolName, adminUserId, adminName, adminEmail } = data;
+    setConversations((prev) => {
+      if (prev.find((c) => c.conversation_id === conversationId)) return prev;
+      return [
+        {
+          conversation_id: conversationId,
+          item_title: `${schoolName} · School Admin`,
+          otherUserId: adminUserId,
+          otherUserName: adminName,
+          otherUserEmail: adminEmail,
+          lastMessage: "",
+          lastMessageAt: new Date().toISOString(),
+          unread: false,
+          isSchoolAdminConv: true,
+          schoolId,
+        },
+        ...prev,
+      ];
+    });
+    setActiveConvId(conversationId);
+    setReportingUser(false);
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -358,9 +403,17 @@ export default function MessagesPage() {
         if (!convMap.has(msg.conversation_id)) {
           const isOwn = msg.sender_id === user.id;
           const isAdminConv = msg.conversation_id.startsWith("admin_");
+          const isSchoolAdminConv = msg.conversation_id.startsWith("school_");
+          const schoolId = isSchoolAdminConv
+            ? schoolIdFromConversationId(msg.conversation_id)
+            : undefined;
           convMap.set(msg.conversation_id, {
             conversation_id: msg.conversation_id,
-            item_title: isAdminConv ? "Admin Support" : msg.item_title,
+            item_title: isAdminConv
+              ? "Admin Support"
+              : isSchoolAdminConv
+              ? "School Admin"
+              : msg.item_title,
             otherUserId: isOwn ? msg.receiver_id : msg.sender_id,
             otherUserName: isOwn
               ? msg.receiver_name || msg.receiver_id
@@ -372,6 +425,8 @@ export default function MessagesPage() {
             lastMessageAt: msg.created_at,
             unread: !msg.read && msg.receiver_id === user.id,
             isAdminConv,
+            isSchoolAdminConv,
+            schoolId,
           });
         }
       }
@@ -504,12 +559,12 @@ export default function MessagesPage() {
       receiver_id: activeConv.otherUserId,
       receiver_name: activeConv.otherUserName,
       receiver_email: activeConv.otherUserEmail,
-      item_id: activeConv.isAdminConv
+      item_id: activeConv.isSchoolAdminConv
+        ? `school-support-${activeConv.schoolId}`
+        : activeConv.isAdminConv
         ? "admin-support"
         : activeConv.conversation_id.split("_")[0],
-      item_title: activeConv.isAdminConv
-        ? "Admin Support"
-        : activeConv.item_title,
+      item_title: activeConv.item_title,
       text: trimmed,
       read: false,
     });
@@ -523,7 +578,6 @@ export default function MessagesPage() {
     }
   };
 
-  // Close chat pane on mobile and return to sidebar
   const handleBack = () => {
     setActiveConvId(null);
     setReportingUser(false);
@@ -554,6 +608,14 @@ export default function MessagesPage() {
             <FaShieldHalved className="messages-sidebar__admin-icon" />
             Contact an Admin
           </button>
+          <button
+            className="messages-sidebar__admin-btn messages-sidebar__school-btn"
+            onClick={() => setShowSchoolAdminModal(true)}
+            style={{ marginTop: 6 }}
+          >
+            <MdOutlineSchool className="messages-sidebar__admin-icon messages-sidebar__school-icon" style={{ fontSize: 16 }} />
+            Contact School Admin
+          </button>
         </div>
 
         <div
@@ -578,10 +640,12 @@ export default function MessagesPage() {
               }}
             >
               <div
-                className={`messages-conv-avatar${conv.isAdminConv ? " messages-conv-avatar--admin" : ""}`}
+                className={`messages-conv-avatar${conv.isAdminConv ? " messages-conv-avatar--admin" : conv.isSchoolAdminConv ? " messages-conv-avatar--school-admin" : ""}`}
               >
                 {conv.isAdminConv ? (
                   <FaShieldHalved style={{ fontSize: 14 }} />
+                ) : conv.isSchoolAdminConv ? (
+                  <MdOutlineSchool style={{ fontSize: 16 }} />
                 ) : (
                   (conv.otherUserName?.[0]?.toUpperCase() ?? "?")
                 )}
@@ -594,6 +658,11 @@ export default function MessagesPage() {
                     {conv.otherUserName}
                     {conv.isAdminConv && (
                       <span className="messages-conv-admin-badge">Admin</span>
+                    )}
+                    {conv.isSchoolAdminConv && (
+                      <span className="messages-conv-admin-badge messages-conv-school-badge">
+                        School
+                      </span>
                     )}
                   </span>
                   {conv.unread && <span className="messages-conv-unread-dot" />}
@@ -610,9 +679,7 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* ── Chat area ──
-          On mobile: slides over sidebar when activeConvId is set (.messages-chat--open)
-      ── */}
+      {/* ── Chat area ── */}
       <div
         className={`messages-chat${activeConvId ? " messages-chat--open" : ""}`}
       >
@@ -625,7 +692,6 @@ export default function MessagesPage() {
           <>
             {/* Header */}
             <div className="messages-chat__header">
-              {/* Back button — only visible on mobile via CSS */}
               <button
                 className="messages-chat__back"
                 onClick={handleBack}
@@ -635,10 +701,12 @@ export default function MessagesPage() {
               </button>
 
               <div
-                className={`messages-conv-avatar${activeConv?.isAdminConv ? " messages-conv-avatar--admin" : ""}`}
+                className={`messages-conv-avatar${activeConv?.isAdminConv ? " messages-conv-avatar--admin" : activeConv?.isSchoolAdminConv ? " messages-conv-avatar--school-admin" : ""}`}
               >
                 {activeConv?.isAdminConv ? (
                   <FaShieldHalved style={{ fontSize: 14 }} />
+                ) : activeConv?.isSchoolAdminConv ? (
+                  <MdOutlineSchool style={{ fontSize: 16 }} />
                 ) : (
                   (activeConv?.otherUserName?.[0]?.toUpperCase() ?? "?")
                 )}
@@ -649,12 +717,17 @@ export default function MessagesPage() {
                   {activeConv?.isAdminConv && (
                     <span className="messages-chat__header-badge">Admin</span>
                   )}
+                  {activeConv?.isSchoolAdminConv && (
+                    <span className="messages-chat__header-badge messages-chat__header-badge--school">
+                      School Admin
+                    </span>
+                  )}
                 </div>
                 <div className="messages-chat__header-sub">
                   {activeConv?.item_title}
                 </div>
               </div>
-              {!activeConv?.isAdminConv && (
+              {!activeConv?.isAdminConv && !activeConv?.isSchoolAdminConv && (
                 <button
                   className="msg-report-btn"
                   onClick={() => setReportingUser(true)}
@@ -675,6 +748,14 @@ export default function MessagesPage() {
                       <p>
                         You're chatting with an admin. Ask anything — they're
                         here to help.
+                      </p>
+                    </>
+                  ) : activeConv?.isSchoolAdminConv ? (
+                    <>
+                      <MdOutlineSchool className="messages-chat__admin-empty-icon messages-chat__school-empty-icon" style={{ fontSize: 32 }} />
+                      <p>
+                        You're chatting with a school admin. They can help with
+                        lost & found items at your school.
                       </p>
                     </>
                   ) : (
@@ -752,6 +833,15 @@ export default function MessagesPage() {
           loading={adminsLoading}
           onSelect={handleSelectAdmin}
           onClose={() => setShowAdminModal(false)}
+        />
+      )}
+
+      {/* Contact School Admin Modal */}
+      {showSchoolAdminModal && (
+        <SchoolAdminContactModal
+          userId={user.id}
+          onConversationStart={handleSelectSchoolAdmin}
+          onClose={() => setShowSchoolAdminModal(false)}
         />
       )}
     </div>

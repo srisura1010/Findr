@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import "../../schools.css";
 
@@ -9,9 +9,10 @@ import { supabase } from "@/lib/supabaseClient";
 import { FaTrash, FaPlus, FaChevronDown } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useSettings } from "@/context/SettingsContext";
-import { MdFlagCircle } from "react-icons/md";
+import { MdFlagCircle, MdOutlineMessage } from "react-icons/md";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { CiLogin } from "react-icons/ci";
+import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import { FaClipboard } from "react-icons/fa";
 import Cropper from "react-easy-crop";
 
@@ -30,6 +31,7 @@ interface School {
   rep_name: string;
   rep_email: string;
   status: string;
+  rep_user_id: string | null;
 }
 
 interface SchoolItem {
@@ -811,7 +813,7 @@ function MyItemsPanel({
 
 // ─── SchoolBoard ───────────────────────────────────────────────────────────────
 function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; onBack: () => void; s: BoardStrings }) {
-  type BoardTab = "items" | "add-item" | "my-items" | "admin-login" | "reports";
+  type BoardTab = "items" | "add-item" | "my-items" | "admin-login" | "reports" | "inbox";
 
   const router = useRouter();
   const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
@@ -826,7 +828,10 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     { id: "add-item", label: s.addItemTab, icon: <FaPlus style={{ fontSize: 11 }} /> },
     { id: "my-items", label: s.myItemsTab, icon: <FaClipboard style={{ fontSize: 13 }} /> },
     { id: "admin-login", label: s.adminTab, icon: <CiLogin style={{ fontSize: 20 }} /> },
-    ...(isSchoolAdmin ? [{ id: "reports" as BoardTab, label: s.reportsTab, icon: <MdFlagCircle style={{ fontSize: 20 }} /> }] : []),
+    ...(isSchoolAdmin ? [
+      { id: "reports" as BoardTab, label: s.reportsTab, icon: <MdFlagCircle style={{ fontSize: 20 }} /> },
+      { id: "inbox" as BoardTab, label: "Inbox", icon: <MdOutlineMessage style={{ fontSize: 20 }} /> },
+    ] : []),
   ];
 
   const [activeTab, setActiveTab] = useState<BoardTab>("items");
@@ -1049,17 +1054,32 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     e.preventDefault();
     setAdminChecking(true); setAdminError("");
     const { data: schoolRow } = await supabase.from("schools").select("password").eq("id", school.id).maybeSingle();
-    const repMatch = schoolRow?.password && schoolRow.password === adminPassword;
-    const { data: staffRow } = repMatch ? { data: null } : await supabase
-      .from("school_admins").select("id")
-      .eq("school_id", school.id)
-      .eq("user_email", user?.primaryEmailAddress?.emailAddress ?? "")
-      .eq("password", adminPassword).maybeSingle();
-    if (!repMatch && !staffRow) {
+    const isMatch = schoolRow?.password && schoolRow.password === adminPassword;
+    if (!isMatch) {
       setAdminError(s.adminIncorrect);
     } else {
       localStorage.setItem(`findr_school_admin_${school.id}`, "true");
       setIsSchoolAdmin(true); setAdminUnlocked(true);
+      if (user && user.id !== school.rep_user_id) {
+        const email = user.primaryEmailAddress?.emailAddress ?? "";
+        const { data: existing } = await supabase
+          .from("school_admins").select("id")
+          .eq("school_id", school.id).eq("user_email", email).maybeSingle();
+        if (existing) {
+          supabase.from("school_admins")
+            .update({ user_id: user.id, name: user.fullName ?? null })
+            .eq("id", existing.id).then(() => {});
+        } else {
+          supabase.from("school_admins").insert({
+            school_id: school.id,
+            user_email: email,
+            user_id: user.id,
+            user_name: user.fullName ?? user.username ?? email,
+            name: user.fullName ?? null,
+            password: adminPassword,
+          }).then(() => {});
+        }
+      }
     }
     setAdminChecking(false);
   };
@@ -1155,7 +1175,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
             <button className="sc-admin-badge__exit" onClick={() => {
               localStorage.removeItem(`findr_school_admin_${school.id}`);
               setIsSchoolAdmin(false);
-              if (activeTab === "reports") setActiveTab("items");
+              if (activeTab === "reports" || activeTab === "inbox") setActiveTab("items");
             }}>{s.exitAdmin}</button>
           </div>
         )}
@@ -1589,6 +1609,21 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                 Items reported by users in this school board. Only you (school admin) can see and act on these.
               </p>
               <SchoolReportsPanel school={school} onDeleteItem={handleReportDeleteItem} color={color} />
+            </div>
+          )}
+
+          {/* ── INBOX ── */}
+          {activeTab === "inbox" && isSchoolAdmin && user && (
+            <div className="sc-panel-content">
+              <div className="sc-section-title">Inbox</div>
+              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>
+                Messages from users at this school.
+              </p>
+              <AdminInboxPanel
+                adminId={user.id}
+                adminName={user.fullName || user.username || "Admin"}
+                adminEmail={user.primaryEmailAddress?.emailAddress || ""}
+              />
             </div>
           )}
         </main>

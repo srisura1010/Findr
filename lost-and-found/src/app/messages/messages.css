@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap");
 
 
 :root,
@@ -801,6 +801,29 @@ body.high-contrast .admin-select-avatar {
 }
 
 
+
+
+.messages-conv-avatar--school-admin {
+  background: linear-gradient(135deg, #059669, #0891b2);
+}
+.messages-conv-school-badge {
+  font-size: 10px; font-weight: 700; color: #34d399;
+  background: rgba(5, 150, 105, 0.15); padding: 1px 6px;
+  border-radius: 99px; font-family: "Ubuntu", sans-serif;
+}
+.messages-chat__header-badge--school { color: #34d399; background: rgba(5, 150, 105, 0.15); }
+.messages-chat__school-empty-icon { color: #059669 !important; }
+.messages-sidebar__school-btn { border-color: #059669 !important; color: #34d399 !important; }
+.messages-sidebar__school-btn:hover { background: rgba(5, 150, 105, 0.12) !important; border-color: #34d399 !important; }
+.messages-sidebar__school-icon { color: #059669 !important; }
+.admin-select-avatar--school { background: linear-gradient(135deg, #059669, #0891b2); }
+.admin-select-tag--school { color: #34d399; background: rgba(5, 150, 105, 0.15); }
+.school-modal-back-btn {
+  background: none; border: none; color: var(--msg-text-muted); cursor: pointer;
+  font-size: 12px; font-family: "Poppins", sans-serif; padding: 4px 0;
+  display: block; margin-top: 4px; transition: color 0.15s ease;
+}
+.school-modal-back-btn:hover { color: var(--msg-text-secondary); }
 @media (max-width: 640px) {
 
   .messages-layout {
