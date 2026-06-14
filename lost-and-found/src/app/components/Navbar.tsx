@@ -83,45 +83,44 @@ export default function Navbar() {
   }, [user]);
 
   const [dashboardText, setDashboardText] = useState("Dashboard");
+  const [messagesText, setMessagesText] = useState("Messages");
   const [signInText, setSignInText] = useState("Sign In");
   const [signUpText, setSignUpText] = useState("Sign Up");
   const [helpText, setHelpText] = useState("Help");
   const [schoolsText, setSchoolsText] = useState("For Schools");
+  const [superAdminText, setSuperAdminText] = useState("Super Admin");
 
   useEffect(() => {
     if (language === "en") return;
-    setDashboardText(
-      localStorage.getItem(`nav_dashboard_${language}`) || "Dashboard",
-    );
+    setDashboardText(localStorage.getItem(`nav_dashboard_${language}`) || "Dashboard");
+    setMessagesText(localStorage.getItem(`nav_messages_${language}`) || "Messages");
     setSignInText(localStorage.getItem(`nav_signIn_${language}`) || "Sign In");
     setSignUpText(localStorage.getItem(`nav_signUp_${language}`) || "Sign Up");
-    setSignInText(localStorage.getItem(`nav_signIn_${language}`) || "Sign In");
     setHelpText(localStorage.getItem(`nav_help_${language}`) || "Help");
-    setSchoolsText(
-      localStorage.getItem(`nav_schools_${language}`) || "For Schools",
-    );
+    setSchoolsText(localStorage.getItem(`nav_schools_${language}`) || "For Schools");
+    setSuperAdminText(localStorage.getItem(`nav_superAdmin_${language}`) || "Super Admin");
   }, []);
 
   useEffect(() => {
     if (language === "en") {
       setDashboardText("Dashboard");
+      setMessagesText("Messages");
       setSignInText("Sign In");
       setSignUpText("Sign Up");
       setHelpText("Help");
       setSchoolsText("For Schools");
+      setSuperAdminText("Super Admin");
       return;
     }
     const translateAndCache = async () => {
       const translations = [
-        {
-          key: "Dashboard",
-          setter: setDashboardText,
-          cacheKey: "nav_dashboard",
-        },
+        { key: "Dashboard", setter: setDashboardText, cacheKey: "nav_dashboard" },
+        { key: "Messages", setter: setMessagesText, cacheKey: "nav_messages" },
         { key: "Sign In", setter: setSignInText, cacheKey: "nav_signIn" },
         { key: "Sign Up", setter: setSignUpText, cacheKey: "nav_signUp" },
         { key: "Help", setter: setHelpText, cacheKey: "nav_help" },
         { key: "For Schools", setter: setSchoolsText, cacheKey: "nav_schools" },
+        { key: "Super Admin", setter: setSuperAdminText, cacheKey: "nav_superAdmin" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         try {
@@ -151,7 +150,7 @@ export default function Navbar() {
       requiresAuth: true,
     },
     {
-      label: "Messages",
+      label: messagesText,
       icon: <MdOutlineMessage size={22} />,
       path: "/messages",
       requiresAuth: true,
@@ -166,7 +165,7 @@ export default function Navbar() {
     ...(isSuperAdmin
       ? [
           {
-            label: "Super Admin",
+            label: superAdminText,
             icon: <MdOutlineAdminPanelSettings size={22} />,
             path: "/super-admin",
             requiresAuth: true,
