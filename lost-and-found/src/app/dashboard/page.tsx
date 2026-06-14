@@ -1232,9 +1232,12 @@ function MyDashboardCharts({
 
     loadChartJs().then(() => {
       const C = (window as any).Chart;
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-      const tickColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.45)";
+      const style = getComputedStyle(document.documentElement);
+      const gridColor = style.getPropertyValue("--border-default").trim() || "rgba(0,0,0,0.06)";
+      const tickColor = style.getPropertyValue("--text-muted").trim() || "rgba(0,0,0,0.45)";
+      const clrFound = style.getPropertyValue("--accent").trim() || "#2f80ed";
+      const clrLost = style.getPropertyValue("--warning").trim() || "#f59e0b";
+      const clrClaimed = style.getPropertyValue("--success").trim() || "#10b981";
 
       const barEl = document.getElementById(
         `myDashBarChart-${chartKey}`,
@@ -1250,21 +1253,21 @@ function MyDashboardCharts({
               {
                 label: "Found",
                 data: foundByMonth,
-                backgroundColor: "#2f80ed",
+                backgroundColor: clrFound,
                 borderRadius: 5,
                 borderSkipped: false,
               },
               {
                 label: "Lost",
                 data: lostByMonth,
-                backgroundColor: "#f59e0b",
+                backgroundColor: clrLost,
                 borderRadius: 5,
                 borderSkipped: false,
               },
               {
                 label: "Claimed",
                 data: claimedByMonth,
-                backgroundColor: "#10b981",
+                backgroundColor: clrClaimed,
                 borderRadius: 5,
                 borderSkipped: false,
               },
@@ -1322,9 +1325,8 @@ function MyDashboardCharts({
             datasets: [
               {
                 data: [totalFound, totalLost, totalClaimed],
-                backgroundColor: ["#2f80ed", "#f59e0b", "#10b981"],
-                borderWidth: 2,
-                borderColor: isDark ? "#1e293b" : "#fff",
+                backgroundColor: [clrFound, clrLost, clrClaimed],
+                borderWidth: 0,
                 hoverOffset: 8,
               },
             ],
@@ -1371,7 +1373,7 @@ export default function DashboardPage() {
     removeLostItem,
   } = useItems();
   const { user, isLoaded } = useUser();
-  const { language } = useSettings();
+  const { language, theme } = useSettings();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<TabId>("items");
@@ -2498,7 +2500,12 @@ export default function DashboardPage() {
           claimedByMonth,
         });
         const pieDataJson = JSON.stringify({ totalFound, totalLost, totalClaimed });
-        const chartKey = `${user?.id}-${totalActions}`;
+        const dashStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
+        const clrFound = dashStyle?.getPropertyValue("--accent").trim() || "#2f80ed";
+        const clrLost = dashStyle?.getPropertyValue("--warning").trim() || "#f59e0b";
+        const clrClaimed = dashStyle?.getPropertyValue("--success").trim() || "#10b981";
+
+        const chartKey = `${user?.id}-${totalActions}-${theme}`;
 
         return (
           <div
@@ -2603,10 +2610,10 @@ export default function DashboardPage() {
               <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
                 {(
                   [
-                    ["Posted", totalFound, "#2f80ed"],
-                    ["Returned", totalClaimed, "#10b981"],
-                    ["Lost", totalLost, "#f59e0b"],
-                  ] as const
+                    ["Posted", totalFound, clrFound],
+                    ["Returned", totalClaimed, clrClaimed],
+                    ["Lost", totalLost, clrLost],
+                  ] as [string, number, string][]
                 ).map(([label, val, color]) => (
                   <div key={label} style={{ textAlign: "center" }}>
                     <p
@@ -2665,10 +2672,10 @@ export default function DashboardPage() {
                 >
                   {(
                     [
-                      ["Found", "#2f80ed"],
-                      ["Lost", "#f59e0b"],
-                      ["Claimed", "#10b981"],
-                    ] as const
+                      ["Found", clrFound],
+                      ["Lost", clrLost],
+                      ["Claimed", clrClaimed],
+                    ] as [string, string][]
                   ).map(([l, c]) => (
                     <span
                       key={l}
@@ -2749,10 +2756,10 @@ export default function DashboardPage() {
                     >
                       {(
                         [
-                          ["Found posted", "#2f80ed", totalFound],
-                          ["Lost reported", "#f59e0b", totalLost],
-                          ["Claimed", "#10b981", totalClaimed],
-                        ] as const
+                          ["Found posted", clrFound, totalFound],
+                          ["Lost reported", clrLost, totalLost],
+                          ["Claimed", clrClaimed, totalClaimed],
+                        ] as [string, string, number][]
                       ).map(([l, c, v]) => (
                         <span
                           key={l}
