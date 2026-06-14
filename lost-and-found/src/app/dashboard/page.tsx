@@ -26,6 +26,14 @@ import Cropper from "react-easy-crop";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import LocationPicker, { LocationData } from "@/app/components/LocationPicker";
 
+function sendEmail(route: string, body: Record<string, string>) {
+  fetch(`/api/emails/${route}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(console.error);
+}
+
 // ── Categories ────────────────────────────────────────────────────────────────
 const CATEGORIES = [
   "Electronics",
@@ -1201,6 +1209,96 @@ function CategorySelect({
   );
 }
 
+// ── Disputes panel ───────────────────────────────────────────────────────────
+
+interface Dispute {
+  id: number | string;
+  item_id: number;
+  item_name: string;
+  claimant_id: string;
+  claimant_email: string;
+  reason: string;
+  created_at: string;
+}
+
+function DisputesPanel({ s }: { s: DashStrings }) {
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("disputes")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (data) setDisputes(data as Dispute[]);
+      setLoading(false);
+    })();
+  }, []);
+
+  const handleResolveForClaimant = async (dispute: Dispute) => {
+    if (
+      !confirm(
+        "Resolve in claimant's favor? This will permanently delete the item listing.",
+      )
+    )
+      return;
+    await supabase.from("items").delete().eq("id", dispute.item_id);
+    await supabase.from("disputes").delete().eq("id", dispute.id);
+    setDisputes((prev) => prev.filter((d) => d.id !== dispute.id));
+  };
+
+  const handleDismiss = async (dispute: Dispute) => {
+    if (
+      !confirm(
+        "Dismiss this dispute? The item will return to claim_accepted status so the finder can re-confirm handoff.",
+      )
+    )
+      return;
+    await supabase
+      .from("items")
+      .update({ status: "claim_accepted" })
+      .eq("id", dispute.item_id);
+    await supabase.from("disputes").delete().eq("id", dispute.id);
+    setDisputes((prev) => prev.filter((d) => d.id !== dispute.id));
+  };
+
+  if (loading) return <p className="panel-empty">{s.loadingText}</p>;
+  if (disputes.length === 0)
+    return <p className="panel-empty">No disputes — all clear!</p>;
+
+  return (
+    <div className="panel-item-list">
+      {disputes.map((dispute) => (
+        <div key={dispute.id} className="reported-card">
+          <div className="reported-card__body">
+            <p className="reported-card__name">{dispute.item_name}</p>
+            <p className="reported-card__reason">{dispute.reason}</p>
+            <p className="reported-card__meta">
+              Disputed by {dispute.claimant_email} ·{" "}
+              {new Date(dispute.created_at).toLocaleDateString()}
+            </p>
+          </div>
+          <div className="reported-card__actions">
+            <button
+              className="reported-card__dismiss"
+              onClick={() => handleDismiss(dispute)}
+            >
+              Dismiss Dispute
+            </button>
+            <button
+              className="reported-card__delete"
+              onClick={() => handleResolveForClaimant(dispute)}
+            >
+              Resolve for Claimant
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 function MyDashboardCharts({
   chartKey,
@@ -1380,7 +1478,11 @@ export default function DashboardPage() {
   const [isReady, setIsReady] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
-  const [reportsTab, setReportsTab] = useState<"items" | "users">("items");
+
+  // My Active Claims (claimant section)
+  const [myActiveClaims, setMyActiveClaims] = useState<any[]>([]);
+  const [activeClaimsLoading, setActiveClaimsLoading] = useState(false);
+  const [reportsTab, setReportsTab] = useState<"items" | "users" | "disputes">("items");
   const [reportMode, setReportMode] = useState<"found" | "lost">("found");
   const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
 
@@ -1446,6 +1548,38 @@ export default function DashboardPage() {
     };
     checkBan();
   }, [user, isLoaded]);
+
+  // ── Active claims fetch (claimant's My Active Claims section) ──────────────
+  useEffect(() => {
+    if (!user?.id || !isLoaded) return;
+    setActiveClaimsLoading(true);
+    (async () => {
+      const { data: claims } = await supabase
+        .from("claim_requests")
+        .select("*")
+        .eq("claimant_id", user.id)
+        .in("status", ["pending", "accepted"]);
+
+      if (claims && claims.length > 0) {
+        const itemIds = [...new Set(claims.map((c: any) => c.item_id))];
+        const { data: claimItems } = await supabase
+          .from("items")
+          .select("id, name, status")
+          .in("id", itemIds);
+        const itemMap = new Map((claimItems || []).map((i: any) => [i.id, i]));
+        setMyActiveClaims(
+          claims.map((c: any) => ({
+            ...c,
+            item_name: itemMap.get(c.item_id)?.name || "Unknown item",
+            item_status: itemMap.get(c.item_id)?.status || "unknown",
+          })),
+        );
+      } else {
+        setMyActiveClaims([]);
+      }
+      setActiveClaimsLoading(false);
+    })();
+  }, [user?.id, isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Translation effect ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -1728,9 +1862,97 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (itemId: number) => {
-    if (!confirm("Delete this item permanently?")) return;
-    const { error } = await supabase.from("items").delete().eq("id", itemId);
-    if (!error) updateItemStatus(itemId, "claimed");
+    const foundItem = (items ?? []).find((i) => i.id === itemId) as any;
+    const itemStatus = foundItem?.status || "waiting";
+
+    // Case D: cannot delete while handoff or dispute in progress
+    if (itemStatus === "handed_off" || itemStatus === "disputed") {
+      alert(
+        "This item cannot be deleted while a handoff or dispute is in progress. Please wait for the claimant to confirm receipt or for admin to resolve the dispute.",
+      );
+      return;
+    }
+
+    const { data: allClaims } = await supabase
+      .from("claim_requests")
+      .select("*")
+      .eq("item_id", itemId);
+
+    const pendClaimsArr = (allClaims || []).filter((c: any) => c.status === "pending");
+    const hasActiveClaims = (allClaims || []).some(
+      (c: any) => c.status === "pending" || c.status === "accepted",
+    );
+    const itemName = foundItem?.name || "this item";
+
+    // Case A: no claims or all resolved
+    if (!allClaims || allClaims.length === 0 || !hasActiveClaims) {
+      if (!confirm("Delete this item permanently?")) return;
+      const { error } = await supabase.from("items").delete().eq("id", itemId);
+      if (!error) updateItemStatus(itemId, "claimed");
+      return;
+    }
+
+    // Case B: waiting with pending claims
+    if (itemStatus === "waiting" && pendClaimsArr.length > 0) {
+      if (
+        !confirm(
+          `There are ${pendClaimsArr.length} students who submitted claims for this item. Deleting will notify them it's been removed. Continue?`,
+        )
+      )
+        return;
+      for (const c of pendClaimsArr) {
+        sendEmail("claim-rejected", {
+          claimant_email: c.claimant_email,
+          claimant_name: c.claimant_name,
+          item_name: itemName,
+          rejection_reason: "The item was removed by the finder.",
+        });
+      }
+      const { error } = await supabase.from("items").delete().eq("id", itemId);
+      if (!error) updateItemStatus(itemId, "claimed");
+      return;
+    }
+
+    // Case C: claim_accepted
+    if (itemStatus === "claim_accepted") {
+      const accName = foundItem?.accepted_claimant_name || "the claimant";
+      const accEmail = foundItem?.accepted_claimant_email || "";
+      if (
+        !confirm(
+          `You accepted ${accName}'s claim. Deleting now will cancel their accepted claim and notify them. Continue?`,
+        )
+      )
+        return;
+      if (accEmail) {
+        sendEmail("claim-rejected", {
+          claimant_email: accEmail,
+          claimant_name: accName,
+          item_name: itemName,
+          rejection_reason:
+            "The item listing was removed by the finder after your claim was accepted. Please contact your school admin if you believe this is incorrect.",
+        });
+      }
+      const { error } = await supabase.from("items").delete().eq("id", itemId);
+      if (!error) updateItemStatus(itemId, "claimed");
+      return;
+    }
+  };
+
+  const handleCancelClaim = async (claimId: string, itemId: number) => {
+    const { data: freshItem } = await supabase
+      .from("items")
+      .select("status")
+      .eq("id", itemId)
+      .maybeSingle();
+    if (!freshItem || freshItem.status !== "waiting") {
+      alert("This claim can no longer be cancelled.");
+      return;
+    }
+    await supabase
+      .from("claim_requests")
+      .update({ status: "cancelled", updated_at: new Date().toISOString() })
+      .eq("id", claimId);
+    setMyActiveClaims((prev) => prev.filter((c) => c.id !== claimId));
   };
 
   const handleDeleteLostItem = async (itemId: number) => {
@@ -2408,12 +2630,32 @@ export default function DashboardPage() {
                   {t === "items" ? s.reportedItemsTab : s.reportedUsersTab}
                 </button>
               ))}
+              <button
+                onClick={() => setReportsTab("disputes")}
+                style={{
+                  padding: "8px 20px",
+                  borderRadius: "8px 8px 0 0",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  fontFamily: "Poppins, sans-serif",
+                  background:
+                    reportsTab === "disputes" ? "var(--danger)" : "var(--bg-page)",
+                  color: reportsTab === "disputes" ? "#fff" : "var(--text-muted)",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                Disputes
+              </button>
             </div>
             <div className="main-panel-content" style={{ maxWidth: "720px" }}>
               <div className="main-panel-section-title">
                 {reportsTab === "items"
                   ? s.reportedItemsTitle
-                  : s.reportedUsersTitle}
+                  : reportsTab === "users"
+                    ? s.reportedUsersTitle
+                    : "Disputes"}
               </div>
               {reportsTab === "items" && (
                 <ReportedItemsPanel updateItemStatus={updateItemStatus} s={s} />
@@ -2424,6 +2666,7 @@ export default function DashboardPage() {
                   s={s}
                 />
               )}
+              {reportsTab === "disputes" && <DisputesPanel s={s} />}
             </div>
           </>
         ) : null;
@@ -2871,15 +3114,25 @@ export default function DashboardPage() {
                             fontWeight: 600,
                             marginTop: 4,
                             color:
-                              item.status === "pending"
+                              item.status === "pending" || item.status === "claim_accepted"
                                 ? "var(--accent)"
-                                : "var(--success)",
+                                : item.status === "handed_off"
+                                  ? "var(--text-muted)"
+                                  : item.status === "disputed"
+                                    ? "var(--danger)"
+                                    : "var(--success)",
                             fontFamily: "Poppins, sans-serif",
                           }}
                         >
                           {item.status === "pending"
                             ? s.claimPendingStatus
-                            : s.activeStatus}
+                            : item.status === "claim_accepted"
+                              ? "⏳ Claim in progress"
+                              : item.status === "handed_off"
+                                ? "🤝 Awaiting confirmation"
+                                : item.status === "disputed"
+                                  ? "⚠️ Disputed"
+                                  : s.activeStatus}
                         </p>
                       </div>
                       <div className="button-group">
@@ -2892,12 +3145,14 @@ export default function DashboardPage() {
                           </button>
                         )}
                         <div className="button-group__row">
-                          <button
-                            className="delete-button"
-                            onClick={() => handleDelete(item.id)}
-                          >
-                            <FaTrash />
-                          </button>
+                          {item.status !== "handed_off" && item.status !== "disputed" && (
+                            <button
+                              className="delete-button"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -3005,6 +3260,90 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
+
+            {/* ── My Active Claims ── */}
+            <div>
+              <p
+                style={{
+                  margin: "0 0 10px",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "var(--text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.8px",
+                }}
+              >
+                My Active Claims
+              </p>
+              {activeClaimsLoading ? (
+                <p className="panel-empty">Loading...</p>
+              ) : myActiveClaims.length === 0 ? (
+                <p className="panel-empty">You have no active claims.</p>
+              ) : (
+                <div className="items-container" style={{ margin: 0 }}>
+                  {myActiveClaims.map((claim: any) => (
+                    <div key={claim.id} className="item-card">
+                      <div className="item-info">
+                        <h3 style={{ fontFamily: "Poppins, sans-serif" }}>{claim.item_name}</h3>
+                        <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.8rem" }}>
+                          {claim.description_proof?.slice(0, 100)}
+                          {(claim.description_proof?.length || 0) > 100 ? "…" : ""}
+                        </p>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            marginTop: 6,
+                            padding: "2px 10px",
+                            borderRadius: 100,
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            fontFamily: "Poppins, sans-serif",
+                            background:
+                              claim.status === "accepted"
+                                ? "var(--success)"
+                                : "var(--warning)",
+                            color: "#fff",
+                          }}
+                        >
+                          {claim.status === "accepted"
+                            ? "Accepted — Coordinate Now"
+                            : "Pending Review"}
+                        </span>
+                      </div>
+                      <div className="button-group">
+                        {claim.status === "accepted" ? (
+                          <button
+                            className="confirm-button"
+                            onClick={() => router.push(`/items/${claim.item_id}`)}
+                          >
+                            Go to Item
+                          </button>
+                        ) : (
+                          <button
+                            className="delete-button"
+                            style={{
+                              background: "transparent",
+                              border: "1.5px solid var(--danger)",
+                              color: "var(--danger)",
+                              borderRadius: 8,
+                              padding: "6px 12px",
+                              fontFamily: "Poppins, sans-serif",
+                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                            }}
+                            onClick={() => handleCancelClaim(claim.id, claim.item_id)}
+                          >
+                            Cancel Claim
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {!user && <p className="panel-empty">{s.signInToView}</p>}
             {user && myFoundItems.length === 0 && myLostItems.length === 0 && (
@@ -3467,6 +3806,48 @@ export default function DashboardPage() {
                             }}
                           >
                             {s.claimPending}
+                          </span>
+                        )}
+                        {item.status === "claim_accepted" && (
+                          <span
+                            style={{
+                              fontSize: "0.72rem",
+                              fontWeight: 700,
+                              color: "var(--warning)",
+                              fontFamily: "Poppins, sans-serif",
+                              marginTop: 4,
+                              display: "block",
+                            }}
+                          >
+                            ⏳ Claim in progress
+                          </span>
+                        )}
+                        {item.status === "handed_off" && (
+                          <span
+                            style={{
+                              fontSize: "0.72rem",
+                              fontWeight: 700,
+                              color: "var(--text-muted)",
+                              fontFamily: "Poppins, sans-serif",
+                              marginTop: 4,
+                              display: "block",
+                            }}
+                          >
+                            🤝 Awaiting confirmation
+                          </span>
+                        )}
+                        {item.status === "disputed" && (
+                          <span
+                            style={{
+                              fontSize: "0.72rem",
+                              fontWeight: 700,
+                              color: "var(--danger)",
+                              fontFamily: "Poppins, sans-serif",
+                              marginTop: 4,
+                              display: "block",
+                            }}
+                          >
+                            ⚠️ Disputed
                           </span>
                         )}
                       </div>

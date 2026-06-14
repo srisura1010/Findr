@@ -47,6 +47,14 @@ interface Message {
   created_at: string;
 }
 
+function sendEmail(route: string, body: Record<string, string>) {
+  fetch(`/api/emails/${route}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(console.error);
+}
+
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -82,6 +90,32 @@ export default function ItemDetailPage() {
   // Related items
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(false);
+
+  // ── CLAIM FLOW STATE ────────────────────────────────────────────────────────
+  const [claimCheckDone, setClaimCheckDone] = useState(false);
+  const [userExistingClaim, setUserExistingClaim] = useState<any>(null);
+  const [rateLimitCount, setRateLimitCount] = useState(0);
+  const [pendingClaimsCount, setPendingClaimsCount] = useState(0);
+
+  // Claim submission modal
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimProofText, setClaimProofText] = useState("");
+  const [claimProofFile, setClaimProofFile] = useState<File | null>(null);
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+
+  // Finder's claims review modal
+  const [showClaimsReviewModal, setShowClaimsReviewModal] = useState(false);
+  const [pendingClaims, setPendingClaims] = useState<any[]>([]);
+  const [claimsLoading, setClaimsLoading] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
+  const [claimActionLoading, setClaimActionLoading] = useState(false);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+
+  // Dispute modal
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [disputeText, setDisputeText] = useState("");
+  const [disputeSubmitting, setDisputeSubmitting] = useState(false);
 
   // Resolve item from context or fetch from DB
   useEffect(() => {
@@ -133,6 +167,12 @@ export default function ItemDetailPage() {
           location: foundData.location ?? null,
           latitude: foundData.latitude ?? null,
           longitude: foundData.longitude ?? null,
+          accepted_claimant_id: foundData.accepted_claimant_id ?? null,
+          accepted_claimant_email: foundData.accepted_claimant_email ?? null,
+          accepted_claimant_name: foundData.accepted_claimant_name ?? null,
+          handoff_confirmed_by_poster: foundData.handoff_confirmed_by_poster ?? false,
+          handoff_confirmed_by_claimant: foundData.handoff_confirmed_by_claimant ?? false,
+          rejection_count: foundData.rejection_count ?? 0,
         });
         setIsLost(false);
         setLoading(false);
@@ -173,6 +213,69 @@ export default function ItemDetailPage() {
 
     fetchItem();
   }, [id, items, lostItems, isLoaded]);
+
+  // Refresh item's claim-related fields from DB (runs once after item.id is set)
+  useEffect(() => {
+    if (!item?.id || isLost) return;
+    supabase
+      .from("items")
+      .select(
+        "status, accepted_claimant_id, accepted_claimant_email, accepted_claimant_name, handoff_confirmed_by_poster, handoff_confirmed_by_claimant, claim_accepted_at, handed_off_at, rejection_count",
+      )
+      .eq("id", item.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setItem((prev: any) => (prev ? { ...prev, ...data } : prev));
+      });
+  }, [item?.id, isLost]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch claim state for current user on this item
+  useEffect(() => {
+    if (!item?.id || !user?.id || !isLoaded || isLost) return;
+
+    (async () => {
+      // Existing claim by this user on this item
+      const { data: myClaimsOnItem } = await supabase
+        .from("claim_requests")
+        .select("*")
+        .eq("item_id", item.id)
+        .eq("claimant_id", user.id);
+
+      if (myClaimsOnItem && myClaimsOnItem.length > 0) {
+        setUserExistingClaim(myClaimsOnItem[0]);
+      }
+
+      // Rate limit: count pending/accepted + cancelled within 24h
+      const { data: allMyClaims } = await supabase
+        .from("claim_requests")
+        .select("id, status, created_at")
+        .eq("claimant_id", user.id)
+        .in("status", ["pending", "accepted", "cancelled"]);
+
+      let rateCount = 0;
+      const now = Date.now();
+      for (const c of allMyClaims || []) {
+        if (c.status === "pending" || c.status === "accepted") {
+          rateCount++;
+        } else if (c.status === "cancelled") {
+          if (now - new Date(c.created_at).getTime() < 86400000) rateCount++;
+        }
+      }
+      setRateLimitCount(rateCount);
+
+      // Count pending claims for this item (for finder's button)
+      if (user.id === item.authorId) {
+        const { count } = await supabase
+          .from("claim_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("item_id", item.id)
+          .eq("status", "pending");
+        setPendingClaimsCount(count ?? 0);
+      }
+
+      setClaimCheckDone(true);
+    })();
+  }, [item?.id, user?.id, isLoaded, isLost]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Chat subscription
   useEffect(() => {
@@ -230,6 +333,8 @@ export default function ItemDetailPage() {
         )
       : "";
 
+  // ── HANDLERS ────────────────────────────────────────────────────────────────
+
   const handleRetrieve = async () => {
     if (!user || !item) return;
     setActionLoading(true);
@@ -277,17 +382,108 @@ export default function ItemDetailPage() {
     setActionLoading(false);
   };
 
+  // handleDelete with 4-case logic (Step 5)
   const handleDelete = async () => {
-    if (!item || !confirm("Delete this item permanently?")) return;
-    setActionLoading(true);
-    const table = isLost ? "lost_items" : "items";
-    const { error } = await supabase.from(table).delete().eq("id", item.id);
-    if (!error) {
-      if (isLost) removeLostItem(item.id);
-      else updateItemStatus(item.id, "claimed");
-      router.push("/dashboard");
+    if (!item || !user) return;
+
+    const currentStatus = item.status || "waiting";
+
+    // Lost item: simple delete
+    if (isLost) {
+      if (!confirm("Delete this lost item report permanently?")) return;
+      setActionLoading(true);
+      const { error } = await supabase.from("lost_items").delete().eq("id", item.id);
+      if (!error) {
+        removeLostItem(item.id);
+        router.push("/dashboard");
+      }
+      setActionLoading(false);
+      return;
     }
-    setActionLoading(false);
+
+    // Case D: cannot delete while handoff or dispute is in progress
+    if (currentStatus === "handed_off" || currentStatus === "disputed") {
+      alert(
+        "This item cannot be deleted while a handoff or dispute is in progress. Please wait for the claimant to confirm receipt or for admin to resolve the dispute.",
+      );
+      return;
+    }
+
+    // Fetch all claim requests for this item
+    const { data: allClaims } = await supabase
+      .from("claim_requests")
+      .select("*")
+      .eq("item_id", item.id);
+
+    const pendClaimsArr = (allClaims || []).filter((c: any) => c.status === "pending");
+    const hasActiveClaimsOnly = (allClaims || []).some(
+      (c: any) => c.status === "pending" || c.status === "accepted",
+    );
+
+    // Case A: no claims or all resolved
+    if (!allClaims || allClaims.length === 0 || !hasActiveClaimsOnly) {
+      if (!confirm("Delete this item permanently?")) return;
+      setActionLoading(true);
+      const { error } = await supabase.from("items").delete().eq("id", item.id);
+      if (!error) {
+        updateItemStatus(item.id, "claimed");
+        router.push("/dashboard");
+      }
+      setActionLoading(false);
+      return;
+    }
+
+    // Case B: waiting with pending claims
+    if (currentStatus === "waiting" && pendClaimsArr.length > 0) {
+      if (
+        !confirm(
+          `There are ${pendClaimsArr.length} students who submitted claims for this item. Deleting will notify them it's been removed. Continue?`,
+        )
+      )
+        return;
+      setActionLoading(true);
+      for (const c of pendClaimsArr) {
+        sendEmail("claim-rejected", {
+          claimant_email: c.claimant_email,
+          claimant_name: c.claimant_name,
+          item_name: item.name,
+          rejection_reason: "The item was removed by the finder.",
+        });
+      }
+      const { error } = await supabase.from("items").delete().eq("id", item.id);
+      if (!error) {
+        updateItemStatus(item.id, "claimed");
+        router.push("/dashboard");
+      }
+      setActionLoading(false);
+      return;
+    }
+
+    // Case C: claim_accepted
+    if (currentStatus === "claim_accepted") {
+      const accName = item.accepted_claimant_name || "the claimant";
+      if (
+        !confirm(
+          `You accepted ${accName}'s claim. Deleting now will cancel their accepted claim and notify them. Continue?`,
+        )
+      )
+        return;
+      setActionLoading(true);
+      sendEmail("claim-rejected", {
+        claimant_email: item.accepted_claimant_email,
+        claimant_name: item.accepted_claimant_name || "",
+        item_name: item.name,
+        rejection_reason:
+          "The item listing was removed by the finder after your claim was accepted. Please contact your school admin if you believe this is incorrect.",
+      });
+      const { error } = await supabase.from("items").delete().eq("id", item.id);
+      if (!error) {
+        updateItemStatus(item.id, "claimed");
+        router.push("/dashboard");
+      }
+      setActionLoading(false);
+      return;
+    }
   };
 
   const handleMarkFound = async () => {
@@ -303,6 +499,281 @@ export default function ItemDetailPage() {
       setTimeout(() => router.push("/dashboard"), 1200);
     }
     setActionLoading(false);
+  };
+
+  // Step 1: Claimant submits a claim
+  const handleSubmitClaim = async () => {
+    if (!user || !item || claimSubmitting) return;
+    if (claimProofText.trim().length < 20) return;
+    setClaimSubmitting(true);
+
+    let proofImageUrl = "";
+    if (claimProofFile) {
+      const fileName = `claim_proof_${Date.now()}_${claimProofFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("item-images")
+        .upload(fileName, claimProofFile);
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from("item-images")
+          .getPublicUrl(fileName);
+        proofImageUrl = urlData.publicUrl;
+      }
+    }
+
+    const finderEmail = item.authorEmail || item.author_email || "";
+    const finderName = item.authorName || item.author_name || "Finder";
+
+    const { data: insertedClaim, error } = await supabase.from("claim_requests").insert({
+      item_id: item.id,
+      claimant_id: user.id,
+      claimant_name:
+        user.fullName ||
+        user.username ||
+        [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
+        user.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+        "Anonymous",
+      claimant_email: user.primaryEmailAddress?.emailAddress,
+      description_proof: claimProofText.trim(),
+      proof_image_url: proofImageUrl || null,
+      status: "pending",
+    }).select().single();
+
+    console.log("[claim_requests insert] data:", insertedClaim, "error:", error);
+
+    if (!error) {
+      sendEmail("claim-submitted", {
+        finder_email: finderEmail,
+        finder_name: finderName,
+        item_name: item.name,
+        claimant_name:
+          user.fullName ||
+          user.username ||
+          [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
+          user.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+          "Someone",
+      });
+      setShowClaimModal(false);
+      setClaimProofText("");
+      setClaimProofFile(null);
+      setUserExistingClaim({ status: "pending", description_proof: claimProofText.trim() });
+      setActionMsg("Your claim has been submitted. The finder will review it and get back to you.");
+    } else {
+      console.error("[claim submit failed]", error?.message, error?.code, error?.details, error?.hint);
+      setActionMsg("Failed to submit claim: " + (error?.message || "Unknown error"));
+    }
+    setClaimSubmitting(false);
+  };
+
+  // Step 2: Finder loads and views claims
+  const handleLoadAndShowClaims = async () => {
+    setClaimsLoading(true);
+    setShowClaimsReviewModal(true);
+    const { data } = await supabase
+      .from("claim_requests")
+      .select("*")
+      .eq("item_id", item.id)
+      .eq("status", "pending")
+      .order("created_at", { ascending: true });
+    setPendingClaims(data || []);
+    setClaimsLoading(false);
+  };
+
+  // Step 2: Finder accepts a claim
+  const handleAcceptClaim = async (claim: any) => {
+    if (!item || claimActionLoading) return;
+    setClaimActionLoading(true);
+
+    await supabase.from("items").update({
+      status: "claim_accepted",
+      accepted_claimant_id: claim.claimant_id,
+      accepted_claimant_email: claim.claimant_email,
+      accepted_claimant_name: claim.claimant_name,
+      claim_accepted_at: new Date().toISOString(),
+    }).eq("id", item.id);
+
+    await supabase.from("claim_requests").update({ status: "accepted" }).eq("id", claim.id);
+
+    // Reject all other pending claims
+    const { data: otherPending } = await supabase
+      .from("claim_requests")
+      .select("*")
+      .eq("item_id", item.id)
+      .eq("status", "pending")
+      .neq("id", claim.id);
+
+    if (otherPending && otherPending.length > 0) {
+      await supabase.from("claim_requests")
+        .update({
+          status: "rejected",
+          rejection_reason: "Another claim was accepted for this item.",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("item_id", item.id)
+        .eq("status", "pending")
+        .neq("id", claim.id);
+
+      for (const rejected of otherPending) {
+        sendEmail("claim-rejected", {
+          claimant_email: rejected.claimant_email,
+          claimant_name: rejected.claimant_name,
+          item_name: item.name,
+          rejection_reason: "Another claim was accepted for this item.",
+        });
+      }
+    }
+
+    sendEmail("claim-accepted", {
+      claimant_email: claim.claimant_email,
+      claimant_name: claim.claimant_name,
+      item_name: item.name,
+    });
+
+    setItem((prev: any) =>
+      prev
+        ? {
+            ...prev,
+            status: "claim_accepted",
+            accepted_claimant_id: claim.claimant_id,
+            accepted_claimant_email: claim.claimant_email,
+            accepted_claimant_name: claim.claimant_name,
+            claim_accepted_at: new Date().toISOString(),
+          }
+        : prev,
+    );
+    updateItemStatus(item.id, "claim_accepted");
+    setShowClaimsReviewModal(false);
+    setClaimActionLoading(false);
+  };
+
+  // Step 2: Finder rejects a claim
+  const handleRejectClaim = async (claim: any) => {
+    const reason = rejectReasons[claim.id] || "";
+    if (!item || claimActionLoading || !reason.trim()) return;
+    setClaimActionLoading(true);
+
+    await supabase.from("claim_requests").update({
+      status: "rejected",
+      rejection_reason: reason.trim(),
+      updated_at: new Date().toISOString(),
+    }).eq("id", claim.id);
+
+    const newCount = (item.rejection_count || 0) + 1;
+    await supabase.from("items").update({ rejection_count: newCount }).eq("id", item.id);
+
+    if (newCount >= 5) {
+      await supabase.from("reports").insert({
+        item_id: item.id,
+        item_name: item.name,
+        reporter_name: "System",
+        reporter_email: "system@findr.com",
+        reason: "This item has had 5 or more claims rejected. Possible finder misconduct.",
+      });
+    }
+
+    sendEmail("claim-rejected", {
+      claimant_email: claim.claimant_email,
+      claimant_name: claim.claimant_name,
+      item_name: item.name,
+      rejection_reason: reason.trim(),
+    });
+
+    setItem((prev: any) => (prev ? { ...prev, rejection_count: newCount } : prev));
+    setPendingClaims((prev) => prev.filter((c) => c.id !== claim.id));
+    setPendingClaimsCount((prev) => Math.max(0, prev - 1));
+    setRejectingId(null);
+    setRejectReasons((prev) => {
+      const n = { ...prev };
+      delete n[claim.id];
+      return n;
+    });
+    setClaimActionLoading(false);
+  };
+
+  // Step 3: Finder confirms handoff
+  const handleFinderHandoff = async () => {
+    if (!item || actionLoading) return;
+    setActionLoading(true);
+
+    await supabase.from("items").update({
+      handoff_confirmed_by_poster: true,
+      handed_off_at: new Date().toISOString(),
+      status: "handed_off",
+    }).eq("id", item.id);
+
+    // Re-fetch accepted claimant email from DB in case context doesn't have it
+    const { data: freshItem } = await supabase
+      .from("items")
+      .select("accepted_claimant_email, accepted_claimant_name")
+      .eq("id", item.id)
+      .maybeSingle();
+
+    const claimantEmail = freshItem?.accepted_claimant_email || item.accepted_claimant_email || "";
+    const claimantName = freshItem?.accepted_claimant_name || item.accepted_claimant_name || "";
+
+    if (claimantEmail) {
+      sendEmail("handoff-confirmed", {
+        claimant_email: claimantEmail,
+        claimant_name: claimantName,
+        item_name: item.name,
+      });
+    }
+
+    setItem((prev: any) =>
+      prev
+        ? {
+            ...prev,
+            status: "handed_off",
+            handoff_confirmed_by_poster: true,
+            handed_off_at: new Date().toISOString(),
+          }
+        : prev,
+    );
+    updateItemStatus(item.id, "handed_off");
+    setActionMsg("You've confirmed the handoff. The claimant has been notified.");
+    setActionLoading(false);
+  };
+
+  // Step 4: Claimant confirms receipt
+  const handleClaimantConfirmReceipt = async () => {
+    if (!item || actionLoading) return;
+    setActionLoading(true);
+
+    await supabase.from("items").update({ handoff_confirmed_by_claimant: true }).eq("id", item.id);
+    await supabase.from("items").delete().eq("id", item.id);
+
+    updateItemStatus(item.id, "claimed");
+    setActionMsg("Thanks for confirming! This listing has been removed.");
+    setTimeout(() => router.push("/dashboard"), 1500);
+    setActionLoading(false);
+  };
+
+  // Step 4: Claimant submits a dispute
+  const handleSubmitDispute = async () => {
+    if (!item || !user || disputeText.trim().length < 50 || disputeSubmitting) return;
+    setDisputeSubmitting(true);
+
+    await supabase.from("disputes").insert({
+      item_id: item.id,
+      item_name: item.name,
+      claimant_id: user.id,
+      claimant_email: user.primaryEmailAddress?.emailAddress,
+      reason: disputeText.trim(),
+    });
+
+    await supabase.from("items").update({ status: "disputed" }).eq("id", item.id);
+
+    sendEmail("dispute-filed", {
+      item_name: item.name,
+      claimant_email: user.primaryEmailAddress?.emailAddress || "",
+      dispute_reason: disputeText.trim(),
+    });
+
+    setItem((prev: any) => (prev ? { ...prev, status: "disputed" } : prev));
+    updateItemStatus(item.id, "disputed");
+    setShowDisputeModal(false);
+    setActionMsg("Your dispute has been filed. An admin will review it.");
+    setDisputeSubmitting(false);
   };
 
   const handleReportSubmit = async () => {
@@ -398,6 +869,7 @@ export default function ItemDetailPage() {
 
   const isItemOwner = user?.id === item.authorId;
   const currentStatus = item.status || "waiting";
+  const isAcceptedClaimant = !isLost && user?.id === item.accepted_claimant_id;
 
   const dateLabel = item.date_found
     ? new Date(item.date_found).toLocaleDateString(undefined, {
@@ -412,6 +884,30 @@ export default function ItemDetailPage() {
     item.longitude != null &&
     !isNaN(Number(item.latitude)) &&
     !isNaN(Number(item.longitude));
+
+  // Overlay/modal shared style
+  const overlayStyle: React.CSSProperties = {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.75)",
+    zIndex: 1500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+  };
+  const modalCardStyle: React.CSSProperties = {
+    background: "var(--bg-card)",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 480,
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+    maxHeight: "90vh",
+    overflowY: "auto",
+  };
 
   return (
     <div className="detail-page">
@@ -446,7 +942,13 @@ export default function ItemDetailPage() {
                 ? "✓ Available"
                 : currentStatus === "pending"
                   ? "⏳ Claim Pending"
-                  : "✓ Claimed"}
+                  : currentStatus === "claim_accepted"
+                    ? "✅ Claim Accepted"
+                    : currentStatus === "handed_off"
+                      ? "🤝 Handoff in Progress"
+                      : currentStatus === "disputed"
+                        ? "⚠️ Disputed"
+                        : "✓ Claimed"}
           </div>
         </div>
 
@@ -477,7 +979,7 @@ export default function ItemDetailPage() {
                   Report
                 </button>
               )}
-              {isItemOwner && (
+              {isItemOwner && currentStatus !== "handed_off" && currentStatus !== "disputed" && (
                 <button
                   className="detail-secondary-btn detail-secondary-btn--danger"
                   onClick={handleDelete}
@@ -591,26 +1093,150 @@ export default function ItemDetailPage() {
             </div>
           )}
 
-          {/* PRIMARY ACTIONS */}
+          {/* ── PRIMARY ACTIONS ── */}
           <div className="detail-actions">
+
+            {/* ── CLAIMANT: "This is mine" button (waiting status) ── */}
             {!isLost && !isItemOwner && currentStatus === "waiting" && (
-              <button
-                className="detail-btn detail-btn--primary"
-                onClick={handleRetrieve}
-                disabled={actionLoading}
+              <>
+                {!claimCheckDone ? null : userExistingClaim?.status === "rejected" ? (
+                  <p
+                    style={{
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: 13,
+                      color: "var(--warning)",
+                      padding: "10px 14px",
+                      background: "rgba(245,158,11,0.1)",
+                      borderRadius: 10,
+                      border: "1px solid var(--warning)",
+                      margin: 0,
+                    }}
+                  >
+                    You have already submitted a claim for this item that was not accepted.
+                  </p>
+                ) : userExistingClaim?.status === "pending" || userExistingClaim?.status === "accepted" ? (
+                  <button className="detail-btn detail-btn--disabled" disabled>
+                    ⏳ Claim Submitted — Awaiting Review
+                  </button>
+                ) : rateLimitCount >= 2 ? (
+                  <button
+                    className="detail-btn detail-btn--disabled"
+                    disabled
+                    title="You already have 2 active claims. Resolve one before claiming another."
+                  >
+                    This is mine
+                  </button>
+                ) : (
+                  <button
+                    className="detail-btn detail-btn--primary"
+                    onClick={() => setShowClaimModal(true)}
+                  >
+                    This is mine
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* ── CLAIMANT: claim accepted, waiting for finder handoff ── */}
+            {!isLost && !isItemOwner && currentStatus === "claim_accepted" && isAcceptedClaimant && (
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderRadius: 10,
+                  border: "1px solid var(--success)",
+                  background: "rgba(16,185,129,0.08)",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: 13,
+                  color: "var(--success)",
+                }}
               >
-                {actionLoading
-                  ? "Sending..."
-                  : "This is Mine — Request to Retrieve"}
+                Your claim has been accepted! Coordinate with the finder for pickup.
+              </div>
+            )}
+
+            {/* ── CLAIMANT: handed off — confirm receipt or dispute ── */}
+            {!isLost && !isItemOwner && currentStatus === "handed_off" && isAcceptedClaimant && !item.handoff_confirmed_by_claimant && (
+              <>
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 10,
+                    border: "1px solid var(--accent)",
+                    background: "rgba(47,128,237,0.08)",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 13,
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  The finder says they handed this back to you. Please confirm below.
+                </div>
+                <button
+                  className="detail-btn detail-btn--success"
+                  onClick={handleClaimantConfirmReceipt}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Confirming..." : "Confirm I Received It"}
+                </button>
+                <button
+                  className="detail-btn"
+                  style={{ background: "var(--danger)", color: "#fff" }}
+                  onClick={() => setShowDisputeModal(true)}
+                  disabled={actionLoading}
+                >
+                  Dispute
+                </button>
+              </>
+            )}
+
+            {/* ── FINDER: view claims button ── */}
+            {!isLost && isItemOwner && currentStatus === "waiting" && claimCheckDone && (
+              <button
+                className={
+                  pendingClaimsCount > 0
+                    ? "detail-btn detail-btn--secondary"
+                    : "detail-btn detail-btn--disabled"
+                }
+                onClick={pendingClaimsCount > 0 ? handleLoadAndShowClaims : undefined}
+                disabled={pendingClaimsCount === 0}
+              >
+                {pendingClaimsCount === 0
+                  ? "No claims yet"
+                  : `View Claims (${pendingClaimsCount})`}
               </button>
             )}
 
+            {/* ── FINDER: claim accepted — confirm handoff ── */}
+            {!isLost && isItemOwner && currentStatus === "claim_accepted" && (
+              <>
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 10,
+                    border: "1px solid var(--success)",
+                    background: "rgba(16,185,129,0.08)",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 13,
+                    color: "var(--success)",
+                  }}
+                >
+                  You accepted <strong>{item.accepted_claimant_name}</strong>'s claim. Once you've physically handed the item back, click below.
+                </div>
+                <button
+                  className="detail-btn detail-btn--success"
+                  onClick={handleFinderHandoff}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Confirming..." : "Confirm I Handed It Back"}
+                </button>
+              </>
+            )}
+
+            {/* ── LEGACY: pending status (old flow) ── */}
             {!isLost && !isItemOwner && currentStatus === "pending" && (
               <button className="detail-btn detail-btn--disabled" disabled>
                 ⏳ Claim Pending Confirmation
               </button>
             )}
-
             {!isLost && isItemOwner && currentStatus === "pending" && (
               <button
                 className="detail-btn detail-btn--success"
@@ -621,6 +1247,7 @@ export default function ItemDetailPage() {
               </button>
             )}
 
+            {/* ── LOST ITEM ACTIONS ── */}
             {isLost && !isItemOwner && (
               <button
                 className="detail-btn detail-btn--primary"
@@ -630,7 +1257,6 @@ export default function ItemDetailPage() {
                 I Found This! — Message Owner
               </button>
             )}
-
             {isLost && isItemOwner && (
               <button
                 className="detail-btn detail-btn--success"
@@ -641,6 +1267,7 @@ export default function ItemDetailPage() {
               </button>
             )}
 
+            {/* ── Message finder (found, non-owner) ── */}
             {!isLost && !isItemOwner && (
               <button
                 className="detail-btn detail-btn--secondary"
@@ -874,6 +1501,434 @@ export default function ItemDetailPage() {
                 className={`chat-modal__send${chatText.trim() ? " chat-modal__send--active" : ""}`}
               >
                 ↑
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CLAIM SUBMISSION MODAL (Step 1) ── */}
+      {showClaimModal && (
+        <div style={overlayStyle} onClick={() => setShowClaimModal(false)}>
+          <div style={modalCardStyle} onClick={(e) => e.stopPropagation()}>
+            <p
+              style={{
+                fontFamily: "Ubuntu, sans-serif",
+                fontSize: 18,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                margin: 0,
+              }}
+            >
+              Submit a Claim
+            </p>
+            <p
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontSize: 13,
+                color: "var(--text-muted)",
+                margin: 0,
+              }}
+            >
+              Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible — the finder will use this to verify ownership.
+            </p>
+            <textarea
+              className="panel-form__textarea"
+              placeholder='e.g. There&apos;s a small scratch on the bottom-left corner, the brand sticker is peeling, my name is written inside in black marker'
+              value={claimProofText}
+              onChange={(e) => setClaimProofText(e.target.value)}
+              minLength={20}
+              required
+              style={{ minHeight: 100 }}
+            />
+            <p
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontSize: 11,
+                color:
+                  claimProofText.trim().length >= 20
+                    ? "var(--success)"
+                    : "var(--text-muted)",
+                margin: "4px 0 0",
+                textAlign: "right",
+              }}
+            >
+              {claimProofText.trim().length}/20 minimum characters
+            </p>
+            <div>
+              <label
+                className="panel-form__label"
+                style={{ display: "block", marginBottom: 6 }}
+              >
+                Upload proof (optional)
+              </label>
+              <label
+                className="panel-form__file-label"
+                htmlFor="claim-proof-upload"
+              >
+                <span className="panel-form__file-icon">+</span>
+                <span className="panel-form__file-text">
+                  {claimProofFile ? claimProofFile.name : "Choose image"}
+                </span>
+              </label>
+              <input
+                id="claim-proof-upload"
+                className="panel-form__file"
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  e.target.files?.[0] && setClaimProofFile(e.target.files[0])
+                }
+              />
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                className="panel-form__cancel"
+                style={{ flex: 1 }}
+                onClick={() => {
+                  setShowClaimModal(false);
+                  setClaimProofText("");
+                  setClaimProofFile(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="panel-form__submit"
+                style={{ flex: 2 }}
+                onClick={handleSubmitClaim}
+                disabled={claimSubmitting || claimProofText.trim().length < 20}
+              >
+                {claimSubmitting ? "Submitting..." : "Submit Claim"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── FINDER CLAIMS REVIEW MODAL (Step 2) ── */}
+      {showClaimsReviewModal && (
+        <div
+          style={overlayStyle}
+          onClick={() => setShowClaimsReviewModal(false)}
+        >
+          <div
+            style={{ ...modalCardStyle, maxWidth: 560 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p
+              style={{
+                fontFamily: "Ubuntu, sans-serif",
+                fontSize: 18,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                margin: 0,
+              }}
+            >
+              Claims for "{item.name}"
+            </p>
+            {claimsLoading ? (
+              <p
+                style={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: 13,
+                  color: "var(--text-muted)",
+                }}
+              >
+                Loading claims...
+              </p>
+            ) : pendingClaims.length === 0 ? (
+              <p
+                style={{
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: 13,
+                  color: "var(--text-muted)",
+                }}
+              >
+                No pending claims.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {pendingClaims.map((claim) => (
+                  <div
+                    key={claim.id}
+                    style={{
+                      border: "1px solid var(--border-default)",
+                      borderRadius: 12,
+                      padding: "14px 16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 8,
+                      }}
+                    >
+                      <div>
+                        <p
+                          style={{
+                            fontFamily: "Poppins, sans-serif",
+                            fontWeight: 700,
+                            fontSize: 14,
+                            color: "var(--text-primary)",
+                            margin: 0,
+                          }}
+                        >
+                          {claim.claimant_name}
+                        </p>
+                        <p
+                          style={{
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 11,
+                            color: "var(--text-muted)",
+                            margin: "2px 0 0",
+                          }}
+                        >
+                          {new Date(claim.created_at).toLocaleDateString(
+                            undefined,
+                            { year: "numeric", month: "short", day: "numeric" },
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: 13,
+                        color: "var(--text-primary)",
+                        margin: 0,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {claim.description_proof}
+                    </p>
+                    {claim.proof_image_url && (
+                      <img
+                        src={claim.proof_image_url}
+                        alt="proof"
+                        style={{
+                          width: 80,
+                          height: 80,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          border: "1px solid var(--border-default)",
+                        }}
+                        onClick={() => setEnlargedImage(claim.proof_image_url)}
+                      />
+                    )}
+                    {rejectingId === claim.id ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <textarea
+                          className="panel-form__textarea"
+                          placeholder="Enter rejection reason (required)"
+                          value={rejectReasons[claim.id] || ""}
+                          onChange={(e) =>
+                            setRejectReasons((prev) => ({
+                              ...prev,
+                              [claim.id]: e.target.value,
+                            }))
+                          }
+                          style={{ minHeight: 70 }}
+                          required
+                        />
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            style={{
+                              flex: 1,
+                              padding: "9px 0",
+                              borderRadius: 8,
+                              border: "1.5px solid var(--border-input)",
+                              background: "transparent",
+                              color: "var(--text-muted)",
+                              fontFamily: "Poppins, sans-serif",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              setRejectingId(null);
+                              setRejectReasons((prev) => {
+                                const n = { ...prev };
+                                delete n[claim.id];
+                                return n;
+                              });
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            style={{
+                              flex: 2,
+                              padding: "9px 0",
+                              borderRadius: 8,
+                              border: "none",
+                              background: "var(--danger)",
+                              color: "#fff",
+                              fontFamily: "Poppins, sans-serif",
+                              fontSize: 13,
+                              fontWeight: 700,
+                              cursor: "pointer",
+                            }}
+                            onClick={() => handleRejectClaim(claim)}
+                            disabled={
+                              claimActionLoading ||
+                              !(rejectReasons[claim.id] || "").trim()
+                            }
+                          >
+                            {claimActionLoading ? "Rejecting..." : "Confirm Reject"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          style={{
+                            flex: 1,
+                            padding: "9px 0",
+                            borderRadius: 8,
+                            border: "none",
+                            background: "var(--success)",
+                            color: "#fff",
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 13,
+                            fontWeight: 700,
+                            cursor: claimActionLoading ? "not-allowed" : "pointer",
+                            opacity: claimActionLoading ? 0.6 : 1,
+                          }}
+                          onClick={() => handleAcceptClaim(claim)}
+                          disabled={claimActionLoading}
+                        >
+                          {claimActionLoading ? "..." : "Accept"}
+                        </button>
+                        <button
+                          style={{
+                            flex: 1,
+                            padding: "9px 0",
+                            borderRadius: 8,
+                            border: "none",
+                            background: "var(--danger)",
+                            color: "#fff",
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 13,
+                            fontWeight: 700,
+                            cursor: claimActionLoading ? "not-allowed" : "pointer",
+                            opacity: claimActionLoading ? 0.6 : 1,
+                          }}
+                          onClick={() => setRejectingId(claim.id)}
+                          disabled={claimActionLoading}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              className="panel-form__cancel"
+              onClick={() => setShowClaimsReviewModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── PROOF IMAGE ENLARGE ── */}
+      {enlargedImage && (
+        <div
+          style={{ ...overlayStyle, zIndex: 1600 }}
+          onClick={() => setEnlargedImage(null)}
+        >
+          <img
+            src={enlargedImage}
+            alt="proof enlarged"
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "85vh",
+              objectFit: "contain",
+              borderRadius: 12,
+            }}
+          />
+        </div>
+      )}
+
+      {/* ── DISPUTE MODAL (Step 4) ── */}
+      {showDisputeModal && (
+        <div style={overlayStyle} onClick={() => setShowDisputeModal(false)}>
+          <div style={modalCardStyle} onClick={(e) => e.stopPropagation()}>
+            <p
+              style={{
+                fontFamily: "Ubuntu, sans-serif",
+                fontSize: 18,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                margin: 0,
+              }}
+            >
+              Open a Dispute
+            </p>
+            <p
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                fontSize: 13,
+                color: "var(--text-muted)",
+                margin: 0,
+              }}
+            >
+              Describe what went wrong. An admin will review your dispute.
+            </p>
+            <textarea
+              className="panel-form__textarea"
+              placeholder="Describe what went wrong (minimum 50 characters)"
+              value={disputeText}
+              onChange={(e) => setDisputeText(e.target.value)}
+              minLength={50}
+              required
+              style={{ minHeight: 100 }}
+            />
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                className="panel-form__cancel"
+                style={{ flex: 1 }}
+                onClick={() => {
+                  setShowDisputeModal(false);
+                  setDisputeText("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  flex: 2,
+                  padding: "11px 0",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "var(--danger)",
+                  color: "#fff",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor:
+                    disputeSubmitting || disputeText.trim().length < 50
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity:
+                    disputeSubmitting || disputeText.trim().length < 50
+                      ? 0.6
+                      : 1,
+                }}
+                onClick={handleSubmitDispute}
+                disabled={disputeSubmitting || disputeText.trim().length < 50}
+              >
+                {disputeSubmitting ? "Submitting..." : "Submit Dispute"}
               </button>
             </div>
           </div>
