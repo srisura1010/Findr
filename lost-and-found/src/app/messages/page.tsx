@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { useSettings } from "@/context/SettingsContext";
 import { FaFlag, FaShieldHalved } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-import { MdOutlineMessage } from "react-icons/md";
+import { MdOutlineMessage, MdOutlineSchool } from "react-icons/md";
+import { SchoolAdminContactModal, type SchoolAdminConvData } from "@/app/components/SchoolAdminContactModal";
 
 interface Message {
   id: number;
@@ -226,6 +227,7 @@ export default function MessagesPage() {
   const [sending, setSending] = useState(false);
   const [reportingUser, setReportingUser] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [showSchoolAdminModal, setShowSchoolAdminModal] = useState(false);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminsLoading, setAdminsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -525,6 +527,29 @@ export default function MessagesPage() {
     }
   };
 
+  const handleSchoolAdminConversationStart = (data: SchoolAdminConvData) => {
+    setShowSchoolAdminModal(false);
+    const existing = conversations.find((c) => c.conversation_id === data.conversationId);
+    if (!existing) {
+      setConversations((prev) => [
+        {
+          conversation_id: data.conversationId,
+          item_title: `${data.schoolName} — School Admin`,
+          otherUserId: data.adminUserId,
+          otherUserName: data.adminName,
+          otherUserEmail: data.adminEmail,
+          lastMessage: "",
+          lastMessageAt: new Date().toISOString(),
+          unread: false,
+          isAdminConv: false,
+        },
+        ...prev,
+      ]);
+    }
+    setActiveConvId(data.conversationId);
+    setReportingUser(false);
+  };
+
   // Close chat pane on mobile and return to sidebar
   const handleBack = () => {
     setActiveConvId(null);
@@ -555,6 +580,16 @@ export default function MessagesPage() {
           >
             <FaShieldHalved className="messages-sidebar__admin-icon" />
             Contact an Admin
+          </button>
+        </div>
+
+        <div className="messages-sidebar__admin-btn-wrap">
+          <button
+            className="messages-sidebar__admin-btn"
+            onClick={() => setShowSchoolAdminModal(true)}
+          >
+            <MdOutlineSchool className="messages-sidebar__admin-icon" />
+            Contact a School Admin
           </button>
         </div>
 
@@ -778,6 +813,15 @@ export default function MessagesPage() {
           loading={adminsLoading}
           onSelect={handleSelectAdmin}
           onClose={() => setShowAdminModal(false)}
+        />
+      )}
+
+      {/* Contact School Admin Modal */}
+      {showSchoolAdminModal && user && (
+        <SchoolAdminContactModal
+          userId={user.id}
+          onConversationStart={handleSchoolAdminConversationStart}
+          onClose={() => setShowSchoolAdminModal(false)}
         />
       )}
     </div>
