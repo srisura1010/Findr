@@ -156,7 +156,7 @@ export default function GlobalChatbot() {
         onClick={() => setIsOpen((v) => !v)}
         aria-label="Toggle support chat"
       >
-        F
+        <img src="/logo/Findr_logo.png" alt="Findr" style={{ width: "50px", height: "50px", objectFit: "contain", display: "block", margin: "0 auto" }} />
       </button>
 
       {isOpen && (
@@ -178,7 +178,7 @@ export default function GlobalChatbot() {
                 className={`global-chat-bubble-wrap${msg.role === "user" ? " global-chat-bubble-wrap--user" : ""}`}
               >
                 {msg.role === "assistant" && (
-                  <div className="global-chat-avatar">F</div>
+                  <div className="global-chat-avatar"><img src="/logo/Findr_logo.png" alt="Findr" style={{ width: "16px", height: "16px", objectFit: "contain", display: "block" }} /></div>
                 )}
                 <div
                   className={`global-chat-bubble global-chat-bubble--${msg.role}`}
