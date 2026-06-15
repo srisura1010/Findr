@@ -1,4 +1,4 @@
-# Findr
+# Findr (need to update)
 
 A school lost-and-found web platform that connects students with their missing items through a searchable catalog, direct messaging, and AI-powered item matching.
 
