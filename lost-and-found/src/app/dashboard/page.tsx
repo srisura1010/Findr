@@ -1221,9 +1221,13 @@ interface Dispute {
   created_at: string;
 }
 
-function DisputesPanel({ s }: { s: DashStrings }) {
+function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: string; adminName: string }) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
+  const [messagingDispute, setMessagingDispute] = useState<string | null>(null);
+  const [adminMsgText, setAdminMsgText] = useState("");
+  const [adminMsgSending, setAdminMsgSending] = useState(false);
+  const [adminMsgTarget, setAdminMsgTarget] = useState<"finder" | "claimant">("claimant");
 
   useEffect(() => {
     (async () => {
@@ -1263,6 +1267,47 @@ function DisputesPanel({ s }: { s: DashStrings }) {
     setDisputes((prev) => prev.filter((d) => d.id !== dispute.id));
   };
 
+  const handleSendAdminMsg = async (dispute: Dispute) => {
+    let finderInfo = { author_id: "", author_name: "Finder", author_email: "" };
+    if (adminMsgTarget === "finder") {
+      const { data: itemData } = await supabase
+        .from("items")
+        .select("author_id, author_name, author_email")
+        .eq("id", dispute.item_id)
+        .maybeSingle();
+      if (itemData) finderInfo = itemData;
+    }
+
+    const targetId = adminMsgTarget === "claimant"
+      ? dispute.claimant_id
+      : finderInfo.author_id;
+    const targetEmail = adminMsgTarget === "claimant"
+      ? dispute.claimant_email
+      : finderInfo.author_email;
+    const targetName = adminMsgTarget === "claimant"
+      ? dispute.claimant_email
+      : finderInfo.author_name;
+    if (!targetEmail || !targetId || !adminId) return;
+    setAdminMsgSending(true);
+    const convId = `conv_${[adminId, targetId].sort().join("_")}`;
+    await supabase.from("chat_messages").insert({
+      conversation_id: convId,
+      sender_id: adminId,
+      sender_name: adminName,
+      sender_email: "",
+      receiver_id: targetId,
+      receiver_name: targetName,
+      receiver_email: targetEmail,
+      item_id: String(dispute.item_id),
+      item_title: dispute.item_name,
+      text: adminMsgText.trim(),
+      read: false,
+    });
+    setAdminMsgSending(false);
+    setAdminMsgText("");
+    setMessagingDispute(null);
+  };
+
   if (loading) return <p className="panel-empty">{s.loadingText}</p>;
   if (disputes.length === 0)
     return <p className="panel-empty">No disputes — all clear!</p>;
@@ -1270,29 +1315,165 @@ function DisputesPanel({ s }: { s: DashStrings }) {
   return (
     <div className="panel-item-list">
       {disputes.map((dispute) => (
-        <div key={dispute.id} className="reported-card">
-          <div className="reported-card__body">
-            <p className="reported-card__name">{dispute.item_name}</p>
-            <p className="reported-card__reason">{dispute.reason}</p>
-            <p className="reported-card__meta">
-              Disputed by {dispute.claimant_email} ·{" "}
-              {new Date(dispute.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          <div className="reported-card__actions">
-            <button
-              className="reported-card__dismiss"
-              onClick={() => handleDismiss(dispute)}
+        <div
+          key={dispute.id}
+          className="reported-card"
+          style={{ alignItems: "flex-start", gap: 16, padding: "16px", flexDirection: "column" }}
+        >
+          <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+            <div className="reported-card__body">
+              <p className="reported-card__name">{dispute.item_name}</p>
+              <p
+                className="reported-card__reason"
+                style={{
+                  color: "var(--text-secondary)",
+                  textTransform: "none",
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "0.85rem",
+                  fontWeight: 400,
+                  lineHeight: 1.5,
+                  margin: "4px 0",
+                  letterSpacing: "normal",
+                }}
+              >
+                {dispute.reason}
+              </p>
+              <p className="reported-card__meta">
+                Disputed by {dispute.claimant_email} ·{" "}
+                {new Date(dispute.created_at).toLocaleDateString()}
+              </p>
+              <a
+                href={`/items/${dispute.item_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "3px 10px",
+                  borderRadius: "100px",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  fontFamily: "Poppins, sans-serif",
+                  textDecoration: "none",
+                  marginTop: 6,
+                  width: "fit-content",
+                  alignSelf: "flex-start",
+                }}
+              >
+                View Item →
+              </a>
+            </div>
+            <div
+              className="reported-card__actions"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                flexShrink: 0,
+                alignSelf: "flex-start",
+                width: 180,
+              }}
             >
-              Dismiss Dispute
-            </button>
-            <button
-              className="reported-card__delete"
-              onClick={() => handleResolveForClaimant(dispute)}
-            >
-              Resolve for Claimant
-            </button>
+              <button
+                className="reported-card__dismiss"
+                style={{ width: "100%", padding: "10px 0", textAlign: "center", boxSizing: "border-box" }}
+                onClick={() => handleDismiss(dispute)}
+              >
+                Dismiss Dispute
+              </button>
+              <button
+                className="reported-card__delete"
+                style={{ width: "100%", padding: "10px 0", textAlign: "center", boxSizing: "border-box" }}
+                onClick={() => handleResolveForClaimant(dispute)}
+              >
+                Resolve for Claimant
+              </button>
+              <button
+                style={{
+                  width: "100%",
+                  padding: "10px 0",
+                  textAlign: "center",
+                  boxSizing: "border-box",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  fontFamily: "Poppins, sans-serif",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                onClick={() =>
+                  setMessagingDispute(
+                    messagingDispute === String(dispute.id)
+                      ? null
+                      : String(dispute.id),
+                  )
+                }
+              >
+                {messagingDispute === String(dispute.id) ? "Cancel" : "Message Parties"}
+              </button>
+            </div>
           </div>
+          {messagingDispute === String(dispute.id) && (
+            <div
+              style={{
+                width: "100%",
+                borderTop: "1px solid var(--border-default)",
+                paddingTop: 14,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div style={{ display: "flex", gap: 6 }}>
+                {(["claimant", "finder"] as const).map((target) => (
+                  <button
+                    key={target}
+                    style={{
+                      padding: "7px 16px",
+                      borderRadius: 100,
+                      border: "none",
+                      fontFamily: "Poppins, sans-serif",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      background:
+                        adminMsgTarget === target
+                          ? "var(--accent)"
+                          : "var(--bg-input)",
+                      color:
+                        adminMsgTarget === target ? "#fff" : "var(--text-muted)",
+                    }}
+                    onClick={() => setAdminMsgTarget(target)}
+                  >
+                    {target === "claimant" ? "Claimant" : "Finder"}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                className="panel-form__textarea"
+                style={{ width: "100%", minHeight: 80, boxSizing: "border-box" }}
+                placeholder={
+                  adminMsgTarget === "claimant"
+                    ? `Message to claimant (${dispute.claimant_email})...`
+                    : `Message to finder...`
+                }
+                value={adminMsgText}
+                onChange={(e) => setAdminMsgText(e.target.value)}
+              />
+              <button
+                className="panel-form__submit"
+                style={{ width: "100%" }}
+                disabled={adminMsgSending || !adminMsgText.trim()}
+                onClick={() => handleSendAdminMsg(dispute)}
+              >
+                {adminMsgSending ? "Sending..." : "Send Message"}
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -1482,6 +1663,8 @@ export default function DashboardPage() {
   // My Active Claims (claimant section)
   const [myActiveClaims, setMyActiveClaims] = useState<any[]>([]);
   const [activeClaimsLoading, setActiveClaimsLoading] = useState(false);
+  const [totalReturnedByMe, setTotalReturnedByMe] = useState(0);
+  const [myItemClaims, setMyItemClaims] = useState<Record<number, number>>({});
   const [reportsTab, setReportsTab] = useState<"items" | "users" | "disputes">("items");
   const [reportMode, setReportMode] = useState<"found" | "lost">("found");
   const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
@@ -1580,6 +1763,40 @@ export default function DashboardPage() {
       setActiveClaimsLoading(false);
     })();
   }, [user?.id, isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Returned-by-me count (persistent across item deletion, for charts) ───────
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const { count } = await supabase
+        .from("claim_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("claimant_id", user.id)
+        .in("status", ["accepted"]);
+      setTotalReturnedByMe(count ?? 0);
+    })();
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Pending claim counts per found item (for My Dashboard claims summary) ────
+  useEffect(() => {
+    if (!user?.id) return;
+    const myFoundItemIds = (items ?? [])
+      .filter((i) => i.authorId === user.id)
+      .map((i) => i.id);
+    if (myFoundItemIds.length === 0) { setMyItemClaims({}); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("claim_requests")
+        .select("item_id")
+        .in("item_id", myFoundItemIds)
+        .eq("status", "pending");
+      const counts: Record<number, number> = {};
+      for (const row of data || []) {
+        counts[row.item_id] = (counts[row.item_id] || 0) + 1;
+      }
+      setMyItemClaims(counts);
+    })();
+  }, [user?.id, items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Translation effect ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -2666,7 +2883,7 @@ export default function DashboardPage() {
                   s={s}
                 />
               )}
-              {reportsTab === "disputes" && <DisputesPanel s={s} />}
+              {reportsTab === "disputes" && <DisputesPanel s={s} adminId={adminId} adminName={adminName} />}
             </div>
           </>
         ) : null;
@@ -2698,9 +2915,7 @@ export default function DashboardPage() {
 
         const totalFound = myFoundItems.length;
         const totalLost = myLostItems.length;
-        const totalClaimed = (items ?? []).filter(
-          (item) => item.authorId === user?.id && item.status === "claimed",
-        ).length;
+        const totalClaimed = totalReturnedByMe;
         const totalActions = totalFound + totalLost + totalClaimed;
 
         const now = new Date();
@@ -2748,7 +2963,7 @@ export default function DashboardPage() {
         const clrLost = dashStyle?.getPropertyValue("--warning").trim() || "#f59e0b";
         const clrClaimed = dashStyle?.getPropertyValue("--success").trim() || "#10b981";
 
-        const chartKey = `${user?.id}-${totalActions}-${theme}`;
+        const chartKey = `${user?.id}-${totalActions}-${theme}-${totalReturnedByMe}`;
 
         return (
           <div
@@ -3052,6 +3267,104 @@ export default function DashboardPage() {
               chartData={chartDataJson}
               pieData={pieDataJson}
             />
+
+            {/* ── Pending claims on my items ── */}
+            {Object.values(myItemClaims).some((n) => n > 0) && (
+              <div>
+                <p
+                  style={{
+                    margin: "0 0 10px",
+                    fontFamily: "Poppins, sans-serif",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                  }}
+                >
+                  Pending Claims on My Items
+                </p>
+                {myFoundItems
+                  .filter((item) => (myItemClaims[item.id] ?? 0) > 0)
+                  .map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        background: "var(--bg-card)",
+                        border: "1px solid var(--border-default)",
+                        borderRadius: 12,
+                        padding: "12px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        marginBottom: 8,
+                      }}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 6,
+                          objectFit: "cover",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <p
+                        style={{
+                          fontFamily: "Poppins, sans-serif",
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "var(--text-primary)",
+                          margin: 0,
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {item.name}
+                      </p>
+                      <span
+                        style={{
+                          background: "var(--warning)",
+                          color: "#fff",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: "3px 10px",
+                          borderRadius: 100,
+                          fontFamily: "Poppins, sans-serif",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {myItemClaims[item.id]}{" "}
+                        pending claim
+                        {myItemClaims[item.id] !== 1 ? "s" : ""}
+                      </span>
+                      <button
+                        style={{
+                          background: "var(--accent)",
+                          color: "#fff",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          padding: "6px 14px",
+                          borderRadius: 8,
+                          border: "none",
+                          cursor: "pointer",
+                          fontFamily: "Poppins, sans-serif",
+                          flexShrink: 0,
+                        }}
+                        onClick={() => router.push(`/items/${item.id}`)}
+                      >
+                        Review
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
 
             {/* ── Found items ── */}
             {myFoundItems.length > 0 && (

@@ -117,6 +117,11 @@ export default function ItemDetailPage() {
   const [disputeText, setDisputeText] = useState("");
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
 
+  // Finder messaging claimant from claims review modal
+  const [messagingClaimId, setMessagingClaimId] = useState<string | null>(null);
+  const [claimMsgText, setClaimMsgText] = useState("");
+  const [claimMsgSending, setClaimMsgSending] = useState(false);
+
   // Resolve item from context or fetch from DB
   useEffect(() => {
     if (!isLoaded) return;
@@ -765,6 +770,11 @@ export default function ItemDetailPage() {
 
     sendEmail("dispute-filed", {
       item_name: item.name,
+      item_description: item.description || "",
+      item_image_url: item.image || "",
+      item_id: String(item.id),
+      finder_name: item.authorName || "",
+      finder_email: item.authorEmail || item.author_email || "",
       claimant_email: user.primaryEmailAddress?.emailAddress || "",
       dispute_reason: disputeText.trim(),
     });
@@ -1399,6 +1409,67 @@ export default function ItemDetailPage() {
               </button>
             </div>
             <div className="chat-modal__messages">
+              {item && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "10px 12px",
+                    background: "var(--bg-input)",
+                    borderRadius: 10,
+                    margin: "8px 12px",
+                    border: "1px solid var(--border-default)",
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 8,
+                      objectFit: "cover",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <p
+                    style={{
+                      fontFamily: "Poppins, sans-serif",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      color: "var(--text-primary)",
+                      margin: 0,
+                      flex: 1,
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.name}
+                  </p>
+                  <a
+                    href={`/items/${item.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      background: "var(--accent)",
+                      color: "#fff",
+                      fontSize: 11,
+                      padding: "3px 10px",
+                      borderRadius: 100,
+                      textDecoration: "none",
+                      fontWeight: 600,
+                      fontFamily: "Poppins, sans-serif",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                  >
+                    View Item
+                  </a>
+                </div>
+              )}
               {messages.length === 0 && (
                 <div className="chat-modal__empty">
                   <p>
@@ -1824,6 +1895,74 @@ export default function ItemDetailPage() {
                           disabled={claimActionLoading}
                         >
                           Reject
+                        </button>
+                      </div>
+                    )}
+                    <button
+                      style={{
+                        width: "100%",
+                        padding: "8px 0",
+                        borderRadius: 8,
+                        border: "1.5px solid var(--border-input)",
+                        background: "transparent",
+                        color: "var(--text-muted)",
+                        fontFamily: "Poppins, sans-serif",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        marginTop: 4,
+                      }}
+                      onClick={() =>
+                        setMessagingClaimId(
+                          messagingClaimId === claim.id ? null : claim.id,
+                        )
+                      }
+                    >
+                      {messagingClaimId === claim.id
+                        ? "Cancel"
+                        : "Message Claimant"}
+                    </button>
+                    {messagingClaimId === claim.id && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                        }}
+                      >
+                        <textarea
+                          className="panel-form__textarea"
+                          placeholder={`Ask ${claim.claimant_name} for more details about their claim...`}
+                          value={claimMsgText}
+                          onChange={(e) => setClaimMsgText(e.target.value)}
+                          style={{ minHeight: 70 }}
+                        />
+                        <button
+                          className="panel-form__submit"
+                          disabled={claimMsgSending || !claimMsgText.trim()}
+                          onClick={async () => {
+                            if (!user) return;
+                            setClaimMsgSending(true);
+                            const convId = `conv_${[user.id, claim.claimant_id].sort().join("_")}`;
+                            await supabase.from("chat_messages").insert({
+                              conversation_id: convId,
+                              sender_id: user.id,
+                              sender_name: user.fullName || "",
+                              sender_email: user.primaryEmailAddress?.emailAddress || "",
+                              receiver_id: claim.claimant_id,
+                              receiver_name: claim.claimant_name,
+                              receiver_email: claim.claimant_email,
+                              item_id: item.id,
+                              item_title: item.name,
+                              text: claimMsgText.trim(),
+                              read: false,
+                            });
+                            setClaimMsgSending(false);
+                            setClaimMsgText("");
+                            setMessagingClaimId(null);
+                          }}
+                        >
+                          {claimMsgSending ? "Sending..." : "Send Message"}
                         </button>
                       </div>
                     )}

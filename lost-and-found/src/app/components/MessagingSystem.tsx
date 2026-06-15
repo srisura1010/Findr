@@ -4,7 +4,7 @@ export function getConversationId(
   otherUser: { uid: string; displayName: string },
 ): string {
   const participants = [currentUser.uid, otherUser.uid].sort();
-  return `${item.id}_${participants.join("_")}`;
+  return `conv_${participants.join("_")}`;
 }
 
 export function getSchoolAdminConversationId(
