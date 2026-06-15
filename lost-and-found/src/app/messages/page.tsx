@@ -573,19 +573,18 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        <div className="messages-sidebar__admin-btn-wrap">
+        <div className="messages-sidebar__admin-btn-wrap" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <button
             className="messages-sidebar__admin-btn"
+            style={{ justifyContent: "center" }}
             onClick={handleOpenAdminModal}
           >
             <FaShieldHalved className="messages-sidebar__admin-icon" />
             Contact an Admin
           </button>
-        </div>
-
-        <div className="messages-sidebar__admin-btn-wrap">
           <button
             className="messages-sidebar__admin-btn"
+            style={{ justifyContent: "center" }}
             onClick={() => setShowSchoolAdminModal(true)}
           >
             <MdOutlineSchool className="messages-sidebar__admin-icon" />

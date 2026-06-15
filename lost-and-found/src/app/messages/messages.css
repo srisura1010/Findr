@@ -145,6 +145,7 @@ body.dark {
   font-weight: 700;
   font-size: 13px;
   transition: background 0.15s ease, border-color 0.15s ease;
+  margin-left: 11px;
 }
 
 .messages-sidebar__admin-btn:hover {
