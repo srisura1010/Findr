@@ -1491,9 +1491,9 @@ function MyDashboardCharts({
   pieData: string;
 }) {
   useEffect(() => {
-    const { monthLabels, foundByMonth, lostByMonth, claimedByMonth } =
+    const { monthLabels, foundByMonth, lostByMonth, returnedByMonth } =
       JSON.parse(chartData);
-    const { totalFound, totalLost, totalClaimed } = JSON.parse(pieData);
+    const { totalFound, totalLost, totalReturned } = JSON.parse(pieData);
 
     const loadChartJs = () => {
       return new Promise<void>((resolve) => {
@@ -1544,8 +1544,8 @@ function MyDashboardCharts({
                 borderSkipped: false,
               },
               {
-                label: "Claimed",
-                data: claimedByMonth,
+                label: "Returned",
+                data: returnedByMonth,
                 backgroundColor: clrClaimed,
                 borderRadius: 5,
                 borderSkipped: false,
@@ -1594,16 +1594,16 @@ function MyDashboardCharts({
       const pieEl = document.getElementById(
         `myDashPieChart-${chartKey}`,
       ) as HTMLCanvasElement | null;
-      if (pieEl && totalFound + totalLost + totalClaimed > 0) {
+      if (pieEl && totalFound + totalLost + totalReturned > 0) {
         const existing = C.getChart(pieEl);
         if (existing) existing.destroy();
         new C(pieEl, {
           type: "doughnut",
           data: {
-            labels: ["Found posted", "Lost reported", "Claimed"],
+            labels: ["Found posted", "Lost reported", "Returned"],
             datasets: [
               {
-                data: [totalFound, totalLost, totalClaimed],
+                data: [totalFound, totalLost, totalReturned],
                 backgroundColor: [clrFound, clrLost, clrClaimed],
                 borderWidth: 0,
                 hoverOffset: 8,
@@ -1624,7 +1624,7 @@ function MyDashboardCharts({
                     const total = [
                       totalFound,
                       totalLost,
-                      totalClaimed,
+                      totalReturned,
                     ].reduce((a: number, b: number) => a + b, 0);
                     return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / total) * 100)}%)`;
                   },
@@ -1764,15 +1764,15 @@ export default function DashboardPage() {
     })();
   }, [user?.id, isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Returned-by-me count (persistent across item deletion, for charts) ───────
+  // ── Returned-by-me count: items I found and have confirmed handing off ────────
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
       const { count } = await supabase
-        .from("claim_requests")
+        .from("items")
         .select("id", { count: "exact", head: true })
-        .eq("claimant_id", user.id)
-        .in("status", ["accepted"]);
+        .eq("author_id", user.id)
+        .eq("handoff_confirmed_by_poster", true);
       setTotalReturnedByMe(count ?? 0);
     })();
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -2943,9 +2943,9 @@ export default function DashboardPage() {
             return d.startsWith(m);
           }).length,
         );
-        const claimedByMonth = months.map((m) =>
+        const returnedByMonth = months.map((m) =>
           (items ?? []).filter((item) => {
-            if (item.authorId !== user?.id || item.status !== "claimed") return false;
+            if (item.authorId !== user?.id || item.status !== "handed_off") return false;
             const d = (item as any).date_found || (item as any).created_at || "";
             return d.startsWith(m);
           }).length,
@@ -2955,9 +2955,9 @@ export default function DashboardPage() {
           monthLabels,
           foundByMonth,
           lostByMonth,
-          claimedByMonth,
+          returnedByMonth,
         });
-        const pieDataJson = JSON.stringify({ totalFound, totalLost, totalClaimed });
+        const pieDataJson = JSON.stringify({ totalFound, totalLost, totalReturned: totalClaimed });
         const dashStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
         const clrFound = dashStyle?.getPropertyValue("--accent").trim() || "#2f80ed";
         const clrLost = dashStyle?.getPropertyValue("--warning").trim() || "#f59e0b";
@@ -3132,7 +3132,7 @@ export default function DashboardPage() {
                     [
                       ["Found", clrFound],
                       ["Lost", clrLost],
-                      ["Claimed", clrClaimed],
+                      ["Returned", clrClaimed],
                     ] as [string, string][]
                   ).map(([l, c]) => (
                     <span
@@ -3216,7 +3216,7 @@ export default function DashboardPage() {
                         [
                           ["Found posted", clrFound, totalFound],
                           ["Lost reported", clrLost, totalLost],
-                          ["Claimed", clrClaimed, totalClaimed],
+                          ["Returned", clrClaimed, totalClaimed],
                         ] as [string, string, number][]
                       ).map(([l, c, v]) => (
                         <span

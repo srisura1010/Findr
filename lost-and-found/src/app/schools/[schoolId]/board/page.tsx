@@ -698,6 +698,115 @@ function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDelete
   );
 }
 
+// ─── SchoolCharts ──────────────────────────────────────────────────────────────
+function SchoolCharts({
+  chartKey,
+  monthLabels,
+  foundByMonth,
+  lostByMonth,
+  claimedByMonth,
+  totalFound,
+  totalLost,
+  totalClaimed,
+  clrFound,
+  clrLost,
+  clrClaimed,
+}: {
+  chartKey: string;
+  monthLabels: string[];
+  foundByMonth: number[];
+  lostByMonth: number[];
+  claimedByMonth: number[];
+  totalFound: number;
+  totalLost: number;
+  totalClaimed: number;
+  clrFound: string;
+  clrLost: string;
+  clrClaimed: string;
+}) {
+  useEffect(() => {
+    const loadChartJs = () =>
+      new Promise<void>((resolve) => {
+        if ((window as any).Chart) { resolve(); return; }
+        const sc = document.createElement("script");
+        sc.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js";
+        sc.onload = () => resolve();
+        document.head.appendChild(sc);
+      });
+
+    loadChartJs().then(() => {
+      const C = (window as any).Chart;
+      const style = getComputedStyle(document.documentElement);
+      const gridColor = style.getPropertyValue("--border-default").trim() || "rgba(0,0,0,0.06)";
+      const tickColor = style.getPropertyValue("--text-muted").trim() || "rgba(0,0,0,0.45)";
+
+      const barEl = document.getElementById(`schoolBarChart-${chartKey}`) as HTMLCanvasElement | null;
+      if (barEl) {
+        const existing = C.getChart(barEl);
+        if (existing) existing.destroy();
+        new C(barEl, {
+          type: "bar",
+          data: {
+            labels: monthLabels,
+            datasets: [
+              { label: "Found", data: foundByMonth, backgroundColor: clrFound, borderRadius: 5, borderSkipped: false },
+              { label: "Lost", data: lostByMonth, backgroundColor: clrLost, borderRadius: 5, borderSkipped: false },
+              { label: "Claimed", data: claimedByMonth, backgroundColor: clrClaimed, borderRadius: 5, borderSkipped: false },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { mode: "index", intersect: false, padding: 10, cornerRadius: 8, bodyFont: { family: "Poppins, sans-serif", size: 12 }, titleFont: { family: "Poppins, sans-serif", size: 12 } },
+            },
+            scales: {
+              x: { stacked: true, grid: { color: gridColor }, ticks: { color: tickColor, font: { family: "Poppins, sans-serif", size: 11 }, autoSkip: false } },
+              y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: tickColor, font: { family: "Poppins, sans-serif", size: 11 } }, grid: { color: gridColor } },
+            },
+          },
+        });
+      }
+
+      const pieEl = document.getElementById(`schoolPieChart-${chartKey}`) as HTMLCanvasElement | null;
+      if (pieEl && totalFound + totalLost + totalClaimed > 0) {
+        const existing = C.getChart(pieEl);
+        if (existing) existing.destroy();
+        new C(pieEl, {
+          type: "doughnut",
+          data: {
+            labels: ["Found posted", "Lost reported", "Claimed"],
+            datasets: [{ data: [totalFound, totalLost, totalClaimed], backgroundColor: [clrFound, clrLost, clrClaimed], borderWidth: 0, hoverOffset: 8 }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "62%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                  label: (ctx: any) => {
+                    const total = totalFound + totalLost + totalClaimed;
+                    return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / total) * 100)}%)`;
+                  },
+                },
+                bodyFont: { family: "Poppins, sans-serif", size: 12 },
+                titleFont: { family: "Poppins, sans-serif", size: 12 },
+              },
+            },
+          },
+        });
+      }
+    });
+  }, [chartKey]);
+
+  return null;
+}
+
 // ─── MyItemsPanel ──────────────────────────────────────────────────────────────
 function MyItemsPanel({
   items, lostItems, user, color, s,
@@ -857,6 +966,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
   const color = school.color;
   const color2 = school.secondary_color ?? "#f5c842";
+  const schoolReturnedCount = 0; // placeholder until school claim workflow exists
   const textOn = textOnColor(color);
   const gradOverlay = gradStyles(color)[school.gradient_mode ?? 0];
   const hasBg = !!school.bg_image_url;
@@ -1568,12 +1678,283 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {/* ── MY ITEMS ── */}
           {activeTab === "my-items" && (
             <div className="sc-panel-content" style={{ maxWidth: "none", margin: 0, padding: "0" }}>
-              <div className="sc-section-title" style={{ marginBottom: 16 }}>{s.myItemsTab}</div>
-              <MyItemsPanel
-                items={items} lostItems={lostItems} user={user} color={color} s={s}
-                onDeleteFound={handleDeleteFound} onDeleteLost={handleDeleteLost}
-                onMarkClaimed={handleMarkClaimed} onMarkFound={handleMarkFound}
-              />
+              {/* ── School My Items Dashboard ── */}
+              {(() => {
+                const mySchoolFound = items.filter((i) => i.author_id === user?.id && i.status !== "claimed");
+                const mySchoolLost = lostItems.filter((i) => i.author_id === user?.id);
+                const totalFound = mySchoolFound.length;
+                const totalLost = mySchoolLost.length;
+                const totalClaimed = schoolReturnedCount;
+                const totalActions = totalFound + totalLost + totalClaimed;
+
+                const now = new Date();
+                const months: string[] = [];
+                const monthLabels: string[] = [];
+                for (let i = 5; i >= 0; i--) {
+                  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                  months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                  monthLabels.push(d.toLocaleString("default", { month: "short" }));
+                }
+
+                const foundByMonth = months.map((m) =>
+                  items.filter((item) => {
+                    if (item.author_id !== user?.id) return false;
+                    const d = (item as any).date_found || (item as any).created_at || "";
+                    return d.startsWith(m);
+                  }).length
+                );
+                const lostByMonth = months.map((m) =>
+                  lostItems.filter((item) => {
+                    if (item.author_id !== user?.id) return false;
+                    const d = (item as any).created_at || "";
+                    return d.startsWith(m);
+                  }).length
+                );
+                const claimedByMonth = months.map(() => 0);
+
+                const clrFound = color || "#2f80ed";
+                const clrLost = color2 || "#f59e0b";
+                const clrClaimed = "#10b981";
+
+                const chartKey = `school-${school.id}-${user?.id}-${totalActions}`;
+
+                return (
+                  <>
+                    {/* Profile card */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 16,
+                        padding: "18px 20px",
+                        background: "var(--bg-card)",
+                        border: "1px solid var(--border-default)",
+                        borderRadius: 16,
+                        boxShadow: "var(--card-shadow)",
+                        marginBottom: 16,
+                      }}
+                    >
+                      {user?.imageUrl ? (
+                        <img
+                          src={user.imageUrl}
+                          alt="Profile"
+                          style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: `2.5px solid ${color}`,
+                            flexShrink: 0,
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: "50%",
+                            background: `${color}22`,
+                            color: color,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 22,
+                            fontWeight: 700,
+                            fontFamily: "Poppins, sans-serif",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {(user?.fullName || user?.username || "?")[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            margin: "0 0 2px",
+                            fontFamily: "Ubuntu, sans-serif",
+                            fontSize: 17,
+                            fontWeight: 700,
+                            color: "var(--text-primary)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {user?.fullName || user?.username || "Anonymous"}
+                        </p>
+                        <p
+                          style={{
+                            margin: "0 0 8px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 11,
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          {user?.primaryEmailAddress?.emailAddress || ""}
+                        </p>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            background: `${color}22`,
+                            color: color,
+                            fontFamily: "Poppins, sans-serif",
+                          }}
+                        >
+                          ✓ {school.name} member
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
+                        {(
+                          [
+                            ["Posted", totalFound, clrFound],
+                            ["Returned", totalClaimed, clrClaimed],
+                            ["Lost", totalLost, clrLost],
+                          ] as [string, number, string][]
+                        ).map(([label, val, clr]) => (
+                          <div key={label} style={{ textAlign: "center" }}>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontFamily: "Ubuntu, sans-serif",
+                                fontSize: 20,
+                                fontWeight: 700,
+                                color: clr,
+                              }}
+                            >
+                              {val}
+                            </p>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontFamily: "Poppins, sans-serif",
+                                fontSize: 10,
+                                color: "var(--text-muted)",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.5px",
+                              }}
+                            >
+                              {label}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Charts row */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                      {/* Bar chart */}
+                      <div
+                        style={{
+                          background: "var(--bg-card)",
+                          border: "1px solid var(--border-default)",
+                          borderRadius: 14,
+                          padding: "16px 18px",
+                          boxShadow: "var(--card-shadow)",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: "0 0 10px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "var(--text-primary)",
+                          }}
+                        >
+                          Monthly activity
+                        </p>
+                        <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+                          {([["Found", clrFound], ["Lost", clrLost], ["Claimed", clrClaimed]] as [string, string][]).map(([l, c]) => (
+                            <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>
+                              <span style={{ width: 9, height: 9, borderRadius: 2, background: c, flexShrink: 0 }} />
+                              {l}
+                            </span>
+                          ))}
+                        </div>
+                        <div style={{ position: "relative", height: 160 }}>
+                          <canvas id={`schoolBarChart-${chartKey}`} role="img" aria-label="Monthly school activity chart" />
+                        </div>
+                      </div>
+
+                      {/* Doughnut chart */}
+                      <div
+                        style={{
+                          background: "var(--bg-card)",
+                          border: "1px solid var(--border-default)",
+                          borderRadius: 14,
+                          padding: "16px 18px",
+                          boxShadow: "var(--card-shadow)",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: "0 0 10px",
+                            fontFamily: "Poppins, sans-serif",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "var(--text-primary)",
+                          }}
+                        >
+                          Action breakdown
+                        </p>
+                        {totalActions === 0 ? (
+                          <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 12, color: "var(--text-muted)", padding: "20px 0" }}>
+                            No activity yet.
+                          </p>
+                        ) : (
+                          <>
+                            <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+                              {([["Found posted", clrFound, totalFound], ["Lost reported", clrLost, totalLost], ["Claimed", clrClaimed, totalClaimed]] as [string, string, number][]).map(([l, c, v]) => (
+                                <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>
+                                  <span style={{ width: 9, height: 9, borderRadius: 2, background: c, flexShrink: 0 }} />
+                                  {l} {totalActions > 0 ? Math.round((v / totalActions) * 100) : 0}%
+                                </span>
+                              ))}
+                            </div>
+                            <div style={{ position: "relative", height: 160 }}>
+                              <canvas id={`schoolPieChart-${chartKey}`} role="img" aria-label="School action breakdown chart" />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Chart initialization */}
+                    <SchoolCharts
+                      chartKey={chartKey}
+                      monthLabels={monthLabels}
+                      foundByMonth={foundByMonth}
+                      lostByMonth={lostByMonth}
+                      claimedByMonth={claimedByMonth}
+                      totalFound={totalFound}
+                      totalLost={totalLost}
+                      totalClaimed={totalClaimed}
+                      clrFound={clrFound}
+                      clrLost={clrLost}
+                      clrClaimed={clrClaimed}
+                    />
+
+                    {/* Existing MyItemsPanel */}
+                    <MyItemsPanel
+                      items={items}
+                      lostItems={lostItems}
+                      user={user}
+                      color={color}
+                      s={s}
+                      onDeleteFound={handleDeleteFound}
+                      onDeleteLost={handleDeleteLost}
+                      onMarkClaimed={handleMarkClaimed}
+                      onMarkFound={handleMarkFound}
+                    />
+                  </>
+                );
+              })()}
             </div>
           )}
 
