@@ -17,6 +17,10 @@ body.light         { background-color: #f0f2f8; }
 body.dark          { background-color: #0b1120; }
 body.high-contrast { background-color: #000000; }
 body.colorblind    { background-color: #e6f0ff; }
+body.dawn          { background-color: #f5f3ff; }
+body.lagoon        { background-color: #ecfeff; }
+body.meadow        { background-color: #f0fdf4; }
+body.sunrise       { background-color: #fff7ed; }
 
 /* ─── TOP BAR ─────────────────────────────────────────────────────────────── */
 .topbar {
@@ -330,6 +334,22 @@ body.colorblind .topbar__signup-btn:hover { background: #0b3d91; color: #ffdd44;
 body.colorblind .topbar__hamburger { border-color: #ffdd44; }
 body.colorblind .topbar__hamburger-bar { background: #ffdd44; }
 
+/* ─── THEME OVERRIDES — LIGHT VARIANTS (dawn / lagoon / meadow / sunrise) ── */
+body.dawn .topbar, body.lagoon .topbar, body.meadow .topbar, body.sunrise .topbar {
+  background-color: #ffffff;
+  border-bottom-color: #e2e8f0;
+  box-shadow: 0 1px 0 #e2e8f0;
+}
+body.dawn .topbar__logo, body.lagoon .topbar__logo, body.meadow .topbar__logo, body.sunrise .topbar__logo { color: #0f172a; border-right-color: #e2e8f0; }
+body.dawn .topbar__icon-btn, body.lagoon .topbar__icon-btn, body.meadow .topbar__icon-btn, body.sunrise .topbar__icon-btn { color: #64748b; }
+body.dawn .topbar__icon-btn:hover, body.lagoon .topbar__icon-btn:hover, body.meadow .topbar__icon-btn:hover, body.sunrise .topbar__icon-btn:hover { background: #f1f5f9; color: #0f172a; }
+body.dawn .topbar__divider, body.lagoon .topbar__divider, body.meadow .topbar__divider, body.sunrise .topbar__divider { background: #e2e8f0; }
+body.dawn .topbar__signin-btn, body.lagoon .topbar__signin-btn, body.meadow .topbar__signin-btn, body.sunrise .topbar__signin-btn { color: #475569; border-color: #e2e8f0; }
+body.dawn .topbar__signin-btn:hover, body.lagoon .topbar__signin-btn:hover, body.meadow .topbar__signin-btn:hover, body.sunrise .topbar__signin-btn:hover { background: #f1f5f9; color: #0f172a; border-color: var(--accent-border); }
+body.dawn .topbar__hamburger, body.lagoon .topbar__hamburger, body.meadow .topbar__hamburger, body.sunrise .topbar__hamburger { border-color: #e2e8f0; }
+body.dawn .topbar__hamburger:hover, body.lagoon .topbar__hamburger:hover, body.meadow .topbar__hamburger:hover, body.sunrise .topbar__hamburger:hover { background: #f1f5f9; }
+body.dawn .topbar__hamburger-bar, body.lagoon .topbar__hamburger-bar, body.meadow .topbar__hamburger-bar, body.sunrise .topbar__hamburger-bar { background: #1f2937; }
+
 /* ─── THEME OVERRIDES — LEFT SIDEBAR ──────────────────────────────────────── */
 body.light .left-sidebar { background-color: #ffffff; border-right-color: #e2e8f0; }
 body.light .left-sidebar__bottom { border-top-color: #e2e8f0; }
@@ -354,6 +374,14 @@ body.colorblind .left-sidebar__item:hover { background: rgba(255,221,68,0.1); }
 body.colorblind .left-sidebar__item--active { background: rgba(255,221,68,0.2) !important; color: #ffdd44 !important; }
 body.colorblind .left-sidebar__badge { border-color: #0b3d91; }
 body.colorblind .left-sidebar__item::after { background: #0b3d91; border-color: #ffdd44; }
+
+body.dawn .left-sidebar, body.lagoon .left-sidebar, body.meadow .left-sidebar, body.sunrise .left-sidebar { background-color: #ffffff; border-right-color: #e2e8f0; }
+body.dawn .left-sidebar__bottom, body.lagoon .left-sidebar__bottom, body.meadow .left-sidebar__bottom, body.sunrise .left-sidebar__bottom { border-top-color: #e2e8f0; }
+body.dawn .left-sidebar__item, body.lagoon .left-sidebar__item, body.meadow .left-sidebar__item, body.sunrise .left-sidebar__item { color: #64748b; }
+body.dawn .left-sidebar__item:hover, body.lagoon .left-sidebar__item:hover, body.meadow .left-sidebar__item:hover, body.sunrise .left-sidebar__item:hover { background: #f1f5f9; color: #0f172a; }
+body.dawn .left-sidebar__item--active, body.lagoon .left-sidebar__item--active, body.meadow .left-sidebar__item--active, body.sunrise .left-sidebar__item--active { background: var(--accent-light) !important; color: var(--accent) !important; }
+body.dawn .left-sidebar__badge, body.lagoon .left-sidebar__badge, body.meadow .left-sidebar__badge, body.sunrise .left-sidebar__badge { border-color: #ffffff; }
+body.dawn .left-sidebar__item::after, body.lagoon .left-sidebar__item::after, body.meadow .left-sidebar__item::after, body.sunrise .left-sidebar__item::after { background: #0f172a; border-color: #e2e8f0; color: white; }
 
 /* ─── MOBILE ───────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
@@ -516,6 +544,14 @@ body.colorblind .mobile-sidebar__item { color: #ffdd44; }
 body.colorblind .mobile-sidebar__item:hover { background: rgba(255,221,68,0.12); }
 body.colorblind .mobile-sidebar__signup { background: #ffdd44; color: #0b3d91; }
 body.colorblind .mobile-sidebar__signup:hover { background: #0b3d91; color: #ffdd44; border: 1px solid #ffdd44; }
+
+body.dawn .mobile-sidebar, body.lagoon .mobile-sidebar, body.meadow .mobile-sidebar, body.sunrise .mobile-sidebar { background: #ffffff; box-shadow: -8px 0 32px rgba(0,0,0,0.12); }
+body.dawn .mobile-sidebar__header, body.lagoon .mobile-sidebar__header, body.meadow .mobile-sidebar__header, body.sunrise .mobile-sidebar__header { border-bottom-color: #e8eaf0; }
+body.dawn .mobile-sidebar__logo, body.lagoon .mobile-sidebar__logo, body.meadow .mobile-sidebar__logo, body.sunrise .mobile-sidebar__logo { color: #0f172a; }
+body.dawn .mobile-sidebar__close, body.lagoon .mobile-sidebar__close, body.meadow .mobile-sidebar__close, body.sunrise .mobile-sidebar__close { border-color: #e2e8f0; color: #64748b; }
+body.dawn .mobile-sidebar__close:hover, body.lagoon .mobile-sidebar__close:hover, body.meadow .mobile-sidebar__close:hover, body.sunrise .mobile-sidebar__close:hover { background: #f1f5f9; color: #0f172a; }
+body.dawn .mobile-sidebar__item, body.lagoon .mobile-sidebar__item, body.meadow .mobile-sidebar__item, body.sunrise .mobile-sidebar__item { color: #475569; }
+body.dawn .mobile-sidebar__item:hover, body.lagoon .mobile-sidebar__item:hover, body.meadow .mobile-sidebar__item:hover, body.sunrise .mobile-sidebar__item:hover { background: #f1f5f9; color: #0f172a; }
 
 /* ─── MISC ────────────────────────────────────────────────────────────────── */
 @keyframes fadeIn {
