@@ -76,6 +76,7 @@ interface ItemsContextType {
     claimerEmail?: string,
   ) => void;
   removeLostItem: (id: number) => void;
+  removeItem: (id: number) => void;
   // schoolId is set externally by SchoolContext integration in the provider wrapper
   setActiveSchoolId: (id: string | null) => void;
 }
@@ -139,6 +140,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
       let query = supabase
         .from("items")
         .select("*")
+        .neq("status", "returned")
         .order("id", { ascending: false });
 
       // If user is in a school, only show that school's items.
@@ -292,6 +294,11 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
     setLostItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const removeItem = (id: number) => {
+    setRawItems((prev) => prev.filter((item) => item.id !== id));
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const updateItemStatus = (
     id: number,
     newStatus: string,
@@ -330,6 +337,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
         addLostItem,
         updateItemStatus,
         removeLostItem,
+        removeItem,
         setActiveSchoolId,
       }}
     >

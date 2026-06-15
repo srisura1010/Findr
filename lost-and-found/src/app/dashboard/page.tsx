@@ -1650,6 +1650,7 @@ export default function DashboardPage() {
     addLostItem,
     updateItemStatus,
     removeLostItem,
+    removeItem,
   } = useItems();
   const { user, isLoaded } = useUser();
   const { language, theme } = useSettings();
@@ -1664,6 +1665,7 @@ export default function DashboardPage() {
   const [myActiveClaims, setMyActiveClaims] = useState<any[]>([]);
   const [activeClaimsLoading, setActiveClaimsLoading] = useState(false);
   const [totalReturnedByMe, setTotalReturnedByMe] = useState(0);
+  const [myReturnedItems, setMyReturnedItems] = useState<any[]>([]);
   const [myItemClaims, setMyItemClaims] = useState<Record<number, number>>({});
   const [reportsTab, setReportsTab] = useState<"items" | "users" | "disputes">("items");
   const [reportMode, setReportMode] = useState<"found" | "lost">("found");
@@ -1751,11 +1753,16 @@ export default function DashboardPage() {
           .in("id", itemIds);
         const itemMap = new Map((claimItems || []).map((i: any) => [i.id, i]));
         setMyActiveClaims(
-          claims.map((c: any) => ({
-            ...c,
-            item_name: itemMap.get(c.item_id)?.name || "Unknown item",
-            item_status: itemMap.get(c.item_id)?.status || "unknown",
-          })),
+          claims
+            .filter((c: any) => {
+              const itemStatus = itemMap.get(c.item_id)?.status;
+              return itemStatus && itemStatus !== "returned";
+            })
+            .map((c: any) => ({
+              ...c,
+              item_name: itemMap.get(c.item_id)?.name || "Unknown item",
+              item_status: itemMap.get(c.item_id)?.status || "unknown",
+            })),
         );
       } else {
         setMyActiveClaims([]);
@@ -1764,16 +1771,16 @@ export default function DashboardPage() {
     })();
   }, [user?.id, isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Returned-by-me count: items I found and have confirmed handing off ────────
+  // ── Returned-by-me count: items I found and successfully returned ─────────────
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const { count } = await supabase
-        .from("items")
-        .select("id", { count: "exact", head: true })
-        .eq("author_id", user.id)
-        .eq("handoff_confirmed_by_poster", true);
-      setTotalReturnedByMe(count ?? 0);
+      const res = await fetch(`/api/returned-count?author_id=${user.id}`);
+      if (res.ok) {
+        const json = await res.json();
+        setTotalReturnedByMe(json.count ?? 0);
+        setMyReturnedItems(json.items ?? []);
+      }
     })();
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -2074,8 +2081,20 @@ export default function DashboardPage() {
   };
 
   const handleConfirmClaimed = async (itemId: number) => {
-    const { error } = await supabase.from("items").delete().eq("id", itemId);
-    if (!error) updateItemStatus(itemId, "claimed");
+    if (!user?.id) return;
+    const res = await fetch("/api/confirm-return", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item_id: itemId, user_id: user.id }),
+    });
+    if (res.ok) {
+      removeItem(itemId);
+      setTotalReturnedByMe((prev) => prev + 1);
+      setMyReturnedItems((prev) => [
+        ...prev,
+        { id: itemId, returned_at: new Date().toISOString(), date_found: new Date().toISOString() },
+      ]);
+    }
   };
 
   const handleDelete = async (itemId: number) => {
@@ -2913,7 +2932,8 @@ export default function DashboardPage() {
           (item) => item.authorId === user?.id,
         );
 
-        const totalFound = myFoundItems.length;
+        // POSTED = items still active in the feed + items already returned.
+        const totalFound = myFoundItems.length + totalReturnedByMe;
         const totalLost = myLostItems.length;
         const totalClaimed = totalReturnedByMe;
         const totalActions = totalFound + totalLost + totalClaimed;
@@ -2929,13 +2949,19 @@ export default function DashboardPage() {
           monthLabels.push(d.toLocaleString("default", { month: "short" }));
         }
 
-        const foundByMonth = months.map((m) =>
-          (items ?? []).filter((item) => {
+        const foundByMonth = months.map((m) => {
+          const active = (items ?? []).filter((item) => {
             if (item.authorId !== user?.id) return false;
             const d = (item as any).date_found || (item as any).created_at || "";
             return d.startsWith(m);
-          }).length,
-        );
+          }).length;
+          // Returned items are gone from `items`, so count their original found date too.
+          const returned = (myReturnedItems ?? []).filter((item) => {
+            const d = item.date_found || "";
+            return d.startsWith(m);
+          }).length;
+          return active + returned;
+        });
         const lostByMonth = months.map((m) =>
           (lostItems ?? []).filter((item) => {
             if (item.authorId !== user?.id) return false;
@@ -2944,9 +2970,8 @@ export default function DashboardPage() {
           }).length,
         );
         const returnedByMonth = months.map((m) =>
-          (items ?? []).filter((item) => {
-            if (item.authorId !== user?.id || item.status !== "handed_off") return false;
-            const d = (item as any).date_found || (item as any).created_at || "";
+          (myReturnedItems ?? []).filter((item) => {
+            const d = item.returned_at || item.date_found || "";
             return d.startsWith(m);
           }).length,
         );

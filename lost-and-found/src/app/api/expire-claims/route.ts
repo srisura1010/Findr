@@ -101,6 +101,16 @@ export async function GET(request: Request) {
     .eq("handoff_confirmed_by_claimant", false);
 
   for (const item of handedOffItems || []) {
+    // Move into returned_items, then delete from the live items table.
+    await supabase.from("returned_items").insert({
+      original_item_id: item.id,
+      author_id: item.author_id,
+      author_name: item.author_name,
+      item_name: item.name,
+      returned_by_id: item.accepted_claimant_id ?? item.author_id,
+      date_found: item.date_found ?? item.created_at ?? null,
+      snapshot: item,
+    });
     await supabase.from("items").delete().eq("id", item.id);
 
     if (item.accepted_claimant_email) {

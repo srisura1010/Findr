@@ -59,7 +59,7 @@ export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { items, lostItems, updateItemStatus, removeLostItem } = useItems();
+  const { items, lostItems, updateItemStatus, removeLostItem, removeItem } = useItems();
 
   const [item, setItem] = useState<any>(null);
   const [isLost, setIsLost] = useState(false);
@@ -251,15 +251,19 @@ export default function ItemDetailPage() {
       }
 
       // Rate limit: count pending/accepted + cancelled within 24h
+      // Join items to skip claims for returned/deleted items
       const { data: allMyClaims } = await supabase
         .from("claim_requests")
-        .select("id, status, created_at")
+        .select("id, status, created_at, items(status)")
         .eq("claimant_id", user.id)
         .in("status", ["pending", "accepted", "cancelled"]);
 
       let rateCount = 0;
       const now = Date.now();
+      const doneStatuses = ["returned", "claimed"];
       for (const c of allMyClaims || []) {
+        const itemStatus = (c.items as any)?.status;
+        if (itemStatus && doneStatuses.includes(itemStatus)) continue;
         if (c.status === "pending" || c.status === "accepted") {
           rateCount++;
         } else if (c.status === "cancelled") {
@@ -376,13 +380,20 @@ export default function ItemDetailPage() {
   };
 
   const handleConfirmClaimed = async () => {
-    if (!item) return;
+    if (!item || !user) return;
     setActionLoading(true);
-    const { error } = await supabase.from("items").delete().eq("id", item.id);
-    if (!error) {
-      updateItemStatus(item.id, "claimed");
-      setActionMsg("Item marked as claimed!");
+    const res = await fetch("/api/confirm-return", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item_id: item.id, user_id: user.id }),
+    });
+    if (res.ok) {
+      removeItem(item.id);
+      setActionMsg("Item marked as returned!");
       setTimeout(() => router.push("/dashboard"), 1200);
+    } else {
+      const body = await res.json().catch(() => ({}));
+      setActionMsg(`Error: ${body.error ?? res.status}`);
     }
     setActionLoading(false);
   };
@@ -741,13 +752,23 @@ export default function ItemDetailPage() {
 
   // Step 4: Claimant confirms receipt
   const handleClaimantConfirmReceipt = async () => {
-    if (!item || actionLoading) return;
+    if (!item || !user || actionLoading) return;
     setActionLoading(true);
 
-    await supabase.from("items").update({ handoff_confirmed_by_claimant: true }).eq("id", item.id);
-    await supabase.from("items").delete().eq("id", item.id);
+    const res = await fetch("/api/confirm-return", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item_id: item.id, user_id: user.id }),
+    });
 
-    updateItemStatus(item.id, "claimed");
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setActionMsg(`Error confirming return: ${body.error ?? res.status}`);
+      setActionLoading(false);
+      return;
+    }
+
+    removeItem(item.id);
     setActionMsg("Thanks for confirming! This listing has been removed.");
     setTimeout(() => router.push("/dashboard"), 1500);
     setActionLoading(false);
@@ -1422,17 +1443,19 @@ export default function ItemDetailPage() {
                     border: "1px solid var(--border-default)",
                   }}
                 >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 8,
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
+                  {item.image && (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 8,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
                   <p
                     style={{
                       fontFamily: "Poppins, sans-serif",
