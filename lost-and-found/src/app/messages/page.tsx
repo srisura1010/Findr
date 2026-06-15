@@ -583,11 +583,11 @@ export default function MessagesPage() {
             Contact an Admin
           </button>
           <button
-            className="messages-sidebar__admin-btn"
+            className="messages-sidebar__admin-btn messages-sidebar__admin-btn--school"
             style={{ justifyContent: "center" }}
             onClick={() => setShowSchoolAdminModal(true)}
           >
-            <MdOutlineSchool className="messages-sidebar__admin-icon" />
+            <MdOutlineSchool className="messages-sidebar__admin-icon messages-sidebar__admin-icon--school" />
             Contact a School Admin
           </button>
         </div>
