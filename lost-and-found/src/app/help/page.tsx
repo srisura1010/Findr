@@ -53,10 +53,9 @@ const FAQ_CATEGORIES = [
   label: "Getting Started",
   icon: "",
   questions: [
-  { q: "What is Findr?", a: "Findr is a lost & found platform for schools and institutions. If you find something, you post it. If you lost something, you search and claim it — all in one place." },
-  { q: "Do I need an account to use Findr?", a: "You can browse posted items without an account, but you'll need to sign in to post a found item, retrieve an item, or message a finder." },
+  { q: "What is Findr?", a: "Findr is a lost & found platform for schools and institutions. Finders post items they've found, and claimants submit proof-based claims to retrieve them — all in one place with a full verification workflow." },
+  { q: "Do I need an account to use Findr?", a: "You can browse posted items without an account, but you'll need to sign in to post a found item, submit a claim, or message a finder." },
   { q: "How do I sign in?", a: "Click 'Sign In' in the top navigation. We use Clerk for authentication, so you can sign in with your email or a social account. Your profile info is automatically filled in when you post items." }]
-
 },
 {
   id: "finding-items",
@@ -65,48 +64,71 @@ const FAQ_CATEGORIES = [
   questions: [
   { q: "How do I search for a lost item?", a: "Use the search bar on the dashboard. You can type keywords like the color, brand, item type, or location where you lost it. Our AI-powered search understands natural language, so try things like 'blue water bottle' or 'AirPods case'." },
   { q: "How does the AI image search work?", a: "When a finder uploads a photo of an item, our AI automatically reads and tags the image with keywords — things like color, brand, and type. This makes items searchable even if the finder didn't describe them perfectly." },
-  { q: "What does 'waiting' status mean?", a: "'Waiting' means the item has been posted and is available to be claimed. No one has started a retrieval request yet." },
-  { q: "What does 'pending' status mean?", a: "'Pending' means someone has submitted a retrieval request. The original finder gets an email notification and needs to confirm the claim." }]
-
+  { q: "What do the item status labels mean?", a: "'Available' means the item is waiting to be claimed. 'Claim in progress' means a claim was accepted and the finder is arranging the handoff. 'Awaiting confirmation' means the finder confirmed the handoff and the claimant needs to confirm receipt. 'Disputed' means the claimant opened a dispute that an admin is reviewing." },
+  { q: "Can I filter items by category or date?", a: "Yes — use the filter bar on the dashboard to filter by category, location, or date range. Active filters show as removable chips so you can see exactly what's applied." }]
+},
+{
+  id: "claiming",
+  label: "Claiming Items",
+  icon: "",
+  questions: [
+  { q: "How do I claim an item I lost?", a: "Find your item and click 'This is mine'. You'll need to describe something specific about the item that is NOT visible in the photo — a scratch, a name written inside, a sticker placement, etc. You can also upload optional proof like a receipt or photo. The finder reviews your claim and decides to accept or reject it." },
+  { q: "Why do I need to provide proof?", a: "Proof protects against false claims. Since anyone can see the item photo, we ask you to describe something only the true owner would know — something not visible in the image. The finder uses this to verify your ownership." },
+  { q: "How many claims can I have active at once?", a: "You can have a maximum of 2 active claims at any time. Once a claim is resolved (accepted, rejected, or cancelled), the slot frees up. Cancelled claims still count toward the limit for 24 hours to prevent abuse." },
+  { q: "Can I cancel a claim I submitted?", a: "Yes, as long as the item is still in 'waiting' status and the finder hasn't accepted your claim yet. Go to 'My Dashboard' and find it under 'My Active Claims'. Once a claim is accepted, it can no longer be cancelled." },
+  { q: "What happens if my claim is rejected?", a: "You'll receive a notification with the finder's reason. Once rejected on a specific item, you cannot re-submit a claim for that same item. If you believe the rejection was wrong, you can report the item from the dashboard." },
+  { q: "What if multiple people claim the same item?", a: "The finder sees all pending claims and chooses one to accept. When a claim is accepted, all other pending claims for that item are automatically rejected and those claimants are notified." }]
+},
+{
+  id: "handoff",
+  label: "Handoff & Disputes",
+  icon: "",
+  questions: [
+  { q: "What happens after my claim is accepted?", a: "The finder will see a banner prompting them to physically hand the item back to you. Once they do, they click 'Confirm I Handed It Back'. You then receive a notification to confirm receipt on your end." },
+  { q: "How do I confirm I received my item?", a: "After the finder confirms the handoff, go to the item page and click 'Confirm I Received It'. This completes the return and removes the listing. You have 48 hours before the system auto-confirms." },
+  { q: "What if I didn't actually receive the item?", a: "Click 'Dispute' on the item page instead of confirming receipt. Write a description of what went wrong (minimum 50 characters). All registered admins are notified immediately and the item is flagged as disputed. An admin will review and either resolve it in your favor (deleting the listing) or dismiss the dispute (returning the item to claim_accepted status)." },
+  { q: "Can I message the finder?", a: "Yes — use 'Message Finder' on any item page to open a real-time chat. You can also access all your conversations from the Messages page in the navigation. Conversations are organized per person, so all messages with the same user appear in one thread regardless of which item you're discussing." }]
 },
 {
   id: "posting-items",
   label: "Posting Found Items",
   icon: "",
   questions: [
-  { q: "How do I post a found item?", a: "Go to the Dashboard and click 'Add Item' in the sidebar. Fill in the item name, a description (include where and when you found it), and upload a clear photo. Hit 'Post Item' and it'll be live instantly." },
-  { q: "What makes a good item description?", a: "Include: where you found it (e.g., 'near the gym lockers'), when you found it, any identifying features (color, brand, engravings), and where the item is being kept." },
-  { q: "Can I delete my posted item?", a: "Contact an admin to remove a listing. If the item has been claimed, use 'Confirm Claimed' — the item will be automatically removed from the board." }]
-
+  { q: "How do I post a found item?", a: "Go to the Dashboard and click 'Lost/Found Item' in the sidebar, then select 'Found an Item'. Fill in the item name, category, description (include where and when you found it), location, and upload a clear photo. Hit 'Post Item' and it'll be live instantly." },
+  { q: "What makes a good item description?", a: "Include: where you found it (e.g., 'near the gym lockers'), when you found it, any identifying features (color, brand, engravings), and the general condition of the item. Don't reveal every detail — leave some features for claimants to describe so you can verify their proof." },
+  { q: "How do I review claims on my item?", a: "When claims come in, a 'View Claims (N)' button appears on your item page showing how many pending claims exist. Click it to open a review panel where you can read each claimant's proof description, view any proof images they uploaded, and choose to Accept or Reject. Accepting requires no reason; Rejecting requires you to enter a reason." },
+  { q: "Can I message a claimant to ask for more info?", a: "Yes — in the claims review modal, each claim card has a 'Message Claimant' option. Your message goes directly into the in-app chat thread with that user." },
+  { q: "Can I delete my posted item?", a: "Yes, but with restrictions based on claim status. If there are no claims: simple delete. If there are pending claims: you'll be warned and claimants will be notified. If a claim is accepted: you'll be warned and the accepted claimant will be notified. If the item is in 'handed_off' or 'disputed' status, deletion is blocked until the situation resolves." },
+  { q: "What happens if my item gets too many rejected claims?", a: "If 5 or more claims are rejected on a single item, it's automatically flagged in the admin Reports panel as potential finder misconduct. An admin may review the situation." }]
 },
 {
-  id: "claiming",
-  label: "Claiming & Retrieval",
+  id: "schools",
+  label: "School Boards",
   icon: "",
   questions: [
-  { q: "How do I claim an item I lost?", a: "Find your item in the dashboard, then click 'Retrieve'. This sends an email notification to the finder and marks the item as 'Pending'. The finder will reach out to arrange the handoff." },
-  { q: "I'm the finder — how do I confirm a handoff?", a: "Once you've physically returned the item, go to the item card and click 'Confirm Claimed'. This deletes the listing and closes the loop." },
-  { q: "Can I message the finder before claiming?", a: "Yes! Hit 'Message Finder' on any item card to open a real-time chat. Coordinate pickup without sharing personal contact info." }]
-
+  { q: "What is a School Board?", a: "School Boards are private lost & found boards for specific schools or institutions. Each school has its own themed board with its own found items and lost item reports, separate from the main Findr board." },
+  { q: "How do I join a school board?", a: "Go to the Schools page in the navigation and enter your school's code. Once joined, the school's board appears in your schools list and you can post and browse items specific to that school." },
+  { q: "How do I become a school admin?", a: "On your school's board page, click the Admin tab and enter the school admin password from your Findr approval email. Once unlocked, you can delete items, view school-specific reports, and access the school inbox." },
+  { q: "Can I message a school admin?", a: "Yes — on the Messages page, click 'Contact a School Admin' to select your school and choose who to message. School admin conversations are separate from regular item chats." }]
 },
 {
   id: "admin",
   label: "Admin",
   icon: "",
   questions: [
-  { q: "How do I become an admin?", a: "Click 'Become an Admin' in the dashboard sidebar. Fill out the form with your school, staff number, and optionally upload your ID badge. Requests are reviewed manually and you'll receive an approval email." },
-  { q: "What can admins do?", a: "Admins can delete any item from the board — useful for removing spam, duplicates, or items resolved offline." },
-  { q: "I forgot my admin password. What do I do?", a: "Reach out to your institution's Findr contact or the super-admin. Admin passwords are issued per-account and can be reset." }]
-
+  { q: "How do I become a Findr admin?", a: "Click 'Become an Admin' in the dashboard sidebar. Fill out the form with your school, staff number, and optionally upload your ID badge. Requests are reviewed manually and you'll receive an approval email with your admin password." },
+  { q: "What can Findr admins do?", a: "Admins can delete any item, ban or suspend users, view reported items and users, manage disputes (resolve in claimant's favor or dismiss back to claim_accepted), and message any party in a dispute directly through the in-app chat." },
+  { q: "How does dispute resolution work for admins?", a: "In the dashboard under Reports → Disputes, each dispute card shows the item name, the claimant's reason, a 'View Item' link, and a 'Message Parties' button. Admins can message either the finder or the claimant directly. 'Resolve for Claimant' permanently deletes the item listing. 'Dismiss Dispute' returns the item to claim_accepted status so the finder can re-confirm the handoff." },
+  { q: "I forgot my admin password. What do I do?", a: "Reach out to a super-admin. Admin passwords are issued per-account and can be reset through the super-admin panel." }]
 },
 {
   id: "settings",
-  label: "Settings",
+  label: "Settings & Accessibility",
   icon: "",
   questions: [
-  { q: "Can I change the language?", a: "Yes! Go to Settings and pick your preferred language. Findr uses AI-powered translation to localize the entire interface." },
-  { q: "Does Findr have text-to-speech?", a: "Yes — go to the Settings page to enable TTS, which will read item descriptions aloud." }]
-
+  { q: "Can I change the language?", a: "Yes — go to Settings and pick your preferred language. Findr uses AI-powered translation to localize the entire interface including item descriptions." },
+  { q: "Does Findr have text-to-speech?", a: "Yes — go to the Settings page to enable TTS, which will read item descriptions aloud." },
+  { q: "Does Findr have accessibility modes?", a: "Yes — Settings includes a high-contrast mode and a colorblind-friendly mode in addition to the standard light and dark themes." }]
 }];
 
 
@@ -155,17 +177,65 @@ function FAQAccordion({ language }: {language: string;}) {
 const SYSTEM_PROMPT = `You are the helpful support assistant for Findr, a school lost & found web app.
 Keep answers short, friendly, and focused on Findr. Here's what you know:
 
-- Users post found items (name, description, photo) on the dashboard
-- AI reads item photos and auto-tags them with keywords for better search
-- Users search items using natural language in the search bar
-- Clicking "Retrieve" sends an email to the finder and marks it "pending"
-- Finder clicks "Confirm Claimed" once they hand the item back — it's deleted
-- "Message Finder" opens a real-time chat between finder and claimer
-- "Become an Admin" lets staff submit a request; approved admins get a password and can delete items
-- Settings page has language switching (AI translation) and text-to-speech accessibility
-- Built with Next.js, Clerk auth, Supabase, Groq AI, EmailJS
+POSTING FOUND ITEMS:
+- Finders post items via Dashboard → Lost/Found Item → Found an Item
+- They fill in name, category, description, location (map picker), and upload up to 3 photos
+- AI auto-tags photos with keywords for better searchability
+- Items start with "waiting" status
 
-If you don't know something, say so and suggest contacting the school admin.`;
+CLAIMING ITEMS (the new proof-based flow):
+- Claimants click "This is mine" on an item page
+- They must describe something specific NOT visible in the photo (min 20 chars) to prove ownership
+- Optional proof image upload (receipt, old photo, etc.)
+- Max 2 active claims at once; cancelled claims count for 24h to prevent abuse
+- Once rejected on an item, you cannot re-claim that same item
+
+FINDER REVIEWS CLAIMS:
+- "View Claims (N)" button appears on their item when claims come in
+- They see each claimant's name, proof text, and optional proof image
+- Accept: sets item to claim_accepted, auto-rejects and notifies all other claimants
+- Reject: requires a typed reason, increments rejection counter; 5+ rejections auto-flags item to admin
+
+HANDOFF FLOW:
+- Finder physically hands item back, then clicks "Confirm I Handed It Back" → item becomes "handed_off"
+- Claimant gets notified to confirm receipt within 48 hours
+- Claimant clicks "Confirm I Received It" → item is permanently deleted (success!)
+- Or claimant clicks "Dispute" → writes reason (min 50 chars) → all admins notified, item flagged "disputed"
+
+ADMIN DISPUTE RESOLUTION:
+- Admins see disputes in Dashboard → Reports → Disputes tab
+- Each dispute shows item name, reason, View Item link, Message Parties button
+- "Resolve for Claimant": deletes item permanently
+- "Dismiss Dispute": returns item to claim_accepted so finder can re-confirm handoff
+- Admins can message finder or claimant directly via in-app chat
+
+DELETION RULES:
+- No claims: simple delete
+- Pending claims exist: warns finder, notifies claimants on delete
+- Claim accepted: warns finder, notifies accepted claimant on delete
+- Handed off or disputed: BLOCKED, cannot delete
+
+MESSAGING:
+- All conversations are per user-pair (not per item) — one thread per two people regardless of items
+- Messages page shows all conversations with unread indicators
+- "Message Finder" on item page, "Message Claimant" in claims review modal
+- Admins can message dispute parties from the Disputes panel
+- "Contact an Admin" and "Contact a School Admin" buttons on the Messages page
+
+SCHOOL BOARDS:
+- Private boards per school with their own items, theming, and admins
+- Join with a school code; school admins unlock with a password from their approval email
+- School admins can delete items, view school reports, and access school inbox
+
+SETTINGS:
+- Language switching with AI translation
+- Text-to-speech for item descriptions
+- High-contrast and colorblind-friendly modes
+- Light/dark themes
+
+Built with Next.js, Clerk auth, Supabase, Groq AI, Resend email.
+
+If you don't know something, say so and suggest contacting a Findr admin.`;
 
 function GroqChatbot({ language }: {language: string;}) {
   const initialMessage = useTranslated("Hey! I'm Findr's support assistant. Ask me anything about how to use the app", language);
@@ -256,18 +326,21 @@ function GroqChatbot({ language }: {language: string;}) {
 
 const STEPS = [
 { num: "01", title: "Sign In", desc: "Create an account or sign in with your email via Clerk." },
-{ num: "02", title: "Browse Items", desc: "Search the dashboard for your lost item using keywords, colors, or item type." },
-{ num: "03", title: "Claim or Post", desc: "Hit 'Retrieve' to claim a found item, or 'Add Item' to report something you found." },
-{ num: "04", title: "Connect", desc: "Use 'Message Finder' to chat directly and arrange the handoff." },
-{ num: "05", title: "Confirm", desc: "Once returned, the finder hits 'Confirm Claimed' — the listing is removed automatically." }];
+{ num: "02", title: "Browse Items", desc: "Search the dashboard for your lost item using keywords, colors, category filters, or location." },
+{ num: "03", title: "Submit a Claim", desc: "Click 'This is mine' and describe something specific about the item not visible in the photo. The finder uses this to verify ownership." },
+{ num: "04", title: "Claim Reviewed", desc: "The finder reviews your proof and accepts or rejects your claim. You'll be notified either way with a reason if rejected." },
+{ num: "05", title: "Coordinate Pickup", desc: "Once accepted, use 'Message Finder' to arrange the handoff. The finder posts the item; you retrieve it in person." },
+{ num: "06", title: "Confirm Receipt", desc: "After the finder confirms the handoff, you confirm receipt on your end. The listing is permanently removed. Done!" }];
 
 
 const PRO_TIPS = [
-"Use descriptive keywords when searching — the AI understands \"black north face backpack\"",
-"Post found items ASAP with a clear photo — AI auto-tags it for better discoverability",
-"Use \"Message Finder\" before claiming if you need to confirm it's yours",
-"Admins can moderate the board — contact them for duplicate or spam listings",
-"Switch languages in Settings if English isn't your first language"];
+"Use descriptive keywords when searching — the AI understands 'black north face backpack'",
+"When claiming, describe something not in the photo: a name written inside, a specific scratch, a sticker placement",
+"Message the finder before or after claiming if you need to confirm details or arrange pickup",
+"If you find something, avoid describing every detail in your post — leave some details for claimants to prove ownership",
+"Check 'My Dashboard' to see pending claims on items you've posted without having to visit each item page",
+"Admins can help resolve disputes — use the Dispute button if the finder confirmed a handoff that didn't happen",
+"Switch languages in Settings if English isn't your first language — the whole interface translates"];
 
 
 export default function HelpPage() {
