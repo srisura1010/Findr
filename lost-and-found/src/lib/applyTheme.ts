@@ -1,10 +1,20 @@
 import { themes, ThemeId } from "./themes";
+import { generateThemeVars, loadCustomConfig } from "./generateTheme";
 
 export function applyTheme(id: ThemeId) {
-  const theme = themes[id];
   const root = document.documentElement;
-  Object.entries(theme.vars).forEach(([key, val]) => {
-    root.style.setProperty(key, val);
-  });
+
+  if (id.startsWith("custom-")) {
+    const config = loadCustomConfig(id);
+    if (config) {
+      const vars = generateThemeVars(config);
+      Object.entries(vars).forEach(([key, val]) => root.style.setProperty(key, val));
+    }
+    document.body.className = id;
+    return;
+  }
+
+  const theme = themes[id];
+  Object.entries(theme.vars).forEach(([key, val]) => root.style.setProperty(key, val));
   document.body.className = id;
 }

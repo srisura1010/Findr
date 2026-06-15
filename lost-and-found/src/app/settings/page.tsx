@@ -8,6 +8,15 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import "./settings.css";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import {
+  CustomThemeConfig,
+  PresetThemeId,
+  loadCustomConfig,
+  saveCustomConfig,
+  getPreviewColors,
+} from "@/lib/generateTheme";
+import { applyTheme } from "@/lib/applyTheme";
+import { ThemeId } from "@/lib/themes";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
@@ -90,6 +99,38 @@ const THEME_PREVIEWS: Record<
     sun: "#fb923c",
     stroke: "#ea580c",
     label: "Sunset",
+  },
+  dawn: {
+    sky: "#ede9fe",
+    ground: "#ddd6fe",
+    mountain: "#a5b4fc",
+    sun: "#fde68a",
+    stroke: "#818cf8",
+    label: "Dawn",
+  },
+  lagoon: {
+    sky: "#cffafe",
+    ground: "#a5f3fc",
+    mountain: "#67e8f9",
+    sun: "#fde68a",
+    stroke: "#22d3ee",
+    label: "Lagoon",
+  },
+  meadow: {
+    sky: "#dcfce7",
+    ground: "#bbf7d0",
+    mountain: "#86efac",
+    sun: "#fde68a",
+    stroke: "#4ade80",
+    label: "Meadow",
+  },
+  sunrise: {
+    sky: "#fff7ed",
+    ground: "#ffedd5",
+    mountain: "#fed7aa",
+    sun: "#f97316",
+    stroke: "#fdba74",
+    label: "Sunrise",
   },
   "high-contrast": {
     sky: "#000000",
@@ -182,7 +223,12 @@ const ThemePreviewSVG = ({
 
 const STANDARD_THEMES = ["light", "dark"];
 const DARK_THEMES = ["midnight", "ocean", "forest", "sunset"];
+const LIGHT_THEMES = ["dawn", "lagoon", "meadow", "sunrise"];
 const A11Y_THEMES = ["high-contrast", "protanope", "deuteranope", "tritanope"];
+const CUSTOM_SLOTS = ["custom-1", "custom-2", "custom-3", "custom-4"] as const;
+const ALL_PRESET_THEMES = [
+  ...STANDARD_THEMES, ...LIGHT_THEMES, ...DARK_THEMES, ...A11Y_THEMES,
+];
 
 const FONT_OPTIONS = [
   { value: "sans", name: "Sans Serif", fontFamily: "sans-serif" },
@@ -235,6 +281,15 @@ const SettingsPage = () => {
   const [isReady, setIsReady] = useState(false);
   const [banChecked, setBanChecked] = useState(false);
 
+  // Custom theme state
+  const [customThemes, setCustomThemes] = useState<Record<string, CustomThemeConfig | null>>({
+    "custom-1": null, "custom-2": null, "custom-3": null, "custom-4": null,
+  });
+  const [editingSlot, setEditingSlot] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editBase, setEditBase] = useState<PresetThemeId>("light");
+  const [editAccent, setEditAccent] = useState("#6366f1");
+
   const [appearanceText, setAppearanceText] = useState("Appearance");
   const [languageText, setLanguageText] = useState("Language");
   const [lightText, setLightText] = useState("Light");
@@ -243,6 +298,10 @@ const SettingsPage = () => {
   const [oceanText, setOceanText] = useState("Ocean");
   const [forestText, setForestText] = useState("Forest");
   const [sunsetText, setSunsetText] = useState("Sunset");
+  const [dawnText, setDawnText] = useState("Dawn");
+  const [lagoonText, setLagoonText] = useState("Lagoon");
+  const [meadowText, setMeadowText] = useState("Meadow");
+  const [sunriseText, setSunriseText] = useState("Sunrise");
   const [highContrastText, setHighContrastText] = useState("High Contrast");
   const [protanopeText, setProtanopeText] = useState("Protanope");
   const [deuteranopeText, setDeuteranopeText] = useState("Deuteranope");
@@ -250,6 +309,8 @@ const SettingsPage = () => {
   const [standardGroupText, setStandardGroupText] = useState("Standard");
   const [darkVariantsGroupText, setDarkVariantsGroupText] =
     useState("Dark Variants");
+  const [lightVariantsGroupText, setLightVariantsGroupText] =
+    useState("Light Variants");
   const [accessibilityGroupText, setAccessibilityGroupText] =
     useState("Accessibility");
   const [ttsText, setTTSText] = useState("Text-to-Speech");
@@ -278,6 +339,10 @@ const SettingsPage = () => {
     ocean: oceanText,
     forest: forestText,
     sunset: sunsetText,
+    dawn: dawnText,
+    lagoon: lagoonText,
+    meadow: meadowText,
+    sunrise: sunriseText,
     "high-contrast": highContrastText,
     protanope: protanopeText,
     deuteranope: deuteranopeText,
@@ -310,6 +375,38 @@ const SettingsPage = () => {
     checkBan();
   }, [user, isLoaded]);
 
+  // Load custom theme configs from localStorage on mount
+  useEffect(() => {
+    const loaded: Record<string, CustomThemeConfig | null> = {};
+    CUSTOM_SLOTS.forEach((id) => { loaded[id] = loadCustomConfig(id); });
+    setCustomThemes(loaded);
+  }, []);
+
+  function openEditor(id: string, existing: CustomThemeConfig | null) {
+    setEditingSlot(id);
+    setEditName(existing?.name ?? `Custom ${id.split("-")[1]}`);
+    setEditBase((existing?.base ?? "light") as PresetThemeId);
+    setEditAccent(existing?.accent ?? "#6366f1");
+  }
+
+  function handleSaveCustom() {
+    if (!editingSlot) return;
+    const config: CustomThemeConfig = { name: editName || `Custom ${editingSlot.split("-")[1]}`, accent: editAccent, base: editBase };
+    saveCustomConfig(editingSlot, config);
+    setCustomThemes((prev) => ({ ...prev, [editingSlot]: config }));
+    setTheme(editingSlot as ThemeId);
+    applyTheme(editingSlot as ThemeId);
+    setEditingSlot(null);
+  }
+
+  function handleDeleteCustom() {
+    if (!editingSlot) return;
+    saveCustomConfig(editingSlot, null);
+    setCustomThemes((prev) => ({ ...prev, [editingSlot]: null }));
+    if (theme === editingSlot) setTheme("light");
+    setEditingSlot(null);
+  }
+
   useEffect(() => {
     if (language === "en") {
       setSettingsTitleText("Settings");
@@ -321,12 +418,17 @@ const SettingsPage = () => {
       setOceanText("Ocean");
       setForestText("Forest");
       setSunsetText("Sunset");
+      setDawnText("Dawn");
+      setLagoonText("Lagoon");
+      setMeadowText("Meadow");
+      setSunriseText("Sunrise");
       setHighContrastText("High Contrast");
       setProtanopeText("Protanope");
       setDeuteranopeText("Deuteranope");
       setTritanopeText("Tritanope");
       setStandardGroupText("Standard");
       setDarkVariantsGroupText("Dark Variants");
+      setLightVariantsGroupText("Light Variants");
       setAccessibilityGroupText("Accessibility");
       setTTSText("Text-to-Speech");
       setEnableTTSText("Enable TTS");
@@ -368,6 +470,10 @@ const SettingsPage = () => {
         { key: "Ocean", setter: setOceanText, cacheKey: "settings_ocean" },
         { key: "Forest", setter: setForestText, cacheKey: "settings_forest" },
         { key: "Sunset", setter: setSunsetText, cacheKey: "settings_sunset" },
+        { key: "Dawn", setter: setDawnText, cacheKey: "settings_dawn" },
+        { key: "Lagoon", setter: setLagoonText, cacheKey: "settings_lagoon" },
+        { key: "Meadow", setter: setMeadowText, cacheKey: "settings_meadow" },
+        { key: "Sunrise", setter: setSunriseText, cacheKey: "settings_sunrise" },
         {
           key: "High Contrast",
           setter: setHighContrastText,
@@ -397,6 +503,11 @@ const SettingsPage = () => {
           key: "Dark Variants",
           setter: setDarkVariantsGroupText,
           cacheKey: "settings_darkVariants",
+        },
+        {
+          key: "Light Variants",
+          setter: setLightVariantsGroupText,
+          cacheKey: "settings_lightVariants",
         },
         {
           key: "Accessibility",
@@ -500,13 +611,138 @@ const SettingsPage = () => {
             {renderThemeGroup(STANDARD_THEMES)}
           </div>
 
+          <p className="settings-description"><i>{lightVariantsGroupText}</i></p>
+          <div className="theme-grid" style={{ marginBottom: "18px" }}>
+            {renderThemeGroup(LIGHT_THEMES)}
+          </div>
+
           <p className="settings-description"><i>{darkVariantsGroupText}</i></p>
           <div className="theme-grid" style={{ marginBottom: "18px" }}>
             {renderThemeGroup(DARK_THEMES)}
           </div>
 
           <p className="settings-description"><i>{accessibilityGroupText}</i></p>
-          <div className="theme-grid">{renderThemeGroup(A11Y_THEMES)}</div>
+          <div className="theme-grid" style={{ marginBottom: "18px" }}>{renderThemeGroup(A11Y_THEMES)}</div>
+
+          <p className="settings-description"><i>Custom</i></p>
+          <div className="theme-grid" style={{ marginBottom: "14px" }}>
+            {CUSTOM_SLOTS.map((id, i) => {
+              const config = customThemes[id];
+              const isActive = theme === id;
+              const isEditing = editingSlot === id;
+              const preview = config ? getPreviewColors(config) : null;
+              return (
+                <div
+                  key={id}
+                  className={`theme-card${isActive ? " active" : ""}${isEditing ? " editing" : ""}`}
+                  style={{ display: "flex", flexDirection: "column", padding: 0 }}
+                >
+                  <button
+                    style={{ all: "unset", cursor: "pointer", display: "block" }}
+                    onClick={() => {
+                      if (config) {
+                        setTheme(id as ThemeId);
+                        applyTheme(id as ThemeId);
+                      } else {
+                        openEditor(id, null);
+                      }
+                    }}
+                    aria-label={config ? config.name : `Custom ${i + 1}`}
+                  >
+                    {preview ? (
+                      <ThemePreviewSVG
+                        sky={preview.sky}
+                        ground={preview.ground}
+                        mountain={preview.mountain}
+                        sun={preview.sun}
+                        stroke={preview.stroke}
+                      />
+                    ) : (
+                      <div className="custom-slot-empty">+</div>
+                    )}
+                  </button>
+                  <div className="custom-slot-footer">
+                    <span className="theme-card-label">
+                      {config ? config.name : `Custom ${i + 1}`}
+                    </span>
+                    <button
+                      className="custom-slot-edit-btn"
+                      onClick={() => isEditing ? setEditingSlot(null) : openEditor(id, config)}
+                      aria-label="Edit"
+                    >
+                      {isEditing ? "✕" : "✏"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {editingSlot && (
+            <div className="custom-theme-editor">
+              <div className="cte-row">
+                <span className="cte-label">Name</span>
+                <input
+                  className="cte-name-input"
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder={`Custom ${editingSlot.split("-")[1]}`}
+                  maxLength={24}
+                />
+              </div>
+              <div className="cte-row cte-base-row">
+                <span className="cte-label">Base</span>
+                <div className="cte-base-grid">
+                  {ALL_PRESET_THEMES.map((id) => {
+                    const p = THEME_PREVIEWS[id];
+                    return (
+                      <button
+                        key={id}
+                        className={`cte-base-option${editBase === id ? " active" : ""}`}
+                        onClick={() => setEditBase(id as PresetThemeId)}
+                        title={p?.label ?? id}
+                      >
+                        <ThemePreviewSVG
+                          sky={p.sky}
+                          ground={p.ground}
+                          mountain={p.mountain}
+                          sun={p.sun}
+                          stroke={p.stroke}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="cte-row">
+                <span className="cte-label">Accent</span>
+                <div className="cte-color-row">
+                  <input
+                    className="cte-color-input"
+                    type="color"
+                    value={editAccent}
+                    onChange={(e) => setEditAccent(e.target.value)}
+                  />
+                  <span className="cte-hex">{editAccent.toUpperCase()}</span>
+                </div>
+              </div>
+              <div className="cte-bottom">
+                <div className="cte-preview-wrap">
+                  <ThemePreviewSVG
+                    {...getPreviewColors({ name: editName, accent: editAccent, base: editBase })}
+                  />
+                </div>
+                <div className="cte-actions">
+                  <button className="cte-save" onClick={handleSaveCustom}>Save & Apply</button>
+                  {customThemes[editingSlot] && (
+                    <button className="cte-delete" onClick={handleDeleteCustom}>Remove</button>
+                  )}
+                  <button className="cte-cancel" onClick={() => setEditingSlot(null)}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="settings-section">

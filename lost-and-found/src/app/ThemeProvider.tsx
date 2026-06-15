@@ -24,10 +24,18 @@ const THEME_STYLES: Record<ThemeId, { spinner: string; track: string }> = {
   ocean:          { spinner: "#06b6d4", track: "#1a3040" },
   forest:         { spinner: "#22c55e", track: "#1a3828" },
   sunset:         { spinner: "#f97316", track: "#3a2210" },
+  dawn:           { spinner: "#6366f1", track: "#ddd6fe" },
+  lagoon:         { spinner: "#06b6d4", track: "#a5f3fc" },
+  meadow:         { spinner: "#22c55e", track: "#bbf7d0" },
+  sunrise:        { spinner: "#f97316", track: "#fed7aa" },
   "high-contrast":{ spinner: "#ffff00", track: "#333300" },
   protanope:      { spinner: "#0050cc", track: "#a8bcd8" },
   deuteranope:    { spinner: "#003366", track: "#bfdbfe" },
   tritanope:      { spinner: "#ec4899", track: "#f9a8d4" },
+  "custom-1":     { spinner: "#2f80ed", track: "#e8eaf0" },
+  "custom-2":     { spinner: "#2f80ed", track: "#e8eaf0" },
+  "custom-3":     { spinner: "#2f80ed", track: "#e8eaf0" },
+  "custom-4":     { spinner: "#2f80ed", track: "#e8eaf0" },
 };
 
 function getInitialTheme(): ThemeId {

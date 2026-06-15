@@ -494,6 +494,258 @@ body.high-contrast .settings-save-btn {
 }
 
 
+/* ── CUSTOM THEME SLOTS ── */
+.custom-slot-empty {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 2rem;
+  font-weight: 300;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.theme-card:hover .custom-slot-empty {
+  background: var(--bg-active);
+  color: var(--accent);
+}
+
+.custom-slot-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 6px 5px 4px;
+  border-top: 1px solid var(--border-input);
+  background: var(--bg-card);
+  gap: 4px;
+}
+
+.custom-slot-footer .theme-card-label {
+  border-top: none;
+  padding: 2px 4px;
+  flex: 1;
+  text-align: left;
+  font-size: 0.72rem;
+}
+
+.theme-card.active .custom-slot-footer .theme-card-label {
+  color: var(--accent);
+}
+
+.custom-slot-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  transition: background 0.12s ease, color 0.12s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.custom-slot-edit-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+/* ── CUSTOM THEME EDITOR ── */
+.custom-theme-editor {
+  margin-top: 14px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-input);
+  background: var(--bg-input);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: cte-in 0.18s ease;
+}
+
+@keyframes cte-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cte-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cte-label {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 80px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cte-name-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-input);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.cte-name-input:focus {
+  border-color: var(--border-focus);
+}
+
+.cte-base-row {
+  align-items: flex-start !important;
+}
+
+.cte-base-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1;
+}
+
+.cte-base-option {
+  width: 50px;
+  border-radius: 7px;
+  border: 2px solid var(--border-input);
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  transition: border-color 0.12s ease, transform 0.1s ease, box-shadow 0.12s ease;
+  flex-shrink: 0;
+}
+
+.cte-base-option svg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4/3;
+}
+
+.cte-base-option:hover {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+}
+
+.cte-base-option.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cte-color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cte-color-input {
+  width: 46px;
+  height: 36px;
+  border: 1.5px solid var(--border-input);
+  border-radius: 8px;
+  padding: 3px;
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.cte-hex {
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.cte-bottom {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.cte-preview-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--border-input);
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.cte-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.cte-save {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+  white-space: nowrap;
+}
+
+.cte-save:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.cte-delete {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--danger);
+  background: transparent;
+  color: var(--danger);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.cte-delete:hover {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.cte-cancel {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-input);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.cte-cancel:hover {
+  border-color: var(--accent-border);
+  color: var(--text-primary);
+}
+
 @media (max-width: 768px) {
   .settings-page {
     padding: 20px 10px;
