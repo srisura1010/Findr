@@ -507,7 +507,11 @@ function SchoolDisputesPanel({
 
   const handleDismiss = async (dispute: SchoolDispute) => {
     if (!confirm("Dismiss dispute? Item returns to claim_accepted status.")) return;
-    await supabase.from("school_items").update({ status: "claim_accepted" }).eq("id", dispute.item_id);
+    await supabase.from("school_items").update({
+      status: "claim_accepted",
+      handoff_confirmed_by_poster: false,
+      handoff_confirmed_by_claimant: false,
+    }).eq("id", dispute.item_id);
     await supabase.from("school_disputes").delete().eq("id", dispute.id);
     onRestoreItem(dispute.item_id, "claim_accepted");
     setDisputes((prev) => prev.filter((d) => d.id !== dispute.id));
@@ -573,7 +577,8 @@ function SchoolDisputesPanel({
               <button className="sc-btn sc-btn--ghost sc-btn--sm" style={{ width: "100%" }} onClick={() => handleDismiss(dispute)}>Dismiss Dispute</button>
               <button className="sc-btn sc-btn--danger sc-btn--sm" style={{ width: "100%" }} onClick={() => handleResolveForClaimant(dispute)}>Resolve for Claimant</button>
               <button
-                style={{ width: "100%", padding: "8px 0", borderRadius: 6, background: school.color, color: textOnColor(school.color), border: "none", fontFamily: "Poppins, sans-serif", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}
+                className="sc-btn sc-btn--sm"
+                style={{ width: "100%", background: school.color, color: textOnColor(school.color), border: "none" }}
                 onClick={() => setMessagingId(messagingId === dispute.id ? null : dispute.id)}
               >
                 {messagingId === dispute.id ? "Cancel" : "Message Parties"}
@@ -1247,7 +1252,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
+                        {item.category && <span style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
                         {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>📍 {item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
@@ -1272,7 +1277,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
+                        {item.category && <span style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
                         {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>📍 {item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
@@ -1389,7 +1394,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               MY DASHBOARD TAB
           ══════════════════════════════════════════════════════════════════ */}
           {activeTab === "my-dash" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 896, margin: "0 auto", width: "100%" }}>
               {!user ? (
                 <div className="sc-empty">{s.signInToView}</div>
               ) : (
@@ -1621,9 +1626,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {activeTab === "reports" && isSchoolAdmin && (
             <div className="sc-panel-content">
               {/* Sub-tabs */}
-              <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+              <div style={{ display: "flex", gap: 8, marginBottom: 20, justifyContent: "flex-start" }}>
                 {(["reports", "disputes"] as const).map((t) => (
-                  <button key={t} onClick={() => setReportsSubTab(t)} style={{ padding: "8px 20px", borderRadius: "8px 8px 0 0", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", fontFamily: "Poppins, sans-serif", background: reportsSubTab === t ? "var(--danger)" : "var(--bg-input)", color: reportsSubTab === t ? "#fff" : "var(--text-muted)", transition: "all 0.15s ease" }}>
+                  <button key={t} onClick={() => setReportsSubTab(t)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", fontFamily: "Poppins, sans-serif", background: reportsSubTab === t ? "var(--danger)" : "var(--bg-input)", color: reportsSubTab === t ? "#fff" : "var(--text-muted)", transition: "all 0.15s ease" }}>
                     {t === "reports" ? "Reported Items" : "Disputes"}
                   </button>
                 ))}

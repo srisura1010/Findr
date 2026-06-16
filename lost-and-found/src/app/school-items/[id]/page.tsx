@@ -86,13 +86,13 @@ export default function SchoolItemDetailPage() {
   // ── claim state (finder view) ──────────────────────────────────────────────
   const [claims, setClaims] = useState<SchoolClaimRequest[]>([]);
   const [claimsLoading, setClaimsLoading] = useState(false);
-  const [showClaims, setShowClaims] = useState(false);
+  const [showClaimsModal, setShowClaimsModal] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   const [claimActionLoading, setClaimActionLoading] = useState(false);
 
   // ── submit claim (claimant view) ───────────────────────────────────────────
-  const [showClaimForm, setShowClaimForm] = useState(false);
+  const [showClaimModal, setShowClaimModal] = useState(false);
   const [claimProof, setClaimProof] = useState("");
   const [claimProofFile, setClaimProofFile] = useState<File | null>(null);
   const [claimSubmitting, setClaimSubmitting] = useState(false);
@@ -100,7 +100,7 @@ export default function SchoolItemDetailPage() {
   const [myExistingClaim, setMyExistingClaim] = useState<SchoolClaimRequest | null>(null);
 
   // ── dispute (claimant view after handoff) ─────────────────────────────────
-  const [showDisputeForm, setShowDisputeForm] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
 
@@ -306,7 +306,7 @@ export default function SchoolItemDetailPage() {
 
   // ── submit claim ──────────────────────────────────────────────────────────
   const handleSubmitClaim = async () => {
-    if (!claimProof.trim() || !user || !item) return;
+    if (claimProof.trim().length < 20 || !user || !item) return;
     setClaimSubmitting(true);
 
     let proofImageUrl: string | null = null;
@@ -346,7 +346,7 @@ export default function SchoolItemDetailPage() {
       });
 
       setClaimSubmitted(true);
-      setShowClaimForm(false);
+      setShowClaimModal(false);
       setClaimProof("");
       setClaimProofFile(null);
       setMyExistingClaim({
@@ -430,16 +430,18 @@ export default function SchoolItemDetailPage() {
       )
     );
     setClaimActionLoading(false);
+    setShowClaimsModal(false);
     setActionMsg(`✓ Accepted ${claim.claimant_name}'s claim. Coordinate the handoff!`);
   };
 
   // ── reject claim (finder) ─────────────────────────────────────────────────
   const handleRejectClaim = async (claim: SchoolClaimRequest) => {
-    if (!item) return;
+    const reason = rejectReasons[claim.id] || "";
+    if (!item || claimActionLoading || !reason.trim()) return;
     setClaimActionLoading(true);
     await supabase
       .from("school_claim_requests")
-      .update({ status: "rejected", rejection_reason: rejectReason || "Not approved.", updated_at: new Date().toISOString() })
+      .update({ status: "rejected", rejection_reason: reason.trim(), updated_at: new Date().toISOString() })
       .eq("id", claim.id);
 
     const newRejectionCount = (item.rejection_count || 0) + 1;
@@ -452,12 +454,12 @@ export default function SchoolItemDetailPage() {
       claimant_email: claim.claimant_email,
       claimant_name: claim.claimant_name,
       item_name: item.name,
-      rejection_reason: rejectReason || "Your claim was not approved.",
+      rejection_reason: reason.trim(),
     });
 
     setClaims((prev) => prev.map((c) => c.id === claim.id ? { ...c, status: "rejected" } : c));
     setRejectingId(null);
-    setRejectReason("");
+    setRejectReasons((prev) => { const n = { ...prev }; delete n[claim.id]; return n; });
     setItem((prev: any) => ({ ...prev, rejection_count: newRejectionCount }));
     setClaimActionLoading(false);
   };
@@ -477,7 +479,7 @@ export default function SchoolItemDetailPage() {
         status: "handed_off",
       }).eq("id", item.id);
       setItem((prev: any) => ({ ...prev, handoff_confirmed_by_poster: true, status: "handed_off" }));
-      setActionMsg("Marked as handed off. Waiting for the claimant to confirm receipt.");
+      setActionMsg("You've confirmed the handoff. The claimant has been notified.");
     }
     setActionLoading(false);
   };
@@ -486,7 +488,14 @@ export default function SchoolItemDetailPage() {
   const handleClaimantConfirmReceipt = async () => {
     if (!item) return;
     setActionLoading(true);
-    const finderAlreadyConfirmed = item.handoff_confirmed_by_poster;
+
+    // Fetch fresh data to ensure latest handoff flags (claimant page may be stale)
+    const { data: freshData } = await supabase
+      .from("school_items")
+      .select("handoff_confirmed_by_poster, handoff_confirmed_by_claimant")
+      .eq("id", item.id)
+      .maybeSingle();
+    const finderAlreadyConfirmed = freshData?.handoff_confirmed_by_poster ?? item.handoff_confirmed_by_poster;
 
     if (finderAlreadyConfirmed) {
       await completeHandoff();
@@ -522,7 +531,7 @@ export default function SchoolItemDetailPage() {
 
   // ── claimant files dispute ────────────────────────────────────────────────
   const handleSubmitDispute = async () => {
-    if (!disputeReason.trim() || !user || !item) return;
+    if (disputeReason.trim().length < 50 || !user || !item) return;
     setDisputeSubmitting(true);
     await supabase.from("school_disputes").insert({
       school_id: item.school_id,
@@ -534,7 +543,7 @@ export default function SchoolItemDetailPage() {
     });
     await supabase.from("school_items").update({ status: "disputed" }).eq("id", item.id);
     setItem((prev: any) => ({ ...prev, status: "disputed" }));
-    setShowDisputeForm(false);
+    setShowDisputeModal(false);
     setDisputeReason("");
     setDisputeSubmitting(false);
     setActionMsg("Dispute filed. The school admin will review and contact you.");
@@ -738,12 +747,18 @@ export default function SchoolItemDetailPage() {
               <>
                 {/* View claims button */}
                 {(currentStatus === "waiting" || currentStatus === "pending") && (
-                  <button
-                    className="detail-btn detail-btn--primary"
-                    onClick={() => { setShowClaims((v) => !v); if (!showClaims) fetchClaims(); }}
-                  >
-                    {showClaims ? "Hide Claims" : `Review Claims (${pendingClaims.length} pending)`}
-                  </button>
+                  pendingClaims.length > 0 ? (
+                    <button
+                      className="detail-btn detail-btn--secondary"
+                      onClick={() => { setShowClaimsModal(true); fetchClaims(); }}
+                    >
+                      View Claims ({pendingClaims.length})
+                    </button>
+                  ) : (
+                    <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "8px 0", margin: 0 }}>
+                      No claims yet
+                    </p>
+                  )
                 )}
 
                 {/* Confirm handoff button (claim accepted, not yet handed off) */}
@@ -785,8 +800,8 @@ export default function SchoolItemDetailPage() {
               <>
                 {/* Submit claim */}
                 {currentStatus === "waiting" && !myExistingClaim && !claimSubmitted && (
-                  <button className="detail-btn detail-btn--primary" onClick={() => setShowClaimForm((v) => !v)}>
-                    {showClaimForm ? "Cancel" : "This is Mine - Submit a Claim"}
+                  <button className="detail-btn detail-btn--primary" onClick={() => setShowClaimModal(true)}>
+                    This is Mine — Submit a Claim
                   </button>
                 )}
 
@@ -797,8 +812,15 @@ export default function SchoolItemDetailPage() {
                   </button>
                 )}
 
-                {/* My claim was accepted */}
-                {isMyAcceptedClaim && currentStatus === "claim_accepted" && !item.handoff_confirmed_by_claimant && (
+                {/* My claim was accepted — info only; receipt button appears only after finder confirms handoff */}
+                {isMyAcceptedClaim && currentStatus === "claim_accepted" && (
+                  <div style={{ padding: "12px 16px", borderRadius: 10, border: "1px solid var(--success)", background: "rgba(16,185,129,0.08)", fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--success)" }}>
+                    Your claim has been accepted! Coordinate with the finder for pickup.
+                  </div>
+                )}
+
+                {/* Handed off — claimant confirms receipt */}
+                {isMyAcceptedClaim && currentStatus === "handed_off" && !item.handoff_confirmed_by_claimant && (
                   <>
                     <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--bg-card)", border: "1.5px solid var(--success)", marginBottom: 8 }}>
                       <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.85rem", fontWeight: 700, color: "var(--success)", margin: "0 0 4px" }}>
@@ -814,31 +836,7 @@ export default function SchoolItemDetailPage() {
                     <button
                       className="detail-btn detail-btn--secondary"
                       style={{ border: "1.5px solid var(--danger)", color: "var(--danger)", background: "transparent" }}
-                      onClick={() => setShowDisputeForm((v) => !v)}
-                    >
-                      ⚠️ I Did NOT Receive My Item (Dispute)
-                    </button>
-                  </>
-                )}
-
-                {/* Handed off — claimant needs to confirm */}
-                {isMyAcceptedClaim && currentStatus === "handed_off" && !item.handoff_confirmed_by_claimant && (
-                  <>
-                    <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--bg-card)", border: "1.5px solid var(--warning)", marginBottom: 8 }}>
-                      <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.85rem", fontWeight: 700, color: "var(--warning)", margin: "0 0 4px" }}>
-                        🤝 Finder marked as handed off
-                      </p>
-                      <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.8rem", color: "var(--text-secondary)", margin: 0 }}>
-                        Did you receive your item?
-                      </p>
-                    </div>
-                    <button className="detail-btn detail-btn--success" onClick={handleClaimantConfirmReceipt} disabled={actionLoading}>
-                      {actionLoading ? "Confirming..." : "✓ Yes, I Got My Item!"}
-                    </button>
-                    <button
-                      className="detail-btn detail-btn--secondary"
-                      style={{ border: "1.5px solid var(--danger)", color: "var(--danger)", background: "transparent" }}
-                      onClick={() => setShowDisputeForm((v) => !v)}
+                      onClick={() => setShowDisputeModal(true)}
                     >
                       ⚠️ No — File a Dispute
                     </button>
@@ -873,161 +871,6 @@ export default function SchoolItemDetailPage() {
             )}
           </div>
 
-          {/* ── CLAIM FORM (claimant) ── */}
-          {showClaimForm && !isItemOwner && (
-            <div style={{ marginTop: 16, padding: "18px", borderRadius: 12, background: "var(--bg-card)", border: "1.5px solid var(--border-default)" }}>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 6px" }}>
-                Prove it's yours
-              </p>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.8rem", color: "var(--text-muted)", margin: "0 0 12px" }}>
-                Describe identifying details — color, brand, what's inside, stickers, etc.
-              </p>
-              <textarea
-                value={claimProof}
-                onChange={(e) => setClaimProof(e.target.value)}
-                placeholder="e.g. It's a navy blue JanSport with a keychain of a red mushroom on the zipper, and my name 'Jamie' written inside the front pocket..."
-                rows={4}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: "13px", resize: "vertical", boxSizing: "border-box", outline: "none" }}
-              />
-              <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontFamily: "Poppins, sans-serif", fontSize: "12px", color: "var(--text-muted)", cursor: "pointer" }}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={(e) => setClaimProofFile(e.target.files?.[0] || null)}
-                />
-                <span style={{ padding: "6px 14px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", fontWeight: 600 }}>
-                  + {claimProofFile ? claimProofFile.name : "Attach a photo (optional)"}
-                </span>
-              </label>
-              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                <button onClick={() => { setShowClaimForm(false); setClaimProof(""); setClaimProofFile(null); }} style={{ flex: 1, padding: "10px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                  Cancel
-                </button>
-                <button onClick={handleSubmitClaim} disabled={!claimProof.trim() || claimSubmitting} style={{ flex: 2, padding: "10px 0", borderRadius: 8, border: "none", background: "var(--accent)", color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 13, cursor: claimProof.trim() ? "pointer" : "not-allowed", opacity: claimProof.trim() ? 1 : 0.5 }}>
-                  {claimSubmitting ? "Submitting..." : "Submit Claim"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── DISPUTE FORM (claimant) ── */}
-          {showDisputeForm && (
-            <div style={{ marginTop: 12, padding: "18px", borderRadius: 12, background: "var(--bg-card)", border: "1.5px solid var(--danger)" }}>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "var(--danger)", margin: "0 0 8px" }}>
-                File a Dispute
-              </p>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.8rem", color: "var(--text-muted)", margin: "0 0 10px" }}>
-                Explain what happened. The school admin will review and contact both parties.
-              </p>
-              <textarea
-                value={disputeReason}
-                onChange={(e) => setDisputeReason(e.target.value)}
-                placeholder="e.g. I arranged to meet the finder but they never showed up. I believe the item hasn't actually been handed off..."
-                rows={4}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: "13px", resize: "vertical", boxSizing: "border-box", outline: "none" }}
-              />
-              <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                <button onClick={() => { setShowDisputeForm(false); setDisputeReason(""); }} style={{ flex: 1, padding: "10px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                  Cancel
-                </button>
-                <button onClick={handleSubmitDispute} disabled={!disputeReason.trim() || disputeSubmitting} style={{ flex: 2, padding: "10px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 13, cursor: disputeReason.trim() ? "pointer" : "not-allowed", opacity: disputeReason.trim() ? 1 : 0.5 }}>
-                  {disputeSubmitting ? "Filing..." : "Submit Dispute"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── CLAIMS PANEL (finder) ── */}
-          {isItemOwner && showClaims && (
-            <div style={{ marginTop: 16 }}>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.6px", color: "var(--text-muted)", margin: "0 0 10px" }}>
-                Claims ({claims.length})
-              </p>
-              {claimsLoading ? (
-                <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.85rem", color: "var(--text-muted)" }}>Loading...</p>
-              ) : claims.length === 0 ? (
-                <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.85rem", color: "var(--text-muted)" }}>No claims yet.</p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {claims.map((claim) => (
-                    <div key={claim.id} style={{ padding: "14px 16px", borderRadius: 12, background: "var(--bg-card)", border: `1.5px solid ${claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--border-default)" : "var(--border-input)"}`, opacity: claim.status === "rejected" ? 0.55 : 1 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "0.88rem", color: "var(--text-primary)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {claim.claimant_name}
-                          </p>
-                          <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.75rem", color: "var(--text-muted)", margin: "0 0 6px" }}>
-                            {claim.claimant_email} · {new Date(claim.created_at).toLocaleDateString()}
-                          </p>
-                          <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--text-secondary)", margin: "0 0 6px", lineHeight: 1.5 }}>
-                            {claim.description_proof}
-                          </p>
-                          {claim.proof_image_url && (
-                            <a href={claim.proof_image_url} target="_blank" rel="noopener noreferrer">
-                              <img src={claim.proof_image_url} alt="proof" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 6, border: "1px solid var(--border-default)", marginBottom: 6 }} />
-                            </a>
-                          )}
-                          <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: 100, fontSize: "0.7rem", fontWeight: 700, fontFamily: "Poppins, sans-serif", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)" }}>
-                            {claim.status === "accepted" ? "✓ Accepted" : claim.status === "rejected" ? "Rejected" : "Pending"}
-                          </span>
-                        </div>
-
-                        {/* Claim action buttons */}
-                        {claim.status === "pending" && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
-                            <button
-                              onClick={() => openChatWith(claim.claimant_id, claim.claimant_name)}
-                              style={{ padding: "6px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: "12px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-                            >
-                              💬 Message
-                            </button>
-                            <button
-                              onClick={() => handleAcceptClaim(claim)}
-                              disabled={claimActionLoading}
-                              style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "var(--success)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
-                            >
-                              ✓ Accept
-                            </button>
-                            {rejectingId === claim.id ? (
-                              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                <input
-                                  value={rejectReason}
-                                  onChange={(e) => setRejectReason(e.target.value)}
-                                  placeholder="Reason (optional)"
-                                  style={{ padding: "5px 8px", borderRadius: 6, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", fontFamily: "Poppins, sans-serif", fontSize: "11px", color: "var(--text-primary)", outline: "none", width: 120 }}
-                                />
-                                <button onClick={() => handleRejectClaim(claim)} disabled={claimActionLoading} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>
-                                  Confirm Reject
-                                </button>
-                                <button onClick={() => { setRejectingId(null); setRejectReason(""); }} style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: "11px", cursor: "pointer" }}>
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <button onClick={() => setRejectingId(claim.id)} style={{ padding: "6px 12px", borderRadius: 8, border: "1.5px solid var(--danger)", background: "transparent", color: "var(--danger)", fontFamily: "Poppins, sans-serif", fontSize: "12px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
-                                ✕ Reject
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Accepted claim: show message button */}
-                        {claim.status === "accepted" && (
-                          <button
-                            onClick={() => openChatWith(claim.claimant_id, claim.claimant_name)}
-                            style={{ padding: "6px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: "12px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
-                          >
-                            💬 Message
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
@@ -1052,6 +895,224 @@ export default function SchoolItemDetailPage() {
                 </a>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ── CLAIM SUBMISSION MODAL ── */}
+      {showClaimModal && !isItemOwner && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1500, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+          onClick={() => { setShowClaimModal(false); setClaimProof(""); setClaimProofFile(null); }}
+        >
+          <div
+            style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, display: "flex", flexDirection: "column", gap: 14, maxHeight: "90vh", overflowY: "auto" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 20, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              Submit a Claim
+            </p>
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+              Describe identifying details that prove this is your item — color, brand, contents, stickers, etc.
+            </p>
+            <textarea
+              value={claimProof}
+              onChange={(e) => setClaimProof(e.target.value)}
+              placeholder="e.g. It's a navy blue JanSport with a keychain of a red mushroom on the zipper, and my name 'Jamie' written inside the front pocket..."
+              rows={5}
+              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
+            />
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: claimProof.trim().length >= 20 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
+              {claimProof.trim().length}/20 min chars
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Poppins, sans-serif", fontSize: 12, color: "var(--text-muted)", cursor: "pointer" }}>
+              <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setClaimProofFile(e.target.files?.[0] || null)} />
+              <span style={{ padding: "7px 14px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", fontWeight: 600, color: "var(--text-primary)" }}>
+                + {claimProofFile ? claimProofFile.name : "Attach a photo (optional)"}
+              </span>
+            </label>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => { setShowClaimModal(false); setClaimProof(""); setClaimProofFile(null); }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitClaim}
+                disabled={claimProof.trim().length < 20 || claimSubmitting}
+                style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--accent)", color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 13, cursor: claimProof.trim().length >= 20 ? "pointer" : "not-allowed", opacity: claimProof.trim().length >= 20 ? 1 : 0.5 }}
+              >
+                {claimSubmitting ? "Submitting..." : "Submit Claim"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CLAIMS REVIEW MODAL ── */}
+      {isItemOwner && showClaimsModal && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 1500, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+          onClick={() => setShowClaimsModal(false)}
+        >
+          <div
+            style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 560, display: "flex", flexDirection: "column", gap: 16, maxHeight: "90vh", overflowY: "auto" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              Claims for "{item.name}"
+            </p>
+            {claimsLoading ? (
+              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)" }}>Loading...</p>
+            ) : claims.length === 0 ? (
+              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)" }}>No claims yet.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {claims.map((claim) => (
+                  <div
+                    key={claim.id}
+                    style={{ border: "1px solid var(--border-default)", borderRadius: 12, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, opacity: claim.status === "rejected" ? 0.55 : 1 }}
+                  >
+                    {/* Header row: name + date on left, status badge on right */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 14, color: "var(--text-primary)", margin: "0 0 2px" }}>{claim.claimant_name}</p>
+                        <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{new Date(claim.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, fontFamily: "Poppins, sans-serif", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)", flexShrink: 0 }}>
+                        {claim.status === "accepted" ? "✓ Accepted" : claim.status === "rejected" ? "Rejected" : "Pending"}
+                      </span>
+                    </div>
+
+                    {/* Claim text */}
+                    <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-primary)", lineHeight: 1.5, margin: 0 }}>{claim.description_proof}</p>
+
+                    {/* Proof image */}
+                    {claim.proof_image_url && (
+                      <a href={claim.proof_image_url} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block" }}>
+                        <img src={claim.proof_image_url} alt="proof" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border-default)", display: "block", cursor: "pointer" }} />
+                      </a>
+                    )}
+
+                    {/* Pending actions */}
+                    {claim.status === "pending" && (
+                      <>
+                        {rejectingId === claim.id ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            <textarea
+                              value={rejectReasons[claim.id] || ""}
+                              onChange={(e) => setRejectReasons((prev) => ({ ...prev, [claim.id]: e.target.value }))}
+                              placeholder="Enter rejection reason (required)"
+                              rows={3}
+                              style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
+                            />
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <button
+                                onClick={() => { setRejectingId(null); setRejectReasons((prev) => { const n = { ...prev }; delete n[claim.id]; return n; }); }}
+                                style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleRejectClaim(claim)}
+                                disabled={claimActionLoading || !(rejectReasons[claim.id] || "").trim()}
+                                style={{ flex: 2, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 700, cursor: (rejectReasons[claim.id] || "").trim() ? "pointer" : "not-allowed", opacity: (rejectReasons[claim.id] || "").trim() ? 1 : 0.5 }}
+                              >
+                                {claimActionLoading ? "Rejecting..." : "Confirm Reject"}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                              onClick={() => handleAcceptClaim(claim)}
+                              disabled={claimActionLoading}
+                              style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--success)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                            >
+                              {claimActionLoading ? "Accepting..." : "Accept"}
+                            </button>
+                            <button
+                              onClick={() => setRejectingId(claim.id)}
+                              style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => { setShowClaimsModal(false); openChatWith(claim.claimant_id, claim.claimant_name); }}
+                          style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 4 }}
+                        >
+                          Message Claimant
+                        </button>
+                      </>
+                    )}
+
+                    {/* Accepted — message button */}
+                    {claim.status === "accepted" && (
+                      <button
+                        onClick={() => { setShowClaimsModal(false); openChatWith(claim.claimant_id, claim.claimant_name); }}
+                        style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                      >
+                        Message Claimant
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setShowClaimsModal(false)}
+              style={{ padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── DISPUTE MODAL ── */}
+      {showDisputeModal && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1500, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+          onClick={() => { setShowDisputeModal(false); setDisputeReason(""); }}
+        >
+          <div
+            style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, display: "flex", flexDirection: "column", gap: 14, maxHeight: "90vh", overflowY: "auto" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 20, fontWeight: 700, color: "var(--danger)", margin: 0 }}>
+              File a Dispute
+            </p>
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+              Explain what happened. The school admin will review and contact both parties.
+            </p>
+            <textarea
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+              placeholder="e.g. I arranged to meet the finder but they never showed up. I believe the item hasn't actually been handed off..."
+              rows={5}
+              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeReason.length > 0 && disputeReason.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
+            />
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: disputeReason.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
+              {disputeReason.trim().length}/50 min chars
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => { setShowDisputeModal(false); setDisputeReason(""); }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitDispute}
+                disabled={disputeReason.trim().length < 50 || disputeSubmitting}
+                style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 13, cursor: disputeReason.trim().length >= 50 ? "pointer" : "not-allowed", opacity: disputeReason.trim().length >= 50 ? 1 : 0.5 }}
+              >
+                {disputeSubmitting ? "Filing..." : "Submit Dispute"}
+              </button>
+            </div>
           </div>
         </div>
       )}

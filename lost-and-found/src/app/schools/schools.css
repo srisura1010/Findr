@@ -2279,7 +2279,7 @@ select.sc-form__select {
   padding: 10px 32px 10px 13px !important;
   outline: none !important;
   font-family: "Poppins", sans-serif !important;
-  font-size: 13px !important;
+  font-size: max(16px, 13px) !important;
   font-weight: 500 !important;
   color: var(--text-primary);
   background-color: var(--bg-input) !important;

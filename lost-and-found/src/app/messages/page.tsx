@@ -29,6 +29,7 @@ interface Conversation {
   conversation_id: string;
   item_title: string;
   itemId?: string;
+  isSchoolItem?: boolean;
   otherUserId: string;
   otherUserName: string;
   otherUserEmail: string;
@@ -381,6 +382,29 @@ export default function MessagesPage() {
       }
 
       const convList = Array.from(convMap.values());
+
+      // Determine which item IDs belong to school_items
+      const nonAdminItemIds = [
+        ...new Set(
+          convList
+            .filter((c) => !c.isAdminConv && c.itemId)
+            .map((c) => c.itemId!),
+        ),
+      ];
+      if (nonAdminItemIds.length > 0) {
+        const { data: schoolItems } = await supabase
+          .from("school_items")
+          .select("id")
+          .in("id", nonAdminItemIds);
+        const schoolItemIdSet = new Set(
+          (schoolItems ?? []).map((r) => String(r.id)),
+        );
+        convList.forEach((conv) => {
+          if (conv.itemId)
+            conv.isSchoolItem = schoolItemIdSet.has(conv.itemId);
+        });
+      }
+
       if (language !== "en") {
         await Promise.all(
           convList.map(async (conv) => {
@@ -692,7 +716,7 @@ export default function MessagesPage() {
               </div>
               {!activeConv?.isAdminConv && activeConv?.itemId && (
                 <a
-                  href={`/items/${activeConv.itemId}`}
+                  href={activeConv.isSchoolItem ? `/school-items/${activeConv.itemId}` : `/items/${activeConv.itemId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

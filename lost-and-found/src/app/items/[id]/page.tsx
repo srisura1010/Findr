@@ -1259,6 +1259,12 @@ export default function ItemDetailPage() {
                 >
                   {actionLoading ? "Confirming..." : "Confirm I Handed It Back"}
                 </button>
+                <button
+                  className="detail-btn detail-btn--secondary"
+                  onClick={() => setShowChat(true)}
+                >
+                  Message {item.accepted_claimant_name}
+                </button>
               </>
             )}
 
@@ -2048,18 +2054,17 @@ export default function ItemDetailPage() {
               Describe what went wrong. An admin will review your dispute.
             </p>
             <textarea
-              className="panel-form__textarea"
               placeholder="Describe what went wrong (minimum 50 characters)"
               value={disputeText}
               onChange={(e) => setDisputeText(e.target.value)}
-              minLength={50}
-              required
-              style={{ minHeight: 100 }}
+              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeText.length > 0 && disputeText.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", minHeight: 100, boxSizing: "border-box", outline: "none" }}
             />
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: disputeText.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
+              {disputeText.trim().length}/50 min chars
+            </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
-                className="panel-form__cancel"
-                style={{ flex: 1 }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
                 onClick={() => {
                   setShowDisputeModal(false);
                   setDisputeText("");
