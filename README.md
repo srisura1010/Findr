@@ -113,4 +113,4 @@ findr/
 
 ## Contributors
 
-Built by Srivatsav Sura and Srinath Ramakrishnan — Hillcrest High School, Midvale Utah
+Built by Srivatsav Sura and Srinath Ramakrishnan - Hillcrest High School, Midvale, Utah, USA.
