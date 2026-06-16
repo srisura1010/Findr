@@ -1155,14 +1155,14 @@ export default function ItemDetailPage() {
                     disabled
                     title="You already have 2 active claims. Resolve one before claiming another."
                   >
-                    This is mine
+                    This is mine - Submit a Claim
                   </button>
                 ) : (
                   <button
                     className="detail-btn detail-btn--primary"
                     onClick={() => setShowClaimModal(true)}
                   >
-                    This is mine
+                    This is mine - Submit a Claim
                   </button>
                 )}
               </>

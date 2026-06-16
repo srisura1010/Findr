@@ -786,7 +786,7 @@ export default function SchoolItemDetailPage() {
                 {/* Submit claim */}
                 {currentStatus === "waiting" && !myExistingClaim && !claimSubmitted && (
                   <button className="detail-btn detail-btn--primary" onClick={() => setShowClaimForm((v) => !v)}>
-                    {showClaimForm ? "Cancel" : "This is Mine — Submit a Claim"}
+                    {showClaimForm ? "Cancel" : "This is Mine - Submit a Claim"}
                   </button>
                 )}
 
