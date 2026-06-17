@@ -1888,7 +1888,7 @@ body.dark .sc-tab-btn { color: #4a5a7a; }
 
 .sc-tab-btn:hover {
   background: var(--bg-hover);
-  color: var(--text-primary);
+  color: var(--text-secondary) !important;
 }
 
 .sc-tab-btn--active {
