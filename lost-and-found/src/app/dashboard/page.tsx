@@ -1515,7 +1515,7 @@ function MyDashboardCharts({
       const gridColor = style.getPropertyValue("--border-default").trim() || "rgba(0,0,0,0.06)";
       const tickColor = style.getPropertyValue("--text-muted").trim() || "rgba(0,0,0,0.45)";
       const clrFound = style.getPropertyValue("--accent").trim() || "#2f80ed";
-      const clrLost = style.getPropertyValue("--warning").trim() || "#f59e0b";
+      const clrLost = "#ef4444";
       const clrClaimed = style.getPropertyValue("--success").trim() || "#10b981";
       const chartFont = style.getPropertyValue("--font-body").trim() || "system-ui, sans-serif";
 
@@ -2993,7 +2993,7 @@ export default function DashboardPage() {
         const pieDataJson = JSON.stringify({ totalFound, totalLost, totalReturned: totalClaimed });
         const dashStyle = typeof window !== "undefined" ? getComputedStyle(document.documentElement) : null;
         const clrFound = dashStyle?.getPropertyValue("--accent").trim() || "#2f80ed";
-        const clrLost = dashStyle?.getPropertyValue("--warning").trim() || "#f59e0b";
+        const clrLost = "#ef4444";
         const clrClaimed = dashStyle?.getPropertyValue("--success").trim() || "#10b981";
 
         const chartKey = `${user?.id}-${totalActions}-${theme}-${totalReturnedByMe}`;

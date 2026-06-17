@@ -1002,15 +1002,20 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       const { data } = supabase.storage.from("item-images").getPublicUrl(fn);
       imageUrls.push(data.publicUrl);
     }
-    const { data: inserted } = await supabase.from("school_lost_items").insert({
+    const { data: inserted, error: insertError } = await supabase.from("school_lost_items").insert({
       school_id: school.id, name: lostName, description: lostDesc,
       category: lostCategory || null, location: lostLocation || null,
-      date_lost: lostDate ? new Date(lostDate).toISOString() : new Date().toISOString(),
       image_url: imageUrls[0] || null, image_urls: imageUrls.length > 0 ? imageUrls : null,
       author_name: user.fullName || user.username || "Anonymous",
       author_avatar: user.imageUrl, author_id: user.id,
       author_email: user.primaryEmailAddress?.emailAddress, status: "looking",
     }).select().single();
+    if (insertError) {
+      console.error("Lost item insert error:", insertError.message);
+      alert(`Failed to post lost item: ${insertError.message}`);
+      setLostUploading(false);
+      return;
+    }
     if (inserted) setLostItems((prev) => [inserted as SchoolLostItem, ...prev]);
     setLostName(""); setLostDesc(""); setLostCategory(""); setLostLocation(""); setLostDate(""); setLostFiles([]);
     setLostSuccess(true);
@@ -1181,7 +1186,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const returnedByMonth = months.map((m) => myReturnedItems.filter((i) => (i.returned_at || i.date_found || "").startsWith(m)).length);
 
   const clrFound = color || "#2f80ed";
-  const clrLost = color2 || "#f59e0b";
+  const clrLost = "#ef4444";
   const clrReturned = "#10b981";
   const chartKey = `school-${school.id}-${user?.id}-${totalActions}-${totalReturnedByMe}`;
 
