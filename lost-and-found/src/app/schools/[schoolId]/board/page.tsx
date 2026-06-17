@@ -1446,7 +1446,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "Poppins, sans-serif" }}>✓ {school.name} member</span>
                     </div>
                     <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
-                      {([["Posted", totalFound, clrFound], ["Returned", totalReturnedByMe, clrReturned], ["Lost", totalLost, clrLost]] as [string, number, string][]).map(([label, val, clr]) => (
+                      {([["Posted", totalFound, clrFound], ["Returned", totalReturnedByMe, clrReturned], ["Lost", totalLost, "var(--danger)"]] as [string, number, string][]).map(([label, val, clr]) => (
                         <div key={label} style={{ textAlign: "center" }}>
                           <p style={{ margin: 0, fontFamily: "Ubuntu, sans-serif", fontSize: 20, fontWeight: 700, color: clr }}>{val}</p>
                           <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</p>
