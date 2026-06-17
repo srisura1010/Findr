@@ -2345,3 +2345,11 @@ select.sc-form__select:focus {
 .sc-board__layout {
   z-index: 1;
 }
+
+/* ── Filter-row category select: restore compact sizing overridden by .sc-board__main select ── */
+select.sc-board-filter-select {
+  padding: 8px 28px 8px 10px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+}

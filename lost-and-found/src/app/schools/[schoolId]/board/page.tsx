@@ -1248,7 +1248,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 8, alignItems: "center" }}>
                   <div style={{ position: "relative" }}>
-                    <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ width: "100%", padding: "8px 28px 8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: filterCategory ? color : "var(--bg-input)", color: filterCategory ? textOn : "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", appearance: "none", WebkitAppearance: "none", outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }}>
+                    <select className="sc-board-filter-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ width: "100%", padding: "8px 28px 8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: filterCategory ? color : "var(--bg-input)", color: filterCategory ? textOn : "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", appearance: "none", WebkitAppearance: "none", outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }}>
                       <option value="">{s.filterCategory}</option>
                       {CATEGORIES.map((cat) => <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>{cat}</option>)}
                     </select>
