@@ -1136,7 +1136,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     monthLabels.push(d.toLocaleString("default", { month: "short" }));
   }
   const foundByMonth = months.map((m) => {
-    const active = items.filter((i) => i.author_id === user?.id && (i.date_found || i.created_at || "").startsWith(m)).length;
+    const active = items.filter((i) => i.author_id === user?.id && i.status !== "claimed" && (i.date_found || i.created_at || "").startsWith(m)).length;
     const returned = myReturnedItems.filter((i) => (i.date_found || "").startsWith(m)).length;
     return active + returned;
   });
