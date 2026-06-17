@@ -1272,7 +1272,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               {/* Found / Lost tabs */}
               <div className="sc-tabs-row">
                 {(["found", "lost"] as const).map((t) => (
-                  <button key={t} className={`sc-tab-btn${boardTab === t ? " sc-tab-btn--active" : ""}`} onClick={() => setBoardTab(t)}>
+                  <button key={t} className={`sc-tab-btn${boardTab === t ? " sc-tab-btn--active" : ""}`} style={boardTab === t ? { color: textOnColor(color2) } : undefined} onClick={() => setBoardTab(t)}>
                     {t === "found" ? `${s.foundTabLabel} (${filteredFound.filter((i) => i.status !== "claimed").length})` : `${s.lostTabLabel} (${filteredLost.length})`}
                   </button>
                 ))}
