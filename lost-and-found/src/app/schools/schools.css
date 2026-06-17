@@ -125,7 +125,7 @@ body.light {
 
 .sc-sidebar__title {
   margin: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
@@ -134,7 +134,7 @@ body.light {
 
 .sc-sidebar__sub {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   color: var(--text-muted);
   font-weight: 500;
@@ -159,7 +159,7 @@ body.light {
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -229,7 +229,7 @@ body.light {
 }
 
 .sc-sidebar__schools-label {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -248,7 +248,7 @@ body.light {
   border-left: 3px solid transparent;
   border-radius: 0 8px 8px 0;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
@@ -281,7 +281,7 @@ body.light {
   color: #fff;
   font-size: 11px;
   font-weight: 700;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   flex-shrink: 0;
 }
 
@@ -322,7 +322,7 @@ body.light {
 }
 
 .sc-section-title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 22px;
   font-weight: 700;
   color: var(--text-primary);
@@ -331,7 +331,7 @@ body.light {
 }
 
 .sc-hint {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   color: var(--text-secondary);
   margin: -8px 0 4px;
@@ -339,7 +339,7 @@ body.light {
 }
 
 .sc-empty {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: var(--text-muted);
   text-align: center;
@@ -408,7 +408,7 @@ body.light {
 
 .sc-about__eyebrow {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 11px;
@@ -418,7 +418,7 @@ body.light {
 
 .sc-about__title {
   margin: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: clamp(2.4rem, 5vw, 4.6rem);
   line-height: 0.96;
   letter-spacing: -0.06em;
@@ -429,7 +429,7 @@ body.light {
 .sc-about__subtitle {
   margin: 0;
   max-width: 52ch;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.7;
   color: var(--text-secondary);
@@ -497,7 +497,7 @@ body.light {
 .sc-about__stat strong {
   display: block;
   margin-bottom: 3px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 1.1rem;
   color: var(--text-primary);
   font-weight: 700;
@@ -505,7 +505,7 @@ body.light {
 
 .sc-about__stat span {
   display: block;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   line-height: 1.5;
   color: var(--text-secondary);
@@ -556,7 +556,7 @@ body.light {
 
 .sc-about__hero-label {
   margin: 0 0 10px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 10px;
@@ -566,7 +566,7 @@ body.light {
 
 .sc-about__hero-card h2 {
   margin: 0 0 10px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 1.9rem;
   line-height: 1.05;
   letter-spacing: -0.04em;
@@ -575,7 +575,7 @@ body.light {
 
 .sc-about__hero-card p {
   margin: 0 0 18px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13.5px;
   line-height: 1.65;
   color: var(--text-secondary);
@@ -592,7 +592,7 @@ body.light {
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
   border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border-default));
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -617,7 +617,7 @@ body.light {
 .sc-about__carousel-hint {
   max-width: 640px;
   color: var(--text-secondary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
 }
 
@@ -695,7 +695,7 @@ body.light {
 
 .sc-carousel__card h3 {
   margin: 0 0 6px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -704,7 +704,7 @@ body.light {
 
 .sc-carousel__card p {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.8rem;
   line-height: 1.55;
   color: var(--text-secondary);
@@ -754,7 +754,7 @@ body.light {
 }
 
 .sc-about__feature h3 {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.93rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -763,7 +763,7 @@ body.light {
 }
 
 .sc-about__feature p {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.82rem;
   color: var(--text-secondary);
   margin: 0;
@@ -801,7 +801,7 @@ body.light {
 }
 
 .sc-about__register-cta h2 {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -810,7 +810,7 @@ body.light {
 }
 
 .sc-about__register-cta p {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13.5px;
   color: var(--text-secondary);
   margin: 0;
@@ -829,7 +829,7 @@ body.light {
   padding: 11px 20px;
   border-radius: 9px;
   border: 1.5px solid transparent;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -949,7 +949,7 @@ body.light {
   font-size: 10.5px;
   font-weight: 700;
   color: var(--text-muted);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: -6px;
@@ -961,7 +961,7 @@ body.light {
   border-radius: 9px;
   padding: 10px 13px;
   outline: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   color: var(--text-primary);
   background: var(--bg-input);
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -988,7 +988,7 @@ body.light {
 .sc-form__hint {
   font-size: 10px;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: -4px 0 0;
   line-height: 1.5;
 }
@@ -1004,7 +1004,7 @@ body.light {
   border-radius: 9px;
   background: var(--bg-input);
   color: var(--text-secondary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1028,7 +1028,7 @@ body.light {
 .sc-form__error {
   font-size: 12px;
   color: var(--danger);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: 0;
   padding: 8px 12px;
   background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
@@ -1039,7 +1039,7 @@ body.light {
 .sc-form__success {
   font-size: 12px;
   color: var(--success);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: 0;
   padding: 8px 12px;
   background: color-mix(in srgb, var(--success) 8%, var(--bg-card));
@@ -1117,7 +1117,7 @@ body.light {
 }
 
 .sc-color-value {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -1184,13 +1184,13 @@ body.light {
   padding: 4px 12px;
   font-size: 11px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   width: fit-content;
   margin-bottom: 4px;
 }
 
 .sc-register__preview-name {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 18px;
   font-weight: 700;
   color: #fff;
@@ -1199,7 +1199,7 @@ body.light {
 }
 
 .sc-register__preview-code {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: rgba(255, 255, 255, 0.75);
   margin: 0;
@@ -1237,7 +1237,7 @@ body.light {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .sc-success__sub {
@@ -1309,12 +1309,12 @@ body.light {
   color: #fff;
   font-size: 18px;
   font-weight: 700;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   flex-shrink: 0;
 }
 
 .sc-school-card__name {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
@@ -1323,7 +1323,7 @@ body.light {
 }
 
 .sc-school-card__code {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   color: var(--text-muted);
   margin: 2px 0 0;
@@ -1373,12 +1373,12 @@ body.light {
   color: #fff;
   font-size: 13px;
   font-weight: 700;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   flex-shrink: 0;
 }
 
 .sc-school-chip__name {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
   color: var(--text-primary);
@@ -1386,7 +1386,7 @@ body.light {
 }
 
 .sc-school-chip__code {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -1465,7 +1465,7 @@ body.light {
   padding: 7px 14px;
   font-size: 13px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -1508,7 +1508,7 @@ body.light {
   color: var(--sc-text-on-color, #fff);
   font-size: 18px;
   font-weight: 700;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   flex-shrink: 0;
   box-shadow:
     0 0 0 2px var(--bg-card),
@@ -1525,7 +1525,7 @@ body.light {
 }
 
 .sc-board__name {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
@@ -1544,7 +1544,7 @@ body.high-contrast .sc-board__name { color: var(--text-primary); }
 body.colorblind .sc-board__name { color: var(--text-primary); }
 
 .sc-board__code {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   color: #ffffff;
   margin: 0;
@@ -1565,7 +1565,7 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
 }
 
 .sc-board__count-pill {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 600;
   color: var(--text-muted);
@@ -1583,7 +1583,7 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   background: color-mix(in srgb, var(--sc-color-2, var(--warning)) 15%, var(--bg-card));
   border: 1.5px solid var(--sc-color-2, var(--warning));
   border-radius: 8px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 700;
   color: var(--text-primary);
@@ -1599,7 +1599,7 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: filter 0.15s ease;
   min-height: 28px;
 }
@@ -1647,7 +1647,7 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -1781,7 +1781,7 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
   border-radius: 100px;
   border: none;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.1px;
@@ -1826,7 +1826,7 @@ body.dark .sc-mode-toggle__btn {
   border-radius: 10px;
   background: var(--bg-card);
   color: var(--text-primary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s ease;
@@ -1875,7 +1875,7 @@ body.dark .sc-mode-toggle__btn {
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   background: transparent;
   color: #64748b;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
@@ -1978,7 +1978,7 @@ body.colorblind .sc-tab-btn--active {
   justify-content: center;
   font-size: 2rem;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .sc-item-card__info {
@@ -1991,7 +1991,7 @@ body.colorblind .sc-tab-btn--active {
 
 .sc-item-card__name {
   margin: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -2003,7 +2003,7 @@ body.colorblind .sc-tab-btn--active {
 
 .sc-item-card__desc {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.81rem;
   color: var(--text-secondary);
   line-height: 1.5;
@@ -2018,7 +2018,7 @@ body.colorblind .sc-tab-btn--active {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.73rem;
   color: var(--text-muted);
   margin: 3px 0 6px;
@@ -2033,7 +2033,7 @@ body.colorblind .sc-tab-btn--active {
 }
 
 .sc-item-card__status {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -2278,7 +2278,7 @@ select.sc-form__select {
   border-radius: 9px !important;
   padding: 10px 32px 10px 13px !important;
   outline: none !important;
-  font-family: "Poppins", sans-serif !important;
+  font-family: var(--font-body) !important;
   font-size: max(16px, 13px) !important;
   font-weight: 500 !important;
   color: var(--text-primary);

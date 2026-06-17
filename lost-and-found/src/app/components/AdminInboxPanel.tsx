@@ -201,7 +201,7 @@ export function AdminInboxPanel({
   const totalUnread = convs.filter((c) => c.unread).length;
 
   return (
-    <div style={{ display: "flex", height: "calc(100vh - 120px)", fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ display: "flex", height: "calc(100vh - 120px)", fontFamily: "var(--font-body)" }}>
       <div style={{
         width: 280, flexShrink: 0, background: "#fff",
         borderRight: "1px solid #e2e8f0", display: "flex", flexDirection: "column",

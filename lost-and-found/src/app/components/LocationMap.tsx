@@ -157,7 +157,7 @@ export default function LocationMap({
           <span style={{ fontSize: "16px", flexShrink: 0 }}>📍</span>
           <span
             style={{
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.82rem",
               fontWeight: 500,
               color: "var(--text-primary)",
@@ -177,7 +177,7 @@ export default function LocationMap({
               background: "var(--bg-input)",
               color: "var(--text-secondary)",
               fontSize: "0.72rem",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
               cursor: "pointer",
               whiteSpace: "nowrap",
@@ -208,7 +208,7 @@ export default function LocationMap({
               background: "var(--bg-input)",
               color: "var(--text-muted)",
               fontSize: "0.82rem",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
             }}
           >
             Loading map…

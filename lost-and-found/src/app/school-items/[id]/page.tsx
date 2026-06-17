@@ -730,7 +730,7 @@ export default function SchoolItemDetailPage() {
           {/* Location map */}
           {hasLocation && (
             <div style={{ marginTop: "4px" }}>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--text-muted)", margin: "0 0 8px" }}>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--text-muted)", margin: "0 0 8px" }}>
                 Found location
               </p>
               <LocationMap lat={Number(item.latitude)} lng={Number(item.longitude)} address={item.location ?? undefined} />
@@ -760,7 +760,7 @@ export default function SchoolItemDetailPage() {
                       View Claims ({pendingClaims.length})
                     </button>
                   ) : (
-                    <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "8px 0", margin: 0 }}>
+                    <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "8px 0", margin: 0 }}>
                       No claims yet
                     </p>
                   )
@@ -819,7 +819,7 @@ export default function SchoolItemDetailPage() {
 
                 {/* My claim was accepted — info only; receipt button appears only after finder confirms handoff */}
                 {isMyAcceptedClaim && currentStatus === "claim_accepted" && (
-                  <div style={{ padding: "12px 16px", borderRadius: 10, border: "1px solid var(--success)", background: "rgba(16,185,129,0.08)", fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--success)" }}>
+                  <div style={{ padding: "12px 16px", borderRadius: 10, border: "1px solid var(--success)", background: "rgba(16,185,129,0.08)", fontFamily: "var(--font-body)", fontSize: 13, color: "var(--success)" }}>
                     Your claim has been accepted! Coordinate with the finder for pickup.
                   </div>
                 )}
@@ -828,10 +828,10 @@ export default function SchoolItemDetailPage() {
                 {isMyAcceptedClaim && currentStatus === "handed_off" && !item.handoff_confirmed_by_claimant && (
                   <>
                     <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--bg-card)", border: "1.5px solid var(--success)", marginBottom: 8 }}>
-                      <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.85rem", fontWeight: 700, color: "var(--success)", margin: "0 0 4px" }}>
+                      <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--success)", margin: "0 0 4px" }}>
                         ✓ Your claim was accepted!
                       </p>
-                      <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.8rem", color: "var(--text-secondary)", margin: 0 }}>
+                      <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-secondary)", margin: 0 }}>
                         Coordinate with the finder to retrieve your item, then confirm receipt below.
                       </p>
                     </div>
@@ -914,10 +914,10 @@ export default function SchoolItemDetailPage() {
             style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, display: "flex", flexDirection: "column", gap: 14, maxHeight: "90vh", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 20, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
               Submit a Claim
             </p>
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
               Describe identifying details that prove this is your item — color, brand, contents, stickers, etc.
             </p>
             <textarea
@@ -925,12 +925,12 @@ export default function SchoolItemDetailPage() {
               onChange={(e) => setClaimProof(e.target.value)}
               placeholder="e.g. It's a navy blue JanSport with a keychain of a red mushroom on the zipper, and my name 'Jamie' written inside the front pocket..."
               rows={5}
-              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
+              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
             />
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: claimProof.trim().length >= 20 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: claimProof.trim().length >= 20 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
               {claimProof.trim().length}/20 min chars
             </p>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Poppins, sans-serif", fontSize: 12, color: "var(--text-muted)", cursor: "pointer" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", cursor: "pointer" }}>
               <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setClaimProofFile(e.target.files?.[0] || null)} />
               <span style={{ padding: "7px 14px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", fontWeight: 600, color: "var(--text-primary)" }}>
                 + {claimProofFile ? claimProofFile.name : "Attach a photo (optional)"}
@@ -939,14 +939,14 @@ export default function SchoolItemDetailPage() {
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => { setShowClaimModal(false); setClaimProof(""); setClaimProofFile(null); }}
-                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitClaim}
                 disabled={claimProof.trim().length < 20 || claimSubmitting}
-                style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--accent)", color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 13, cursor: claimProof.trim().length >= 20 ? "pointer" : "not-allowed", opacity: claimProof.trim().length >= 20 ? 1 : 0.5 }}
+                style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, cursor: claimProof.trim().length >= 20 ? "pointer" : "not-allowed", opacity: claimProof.trim().length >= 20 ? 1 : 0.5 }}
               >
                 {claimSubmitting ? "Submitting..." : "Submit Claim"}
               </button>
@@ -965,13 +965,13 @@ export default function SchoolItemDetailPage() {
             style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 560, display: "flex", flexDirection: "column", gap: 16, maxHeight: "90vh", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
               Claims for "{item.name}"
             </p>
             {claimsLoading ? (
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)" }}>Loading...</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>Loading...</p>
             ) : claims.length === 0 ? (
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)" }}>No claims yet.</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>No claims yet.</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {claims.map((claim) => (
@@ -982,16 +982,16 @@ export default function SchoolItemDetailPage() {
                     {/* Header row: name + date on left, status badge on right */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                       <div>
-                        <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 14, color: "var(--text-primary)", margin: "0 0 2px" }}>{claim.claimant_name}</p>
-                        <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{new Date(claim.created_at).toLocaleDateString()}</p>
+                        <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, color: "var(--text-primary)", margin: "0 0 2px" }}>{claim.claimant_name}</p>
+                        <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{new Date(claim.created_at).toLocaleDateString()}</p>
                       </div>
-                      <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, fontFamily: "Poppins, sans-serif", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)", flexShrink: 0 }}>
+                      <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)", flexShrink: 0 }}>
                         {claim.status === "accepted" ? "✓ Accepted" : claim.status === "rejected" ? "Rejected" : "Pending"}
                       </span>
                     </div>
 
                     {/* Claim text */}
-                    <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-primary)", lineHeight: 1.5, margin: 0 }}>{claim.description_proof}</p>
+                    <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-primary)", lineHeight: 1.5, margin: 0 }}>{claim.description_proof}</p>
 
                     {/* Proof image */}
                     {claim.proof_image_url && (
@@ -1010,19 +1010,19 @@ export default function SchoolItemDetailPage() {
                               onChange={(e) => setRejectReasons((prev) => ({ ...prev, [claim.id]: e.target.value }))}
                               placeholder="Enter rejection reason (required)"
                               rows={3}
-                              style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
+                              style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
                             />
                             <div style={{ display: "flex", gap: 8 }}>
                               <button
                                 onClick={() => { setRejectingId(null); setRejectReasons((prev) => { const n = { ...prev }; delete n[claim.id]; return n; }); }}
-                                style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                                style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
                               >
                                 Cancel
                               </button>
                               <button
                                 onClick={() => handleRejectClaim(claim)}
                                 disabled={claimActionLoading || !(rejectReasons[claim.id] || "").trim()}
-                                style={{ flex: 2, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 700, cursor: (rejectReasons[claim.id] || "").trim() ? "pointer" : "not-allowed", opacity: (rejectReasons[claim.id] || "").trim() ? 1 : 0.5 }}
+                                style={{ flex: 2, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, cursor: (rejectReasons[claim.id] || "").trim() ? "pointer" : "not-allowed", opacity: (rejectReasons[claim.id] || "").trim() ? 1 : 0.5 }}
                               >
                                 {claimActionLoading ? "Rejecting..." : "Confirm Reject"}
                               </button>
@@ -1033,13 +1033,13 @@ export default function SchoolItemDetailPage() {
                             <button
                               onClick={() => handleAcceptClaim(claim)}
                               disabled={claimActionLoading}
-                              style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--success)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                              style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--success)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
                             >
                               {claimActionLoading ? "Accepting..." : "Accept"}
                             </button>
                             <button
                               onClick={() => setRejectingId(claim.id)}
-                              style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                              style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
                             >
                               Reject
                             </button>
@@ -1047,7 +1047,7 @@ export default function SchoolItemDetailPage() {
                         )}
                         <button
                           onClick={() => { setShowClaimsModal(false); openChatWith(claim.claimant_id, claim.claimant_name); }}
-                          style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 4 }}
+                          style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 4 }}
                         >
                           Message Claimant
                         </button>
@@ -1058,7 +1058,7 @@ export default function SchoolItemDetailPage() {
                     {claim.status === "accepted" && (
                       <button
                         onClick={() => { setShowClaimsModal(false); openChatWith(claim.claimant_id, claim.claimant_name); }}
-                        style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                        style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
                       >
                         Message Claimant
                       </button>
@@ -1069,7 +1069,7 @@ export default function SchoolItemDetailPage() {
             )}
             <button
               onClick={() => setShowClaimsModal(false)}
-              style={{ padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+              style={{ padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
             >
               Close
             </button>
@@ -1087,10 +1087,10 @@ export default function SchoolItemDetailPage() {
             style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, display: "flex", flexDirection: "column", gap: 14, maxHeight: "90vh", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 20, fontWeight: 700, color: "var(--danger)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: "var(--danger)", margin: 0 }}>
               File a Dispute
             </p>
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
               Explain what happened. The school admin will review and contact both parties.
             </p>
             <textarea
@@ -1098,22 +1098,22 @@ export default function SchoolItemDetailPage() {
               onChange={(e) => setDisputeReason(e.target.value)}
               placeholder="e.g. I arranged to meet the finder but they never showed up. I believe the item hasn't actually been handed off..."
               rows={5}
-              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeReason.length > 0 && disputeReason.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
+              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeReason.length > 0 && disputeReason.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
             />
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: disputeReason.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: disputeReason.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
               {disputeReason.trim().length}/50 min chars
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => { setShowDisputeModal(false); setDisputeReason(""); }}
-                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitDispute}
                 disabled={disputeReason.trim().length < 50 || disputeSubmitting}
-                style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 13, cursor: disputeReason.trim().length >= 50 ? "pointer" : "not-allowed", opacity: disputeReason.trim().length >= 50 ? 1 : 0.5 }}
+                style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, cursor: disputeReason.trim().length >= 50 ? "pointer" : "not-allowed", opacity: disputeReason.trim().length >= 50 ? 1 : 0.5 }}
               >
                 {disputeSubmitting ? "Filing..." : "Submit Dispute"}
               </button>

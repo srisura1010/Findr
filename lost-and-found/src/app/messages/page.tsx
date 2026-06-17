@@ -729,7 +729,7 @@ export default function MessagesPage() {
                     color: "#fff",
                     fontSize: 11,
                     fontWeight: 600,
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     textDecoration: "none",
                     whiteSpace: "nowrap",
                     flexShrink: 0,

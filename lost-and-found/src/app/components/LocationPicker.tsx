@@ -402,7 +402,7 @@ export default function LocationPicker({
               border: "none",
               outline: "none",
               background: "transparent",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.875rem",
               color: "var(--text-primary)",
               padding: "11px 0",
@@ -561,7 +561,7 @@ export default function LocationPicker({
                   {/* Primary name (e.g. "McDonald's") */}
                   <div
                     style={{
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "0.855rem",
                       fontWeight: 600,
                       color: "var(--text-primary)",
@@ -578,7 +578,7 @@ export default function LocationPicker({
                   {/* Secondary address */}
                   <div
                     style={{
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "0.76rem",
                       color: "var(--text-muted)",
                       whiteSpace: "nowrap",
@@ -616,7 +616,7 @@ export default function LocationPicker({
                 padding: "6px 14px",
                 fontSize: "0.68rem",
                 color: "var(--text-muted)",
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 borderTop: "1px solid var(--border-default)",
                 display: "flex",
                 alignItems: "center",
@@ -659,7 +659,7 @@ export default function LocationPicker({
                 padding: "16px 14px",
                 zIndex: 9999,
                 textAlign: "center",
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: "0.82rem",
                 color: "var(--text-muted)",
               }}
@@ -692,7 +692,7 @@ export default function LocationPicker({
               background: "var(--bg-input)",
               color: "var(--text-muted)",
               fontSize: "0.82rem",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
             }}
           >
             Loading map…
@@ -716,7 +716,7 @@ export default function LocationPicker({
           <span style={{ fontSize: "13px" }}>📍</span>
           <span
             style={{
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "0.78rem",
               fontWeight: 500,
               color: "var(--accent)",
@@ -732,7 +732,7 @@ export default function LocationPicker({
             style={{
               fontSize: "0.7rem",
               color: "var(--text-muted)",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               flexShrink: 0,
             }}
           >

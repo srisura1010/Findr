@@ -235,7 +235,7 @@ function CropModal({
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 2000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "16px", gap: "14px" }}>
-      <p style={{ color: "#fff", fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "15px", margin: 0 }}>
+      <p style={{ color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px", margin: 0 }}>
         Crop Photo{queueTotal > 1 ? ` (${queueIndex + 1} of ${queueTotal})` : ""}
       </p>
       <div style={{ position: "relative", width: "min(90vw, 600px)", aspectRatio: "4 / 3", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.12)" }}>
@@ -244,15 +244,15 @@ function CropModal({
       <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "min(90vw, 600px)", background: "rgba(255,255,255,0.06)", borderRadius: "10px", padding: "14px 16px" }}>
         {[["Zoom", zoom, 1, 3, 0.05, setZoom, `${zoom.toFixed(1)}×`], ["Rotate", rotation, -180, 180, 1, setRotation, `${rotation}°`]].map(([label, val, min, max, step, setter, display]) => (
           <div key={label as string} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ color: "rgba(255,255,255,0.55)", fontFamily: "Poppins, sans-serif", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.6px", minWidth: 44 }}>{label as string}</span>
+            <span style={{ color: "rgba(255,255,255,0.55)", fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.6px", minWidth: 44 }}>{label as string}</span>
             <input type="range" min={min as number} max={max as number} step={step as number} value={val as number} onChange={(e) => (setter as any)(Number(e.target.value))} style={{ flex: 1, accentColor: "var(--accent)" }} />
-            <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "Poppins, sans-serif", fontSize: "11px", minWidth: 32, textAlign: "right" }}>{display as string}</span>
+            <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--font-body)", fontSize: "11px", minWidth: 32, textAlign: "right" }}>{display as string}</span>
           </div>
         ))}
       </div>
       <div style={{ display: "flex", gap: "10px", width: "min(90vw, 600px)" }}>
-        <button onClick={onSkip} style={{ flex: 1, padding: "13px 0", borderRadius: "9px", border: "1.5px solid rgba(255,255,255,0.2)", background: "transparent", color: "rgba(255,255,255,0.7)", fontFamily: "Poppins, sans-serif", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>Skip crop</button>
-        <button onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels, rotation)} style={{ flex: 2, padding: "13px 0", borderRadius: "9px", border: "none", background: "var(--accent)", color: "#fff", fontFamily: "Poppins, sans-serif", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>Apply Crop</button>
+        <button onClick={onSkip} style={{ flex: 1, padding: "13px 0", borderRadius: "9px", border: "1.5px solid rgba(255,255,255,0.2)", background: "transparent", color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>Skip crop</button>
+        <button onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels, rotation)} style={{ flex: 2, padding: "13px 0", borderRadius: "9px", border: "none", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>Apply Crop</button>
       </div>
     </div>
   );
@@ -430,7 +430,7 @@ function StatusBadge({ status }: { status: string }) {
   };
   const info = map[status] ?? { label: status, color: "var(--text-muted)" };
   return (
-    <p style={{ fontSize: "0.75rem", fontWeight: 600, marginTop: 4, color: info.color, fontFamily: "Poppins, sans-serif" }}>
+    <p style={{ fontSize: "0.75rem", fontWeight: 600, marginTop: 4, color: info.color, fontFamily: "var(--font-body)" }}>
       {info.label}
     </p>
   );
@@ -468,9 +468,9 @@ function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDelete
         <div key={report.id} style={{ background: "var(--bg-card)", border: "1.5px solid var(--border-default)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
           {report.item_image && <img src={report.item_image} alt={report.item_name} style={{ width: 60, height: 60, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{report.item_name}</p>
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--danger)", margin: "0 0 4px", fontWeight: 600 }}>{report.reason}</p>
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.74rem", color: "var(--text-muted)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{report.item_name}</p>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--danger)", margin: "0 0 4px", fontWeight: 600 }}>{report.reason}</p>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "0.74rem", color: "var(--text-muted)", margin: 0 }}>
               Reported by {report.reporter_name}{report.reporter_email ? ` · ${report.reporter_email}` : ""} · {new Date(report.created_at).toLocaleDateString()}
             </p>
           </div>
@@ -564,12 +564,12 @@ function SchoolDisputesPanel({
         <div key={dispute.id} style={{ background: "var(--bg-card)", border: "1.5px solid var(--border-default)", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 4px" }}>{dispute.item_name}</p>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--text-secondary)", margin: "0 0 4px" }}>{dispute.reason}</p>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.74rem", color: "var(--text-muted)", margin: "0 0 6px" }}>
+              <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 4px" }}>{dispute.item_name}</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-secondary)", margin: "0 0 4px" }}>{dispute.reason}</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.74rem", color: "var(--text-muted)", margin: "0 0 6px" }}>
                 Disputed by {dispute.claimant_email} · {new Date(dispute.created_at).toLocaleDateString()}
               </p>
-              <a href={`/school-items/${dispute.item_id}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 100, background: school.color, color: textOnColor(school.color), fontSize: 11, fontWeight: 700, fontFamily: "Poppins, sans-serif", textDecoration: "none" }}>
+              <a href={`/school-items/${dispute.item_id}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 100, background: school.color, color: textOnColor(school.color), fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)", textDecoration: "none" }}>
                 View Item →
               </a>
             </div>
@@ -589,7 +589,7 @@ function SchoolDisputesPanel({
             <div style={{ borderTop: "1px solid var(--border-default)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ display: "flex", gap: 6 }}>
                 {(["claimant", "finder"] as const).map((t) => (
-                  <button key={t} onClick={() => setMsgTarget(t)} style={{ padding: "7px 16px", borderRadius: 100, border: "none", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", background: msgTarget === t ? school.color : "var(--bg-input)", color: msgTarget === t ? textOnColor(school.color) : "var(--text-muted)" }}>
+                  <button key={t} onClick={() => setMsgTarget(t)} style={{ padding: "7px 16px", borderRadius: 100, border: "none", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", background: msgTarget === t ? school.color : "var(--bg-input)", color: msgTarget === t ? textOnColor(school.color) : "var(--text-muted)" }}>
                     {t === "claimant" ? "Claimant" : "Finder"}
                   </button>
                 ))}
@@ -624,6 +624,7 @@ function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, return
       const style = getComputedStyle(document.documentElement);
       const gridColor = style.getPropertyValue("--border-default").trim() || "rgba(0,0,0,0.06)";
       const tickColor = style.getPropertyValue("--text-muted").trim() || "rgba(0,0,0,0.45)";
+      const chartFont = style.getPropertyValue("--font-body").trim() || "system-ui, sans-serif";
       const barEl = document.getElementById(`schoolBarChart-${chartKey}`) as HTMLCanvasElement | null;
       if (barEl) {
         const ex = C.getChart(barEl); if (ex) ex.destroy();
@@ -631,12 +632,12 @@ function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, return
           { label: "Found", data: foundByMonth, backgroundColor: clrFound, borderRadius: 5, borderSkipped: false },
           { label: "Lost", data: lostByMonth, backgroundColor: clrLost, borderRadius: 5, borderSkipped: false },
           { label: "Returned", data: returnedByMonth, backgroundColor: clrReturned, borderRadius: 5, borderSkipped: false },
-        ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false, padding: 10, cornerRadius: 8, bodyFont: { family: "Poppins, sans-serif", size: 12 }, titleFont: { family: "Poppins, sans-serif", size: 12 } } }, scales: { x: { stacked: true, grid: { color: gridColor }, ticks: { color: tickColor, font: { family: "Poppins, sans-serif", size: 11 }, autoSkip: false } }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: tickColor, font: { family: "Poppins, sans-serif", size: 11 } }, grid: { color: gridColor } } } } });
+        ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false, padding: 10, cornerRadius: 8, bodyFont: { family: chartFont, size: 12 }, titleFont: { family: chartFont, size: 12 } } }, scales: { x: { stacked: true, grid: { color: gridColor }, ticks: { color: tickColor, font: { family: chartFont, size: 11 }, autoSkip: false } }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: tickColor, font: { family: chartFont, size: 11 } }, grid: { color: gridColor } } } } });
       }
       const pieEl = document.getElementById(`schoolPieChart-${chartKey}`) as HTMLCanvasElement | null;
       if (pieEl && totalFound + totalLost + totalReturned > 0) {
         const ex = C.getChart(pieEl); if (ex) ex.destroy();
-        new C(pieEl, { type: "doughnut", data: { labels: ["Found posted", "Lost reported", "Returned"], datasets: [{ data: [totalFound, totalLost, totalReturned], backgroundColor: [clrFound, clrLost, clrReturned], borderWidth: 0, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8, callbacks: { label: (ctx: any) => { const tot = totalFound + totalLost + totalReturned; return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / tot) * 100)}%)`; } }, bodyFont: { family: "Poppins, sans-serif", size: 12 }, titleFont: { family: "Poppins, sans-serif", size: 12 } } } } });
+        new C(pieEl, { type: "doughnut", data: { labels: ["Found posted", "Lost reported", "Returned"], datasets: [{ data: [totalFound, totalLost, totalReturned], backgroundColor: [clrFound, clrLost, clrReturned], borderWidth: 0, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8, callbacks: { label: (ctx: any) => { const tot = totalFound + totalLost + totalReturned; return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / tot) * 100)}%)`; } }, bodyFont: { family: chartFont, size: 12 }, titleFont: { family: chartFont, size: 12 } } } } });
       }
     });
   }, [chartKey]);
@@ -731,9 +732,9 @@ export default function SchoolBoardPage() {
 
   if (!isLoaded || loadingSchool || !stringsReady) return <LoadingSpinner />;
   if (!school) return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, fontFamily: "Poppins, sans-serif" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, fontFamily: "var(--font-body)" }}>
       <p style={{ color: "var(--text-secondary)" }}>School not found.</p>
-      <button onClick={() => router.push("/schools")} style={{ padding: "8px 18px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-card)", cursor: "pointer", fontFamily: "Poppins, sans-serif", fontWeight: 600, color: "var(--text-secondary)" }}>← Back to Schools</button>
+      <button onClick={() => router.push("/schools")} style={{ padding: "8px 18px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-card)", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 600, color: "var(--text-secondary)" }}>← Back to Schools</button>
     </div>
   );
 
@@ -1248,23 +1249,23 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 8, alignItems: "center" }}>
                   <div style={{ position: "relative" }}>
-                    <select className="sc-board-filter-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ width: "100%", padding: "8px 28px 8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: filterCategory ? color : "var(--bg-input)", color: filterCategory ? textOn : "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, cursor: "pointer", appearance: "none", WebkitAppearance: "none", outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }}>
+                    <select className="sc-board-filter-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ width: "100%", padding: "8px 28px 8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: filterCategory ? color : "var(--bg-input)", color: filterCategory ? textOn : "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", appearance: "none", WebkitAppearance: "none", outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }}>
                       <option value="">{s.filterCategory}</option>
                       {CATEGORIES.map((cat) => <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>{cat}</option>)}
                     </select>
                     <FaChevronDown style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", color: filterCategory ? "rgba(255,255,255,0.7)" : "var(--text-muted)", fontSize: 10, pointerEvents: "none" }} />
                   </div>
                   {[filterDateFrom, filterDateTo].map((val, i) => (
-                    <input key={i} type="date" value={val} onChange={(e) => i === 0 ? setFilterDateFrom(e.target.value) : setFilterDateTo(e.target.value)} title={i === 0 ? s.filterDateFrom : s.filterDateTo} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: val ? color : "var(--bg-input)", color: val ? textOn : "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 600, outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }} />
+                    <input key={i} type="date" value={val} onChange={(e) => i === 0 ? setFilterDateFrom(e.target.value) : setFilterDateTo(e.target.value)} title={i === 0 ? s.filterDateFrom : s.filterDateTo} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: val ? color : "var(--bg-input)", color: val ? textOn : "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }} />
                   ))}
-                  <button onClick={clearFilters} disabled={!hasActiveFilters} style={{ padding: "8px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: hasActiveFilters ? "var(--danger)" : "var(--bg-input)", color: hasActiveFilters ? "#fff" : "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 700, cursor: hasActiveFilters ? "pointer" : "not-allowed", opacity: hasActiveFilters ? 1 : 0.45, transition: "all 0.15s ease", whiteSpace: "nowrap" }}>
+                  <button onClick={clearFilters} disabled={!hasActiveFilters} style={{ padding: "8px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: hasActiveFilters ? "var(--danger)" : "var(--bg-input)", color: hasActiveFilters ? "#fff" : "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, cursor: hasActiveFilters ? "pointer" : "not-allowed", opacity: hasActiveFilters ? 1 : 0.45, transition: "all 0.15s ease", whiteSpace: "nowrap" }}>
                     {s.clearFilters}
                   </button>
                 </div>
                 {hasActiveFilters && (
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {filterCategory && <span onClick={() => setFilterCategory("")} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{filterCategory} <span style={{ opacity: 0.7 }}>×</span></span>}
-                    {(filterDateFrom || filterDateTo) && <span onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>📅 {filterDateFrom || "…"} – {filterDateTo || "…"} <span style={{ opacity: 0.7 }}>×</span></span>}
+                    {filterCategory && <span onClick={() => setFilterCategory("")} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{filterCategory} <span style={{ opacity: 0.7 }}>×</span></span>}
+                    {(filterDateFrom || filterDateTo) && <span onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>📅 {filterDateFrom || "…"} – {filterDateTo || "…"} <span style={{ opacity: 0.7 }}>×</span></span>}
                   </div>
                 )}
               </div>
@@ -1288,8 +1289,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>📍 {item.location}</p>}
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
+                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.foundBy} {item.author_name}</span>
@@ -1313,8 +1314,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>📍 {item.location}</p>}
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
+                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.lostBy} {item.author_name}</span>
@@ -1439,17 +1440,17 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
                     {user.imageUrl
                       ? <img src={user.imageUrl} alt="Profile" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: `2.5px solid ${color}`, flexShrink: 0 }} />
-                      : <div style={{ width: 56, height: 56, borderRadius: "50%", background: `${color}22`, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, fontFamily: "Poppins, sans-serif", flexShrink: 0 }}>{(user.fullName || user.username || "?")[0]?.toUpperCase()}</div>}
+                      : <div style={{ width: 56, height: 56, borderRadius: "50%", background: `${color}22`, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, fontFamily: "var(--font-body)", flexShrink: 0 }}>{(user.fullName || user.username || "?")[0]?.toUpperCase()}</div>}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: "0 0 2px", fontFamily: "Ubuntu, sans-serif", fontSize: 17, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName || user.username || "Anonymous"}</p>
-                      <p style={{ margin: "0 0 8px", fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-muted)" }}>{user.primaryEmailAddress?.emailAddress || ""}</p>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "Poppins, sans-serif" }}>✓ {school.name} member</span>
+                      <p style={{ margin: "0 0 2px", fontFamily: "var(--font-body)", fontSize: 17, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName || user.username || "Anonymous"}</p>
+                      <p style={{ margin: "0 0 8px", fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)" }}>{user.primaryEmailAddress?.emailAddress || ""}</p>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>✓ {school.name} member</span>
                     </div>
                     <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
                       {([["Posted", totalFound, clrFound], ["Returned", totalReturnedByMe, clrReturned], ["Lost", totalLost, "var(--danger)"]] as [string, number, string][]).map(([label, val, clr]) => (
                         <div key={label} style={{ textAlign: "center" }}>
-                          <p style={{ margin: 0, fontFamily: "Ubuntu, sans-serif", fontSize: 20, fontWeight: 700, color: clr }}>{val}</p>
-                          <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</p>
+                          <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: clr }}>{val}</p>
+                          <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</p>
                         </div>
                       ))}
                     </div>
@@ -1459,31 +1460,31 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <div style={{ padding: "16px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)", display: "flex", alignItems: "center", gap: 20 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
-                        <span style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 26, fontWeight: 700, color }}>{xp} XP</span>
-                        <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "2px 10px", borderRadius: 20, background: `${color}22` }}>{userLevel}</span>
+                        <span style={{ fontFamily: "var(--font-body)", fontSize: 26, fontWeight: 700, color }}>{xp} XP</span>
+                        <span style={{ fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "2px 10px", borderRadius: 20, background: `${color}22` }}>{userLevel}</span>
                       </div>
                       <div style={{ height: 6, background: "var(--border-default)", borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
                         <div style={{ height: "100%", width: `${xpPct}%`, background: color, borderRadius: 3, transition: "width 0.5s ease" }} />
                       </div>
                       {xpNext !== null
-                        ? <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
-                        : <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color }}>Max level reached</p>}
+                        ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
+                        : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color }}>Max level reached</p>}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
-                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
-                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
-                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
-                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
                     </div>
                   </div>
 
                   {/* Charts */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)" }}>
-                      <p style={{ margin: "0 0 10px", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Monthly activity</p>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Monthly activity</p>
                       <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
                         {([["Found", clrFound], ["Lost", clrLost], ["Returned", clrReturned]] as [string, string][]).map(([l, c]) => (
-                          <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>
+                          <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
                             <span style={{ width: 9, height: 9, borderRadius: 2, background: c, flexShrink: 0 }} />{l}
                           </span>
                         ))}
@@ -1491,14 +1492,14 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div style={{ position: "relative", height: 160 }}><canvas id={`schoolBarChart-${chartKey}`} role="img" aria-label="Monthly activity chart" /></div>
                     </div>
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)" }}>
-                      <p style={{ margin: "0 0 10px", fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Action breakdown</p>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Action breakdown</p>
                       {totalActions === 0 ? (
-                        <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 12, color: "var(--text-muted)", padding: "20px 0" }}>No activity yet.</p>
+                        <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", padding: "20px 0" }}>No activity yet.</p>
                       ) : (
                         <>
                           <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
                             {([["Found posted", clrFound, totalFound], ["Lost reported", clrLost, totalLost], ["Returned", clrReturned, totalReturnedByMe]] as [string, string, number][]).map(([l, c, v]) => (
-                              <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>
+                              <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
                                 <span style={{ width: 9, height: 9, borderRadius: 2, background: c, flexShrink: 0 }} />{l} {totalActions > 0 ? Math.round((v / totalActions) * 100) : 0}%
                               </span>
                             ))}
@@ -1513,15 +1514,15 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   {/* Pending claims on my items */}
                   {Object.values(myItemClaims).some((n) => n > 0) && (
                     <div>
-                      <p style={{ margin: "0 0 10px", fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>Pending Claims on My Items</p>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>Pending Claims on My Items</p>
                       {myFoundItems.filter((item) => (myItemClaims[item.id] ?? 0) > 0).map((item) => (
                         <div key={item.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
                           {item.image_url && <img src={item.image_url} alt={item.name} style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />}
-                          <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", margin: 0, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
-                          <span style={{ background: "var(--warning)", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, fontFamily: "Poppins, sans-serif", whiteSpace: "nowrap", flexShrink: 0 }}>
+                          <p style={{ fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", margin: 0, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
+                          <span style={{ background: "var(--warning)", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, fontFamily: "var(--font-body)", whiteSpace: "nowrap", flexShrink: 0 }}>
                             {myItemClaims[item.id]} pending claim{myItemClaims[item.id] !== 1 ? "s" : ""}
                           </span>
-                          <button style={{ background: color, color: textOn, fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "Poppins, sans-serif", flexShrink: 0 }} onClick={() => router.push(`/school-items/${item.id}`)}>
+                          <button style={{ background: color, color: textOn, fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", flexShrink: 0 }} onClick={() => router.push(`/school-items/${item.id}`)}>
                             Review
                           </button>
                         </div>
@@ -1532,7 +1533,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   {/* My found items */}
                   {myFoundItems.length > 0 && (
                     <div>
-                      <p style={{ margin: "0 0 10px", fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
                         {s.myFoundPosted} ({myFoundItems.length})
                       </p>
                       <div className="sc-items-grid" style={{ margin: 0 }}>
@@ -1544,8 +1545,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             <div className="sc-item-card__info">
                               <p className="sc-item-card__name">{item.name}</p>
                               <p className="sc-item-card__desc">{item.description}</p>
-                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "Poppins, sans-serif", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>📍 {item.location}</p>}
+                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
+                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
                               <StatusBadge status={item.status} />
                             </div>
                             <div className="sc-item-card__actions">
@@ -1572,7 +1573,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   {/* My lost items */}
                   {myLostItemsList.length > 0 && (
                     <div>
-                      <p style={{ margin: "0 0 10px", fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>
                         {s.myLostReported} ({myLostItemsList.length})
                       </p>
                       <div className="sc-items-grid" style={{ margin: 0 }}>
@@ -1584,8 +1585,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             <div className="sc-item-card__info">
                               <p className="sc-item-card__name">{item.name}</p>
                               <p className="sc-item-card__desc">{item.description}</p>
-                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "Poppins, sans-serif", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "Poppins, sans-serif" }}>📍 {item.location}</p>}
+                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
+                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
                             </div>
                             <div className="sc-item-card__actions">
                               <button className="sc-btn sc-btn--success sc-btn--sm" style={{ width: "100%" }} onClick={(e) => handleMarkLostFound(e, item.id)}>{s.markFound}</button>
@@ -1601,7 +1602,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
                   {/* My Active Claims (as claimant) */}
                   <div>
-                    <p style={{ margin: "0 0 10px", fontFamily: "Poppins, sans-serif", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>My Active Claims</p>
+                    <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>My Active Claims</p>
                     {activeClaimsLoading ? (
                       <div className="sc-empty">Loading...</div>
                     ) : myActiveClaims.length === 0 ? (
@@ -1613,12 +1614,12 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             <div className="sc-item-card__info">
                               <p className="sc-item-card__name">{claim.item_name}</p>
                               <p className="sc-item-card__desc">{claim.description_proof?.slice(0, 100)}{(claim.description_proof?.length || 0) > 100 ? "…" : ""}</p>
-                              <span style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", borderRadius: 100, fontSize: "0.7rem", fontWeight: 700, fontFamily: "Poppins, sans-serif", background: claim.status === "accepted" ? "var(--success)" : "var(--warning)", color: "#fff" }}>
+                              <span style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", borderRadius: 100, fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : "var(--warning)", color: "#fff" }}>
                                 {claim.status === "accepted" ? "Accepted — Coordinate Now" : "Pending Review"}
                               </span>
                               {/* Claimant confirm handoff */}
                               {claim.item_status === "handed_off" && (
-                                <span style={{ display: "block", marginTop: 4, fontSize: "0.72rem", fontFamily: "Poppins, sans-serif", color: "var(--text-muted)", fontWeight: 600 }}>🤝 Finder marked as handed off</span>
+                                <span style={{ display: "block", marginTop: 4, fontSize: "0.72rem", fontFamily: "var(--font-body)", color: "var(--text-muted)", fontWeight: 600 }}>🤝 Finder marked as handed off</span>
                               )}
                             </div>
                             <div className="sc-item-card__actions">
@@ -1684,12 +1685,12 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {activeTab === "leaderboard" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 600, margin: "0 auto", width: "100%" }}>
               <div style={{ padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
-                <p style={{ margin: "0 0 4px", fontFamily: "Ubuntu, sans-serif", fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Leaderboard</p>
-                <p style={{ margin: "0 0 20px", fontFamily: "Poppins, sans-serif", fontSize: 12, color: "var(--text-muted)" }}>Top finders at {school.name} — ranked by items returned</p>
+                <p style={{ margin: "0 0 4px", fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Leaderboard</p>
+                <p style={{ margin: "0 0 20px", fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)" }}>Top finders at {school.name} — ranked by items returned</p>
                 {leaderboardLoading ? (
                   <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}><LoadingSpinner /></div>
                 ) : leaderboard.length === 0 ? (
-                  <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>No items have been returned yet. Be the first!</p>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>No items have been returned yet. Be the first!</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {leaderboard.map((entry, idx) => {
@@ -1697,15 +1698,15 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       const medal = idx === 0 ? { bg: "#FFD700", text: "#7a5c00" } : idx === 1 ? { bg: "#C0C0C0", text: "#4a4a4a" } : idx === 2 ? { bg: "#CD7F32", text: "#5c3410" } : null;
                       return (
                         <div key={entry.author_id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderRadius: 12, background: isMe ? `${color}14` : "var(--bg-input)", border: isMe ? `1.5px solid ${color}44` : "1.5px solid var(--border-default)", transition: "all 0.15s" }}>
-                          <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: medal ? medal.bg : "var(--border-default)", fontFamily: "Ubuntu, sans-serif", fontSize: 13, fontWeight: 700, color: medal ? medal.text : "var(--text-muted)" }}>
+                          <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: medal ? medal.bg : "var(--border-default)", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, color: medal ? medal.text : "var(--text-muted)" }}>
                             {idx + 1}
                           </div>
-                          <p style={{ flex: 1, margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <p style={{ flex: 1, margin: 0, fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {entry.author_name}{isMe && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color, background: `${color}22`, padding: "2px 8px", borderRadius: 20 }}>You</span>}
                           </p>
                           <div style={{ textAlign: "right", flexShrink: 0 }}>
-                            <p style={{ margin: 0, fontFamily: "Ubuntu, sans-serif", fontSize: 16, fontWeight: 700, color }}>{entry.count}</p>
-                            <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>returned</p>
+                            <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 16, fontWeight: 700, color }}>{entry.count}</p>
+                            <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>returned</p>
                           </div>
                         </div>
                       );
@@ -1724,7 +1725,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               {/* Sub-tabs */}
               <div style={{ display: "flex", gap: 8, marginBottom: 20, justifyContent: "flex-start" }}>
                 {(["reports", "disputes"] as const).map((t) => (
-                  <button key={t} onClick={() => setReportsSubTab(t)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", fontFamily: "Poppins, sans-serif", background: reportsSubTab === t ? "var(--danger)" : "var(--bg-input)", color: reportsSubTab === t ? "#fff" : "var(--text-muted)", transition: "all 0.15s ease" }}>
+                  <button key={t} onClick={() => setReportsSubTab(t)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", fontFamily: "var(--font-body)", background: reportsSubTab === t ? "var(--danger)" : "var(--bg-input)", color: reportsSubTab === t ? "#fff" : "var(--text-muted)", transition: "all 0.15s ease" }}>
                     {t === "reports" ? "Reported Items" : "Disputes"}
                   </button>
                 ))}
@@ -1733,14 +1734,14 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               {reportsSubTab === "reports" && (
                 <>
                   <div className="sc-section-title">Reported Items</div>
-                  <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Items flagged by students at this school. Only you can see these.</p>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Items flagged by students at this school. Only you can see these.</p>
                   <SchoolReportsPanel school={school} onDeleteItem={handleReportDeleteItem} color={color} />
                 </>
               )}
               {reportsSubTab === "disputes" && (
                 <>
                   <div className="sc-section-title">Disputes</div>
-                  <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Handoff disputes raised by claimants at this school.</p>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Handoff disputes raised by claimants at this school.</p>
                   <SchoolDisputesPanel school={school} adminId={adminId} adminName={adminName} onRestoreItem={handleDisputeRestoreItem} />
                 </>
               )}
@@ -1753,7 +1754,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {activeTab === "inbox" && isSchoolAdmin && user && (
             <div className="sc-panel-content">
               <div className="sc-section-title">Inbox</div>
-              <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Messages from students at this school.</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Messages from students at this school.</p>
               <AdminInboxPanel adminId={user.id} adminName={user.fullName || user.username || "Admin"} adminEmail={user.primaryEmailAddress?.emailAddress || ""} />
             </div>
           )}

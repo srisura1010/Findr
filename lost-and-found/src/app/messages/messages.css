@@ -42,7 +42,7 @@ body.dark {
 .messages-layout {
   display: flex;
   height: calc(100vh - 54px);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   background: var(--msg-bg-page);
   transition: background 0.2s ease;
   overflow: hidden;
@@ -90,7 +90,7 @@ body.dark {
 
 .messages-sidebar__brand-title {
   margin: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   color: var(--msg-text-primary);
@@ -99,7 +99,7 @@ body.dark {
 
 .messages-sidebar__brand-sub {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   color: var(--msg-text-muted);
   font-weight: 500;
@@ -115,7 +115,7 @@ body.dark {
 
 .messages-sidebar__title {
   margin: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   color: var(--msg-text-primary);
@@ -135,7 +135,7 @@ body.dark {
   border: 1.5px solid var(--msg-border-active);
   border-radius: 10px;
   cursor: pointer;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -203,7 +203,7 @@ body.dark {
   border-bottom: 1px solid var(--msg-border);
   cursor: pointer;
   text-align: left;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -233,7 +233,7 @@ body.dark {
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-conv-avatar--admin {
@@ -263,7 +263,7 @@ body.high-contrast .messages-conv-avatar {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-conv-name--unread {
@@ -277,7 +277,7 @@ body.high-contrast .messages-conv-avatar {
   background: var(--msg-accent-light);
   padding: 1px 6px;
   border-radius: 99px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-conv-unread-dot {
@@ -293,7 +293,7 @@ body.high-contrast .messages-conv-avatar {
   color: var(--msg-text-active);
   font-weight: 600;
   margin-bottom: 2px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-conv-preview {
@@ -302,7 +302,7 @@ body.high-contrast .messages-conv-avatar {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-conv-preview--unread {
@@ -357,7 +357,7 @@ body.high-contrast .messages-conv-avatar {
 }
 
 .messages-chat__header-name {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 14px;
   color: var(--msg-text-primary);
@@ -370,7 +370,7 @@ body.high-contrast .messages-conv-avatar {
   font-size: 12px;
   color: var(--msg-text-secondary);
   margin-top: 1px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-chat__header-badge {
@@ -380,7 +380,7 @@ body.high-contrast .messages-conv-avatar {
   background: var(--msg-accent-light);
   padding: 2px 7px;
   border-radius: 99px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-chat__back {
@@ -415,7 +415,7 @@ body.high-contrast .messages-conv-avatar {
   border: 1px solid var(--msg-border);
   border-radius: 7px;
   color: var(--msg-text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -505,7 +505,7 @@ body.high-contrast .msg-report-btn:hover {
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .msg-bubble--own {
@@ -531,7 +531,7 @@ body.high-contrast .msg-bubble--own {
   font-size: 10px;
   color: var(--msg-text-muted);
   margin-top: 2px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-chat__input-row {
@@ -553,7 +553,7 @@ body.high-contrast .msg-bubble--own {
   padding: 9px 14px;
   font-size: 14px;
   resize: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   outline: none;
   line-height: 1.5;
   background: var(--msg-bg-input);
@@ -628,7 +628,7 @@ body.high-contrast .messages-chat__send--active {
 }
 
 .report-modal__title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 700;
   color: var(--msg-text-primary);
@@ -642,7 +642,7 @@ body.high-contrast .messages-chat__send--active {
   font-size: 0.83rem;
   color: var(--msg-text-secondary);
   margin: 0 0 16px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .report-modal__reasons {
@@ -658,7 +658,7 @@ body.high-contrast .messages-chat__send--active {
   border: 1.5px solid var(--msg-border-input);
   background: var(--msg-bg-input);
   color: var(--msg-text-secondary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   text-align: left;
@@ -693,7 +693,7 @@ body.high-contrast .messages-chat__send--active {
   border: 1.5px solid var(--msg-border-input);
   background: var(--msg-bg-input);
   color: var(--msg-text-secondary);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -713,7 +713,7 @@ body.high-contrast .messages-chat__send--active {
   border: none;
   background: var(--msg-accent);
   color: #ffffff;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -742,7 +742,7 @@ body.high-contrast .report-modal__submit {
   gap: 8px;
   padding: 16px 0;
   color: var(--msg-text-primary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 
@@ -760,7 +760,7 @@ body.high-contrast .report-modal__submit {
   border: 1.5px solid var(--msg-border-input);
   background: var(--msg-bg-input);
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   text-align: left;
   width: 100%;
   min-width: 0;
@@ -797,7 +797,7 @@ body.high-contrast .report-modal__submit {
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 body.high-contrast .admin-select-avatar {
@@ -808,13 +808,13 @@ body.high-contrast .admin-select-avatar {
   font-weight: 700;
   font-size: 14px;
   color: var(--msg-text-primary);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .admin-select-email {
   font-size: 12px;
   color: var(--msg-text-secondary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .admin-select-tag {
@@ -825,7 +825,7 @@ body.high-contrast .admin-select-avatar {
   background: var(--msg-accent-light);
   padding: 2px 8px;
   border-radius: 99px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   flex-shrink: 0;
 }
 
@@ -834,7 +834,7 @@ body.high-contrast .admin-select-avatar {
   padding: 24px 0;
   color: var(--msg-text-muted);
   font-size: 14px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .messages-conv-avatar--school-admin {
@@ -847,7 +847,7 @@ body.high-contrast .admin-select-avatar {
   background: rgba(5, 150, 105, 0.15);
   padding: 1px 6px;
   border-radius: 99px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 .messages-chat__header-badge--school {
   color: #34d399;
@@ -880,7 +880,7 @@ body.high-contrast .admin-select-avatar {
   color: var(--msg-text-muted);
   cursor: pointer;
   font-size: 12px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   padding: 4px 0;
   display: block;
   margin-top: 4px;

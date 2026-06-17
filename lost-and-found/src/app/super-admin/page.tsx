@@ -366,7 +366,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                 cursor: "pointer",
                 fontWeight: 600,
                 fontSize: "0.9rem",
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 background:
                   section === s ? "var(--accent, #f97316)" : "transparent",
                 color:
@@ -631,7 +631,7 @@ function SchoolRequestCard({
                 fontWeight: 700,
                 fontSize: 16,
                 flexShrink: 0,
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
               }}
             >
               {request.name[0]}

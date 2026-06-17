@@ -20,7 +20,7 @@ export default function AISearchButton() {
         border: "1.5px solid var(--border-input)",
         background: "var(--bg-input)",
         color: "var(--text-primary)",
-        fontFamily: "Poppins, sans-serif",
+        fontFamily: "var(--font-body)",
         fontSize: 13,
         fontWeight: 600,
         cursor: "pointer",

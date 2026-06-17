@@ -305,7 +305,7 @@ function CropModal({
       <p
         style={{
           color: "#fff",
-          fontFamily: "Poppins, sans-serif",
+          fontFamily: "var(--font-body)",
           fontWeight: 700,
           fontSize: "15px",
           margin: 0,
@@ -353,7 +353,7 @@ function CropModal({
           <span
             style={{
               color: "rgba(255,255,255,0.55)",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "11px",
               fontWeight: 600,
               textTransform: "uppercase",
@@ -375,7 +375,7 @@ function CropModal({
           <span
             style={{
               color: "rgba(255,255,255,0.4)",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "11px",
               minWidth: 32,
               textAlign: "right",
@@ -389,7 +389,7 @@ function CropModal({
           <span
             style={{
               color: "rgba(255,255,255,0.55)",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "11px",
               fontWeight: 600,
               textTransform: "uppercase",
@@ -411,7 +411,7 @@ function CropModal({
           <span
             style={{
               color: "rgba(255,255,255,0.4)",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "11px",
               minWidth: 32,
               textAlign: "right",
@@ -432,7 +432,7 @@ function CropModal({
             border: "1.5px solid rgba(255,255,255,0.2)",
             background: "transparent",
             color: "rgba(255,255,255,0.7)",
-            fontFamily: "Poppins, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: "13px",
             fontWeight: 600,
             cursor: "pointer",
@@ -450,7 +450,7 @@ function CropModal({
             border: "none",
             background: "var(--accent)",
             color: "#fff",
-            fontFamily: "Poppins, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: "13px",
             fontWeight: 700,
             cursor: "pointer",

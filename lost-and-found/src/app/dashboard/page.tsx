@@ -1002,7 +1002,7 @@ function BanManagementPanel({
                 color: banType === type ? "#fff" : "var(--text-primary)",
                 fontSize: "13px",
                 fontWeight: "600",
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
               }}
@@ -1031,7 +1031,7 @@ function BanManagementPanel({
               color: "var(--success)",
               fontSize: "0.85rem",
               margin: "4px 0",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
             }}
           >
             {successMsg}
@@ -1091,7 +1091,7 @@ function BanManagementPanel({
                     fontWeight: 600,
                     fontSize: "0.85rem",
                     color: "var(--text-primary)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -1103,7 +1103,7 @@ function BanManagementPanel({
                   style={{
                     fontSize: "0.78rem",
                     color: "var(--text-secondary)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                   }}
                 >
                   {u.reason}
@@ -1112,7 +1112,7 @@ function BanManagementPanel({
                   style={{
                     fontSize: "0.72rem",
                     color: "var(--text-muted)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                   }}
                 >
                   {u.suspended_until
@@ -1133,7 +1133,7 @@ function BanManagementPanel({
                   border: "none",
                   cursor: "pointer",
                   fontSize: "0.78rem",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontWeight: 600,
                   flexShrink: 0,
                   transition: "background 0.15s ease",
@@ -1174,7 +1174,7 @@ function CategorySelect({
           border: "1.5px solid var(--border-input)",
           background: "var(--bg-input)",
           color: value ? "var(--text-primary)" : "var(--text-muted)",
-          fontFamily: "Poppins, sans-serif",
+          fontFamily: "var(--font-body)",
           fontSize: "13px",
           fontWeight: 500,
           cursor: "pointer",
@@ -1328,7 +1328,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                 style={{
                   color: "var(--text-secondary)",
                   textTransform: "none",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.85rem",
                   fontWeight: 400,
                   lineHeight: 1.5,
@@ -1355,7 +1355,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                   color: "#fff",
                   fontSize: 11,
                   fontWeight: 700,
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   textDecoration: "none",
                   marginTop: 6,
                   width: "fit-content",
@@ -1400,7 +1400,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                   color: "#fff",
                   border: "none",
                   borderRadius: 6,
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.78rem",
                   fontWeight: 600,
                   cursor: "pointer",
@@ -1436,7 +1436,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                       padding: "7px 16px",
                       borderRadius: 100,
                       border: "none",
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: 12,
                       fontWeight: 600,
                       cursor: "pointer",
@@ -1517,6 +1517,7 @@ function MyDashboardCharts({
       const clrFound = style.getPropertyValue("--accent").trim() || "#2f80ed";
       const clrLost = style.getPropertyValue("--warning").trim() || "#f59e0b";
       const clrClaimed = style.getPropertyValue("--success").trim() || "#10b981";
+      const chartFont = style.getPropertyValue("--font-body").trim() || "system-ui, sans-serif";
 
       const barEl = document.getElementById(
         `myDashBarChart-${chartKey}`,
@@ -1562,8 +1563,8 @@ function MyDashboardCharts({
                 intersect: false,
                 padding: 10,
                 cornerRadius: 8,
-                bodyFont: { family: "Poppins, sans-serif", size: 12 },
-                titleFont: { family: "Poppins, sans-serif", size: 12 },
+                bodyFont: { family: chartFont, size: 12 },
+                titleFont: { family: chartFont, size: 12 },
               },
             },
             scales: {
@@ -1572,7 +1573,7 @@ function MyDashboardCharts({
                 grid: { color: gridColor },
                 ticks: {
                   color: tickColor,
-                  font: { family: "Poppins, sans-serif", size: 11 },
+                  font: { family: chartFont, size: 11 },
                   autoSkip: false,
                 },
               },
@@ -1582,7 +1583,7 @@ function MyDashboardCharts({
                 ticks: {
                   stepSize: 1,
                   color: tickColor,
-                  font: { family: "Poppins, sans-serif", size: 11 },
+                  font: { family: chartFont, size: 11 },
                 },
                 grid: { color: gridColor },
               },
@@ -1629,8 +1630,8 @@ function MyDashboardCharts({
                     return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / total) * 100)}%)`;
                   },
                 },
-                bodyFont: { family: "Poppins, sans-serif", size: 12 },
-                titleFont: { family: "Poppins, sans-serif", size: 12 },
+                bodyFont: { family: chartFont, size: 12 },
+                titleFont: { family: chartFont, size: 12 },
               },
             },
           },
@@ -2512,7 +2513,7 @@ export default function DashboardPage() {
               borderRadius: "100px",
               border: "none",
               cursor: "pointer",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: "13px",
               fontWeight: 700,
               letterSpacing: "0.1px",
@@ -2856,7 +2857,7 @@ export default function DashboardPage() {
                     cursor: "pointer",
                     fontWeight: 600,
                     fontSize: "0.9rem",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     background:
                       reportsTab === t ? "var(--danger)" : "var(--bg-page)",
                     color: reportsTab === t ? "#fff" : "var(--text-muted)",
@@ -2875,7 +2876,7 @@ export default function DashboardPage() {
                   cursor: "pointer",
                   fontWeight: 600,
                   fontSize: "0.9rem",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   background:
                     reportsTab === "disputes" ? "var(--danger)" : "var(--bg-page)",
                   color: reportsTab === "disputes" ? "#fff" : "var(--text-muted)",
@@ -3048,7 +3049,7 @@ export default function DashboardPage() {
                     justifyContent: "center",
                     fontSize: 24,
                     fontWeight: 700,
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     flexShrink: 0,
                   }}
                 >
@@ -3059,7 +3060,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 2px",
-                    fontFamily: "Ubuntu, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 18,
                     fontWeight: 700,
                     color: "var(--text-primary)",
@@ -3073,7 +3074,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 8px",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 12,
                     color: "var(--text-muted)",
                   }}
@@ -3091,7 +3092,7 @@ export default function DashboardPage() {
                     borderRadius: 20,
                     background: "var(--accent-light)",
                     color: "var(--accent)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                   }}
                 >
                   ✓ Active member
@@ -3109,7 +3110,7 @@ export default function DashboardPage() {
                     <p
                       style={{
                         margin: 0,
-                        fontFamily: "Ubuntu, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: 22,
                         fontWeight: 700,
                         color,
@@ -3120,7 +3121,7 @@ export default function DashboardPage() {
                     <p
                       style={{
                         margin: 0,
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: 10,
                         color: "var(--text-muted)",
                         textTransform: "uppercase",
@@ -3149,21 +3150,21 @@ export default function DashboardPage() {
             >
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
-                  <span style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 26, fontWeight: 700, color: clrFound }}>{xp} XP</span>
-                  <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "2px 10px", borderRadius: 20, background: "var(--accent-light)" }}>{userLevel}</span>
+                  <span style={{ fontFamily: "var(--font-body)", fontSize: 26, fontWeight: 700, color: clrFound }}>{xp} XP</span>
+                  <span style={{ fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "2px 10px", borderRadius: 20, background: "var(--accent-light)" }}>{userLevel}</span>
                 </div>
                 <div style={{ height: 6, background: "var(--border-default)", borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
                   <div style={{ height: "100%", width: `${xpPct}%`, background: clrFound, borderRadius: 3, transition: "width 0.5s ease" }} />
                 </div>
                 {xpNext !== null
-                  ? <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
-                  : <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: clrFound }}>Max level reached</p>}
+                  ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
+                  : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: clrFound }}>Max level reached</p>}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
-                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
-                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
-                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
-                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
               </div>
             </div>
 
@@ -3182,7 +3183,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 10px",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 12,
                     fontWeight: 600,
                     color: "var(--text-primary)",
@@ -3206,7 +3207,7 @@ export default function DashboardPage() {
                         display: "flex",
                         alignItems: "center",
                         gap: 5,
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: 11,
                         color: "var(--text-secondary)",
                       }}
@@ -3248,7 +3249,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 10px",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 12,
                     fontWeight: 600,
                     color: "var(--text-primary)",
@@ -3259,7 +3260,7 @@ export default function DashboardPage() {
                 {totalActions === 0 ? (
                   <p
                     style={{
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: 12,
                       color: "var(--text-muted)",
                       padding: "20px 0",
@@ -3290,7 +3291,7 @@ export default function DashboardPage() {
                             display: "flex",
                             alignItems: "center",
                             gap: 5,
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                             fontSize: 11,
                             color: "var(--text-secondary)",
                           }}
@@ -3339,7 +3340,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 10px",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 11,
                     fontWeight: 700,
                     color: "var(--text-muted)",
@@ -3378,7 +3379,7 @@ export default function DashboardPage() {
                       />
                       <p
                         style={{
-                          fontFamily: "Poppins, sans-serif",
+                          fontFamily: "var(--font-body)",
                           fontSize: 13,
                           fontWeight: 600,
                           color: "var(--text-primary)",
@@ -3400,7 +3401,7 @@ export default function DashboardPage() {
                           fontWeight: 700,
                           padding: "3px 10px",
                           borderRadius: 100,
-                          fontFamily: "Poppins, sans-serif",
+                          fontFamily: "var(--font-body)",
                           whiteSpace: "nowrap",
                           flexShrink: 0,
                         }}
@@ -3419,7 +3420,7 @@ export default function DashboardPage() {
                           borderRadius: 8,
                           border: "none",
                           cursor: "pointer",
-                          fontFamily: "Poppins, sans-serif",
+                          fontFamily: "var(--font-body)",
                           flexShrink: 0,
                         }}
                         onClick={() => router.push(`/items/${item.id}`)}
@@ -3437,7 +3438,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 10px",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 11,
                     fontWeight: 700,
                     color: "var(--text-muted)",
@@ -3466,7 +3467,7 @@ export default function DashboardPage() {
                               borderRadius: "100px",
                               background: "var(--accent)",
                               color: "#fff",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               marginTop: 4,
                               marginBottom: 2,
                             }}
@@ -3480,7 +3481,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               color: "var(--text-muted)",
                               marginTop: 2,
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                             }}
                           >
                             📍 {item.location}
@@ -3499,7 +3500,7 @@ export default function DashboardPage() {
                                   : item.status === "disputed"
                                     ? "var(--danger)"
                                     : "var(--success)",
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                           }}
                         >
                           {item.status === "pending"
@@ -3545,7 +3546,7 @@ export default function DashboardPage() {
                 <p
                   style={{
                     margin: "0 0 10px",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 11,
                     fontWeight: 700,
                     color: "var(--text-muted)",
@@ -3576,7 +3577,7 @@ export default function DashboardPage() {
                               background: "var(--bg-input)",
                               color: "var(--text-muted)",
                               fontSize: "2rem",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                             }}
                           >
                             ?
@@ -3596,7 +3597,7 @@ export default function DashboardPage() {
                               borderRadius: "100px",
                               background: "var(--accent)",
                               color: "#fff",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               marginTop: 4,
                               marginBottom: 2,
                             }}
@@ -3610,7 +3611,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               color: "var(--text-muted)",
                               marginTop: 2,
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                             }}
                           >
                             📍 {item.location}
@@ -3644,7 +3645,7 @@ export default function DashboardPage() {
               <p
                 style={{
                   margin: "0 0 10px",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 11,
                   fontWeight: 700,
                   color: "var(--text-muted)",
@@ -3663,8 +3664,8 @@ export default function DashboardPage() {
                   {myActiveClaims.map((claim: any) => (
                     <div key={claim.id} className="item-card">
                       <div className="item-info">
-                        <h3 style={{ fontFamily: "Poppins, sans-serif" }}>{claim.item_name}</h3>
-                        <p style={{ fontFamily: "Poppins, sans-serif", fontSize: "0.8rem" }}>
+                        <h3 style={{ fontFamily: "var(--font-body)" }}>{claim.item_name}</h3>
+                        <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem" }}>
                           {claim.description_proof?.slice(0, 100)}
                           {(claim.description_proof?.length || 0) > 100 ? "…" : ""}
                         </p>
@@ -3676,7 +3677,7 @@ export default function DashboardPage() {
                             borderRadius: 100,
                             fontSize: "0.7rem",
                             fontWeight: 700,
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                             background:
                               claim.status === "accepted"
                                 ? "var(--success)"
@@ -3706,7 +3707,7 @@ export default function DashboardPage() {
                               color: "var(--danger)",
                               borderRadius: 8,
                               padding: "6px 12px",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               fontSize: "0.75rem",
                               fontWeight: 700,
                               cursor: "pointer",
@@ -3846,7 +3847,7 @@ export default function DashboardPage() {
                         ? "var(--accent)"
                         : "var(--bg-input)",
                       color: filterCategory ? "#fff" : "var(--text-muted)",
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "12px",
                       fontWeight: 600,
                       cursor: "pointer",
@@ -3904,7 +3905,7 @@ export default function DashboardPage() {
                           ? "var(--accent)"
                           : "var(--bg-input)",
                         color: filterLocation ? "#fff" : "var(--text-muted)",
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: "12px",
                         fontWeight: 600,
                         outline: "none",
@@ -3933,7 +3934,7 @@ export default function DashboardPage() {
                         ? "var(--accent)"
                         : "var(--bg-input)",
                       color: filterDateFrom ? "#fff" : "var(--text-muted)",
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "11px",
                       fontWeight: 600,
                       outline: "none",
@@ -3966,7 +3967,7 @@ export default function DashboardPage() {
                         ? "var(--accent)"
                         : "var(--bg-input)",
                       color: filterDateTo ? "#fff" : "var(--text-muted)",
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "11px",
                       fontWeight: 600,
                       outline: "none",
@@ -3990,7 +3991,7 @@ export default function DashboardPage() {
                       ? "var(--danger)"
                       : "var(--bg-input)",
                     color: hasActiveFilters ? "#fff" : "var(--text-muted)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: "11px",
                     fontWeight: 700,
                     cursor: hasActiveFilters ? "pointer" : "not-allowed",
@@ -4019,7 +4020,7 @@ export default function DashboardPage() {
                         background: "rgba(var(--accent-rgb, 47,128,237), 0.15)",
                         border: "1px solid var(--accent)",
                         color: "var(--accent)",
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: "11px",
                         fontWeight: 600,
                         cursor: "pointer",
@@ -4040,7 +4041,7 @@ export default function DashboardPage() {
                         background: "rgba(var(--accent-rgb, 47,128,237), 0.15)",
                         border: "1px solid var(--accent)",
                         color: "var(--accent)",
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: "11px",
                         fontWeight: 600,
                         cursor: "pointer",
@@ -4065,7 +4066,7 @@ export default function DashboardPage() {
                         background: "rgba(var(--accent-rgb, 47,128,237), 0.15)",
                         border: "1px solid var(--accent)",
                         color: "var(--accent)",
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: "11px",
                         fontWeight: 600,
                         cursor: "pointer",
@@ -4098,7 +4099,7 @@ export default function DashboardPage() {
                     cursor: "pointer",
                     fontWeight: 600,
                     fontSize: "0.9rem",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     background: boardTab === t ? "var(--accent)" : "var(--bg-page)",
                     color: boardTab === t ? "#fff" : "var(--text-muted)",
                     transition: "all 0.15s ease",
@@ -4155,7 +4156,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               color: "var(--text-muted)",
                               marginTop: 4,
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                             }}
                           >
                             📍 {(item as any).location}
@@ -4167,7 +4168,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               color: "var(--text-muted)",
                               marginTop: 4,
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                             }}
                           >
                             🏷️ {item.category}
@@ -4179,7 +4180,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               fontWeight: 700,
                               color: "var(--accent)",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               marginTop: 4,
                             }}
                           >
@@ -4192,7 +4193,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               fontWeight: 700,
                               color: "var(--warning)",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               marginTop: 4,
                               display: "block",
                             }}
@@ -4206,7 +4207,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               fontWeight: 700,
                               color: "var(--text-muted)",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               marginTop: 4,
                               display: "block",
                             }}
@@ -4220,7 +4221,7 @@ export default function DashboardPage() {
                               fontSize: "0.72rem",
                               fontWeight: 700,
                               color: "var(--danger)",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               marginTop: 4,
                               display: "block",
                             }}
@@ -4278,7 +4279,7 @@ export default function DashboardPage() {
                             background: "var(--bg-input)",
                             color: "var(--text-muted)",
                             fontSize: "2rem",
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                           }}
                         >
                           ?
@@ -4305,7 +4306,7 @@ export default function DashboardPage() {
                             fontSize: "0.72rem",
                             color: "var(--text-muted)",
                             marginTop: 4,
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                           }}
                         >
                           📍 {item.location}
@@ -4317,7 +4318,7 @@ export default function DashboardPage() {
                             fontSize: "0.72rem",
                             color: "var(--text-muted)",
                             marginTop: 4,
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                           }}
                         >
                           🏷️ {item.category}
@@ -4361,7 +4362,7 @@ export default function DashboardPage() {
           <p
             style={{
               color: "#fff",
-              fontFamily: "Poppins, sans-serif",
+              fontFamily: "var(--font-body)",
               fontWeight: 700,
               fontSize: "15px",
               margin: 0,
@@ -4412,7 +4413,7 @@ export default function DashboardPage() {
               <span
                 style={{
                   color: "rgba(255,255,255,0.55)",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "11px",
                   fontWeight: 600,
                   textTransform: "uppercase",
@@ -4434,7 +4435,7 @@ export default function DashboardPage() {
               <span
                 style={{
                   color: "rgba(255,255,255,0.4)",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "11px",
                   minWidth: 32,
                   textAlign: "right",
@@ -4448,7 +4449,7 @@ export default function DashboardPage() {
               <span
                 style={{
                   color: "rgba(255,255,255,0.55)",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "11px",
                   fontWeight: 600,
                   textTransform: "uppercase",
@@ -4470,7 +4471,7 @@ export default function DashboardPage() {
               <span
                 style={{
                   color: "rgba(255,255,255,0.4)",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "11px",
                   minWidth: 32,
                   textAlign: "right",
@@ -4497,7 +4498,7 @@ export default function DashboardPage() {
                 border: "1.5px solid rgba(255,255,255,0.2)",
                 background: "transparent",
                 color: "rgba(255,255,255,0.7)",
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: "13px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -4515,7 +4516,7 @@ export default function DashboardPage() {
                 border: "none",
                 background: "var(--accent)",
                 color: "#fff",
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: "13px",
                 fontWeight: 700,
                 cursor: "pointer",

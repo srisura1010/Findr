@@ -35,7 +35,7 @@ body.dark {
   justify-content: center;
   align-items: flex-start;
   padding: 60px 20px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.2s ease;
 }
 
@@ -68,7 +68,7 @@ body.colorblind .help-card::before    { background: #003366; }
 
 
 .help-card h1 {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 1.9rem;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -92,7 +92,7 @@ body.colorblind .help-card::before    { background: #003366; }
 }
 
 .help-nav button {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   padding: 9px 18px;
   border-radius: 9px;
   border: 1.5px solid var(--help-border);
@@ -124,7 +124,7 @@ body.colorblind .help-card::before    { background: #003366; }
 }
 
 .help-section h3 {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -158,7 +158,7 @@ body.colorblind .help-card::before    { background: #003366; }
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 700;
   display: flex;
@@ -173,7 +173,7 @@ body.colorblind .help-card::before    { background: #003366; }
 body.high-contrast .guide-step__num { border-color: #ffff00; }
 
 .guide-step__title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 4px;
@@ -221,7 +221,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
 }
 
 .faq-cat-btn {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -264,7 +264,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   background: none;
   border: none;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.93rem;
   font-weight: 500;
   text-align: left;
@@ -341,7 +341,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
 }
 
 .chatbot__header-title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   font-weight: 700;
   flex: 1;
@@ -349,7 +349,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
 }
 
 .chatbot__key-btn {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   background: none;
   border: 1px solid var(--help-border-soft);
   border-radius: 6px;
@@ -387,7 +387,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
   border: 1.5px solid var(--help-border-soft);
   font-size: 0.875rem;
   outline: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   background: var(--help-bg-input);
   color: var(--help-text-primary);
   transition: border-color 0.15s ease;
@@ -396,7 +396,7 @@ body.high-contrast .guide-step__num { border-color: #ffff00; }
 .chatbot__key-input:focus { border-color: var(--help-accent); }
 
 .chatbot__key-save {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   padding: 8px 16px;
   border-radius: 8px;
   border: none;
@@ -451,7 +451,7 @@ body.colorblind .chatbot__key-save    { color: #ffffff; }
   width: 26px;
   height: 26px;
   border-radius: 6px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -471,7 +471,7 @@ body.high-contrast .chatbot__avatar { color: #000000; }
   font-size: 0.875rem;
   line-height: 1.6;
   white-space: pre-wrap;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .chatbot__bubble--assistant {
@@ -531,7 +531,7 @@ body.high-contrast .chatbot__bubble--user { color: #000000; }
   min-height: 38px;
   max-height: 100px;
   line-height: 1.5;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   background: var(--help-bg-input);
   color: var(--help-text-primary);
   transition: border-color 0.15s ease;

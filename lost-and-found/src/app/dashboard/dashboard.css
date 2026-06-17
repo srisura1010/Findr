@@ -106,7 +106,7 @@ body.light {
 
 .dashboard-sidebar__brand-title {
   margin: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
@@ -115,7 +115,7 @@ body.light {
 
 .dashboard-sidebar__brand-sub {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   color: var(--text-muted);
   font-weight: 500;
@@ -140,7 +140,7 @@ body.light {
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -221,7 +221,7 @@ body.light {
 }
 
 .main-panel-section-title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 22px;
   font-weight: 700;
   color: var(--text-primary);
@@ -242,7 +242,7 @@ body.light {
 }
 
 .panel-section-title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -278,7 +278,7 @@ body.light {
   font-weight: 600;
   color: var(--text-primary);
   background: transparent;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .panel-search__input::placeholder { color: var(--text-muted); font-weight: 600; }
@@ -306,7 +306,7 @@ body.light {
 .panel-search__count {
   font-size: 11px;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: 0;
 }
 
@@ -346,7 +346,7 @@ body.light {
   font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -358,7 +358,7 @@ body.light {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .panel-item-chip__status--waiting  { color: #f59e0b; }
@@ -368,7 +368,7 @@ body.light {
 .panel-empty {
   font-size: 12px;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   text-align: center;
   padding: 20px 0;
   margin: 0;
@@ -393,7 +393,7 @@ body.light {
   font-size: 10.5px;
   font-weight: 700;
   color: var(--text-muted);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: -6px;
@@ -405,7 +405,7 @@ body.light {
   border-radius: 9px;
   padding: 10px 13px;
   outline: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   color: var(--text-primary);
   background: var(--bg-input);
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -441,7 +441,7 @@ body.light {
   border-radius: 9px;
   background: var(--bg-input);
   color: var(--text-secondary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -470,7 +470,7 @@ body.light {
 .panel-form__file-hint {
   font-size: 10px;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: 0;
 }
 
@@ -525,7 +525,7 @@ body.light {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease, color 0.15s ease;
   min-height: 48px;
 }
@@ -542,7 +542,7 @@ body.light {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
   letter-spacing: 0.2px;
   min-height: 48px;
@@ -590,7 +590,7 @@ body.light {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 /* ═══════════════════════════════════════════
@@ -669,7 +669,7 @@ body.light {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -682,7 +682,7 @@ body.light {
   gap: 5px;
   font-size: 0.73rem;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: 3px 0 6px;
 }
 
@@ -699,7 +699,7 @@ body.light {
   font-size: 0.81rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -734,7 +734,7 @@ body.light {
   cursor: pointer;
   width: 100%;
   transition: filter 0.15s ease, transform 0.12s ease;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   letter-spacing: 0.2px;
   min-height: 40px;
 }
@@ -751,7 +751,7 @@ body.light {
   font-weight: 700;
   cursor: pointer;
   width: 100%;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease, transform 0.12s ease;
   min-height: 40px;
 }
@@ -768,7 +768,7 @@ body.light {
   font-weight: 600;
   cursor: not-allowed;
   width: 100%;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   min-height: 40px;
 }
 
@@ -821,7 +821,7 @@ body.light {
   text-align: center;
   padding: 60px 0;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .empty-state p { margin: 0 0 4px; font-size: 14px; }
@@ -876,7 +876,7 @@ body.light {
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .chat-modal__header-info { flex: 1; }
@@ -885,13 +885,13 @@ body.light {
   font-weight: 700;
   font-size: 14px;
   color: var(--text-primary);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .chat-modal__item {
   font-size: 12px;
   color: var(--text-muted);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .chat-modal__close {
@@ -930,7 +930,7 @@ body.light {
   justify-content: center;
   color: var(--text-muted);
   font-size: 13px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .chat-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 6px; }
@@ -942,12 +942,12 @@ body.light {
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .chat-bubble--own   { border-radius: 16px 16px 3px 16px; background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
 .chat-bubble--other { border-radius: 16px 16px 16px 3px; background: var(--bg-card); color: var(--text-primary); box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid var(--border-default); }
-.chat-bubble__time  { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: "Poppins", sans-serif; }
+.chat-bubble__time  { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: var(--font-body); }
 
 .chat-modal__input-row {
   display: flex;
@@ -964,7 +964,7 @@ body.light {
   border-radius: 20px;
   padding: 9px 14px;
   resize: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   outline: none;
   line-height: 1.5;
   background: var(--bg-input);
@@ -1012,9 +1012,9 @@ body.light {
 }
 
 .approve-card:hover { border-color: var(--accent-border); }
-.approve-card__name { font-size: 13px; font-weight: 700; color: var(--text-primary); font-family: "Ubuntu", sans-serif; margin: 0; }
-.approve-card__meta { font-size: 11px; color: var(--text-secondary); font-family: "Poppins", sans-serif; margin: 0; }
-.approve-card__extra { font-size: 11px; color: var(--text-secondary); font-family: "Poppins", sans-serif; margin: 4px 0; }
+.approve-card__name { font-size: 13px; font-weight: 700; color: var(--text-primary); font-family: var(--font-body); margin: 0; }
+.approve-card__meta { font-size: 11px; color: var(--text-secondary); font-family: var(--font-body); margin: 0; }
+.approve-card__extra { font-size: 11px; color: var(--text-secondary); font-family: var(--font-body); margin: 4px 0; }
 
 .approve-card__img {
   width: 100%;
@@ -1040,7 +1040,7 @@ body.light {
   font-size: 13px;
   font-weight: 600;
   color: #92400e;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   flex-wrap: wrap;
 }
 
@@ -1057,7 +1057,7 @@ body.dark .admin-banner { background: #1a1200; border-color: #7a5c00; color: #fc
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease;
   min-height: 36px;
 }
@@ -1075,14 +1075,14 @@ body.dark .item-card--admin { border-color: #7f1d1d; }
 .admin-login__hint {
   font-size: 12px;
   color: var(--text-secondary);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: -4px 0 8px;
 }
 
 .admin-login__error {
   font-size: 12px;
   color: var(--danger);
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   margin: 0;
   padding: 8px 12px;
   background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
@@ -1134,7 +1134,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   color: var(--bg-card);
   font-size: 11px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   padding: 4px 10px;
   border-radius: 6px;
   white-space: nowrap;
@@ -1191,7 +1191,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 }
 
 .report-modal__title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
@@ -1200,7 +1200,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 }
 
 .report-modal__subtitle {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: var(--text-muted);
   margin: -10px 0 0;
@@ -1216,7 +1216,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   border: 1.5px solid var(--border-input);
   border-radius: 10px;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -1251,7 +1251,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease;
   min-height: 48px;
 }
@@ -1268,7 +1268,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease, transform 0.12s ease;
   min-height: 48px;
 }
@@ -1293,9 +1293,9 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 
 .reported-card__body { padding: 12px; display: flex; flex-direction: column; gap: 4px; }
 
-.reported-card__name { font-family: "Ubuntu", sans-serif; font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 0; }
-.reported-card__reason { font-family: "Poppins", sans-serif; font-size: 11px; font-weight: 700; color: var(--danger); text-transform: uppercase; letter-spacing: 0.6px; margin: 0; }
-.reported-card__meta { font-family: "Poppins", sans-serif; font-size: 11px; color: var(--text-muted); margin: 0; }
+.reported-card__name { font-family: var(--font-body); font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 0; }
+.reported-card__reason { font-family: var(--font-body); font-size: 11px; font-weight: 700; color: var(--danger); text-transform: uppercase; letter-spacing: 0.6px; margin: 0; }
+.reported-card__meta { font-family: var(--font-body); font-size: 11px; color: var(--text-muted); margin: 0; }
 
 .reported-card__actions { display: flex; gap: 6px; padding: 0 12px 12px; }
 
@@ -1309,7 +1309,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease;
   min-height: 44px;
 }
@@ -1326,7 +1326,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease, transform 0.12s ease;
   min-height: 44px;
 }
@@ -1348,7 +1348,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   color: var(--danger);
   font-size: 12px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.15s ease, border-color 0.15s ease;
   flex-shrink: 0;
   min-height: 44px;
@@ -1549,7 +1549,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   padding: 9px 18px;
   border-radius: 10px;
   margin-bottom: 14px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   flex-wrap: wrap;
 }
@@ -1580,7 +1580,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   font-weight: 700;
   font-size: 14px;
   letter-spacing: -0.2px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .school-banner__tag {
@@ -1606,7 +1606,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   color: var(--accent);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -1625,7 +1625,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   color: var(--text-muted);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;

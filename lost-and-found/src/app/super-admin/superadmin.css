@@ -30,7 +30,7 @@ body.dark {
   min-height: 100vh;
   background: var(--sa-bg-page);
   padding: 48px 16px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   transition: background 0.2s ease;
 }
 
@@ -45,7 +45,7 @@ body.dark {
 }
 
 .sa-title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 1.9rem;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -65,7 +65,7 @@ body.dark {
 }
 
 .sa-section-title {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -85,7 +85,7 @@ body.dark {
   padding: 2px 9px;
   font-size: 11px;
   font-weight: 700;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   letter-spacing: 0;
 }
 
@@ -126,7 +126,7 @@ body.dark {
 }
 
 .sa-card-name {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 1rem;
   margin: 0 0 3px;
@@ -141,7 +141,7 @@ body.dark {
 
 
 .sa-status {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -175,7 +175,7 @@ body.dark .sa-status--pending { background: #2a1f00; border-color: #92400e; }
   font-weight: 600;
   margin-right: 6px;
   color: var(--sa-text-muted);
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
 }
 
 .sa-detail-value {
@@ -190,7 +190,7 @@ body.dark .sa-status--pending { background: #2a1f00; border-color: #92400e; }
   color: var(--sa-link);
   text-decoration: none;
   margin-bottom: 14px;
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   transition: opacity 0.15s ease;
 }
 
@@ -205,7 +205,7 @@ body.dark .sa-status--pending { background: #2a1f00; border-color: #92400e; }
 
 
 .sa-btn {
-  font-family: "Ubuntu", sans-serif;
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 700;
   padding: 8px 18px;

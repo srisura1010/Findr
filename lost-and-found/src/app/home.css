@@ -5,7 +5,7 @@ body {
   width: 100%;
   min-height: 100vh;
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .home-root {
@@ -192,7 +192,7 @@ body.colorblind .grid-background-light {
   cursor: pointer;
   padding: 12px 26px;
   transition: all 0.15s ease;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .btn-outline {
@@ -202,7 +202,7 @@ body.colorblind .grid-background-light {
   cursor: pointer;
   padding: 12px 26px;
   transition: all 0.15s ease;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   background: transparent;
 }
 
@@ -338,7 +338,7 @@ body.high-contrast .floating-item:not(.is-dragging):hover .floating-item-img {
 
 /* Label: hidden by default, slides up on hover */
 .floating-item-label {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -740,7 +740,7 @@ body.high-contrast .floating-item-label {
   cursor: pointer;
   transition: all 0.15s ease;
   border: none;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .cta-btn:hover {
@@ -824,7 +824,7 @@ body.high-contrast .floating-item-label {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-body);
 }
 
 .footer-link:hover {

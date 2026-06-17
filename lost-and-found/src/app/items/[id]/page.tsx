@@ -1098,7 +1098,7 @@ export default function ItemDetailPage() {
             <div style={{ marginTop: "4px" }}>
               <p
                 style={{
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.78rem",
                   fontWeight: 700,
                   textTransform: "uppercase",
@@ -1133,7 +1133,7 @@ export default function ItemDetailPage() {
                 {!claimCheckDone ? null : userExistingClaim?.status === "rejected" ? (
                   <p
                     style={{
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: 13,
                       color: "var(--warning)",
                       padding: "10px 14px",
@@ -1176,7 +1176,7 @@ export default function ItemDetailPage() {
                   borderRadius: 10,
                   border: "1px solid var(--success)",
                   background: "rgba(16,185,129,0.08)",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 13,
                   color: "var(--success)",
                 }}
@@ -1194,7 +1194,7 @@ export default function ItemDetailPage() {
                     borderRadius: 10,
                     border: "1px solid var(--accent)",
                     background: "rgba(47,128,237,0.08)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 13,
                     color: "var(--text-primary)",
                   }}
@@ -1245,7 +1245,7 @@ export default function ItemDetailPage() {
                     borderRadius: 10,
                     border: "1px solid var(--success)",
                     background: "rgba(16,185,129,0.08)",
-                    fontFamily: "Poppins, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 13,
                     color: "var(--success)",
                   }}
@@ -1464,7 +1464,7 @@ export default function ItemDetailPage() {
                   )}
                   <p
                     style={{
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontWeight: 700,
                       fontSize: 13,
                       color: "var(--text-primary)",
@@ -1490,7 +1490,7 @@ export default function ItemDetailPage() {
                       borderRadius: 100,
                       textDecoration: "none",
                       fontWeight: 600,
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       whiteSpace: "nowrap",
                       flexShrink: 0,
                     }}
@@ -1556,7 +1556,7 @@ export default function ItemDetailPage() {
                       border: "1.5px solid var(--border-input)",
                       background: "var(--bg-input)",
                       color: "var(--text-secondary)",
-                      fontFamily: "Poppins, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: "11px",
                       fontWeight: 600,
                       cursor: "pointer",
@@ -1613,7 +1613,7 @@ export default function ItemDetailPage() {
           <div style={modalCardStyle} onClick={(e) => e.stopPropagation()}>
             <p
               style={{
-                fontFamily: "Ubuntu, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 18,
                 fontWeight: 700,
                 color: "var(--text-primary)",
@@ -1624,7 +1624,7 @@ export default function ItemDetailPage() {
             </p>
             <p
               style={{
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 13,
                 color: "var(--text-muted)",
                 margin: 0,
@@ -1643,7 +1643,7 @@ export default function ItemDetailPage() {
             />
             <p
               style={{
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 11,
                 color:
                   claimProofText.trim().length >= 20
@@ -1718,7 +1718,7 @@ export default function ItemDetailPage() {
           >
             <p
               style={{
-                fontFamily: "Ubuntu, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 18,
                 fontWeight: 700,
                 color: "var(--text-primary)",
@@ -1730,7 +1730,7 @@ export default function ItemDetailPage() {
             {claimsLoading ? (
               <p
                 style={{
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 13,
                   color: "var(--text-muted)",
                 }}
@@ -1740,7 +1740,7 @@ export default function ItemDetailPage() {
             ) : pendingClaims.length === 0 ? (
               <p
                 style={{
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 13,
                   color: "var(--text-muted)",
                 }}
@@ -1772,7 +1772,7 @@ export default function ItemDetailPage() {
                       <div>
                         <p
                           style={{
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                             fontWeight: 700,
                             fontSize: 14,
                             color: "var(--text-primary)",
@@ -1783,7 +1783,7 @@ export default function ItemDetailPage() {
                         </p>
                         <p
                           style={{
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                             fontSize: 11,
                             color: "var(--text-muted)",
                             margin: "2px 0 0",
@@ -1798,7 +1798,7 @@ export default function ItemDetailPage() {
                     </div>
                     <p
                       style={{
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: 13,
                         color: "var(--text-primary)",
                         margin: 0,
@@ -1846,7 +1846,7 @@ export default function ItemDetailPage() {
                               border: "1.5px solid var(--border-input)",
                               background: "transparent",
                               color: "var(--text-muted)",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               fontSize: 13,
                               fontWeight: 600,
                               cursor: "pointer",
@@ -1870,7 +1870,7 @@ export default function ItemDetailPage() {
                               border: "none",
                               background: "var(--danger)",
                               color: "#fff",
-                              fontFamily: "Poppins, sans-serif",
+                              fontFamily: "var(--font-body)",
                               fontSize: 13,
                               fontWeight: 700,
                               cursor: "pointer",
@@ -1895,7 +1895,7 @@ export default function ItemDetailPage() {
                             border: "none",
                             background: "var(--success)",
                             color: "#fff",
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                             fontSize: 13,
                             fontWeight: 700,
                             cursor: claimActionLoading ? "not-allowed" : "pointer",
@@ -1914,7 +1914,7 @@ export default function ItemDetailPage() {
                             border: "none",
                             background: "var(--danger)",
                             color: "#fff",
-                            fontFamily: "Poppins, sans-serif",
+                            fontFamily: "var(--font-body)",
                             fontSize: 13,
                             fontWeight: 700,
                             cursor: claimActionLoading ? "not-allowed" : "pointer",
@@ -1935,7 +1935,7 @@ export default function ItemDetailPage() {
                         border: "1.5px solid var(--border-input)",
                         background: "transparent",
                         color: "var(--text-muted)",
-                        fontFamily: "Poppins, sans-serif",
+                        fontFamily: "var(--font-body)",
                         fontSize: 12,
                         fontWeight: 600,
                         cursor: "pointer",
@@ -2034,7 +2034,7 @@ export default function ItemDetailPage() {
           <div style={modalCardStyle} onClick={(e) => e.stopPropagation()}>
             <p
               style={{
-                fontFamily: "Ubuntu, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 18,
                 fontWeight: 700,
                 color: "var(--text-primary)",
@@ -2045,7 +2045,7 @@ export default function ItemDetailPage() {
             </p>
             <p
               style={{
-                fontFamily: "Poppins, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 13,
                 color: "var(--text-muted)",
                 margin: 0,
@@ -2057,14 +2057,14 @@ export default function ItemDetailPage() {
               placeholder="Describe what went wrong (minimum 50 characters)"
               value={disputeText}
               onChange={(e) => setDisputeText(e.target.value)}
-              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeText.length > 0 && disputeText.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "Poppins, sans-serif", fontSize: 13, resize: "vertical", minHeight: 100, boxSizing: "border-box", outline: "none" }}
+              style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeText.length > 0 && disputeText.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", minHeight: 100, boxSizing: "border-box", outline: "none" }}
             />
-            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: disputeText.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: disputeText.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
               {disputeText.trim().length}/50 min chars
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
-                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
                 onClick={() => {
                   setShowDisputeModal(false);
                   setDisputeText("");
@@ -2080,7 +2080,7 @@ export default function ItemDetailPage() {
                   border: "none",
                   background: "var(--danger)",
                   color: "#fff",
-                  fontFamily: "Poppins, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 13,
                   fontWeight: 700,
                   cursor:
