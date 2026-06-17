@@ -2952,6 +2952,7 @@ export default function DashboardPage() {
         const foundByMonth = months.map((m) => {
           const active = (items ?? []).filter((item) => {
             if (item.authorId !== user?.id) return false;
+            if (item.status === "claimed") return false;
             const d = (item as any).date_found || (item as any).created_at || "";
             return d.startsWith(m);
           }).length;
