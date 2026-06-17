@@ -2938,6 +2938,12 @@ export default function DashboardPage() {
         const totalClaimed = totalReturnedByMe;
         const totalActions = totalFound + totalLost + totalClaimed;
 
+        const xp = totalReturnedByMe * 100 + totalFound * 20 + totalLost * 5;
+        const userLevel = xp >= 1000 ? "Legend" : xp >= 600 ? "Champion" : xp >= 300 ? "Finder" : xp >= 100 ? "Helper" : "Newcomer";
+        const xpNext = xp >= 1000 ? null : xp >= 600 ? 1000 : xp >= 300 ? 600 : xp >= 100 ? 300 : 100;
+        const xpPrev = xp >= 1000 ? 600 : xp >= 600 ? 600 : xp >= 300 ? 300 : xp >= 100 ? 100 : 0;
+        const xpPct = xpNext !== null ? Math.min(100, Math.round(((xp - xpPrev) / (xpNext - xpPrev)) * 100)) : 100;
+
         const now = new Date();
         const months: string[] = [];
         const monthLabels: string[] = [];
@@ -3125,6 +3131,39 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* ── XP / Level card ── */}
+            <div
+              style={{
+                padding: "16px 20px",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-default)",
+                borderRadius: 16,
+                boxShadow: "var(--card-shadow)",
+                display: "flex",
+                alignItems: "center",
+                gap: 20,
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
+                  <span style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 26, fontWeight: 700, color: clrFound }}>{xp} XP</span>
+                  <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "2px 10px", borderRadius: 20, background: "var(--accent-light)" }}>{userLevel}</span>
+                </div>
+                <div style={{ height: 6, background: "var(--border-default)", borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
+                  <div style={{ height: "100%", width: `${xpPct}%`, background: clrFound, borderRadius: 3, transition: "width 0.5s ease" }} />
+                </div>
+                {xpNext !== null
+                  ? <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
+                  : <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: clrFound }}>Max level reached</p>}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
+                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
+                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
+                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
+                <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
               </div>
             </div>
 

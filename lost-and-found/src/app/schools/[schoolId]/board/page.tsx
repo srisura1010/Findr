@@ -6,7 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
-import { FaTrash, FaPlus, FaChevronDown } from "react-icons/fa6";
+import { FaTrash, FaPlus, FaChevronDown, FaTrophy } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useSettings } from "@/context/SettingsContext";
 import { MdFlagCircle, MdOutlineMessage } from "react-icons/md";
@@ -742,7 +742,7 @@ export default function SchoolBoardPage() {
 
 // ─── SchoolBoard ───────────────────────────────────────────────────────────────
 function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; onBack: () => void; s: BoardStrings }) {
-  type BoardTab = "items" | "add-item" | "my-dash" | "admin-login" | "reports" | "inbox";
+  type BoardTab = "items" | "add-item" | "my-dash" | "leaderboard" | "admin-login" | "reports" | "inbox";
 
   const router = useRouter();
   const color = school.color;
@@ -772,6 +772,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [myReturnedItems, setMyReturnedItems] = useState<any[]>([]);
   const [totalReturnedByMe, setTotalReturnedByMe] = useState(0);
   const [myItemClaims, setMyItemClaims] = useState<Record<number, number>>({});
+  const [leaderboard, setLeaderboard] = useState<{ author_id: string; author_name: string; count: number }[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
   // Admin state
   const [adminId, setAdminId] = useState("");
@@ -828,6 +830,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   }, [user?.id, school.id]);
 
   // ── Returned items count ─────────────────────────────────────────────────────
+  // Also depends on items.length so it re-fetches when an item is removed (returned),
+  // keeping totalReturnedByMe in sync with the DB even when the return is triggered
+  // from the school-items detail page rather than directly from this board.
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
@@ -836,7 +841,26 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       setTotalReturnedByMe(count ?? 0);
       setMyReturnedItems(data ?? []);
     })();
-  }, [user?.id, school.id]);
+  }, [user?.id, school.id, items.length]);
+
+  // ── Leaderboard ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (activeTab !== "leaderboard") return;
+    setLeaderboardLoading(true);
+    (async () => {
+      const { data } = await supabase.from("school_returned_items")
+        .select("author_id, author_name").eq("school_id", school.id);
+      if (data) {
+        const counts: Record<string, { author_id: string; author_name: string; count: number }> = {};
+        for (const row of data) {
+          if (!counts[row.author_id]) counts[row.author_id] = { author_id: row.author_id, author_name: row.author_name || "Anonymous", count: 0 };
+          counts[row.author_id].count++;
+        }
+        setLeaderboard(Object.values(counts).sort((a, b) => b.count - a.count));
+      }
+      setLeaderboardLoading(false);
+    })();
+  }, [activeTab, school.id]);
 
   // ── Pending claim counts on my found items ───────────────────────────────────
   useEffect(() => {
@@ -889,8 +913,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const BOARD_TABS: { id: BoardTab; label: string; icon?: React.ReactNode }[] = [
     { id: "items",      label: s.itemsTab,    icon: <HiOutlineMagnifyingGlass style={{ fontSize: 20 }} /> },
     { id: "add-item",   label: s.addItemTab,  icon: <FaPlus style={{ fontSize: 11 }} /> },
-    { id: "my-dash",    label: s.myDashTab,   icon: <FaClipboard style={{ fontSize: 13 }} /> },
-    { id: "admin-login",label: s.adminTab,    icon: <CiLogin style={{ fontSize: 20 }} /> },
+    { id: "my-dash",     label: s.myDashTab,    icon: <FaClipboard style={{ fontSize: 13 }} /> },
+    { id: "leaderboard", label: "Leaderboard", icon: <FaTrophy style={{ fontSize: 14 }} /> },
+    { id: "admin-login", label: s.adminTab,    icon: <CiLogin style={{ fontSize: 20 }} /> },
     ...(isSchoolAdmin ? [
       { id: "reports" as BoardTab, label: s.reportsTab, icon: <MdFlagCircle style={{ fontSize: 20 }} /> },
       { id: "inbox" as BoardTab,   label: "Inbox",      icon: <MdOutlineMessage style={{ fontSize: 20 }} /> },
@@ -1055,7 +1080,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
     if (bothConfirmed) {
       // Record in school_returned_items
-      await supabase.from("school_returned_items").insert({
+      const { error: insertError } = await supabase.from("school_returned_items").insert({
         school_id: school.id,
         original_item_id: itemId,
         author_id: fresh.author_id,
@@ -1066,6 +1091,11 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
         returned_at: new Date().toISOString(),
         snapshot: fresh,
       });
+      if (insertError) {
+        console.error("school_returned_items insert failed:", insertError);
+        alert(`Failed to record return: ${insertError.message}`);
+        return;
+      }
       await supabase.from("school_items").delete().eq("id", itemId);
       setItems((prev) => prev.filter((i) => i.id !== itemId));
       setTotalReturnedByMe((prev) => prev + 1);
@@ -1126,6 +1156,12 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const totalFound = myFoundItems.length + totalReturnedByMe;
   const totalLost = myLostItemsList.length;
   const totalActions = totalFound + totalLost + totalReturnedByMe;
+
+  const xp = totalReturnedByMe * 100 + totalFound * 20 + totalLost * 5;
+  const userLevel = xp >= 1000 ? "Legend" : xp >= 600 ? "Champion" : xp >= 300 ? "Finder" : xp >= 100 ? "Helper" : "Newcomer";
+  const xpNext = xp >= 1000 ? null : xp >= 600 ? 1000 : xp >= 300 ? 600 : xp >= 100 ? 300 : 100;
+  const xpPrev = xp >= 1000 ? 600 : xp >= 600 ? 600 : xp >= 300 ? 300 : xp >= 100 ? 100 : 0;
+  const xpPct = xpNext !== null ? Math.min(100, Math.round(((xp - xpPrev) / (xpNext - xpPrev)) * 100)) : 100;
 
   const now = new Date();
   const months: string[] = [];
@@ -1419,6 +1455,28 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     </div>
                   </div>
 
+                  {/* XP / Level card */}
+                  <div style={{ padding: "16px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)", display: "flex", alignItems: "center", gap: 20 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
+                        <span style={{ fontFamily: "Ubuntu, sans-serif", fontSize: 26, fontWeight: 700, color }}>{xp} XP</span>
+                        <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "2px 10px", borderRadius: 20, background: `${color}22` }}>{userLevel}</span>
+                      </div>
+                      <div style={{ height: 6, background: "var(--border-default)", borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
+                        <div style={{ height: "100%", width: `${xpPct}%`, background: color, borderRadius: 3, transition: "width 0.5s ease" }} />
+                      </div>
+                      {xpNext !== null
+                        ? <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
+                        : <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 10, color }}>Max level reached</p>}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
+                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
+                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
+                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
+                      <span style={{ fontFamily: "Poppins, sans-serif", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
+                    </div>
+                  </div>
+
                   {/* Charts */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)" }}>
@@ -1617,6 +1675,44 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   </button>
                 </form>
               )}
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════
+              LEADERBOARD TAB
+          ══════════════════════════════════════════════════════════════════ */}
+          {activeTab === "leaderboard" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 600, margin: "0 auto", width: "100%" }}>
+              <div style={{ padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
+                <p style={{ margin: "0 0 4px", fontFamily: "Ubuntu, sans-serif", fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Leaderboard</p>
+                <p style={{ margin: "0 0 20px", fontFamily: "Poppins, sans-serif", fontSize: 12, color: "var(--text-muted)" }}>Top finders at {school.name} — ranked by items returned</p>
+                {leaderboardLoading ? (
+                  <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}><LoadingSpinner /></div>
+                ) : leaderboard.length === 0 ? (
+                  <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>No items have been returned yet. Be the first!</p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {leaderboard.map((entry, idx) => {
+                      const isMe = entry.author_id === user?.id;
+                      const medal = idx === 0 ? { bg: "#FFD700", text: "#7a5c00" } : idx === 1 ? { bg: "#C0C0C0", text: "#4a4a4a" } : idx === 2 ? { bg: "#CD7F32", text: "#5c3410" } : null;
+                      return (
+                        <div key={entry.author_id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderRadius: 12, background: isMe ? `${color}14` : "var(--bg-input)", border: isMe ? `1.5px solid ${color}44` : "1.5px solid var(--border-default)", transition: "all 0.15s" }}>
+                          <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: medal ? medal.bg : "var(--border-default)", fontFamily: "Ubuntu, sans-serif", fontSize: 13, fontWeight: 700, color: medal ? medal.text : "var(--text-muted)" }}>
+                            {idx + 1}
+                          </div>
+                          <p style={{ flex: 1, margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {entry.author_name}{isMe && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color, background: `${color}22`, padding: "2px 8px", borderRadius: 20 }}>You</span>}
+                          </p>
+                          <div style={{ textAlign: "right", flexShrink: 0 }}>
+                            <p style={{ margin: 0, fontFamily: "Ubuntu, sans-serif", fontSize: 16, fontWeight: 700, color }}>{entry.count}</p>
+                            <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>returned</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

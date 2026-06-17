@@ -513,7 +513,7 @@ export default function SchoolItemDetailPage() {
   // ── complete handoff (both confirmed) ────────────────────────────────────
   const completeHandoff = async () => {
     if (!item) return;
-    await supabase.from("school_returned_items").insert({
+    const { error: insertError } = await supabase.from("school_returned_items").insert({
       school_id: item.school_id,
       original_item_id: item.id,
       author_id: item.authorId,
@@ -524,8 +524,13 @@ export default function SchoolItemDetailPage() {
       returned_at: new Date().toISOString(),
       snapshot: item,
     });
+    if (insertError) {
+      console.error("school_returned_items insert failed:", insertError);
+      setActionMsg(`Error recording return: ${insertError.message}. Please contact your school admin.`);
+      return;
+    }
     await supabase.from("school_items").delete().eq("id", item.id);
-    setActionMsg("🎉 Item successfully returned! Redirecting...");
+    setActionMsg("Item successfully returned! Redirecting...");
     setTimeout(() => router.back(), 1800);
   };
 
