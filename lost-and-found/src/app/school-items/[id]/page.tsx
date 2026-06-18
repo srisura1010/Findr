@@ -1068,7 +1068,15 @@ export default function SchoolItemDetailPage() {
                         )}
                         <button
                           onClick={() => { setShowClaimsModal(false); openChatWith(claim.claimant_id, claim.claimant_name); }}
-                          style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 4 }}
+                          style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--accent)", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 4, transition: "opacity 0.15s ease, transform 0.12s ease" }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.opacity = "0.88";
+                            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+                            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+                          }}
                         >
                           Message Claimant
                         </button>
@@ -1079,7 +1087,15 @@ export default function SchoolItemDetailPage() {
                     {claim.status === "accepted" && (
                       <button
                         onClick={() => { setShowClaimsModal(false); openChatWith(claim.claimant_id, claim.claimant_name); }}
-                        style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                        style={{ width: "100%", padding: "8px 0", borderRadius: 8, border: "1.5px solid var(--accent)", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", marginTop: 4, transition: "opacity 0.15s ease, transform 0.12s ease" }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLButtonElement).style.opacity = "0.88";
+                          (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+                          (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+                        }}
                       >
                         Message Claimant
                       </button>
