@@ -3806,7 +3806,6 @@ export default function DashboardPage() {
             >
               {/* Search row */}
               <div className="panel-search" style={{ margin: 0 }}>
-                <span className="panel-search__icon"></span>
                 <input
                   className="panel-search__input"
                   placeholder={s.searchPlaceholder}

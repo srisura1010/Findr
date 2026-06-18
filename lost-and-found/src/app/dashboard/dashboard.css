@@ -274,7 +274,7 @@ body.light {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
   background: transparent;
@@ -412,6 +412,7 @@ body.light {
   width: 100%;
   box-sizing: border-box;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .panel-form__input:focus,
@@ -421,12 +422,16 @@ body.light {
 }
 
 .panel-form__input::placeholder,
-.panel-form__textarea::placeholder { color: var(--text-muted); }
+.panel-form__textarea::placeholder {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 13px;
+}
 
 .panel-form__textarea {
   resize: vertical;
   min-height: 80px;
-  font-size: max(16px, 13px);
+  font-size: 13px;
 }
 
 .panel-form__file-wrapper { position: relative; display: flex; flex-direction: column; gap: 8px; }
