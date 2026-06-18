@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -914,13 +914,14 @@ export default function SchoolItemDetailPage() {
             style={{ background: "var(--bg-card)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 480, display: "flex", flexDirection: "column", gap: 14, maxHeight: "90vh", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p style={{ fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
               Submit a Claim
             </p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-              Describe identifying details that prove this is your item — color, brand, contents, stickers, etc.
+              Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible — the finder will use this to verify ownership.
             </p>
             <textarea
+              className="school-claim-textarea"
               value={claimProof}
               onChange={(e) => setClaimProof(e.target.value)}
               placeholder="e.g. It's a navy blue JanSport with a keychain of a red mushroom on the zipper, and my name 'Jamie' written inside the front pocket..."
@@ -930,12 +931,32 @@ export default function SchoolItemDetailPage() {
             <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: claimProof.trim().length >= 20 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
               {claimProof.trim().length}/20 min chars
             </p>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", cursor: "pointer" }}>
-              <input type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => setClaimProofFile(e.target.files?.[0] || null)} />
-              <span style={{ padding: "7px 14px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", fontWeight: 600, color: "var(--text-primary)" }}>
-                + {claimProofFile ? claimProofFile.name : "Attach a photo (optional)"}
-              </span>
-            </label>
+            <div>
+              <label
+                className="panel-form__label"
+                style={{ display: "block", marginBottom: 6 }}
+              >
+                Upload proof (optional)
+              </label>
+              <label
+                className="panel-form__file-label"
+                htmlFor="school-claim-proof-upload"
+              >
+                <span className="panel-form__file-icon">+</span>
+                <span className="panel-form__file-text">
+                  {claimProofFile ? claimProofFile.name : "Choose image"}
+                </span>
+              </label>
+              <input
+                id="school-claim-proof-upload"
+                className="panel-form__file"
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  e.target.files?.[0] && setClaimProofFile(e.target.files[0])
+                }
+              />
+            </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => { setShowClaimModal(false); setClaimProof(""); setClaimProofFile(null); }}

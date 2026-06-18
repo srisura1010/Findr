@@ -411,7 +411,7 @@ body.light {
   transition: border-color 0.15s ease, background 0.15s ease;
   width: 100%;
   box-sizing: border-box;
-  font-size: max(16px, 13px);
+  font-size: 13px;
 }
 
 .panel-form__input:focus,
