@@ -1,10 +1,8 @@
-.detail-page {
+﻿.detail-page {
   min-height: calc(100vh - 54px);
   min-height: calc(100dvh - 54px);
   background: var(--bg-page);
   padding: 24px 28px 48px;
-  max-width: 1100px;
-  margin: 0 auto;
 }
 
 .detail-not-found {
@@ -26,6 +24,9 @@
   gap: 8px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  padding-left: 0;
+  align-self: flex-start;
 }
 
 .detail-back-btn {
@@ -79,6 +80,8 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: 32px;
   align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 /* ── Image col ── */
@@ -344,7 +347,6 @@
 
 .detail-btn--secondary:hover {
   background: var(--accent);
-  color: #fff;
   border-color: var(--accent);
   transform: translateY(-1px);
 }

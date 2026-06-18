@@ -636,7 +636,7 @@ export default function SchoolItemDetailPage() {
   return (
     <div className="detail-page">
       {/* Breadcrumb */}
-      <div className="detail-breadcrumb">
+      <div className="detail-breadcrumb" style={{ marginLeft: 0, alignSelf: "flex-start" }}>
         <button className="detail-back-btn" onClick={() => router.back()}>
           <FaArrowLeft /><span>Back</span>
         </button>
@@ -868,7 +868,7 @@ export default function SchoolItemDetailPage() {
                     className="detail-btn detail-btn--secondary"
                     onClick={() => openChatWith(item.authorId, item.authorName || "Finder")}
                   >
-                    <FaMessage style={{ marginRight: 8 }} />
+                    <FaMessage style={{ marginRight: 8}} />
                     Message Finder
                   </button>
                 )}
