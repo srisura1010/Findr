@@ -29,7 +29,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   pl: "Polish", nl: "Dutch", uk: "Ukrainian", fa: "Persian", sw: "Swahili",
 };
 
-const HIDDEN_PREFIXES = ["/help", "/banned", "/sign-in", "/sign-up"];
+const HIDDEN_PREFIXES = ["/help", "/banned", "/sign-in", "/sign-up", "/messages"];
 
 async function t(text: string, language: string): Promise<string> {
   if (language === "en") return text;
