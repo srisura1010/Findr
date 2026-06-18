@@ -396,6 +396,7 @@ export default function LocationPicker({
             onFocus={() => {
               if (searchResults.length > 0) setShowDropdown(true);
             }}
+            className="location-picker__input"
             placeholder="Search address, place, or landmark…"
             style={{
               flex: 1,
@@ -403,7 +404,8 @@ export default function LocationPicker({
               outline: "none",
               background: "transparent",
               fontFamily: "var(--font-body)",
-              fontSize: "0.875rem",
+              fontSize: "13px",
+              fontWeight: 500,
               color: "var(--text-primary)",
               padding: "11px 0",
             }}

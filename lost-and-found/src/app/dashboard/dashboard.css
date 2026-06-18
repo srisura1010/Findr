@@ -428,6 +428,13 @@ body.light {
   font-size: 13px;
 }
 
+.location-picker__input::placeholder {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+}
+
 .panel-form__textarea {
   resize: vertical;
   min-height: 80px;
