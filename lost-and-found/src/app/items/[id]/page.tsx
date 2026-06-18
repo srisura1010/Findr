@@ -1210,7 +1210,7 @@ export default function ItemDetailPage() {
                 ) : userExistingClaim?.status === "pending" ||
                   userExistingClaim?.status === "accepted" ? (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    ⏳ Claim Submitted — Awaiting Review
+                    Claim Submitted - Awaiting Review
                   </button>
                 ) : rateLimitCount >= 2 ? (
                   <button

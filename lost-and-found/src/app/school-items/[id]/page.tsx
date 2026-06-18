@@ -813,7 +813,7 @@ export default function SchoolItemDetailPage() {
                 {/* Already submitted a claim */}
                 {(myExistingClaim || claimSubmitted) && myExistingClaim?.status !== "accepted" && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    ⏳ Your claim is pending review
+                    Claim Submitted - Awaiting Review
                   </button>
                 )}
 

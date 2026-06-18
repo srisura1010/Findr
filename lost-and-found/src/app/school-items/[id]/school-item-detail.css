@@ -345,12 +345,6 @@
   border-color: color-mix(in srgb, var(--accent) 28%, var(--border-default));
 }
 
-.detail-btn--secondary:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
-
 .detail-btn--success {
   background: var(--success);
   color: #fff;
