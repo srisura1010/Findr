@@ -340,9 +340,15 @@
 }
 
 .detail-btn--secondary {
+  background: transparent;
   color: var(--accent);
-  border-color: var(--accent);
-  border-width: 1.5px;
+  border: 1.5px solid var(--accent);
+}
+
+.detail-btn--secondary:hover:not(:disabled) {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(47,128,237,0.18);
 }
 
 .detail-btn--success {
