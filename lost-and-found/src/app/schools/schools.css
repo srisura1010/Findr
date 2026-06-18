@@ -967,7 +967,8 @@ body.light {
   transition: border-color 0.15s ease, background 0.15s ease;
   width: 100%;
   box-sizing: border-box;
-  font-size: max(16px, 13px);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .sc-form__input:focus,
@@ -977,12 +978,16 @@ body.light {
 }
 
 .sc-form__input::placeholder,
-.sc-form__textarea::placeholder { color: var(--text-muted); }
+.sc-form__textarea::placeholder {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
 
 .sc-form__textarea {
   resize: vertical;
   min-height: 80px;
-  font-size: max(16px, 13px);
+  font-size: 13px;
 }
 
 .sc-form__hint {
@@ -2275,7 +2280,7 @@ select.sc-form__select {
   padding: 10px 32px 10px 13px !important;
   outline: none !important;
   font-family: var(--font-body) !important;
-  font-size: max(16px, 13px) !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
   color: var(--text-primary);
   background-color: var(--bg-input) !important;
