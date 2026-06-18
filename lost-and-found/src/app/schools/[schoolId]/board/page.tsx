@@ -1361,8 +1361,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <label className="sc-form__label">Date Found</label>
                     <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} style={{ color: foundDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosLabel}</label>
-                    <label className="sc-form__file-label" htmlFor="sc-found-upload">
-                      <span className="sc-form__file-icon">+</span>
+                    <label className="sc-form__file-label" htmlFor="sc-found-upload" style={{ color: foundFiles.length > 0 ? "var(--text-primary)" : "var(--text-muted)", fontWeight: 400 }}>
+                      <span className="sc-form__file-icon" style={{ color: "var(--text-muted)" }}>+</span>
                       <span>{foundFiles.length > 0 ? `${foundFiles.length} ${s.photosSelected}` : s.uploadPhotos}</span>
                     </label>
                     <input id="sc-found-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const files = Array.from(e.target.files).slice(0, 3); if (files.length > 0) startFoundCropQueue(files); } }} />
@@ -1405,8 +1405,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <label className="sc-form__label">Date Lost</label>
                     <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} style={{ color: lostDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosOptionalLabel}</label>
-                    <label className="sc-form__file-label" htmlFor="sc-lost-upload">
-                      <span className="sc-form__file-icon">+</span>
+                    <label className="sc-form__file-label" htmlFor="sc-lost-upload" style={{ color: lostFiles.length > 0 ? "var(--text-primary)" : "var(--text-muted)", fontWeight: 400 }}>
+                      <span className="sc-form__file-icon" style={{ color: "var(--text-muted)" }}>+</span>
                       <span>{lostFiles.length > 0 ? `${lostFiles.length} ${s.photosSelected}` : s.uploadPhotos}</span>
                     </label>
                     <input id="sc-lost-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const files = Array.from(e.target.files).slice(0, 3); if (files.length > 0) startLostCropQueue(files); } }} />
