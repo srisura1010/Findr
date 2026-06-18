@@ -1829,7 +1829,7 @@ body.dark .sc-mode-toggle__btn {
   padding: 10px 36px 10px 14px;
   border: 1.5px solid var(--border-input);
   border-radius: 10px;
-  background: var(--bg-card);
+  background: var(--bg-input);
   color: var(--text-muted);
   font-family: var(--font-body);
   font-size: 13px;
