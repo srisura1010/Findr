@@ -1591,7 +1591,7 @@ body.colorblind .sc-board__name { color: var(--text-primary); }
 }
 
 .sc-admin-badge__exit {
-  background: color-mix(in srgb, var(--sc-color-2, var(--warning)) 80%, #000 20%);
+  background: rgb(6, 4, 1);
   color: #fff;
   border: none;
   border-radius: 6px;

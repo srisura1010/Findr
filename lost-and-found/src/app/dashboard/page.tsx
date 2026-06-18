@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import "./dashboard.css";
 import { useItems } from "@/context/ItemsContext";
@@ -316,7 +316,7 @@ const DEFAULT_STRINGS: DashStrings = {
   tabReports: "Reports",
   tabBanManagement: "Ban Management",
   tabInbox: "Inbox",
-  adminBannerMsg: "Admin mode active — you can delete items and ban users",
+  adminBannerMsg: "Admin mode active. You can delete items and ban users",
   adminBannerExit: "Exit Admin",
   searchPlaceholder: "Search items...",
   foundItemsTab: "Found Items",

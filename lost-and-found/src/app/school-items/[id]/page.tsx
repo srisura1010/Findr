@@ -769,7 +769,7 @@ export default function SchoolItemDetailPage() {
                 {/* Confirm handoff button (claim accepted, not yet handed off) */}
                 {currentStatus === "claim_accepted" && !item.handoff_confirmed_by_poster && (
                   <button className="detail-btn detail-btn--success" onClick={handleFinderConfirmHandoff} disabled={actionLoading}>
-                    {actionLoading ? "Confirming..." : "✓ Confirm I Handed Off Item"}
+                    {actionLoading ? "Confirming..." : "✓  Confirm I Handed Off Item"}
                   </button>
                 )}
 
