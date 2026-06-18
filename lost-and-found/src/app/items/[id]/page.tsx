@@ -121,9 +121,8 @@ export default function ItemDetailPage() {
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
 
   // Finder messaging claimant from claims review modal
-  const [messagingClaimId, setMessagingClaimId] = useState<string | null>(null);
-  const [claimMsgText, setClaimMsgText] = useState("");
-  const [claimMsgSending, setClaimMsgSending] = useState(false);
+  const [chatPartnerId, setChatPartnerId] = useState<string>("");
+  const [chatPartnerName, setChatPartnerName] = useState<string>("");
 
   // Resolve item from context or fetch from DB
   useEffect(() => {
@@ -297,7 +296,7 @@ export default function ItemDetailPage() {
     const convId = getConversationId(
       { id: String(item.id) + (isLost ? "_lost" : ""), title: item.name },
       { uid: user.id, displayName: user.fullName || "Me" },
-      { uid: item.authorId, displayName: item.authorName || "Owner" },
+      { uid: effectivePartnerId, displayName: effectivePartnerName },
     );
 
     const fetchMsgs = async () => {
@@ -338,12 +337,14 @@ export default function ItemDetailPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const effectivePartnerId = chatPartnerId || item?.authorId || "";
+  const effectivePartnerName = chatPartnerName || item?.authorName || "Owner";
   const conversationId =
     item && user
       ? getConversationId(
           { id: String(item.id) + (isLost ? "_lost" : ""), title: item.name },
           { uid: user.id, displayName: user.fullName || "Me" },
-          { uid: item.authorId, displayName: item.authorName || "Owner" },
+          { uid: effectivePartnerId, displayName: effectivePartnerName },
         )
       : "";
 
@@ -899,7 +900,7 @@ export default function ItemDetailPage() {
         conversation_id: conversationId,
         sender_id: user.id,
         sender_name: user.fullName || "Me",
-        receiver_id: item.authorId,
+        receiver_id: effectivePartnerId,
         item_id: String(item.id),
         item_title: item.name,
         text: trimmed,
@@ -910,8 +911,8 @@ export default function ItemDetailPage() {
       conversation_id: conversationId,
       sender_id: user.id,
       sender_name: user.fullName || "Me",
-      receiver_id: item.authorId,
-      receiver_name: item.authorName,
+      receiver_id: effectivePartnerId,
+      receiver_name: effectivePartnerName,
       item_id: String(item.id),
       item_title: item.name,
       text: trimmed,
@@ -1387,7 +1388,11 @@ export default function ItemDetailPage() {
             {!isLost && !isItemOwner && (
               <button
                 className="detail-btn detail-btn--secondary"
-                onClick={() => setShowChat(true)}
+                onClick={() => {
+                  setChatPartnerId("");
+                  setChatPartnerName("");
+                  setShowChat(true);
+                }}
               >
                 <FaMessage style={{ marginRight: 8 }} />
                 Message Finder
@@ -1501,10 +1506,10 @@ export default function ItemDetailPage() {
           <div className="detail-chat" onClick={(e) => e.stopPropagation()}>
             <div className="detail-chat__header">
               <div className="chat-modal__avatar">
-                {item.authorName?.[0]?.toUpperCase() ?? "?"}
+                {effectivePartnerName?.[0]?.toUpperCase() ?? "?"}
               </div>
               <div className="chat-modal__header-info">
-                <div className="chat-modal__name">{item.authorName}</div>
+                <div className="chat-modal__name">{effectivePartnerName}</div>
                 <div className="chat-modal__item">{item.name}</div>
               </div>
               <button
@@ -2036,61 +2041,15 @@ export default function ItemDetailPage() {
                         cursor: "pointer",
                         marginTop: 4,
                       }}
-                      onClick={() =>
-                        setMessagingClaimId(
-                          messagingClaimId === claim.id ? null : claim.id,
-                        )
-                      }
+                      onClick={() => {
+                        setShowClaimsReviewModal(false);
+                        setChatPartnerId(claim.claimant_id);
+                        setChatPartnerName(claim.claimant_name);
+                        setShowChat(true);
+                      }}
                     >
-                      {messagingClaimId === claim.id
-                        ? "Cancel"
-                        : "Message Claimant"}
+                      Message Claimant
                     </button>
-                    {messagingClaimId === claim.id && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 8,
-                        }}
-                      >
-                        <textarea
-                          className="panel-form__textarea"
-                          placeholder={`Ask ${claim.claimant_name} for more details about their claim...`}
-                          value={claimMsgText}
-                          onChange={(e) => setClaimMsgText(e.target.value)}
-                          style={{ minHeight: 70 }}
-                        />
-                        <button
-                          className="panel-form__submit"
-                          disabled={claimMsgSending || !claimMsgText.trim()}
-                          onClick={async () => {
-                            if (!user) return;
-                            setClaimMsgSending(true);
-                            const convId = `conv_${[user.id, claim.claimant_id].sort().join("_")}`;
-                            await supabase.from("chat_messages").insert({
-                              conversation_id: convId,
-                              sender_id: user.id,
-                              sender_name: user.fullName || "",
-                              sender_email:
-                                user.primaryEmailAddress?.emailAddress || "",
-                              receiver_id: claim.claimant_id,
-                              receiver_name: claim.claimant_name,
-                              receiver_email: claim.claimant_email,
-                              item_id: item.id,
-                              item_title: item.name,
-                              text: claimMsgText.trim(),
-                              read: false,
-                            });
-                            setClaimMsgSending(false);
-                            setClaimMsgText("");
-                            setMessagingClaimId(null);
-                          }}
-                        >
-                          {claimMsgSending ? "Sending..." : "Send Message"}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
