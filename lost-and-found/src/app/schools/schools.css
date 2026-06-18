@@ -2349,3 +2349,15 @@ select.sc-board-filter-select {
   font-weight: 600 !important;
   border-radius: 8px !important;
 }
+
+/* ── Date input placeholder text ── */
+.sc-form__input[type="date"]:not([value]),
+.sc-form__input[type="date"][value=""] {
+  color: var(--text-muted);
+}
+.sc-form__input[type="date"]::-webkit-datetime-edit {
+  color: inherit;
+}
+.sc-form__input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  color: inherit;
+}

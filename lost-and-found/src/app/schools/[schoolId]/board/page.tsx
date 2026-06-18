@@ -1349,8 +1349,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <form className="sc-form" onSubmit={handleAddFound}>
                     <label className="sc-form__label">{s.itemNameLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <input className="sc-form__input" type="text" placeholder={s.itemNamePlaceholder} required value={foundName} onChange={(e) => setFoundName(e.target.value)} />
-                    <label className="sc-form__label">Category</label>
-                    <select className="sc-form__input" value={foundCategory} onChange={(e) => setFoundCategory(e.target.value)}>
+                    <label className="sc-form__label">Category <span style={{ color: "var(--danger)" }}>*</span></label>
+                    <select className="sc-form__input" value={foundCategory} onChange={(e) => setFoundCategory(e.target.value)} style={{ color: foundCategory ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }}>
                       <option value="">Select a category</option>
                       {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
@@ -1359,7 +1359,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <label className="sc-form__label">Where was it found?</label>
                     <input className="sc-form__input" type="text" placeholder="e.g. Room 204, near the gym, front office..." value={foundLocation} onChange={(e) => setFoundLocation(e.target.value)} />
                     <label className="sc-form__label">Date Found</label>
-                    <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} />
+                    <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} style={{ color: foundDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-found-upload">
                       <span className="sc-form__file-icon">+</span>
@@ -1393,8 +1393,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <form className="sc-form" onSubmit={handleAddLost}>
                     <label className="sc-form__label">{s.whatLostLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <input className="sc-form__input" type="text" placeholder={s.lostItemPlaceholder} required value={lostName} onChange={(e) => setLostName(e.target.value)} />
-                    <label className="sc-form__label">Category</label>
-                    <select className="sc-form__input" value={lostCategory} onChange={(e) => setLostCategory(e.target.value)}>
+                    <label className="sc-form__label">Category <span style={{ color: "var(--danger)" }}>*</span></label>
+                    <select className="sc-form__input" value={lostCategory} onChange={(e) => setLostCategory(e.target.value)} style={{ color: lostCategory ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }}>
                       <option value="">Select a category</option>
                       {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
@@ -1403,7 +1403,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <label className="sc-form__label">Last seen where?</label>
                     <input className="sc-form__input" type="text" placeholder="e.g. Cafeteria, locker room, room 101..." value={lostLocation} onChange={(e) => setLostLocation(e.target.value)} />
                     <label className="sc-form__label">Date Lost</label>
-                    <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} />
+                    <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} style={{ color: lostDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosOptionalLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-lost-upload">
                       <span className="sc-form__file-icon">+</span>
