@@ -1825,13 +1825,14 @@ body.dark .sc-mode-toggle__btn {
   border: 1.5px solid var(--border-input);
   border-radius: 10px;
   background: var(--bg-card);
-  color: var(--text-primary);
+  color: var(--text-muted);
   font-family: var(--font-body);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s ease;
   box-sizing: border-box;
   box-shadow: var(--card-shadow);
+  font-weight: 510;
 }
 .sc-search:focus {
   border-color: var(--sc-color, var(--accent));
@@ -1877,7 +1878,7 @@ body.dark .sc-mode-toggle__btn {
   font-size: 13px;
   font-family: var(--font-body);
   background: transparent;
-  color: #64748b;
+  color: var(--text-muted);
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   min-height: 34px;
   white-space: nowrap;
@@ -1886,15 +1887,10 @@ body.dark .sc-mode-toggle__btn {
 
 body.dark .sc-tab-btn { color: #4a5a7a; }
 
-.sc-tab-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-secondary) !important;
-}
-
 .sc-tab-btn--active {
-  background: var(--sc-color-2, var(--sc-color, var(--accent)));
+  background: var(--sc-color, var(--accent));
   color: var(--sc-text-on-color, #ffffff);
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--sc-color-2, var(--sc-color, var(--accent))) 40%, rgba(0,0,0,0.15));
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--sc-color, var(--accent)) 40%, rgba(0,0,0,0.15));
 }
 
 body.light .sc-tab-btn--active,

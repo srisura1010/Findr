@@ -1247,9 +1247,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {activeTab === "items" && (
             <>
               {/* Search + Filter bar */}
-              <div style={{ marginBottom: 16, background: "var(--bg-card)", border: "1.5px solid var(--border-default)", borderRadius: 16, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+              <div style={{ marginBottom: 16, background: `color-mix(in srgb, ${color}08, var(--bg-card))`, border: `1.5px solid color-mix(in srgb, ${color} 18%, var(--border-default))`, borderRadius: 16, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
                 <div className="sc-search-wrap" style={{ maxWidth: "100%" }}>
-                  <input className="sc-search" placeholder={s.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ maxWidth: "100%" }} />
+                  <input className="sc-search" placeholder={s.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ maxWidth: "100%", fontStyle: "bold", color: textOn }} />
                   {searchQuery && <button className="sc-search__clear" onClick={() => setSearchQuery("")}>×</button>}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 8, alignItems: "center" }}>
