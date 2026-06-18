@@ -340,9 +340,9 @@
 }
 
 .detail-btn--secondary {
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
   color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--border-default));
+  border-color: var(--accent);
+  border-width: 1.5px;
 }
 
 .detail-btn--success {
@@ -372,9 +372,10 @@
 .detail-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 200;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1200;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -522,8 +523,8 @@
 /* ── Chat panel ── */
 .detail-chat {
   width: 100%;
-  max-width: 480px;
-  max-height: 70vh;
+  max-width: 560px;
+  max-height: 72vh;
   background: var(--bg-card);
   border-radius: 24px 24px 0 0;
   border: 1.5px solid var(--border-default);
@@ -532,7 +533,7 @@
   flex-direction: column;
   overflow: hidden;
   animation: detail-slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.22);
 }
 
 .detail-chat__header {
