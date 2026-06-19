@@ -122,6 +122,7 @@ export default function SchoolItemDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMsg, setActionMsg] = useState("");
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
+  const [relatedLoaded, setRelatedLoaded] = useState(false);
 
   // ── fetch item ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -205,16 +206,19 @@ export default function SchoolItemDetailPage() {
 
   // ── related items ─────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!item?.category || !item?.school_id) return;
-    supabase
-      .from("school_items")
-      .select("id, name, image_url, image_urls, category, status")
-      .eq("school_id", item.school_id)
-      .eq("category", item.category)
-      .neq("id", item.id)
-      .neq("status", "claimed")
-      .limit(6)
-      .then(({ data }) => setRelatedItems(data || []));
+    if (!item?.school_id) return;
+    const query = item.category || item.name;
+    if (!query) return;
+    setRelatedLoaded(false);
+    fetch("/api/school-similar-items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, school_id: item.school_id, exclude_id: item.id }),
+    })
+      .then((r) => r.json())
+      .then((data) => setRelatedItems(data.items || []))
+      .catch(() => setRelatedItems([]))
+      .finally(() => setRelatedLoaded(true));
   }, [item?.id]);
 
   // ── chat subscription ─────────────────────────────────────────────────────
@@ -880,27 +884,31 @@ export default function SchoolItemDetailPage() {
       </div>
 
       {/* Related items */}
-      {relatedItems.length > 0 && (
+      {relatedLoaded && (
         <div className="related-section">
           <div className="related-section__header">
             <p className="related-section__title">Similar items</p>
           </div>
-          <div className="related-grid">
-            {relatedItems.map((ri: any) => {
-              const img = Array.isArray(ri.image_urls) ? ri.image_urls[0] : ri.image_url || null;
-              return (
-                <a key={ri.id} href={`/school-items/${ri.id}`} className="related-card">
-                  {img
-                    ? <img src={img} alt={ri.name} className="related-card__img" />
-                    : <div className="related-card__img-placeholder">📦</div>}
-                  <div className="related-card__body">
-                    <p className="related-card__name">{ri.name}</p>
-                    {ri.category && <p className="related-card__cat">{ri.category}</p>}
-                  </div>
-                </a>
-              );
-            })}
-          </div>
+          {relatedItems.length === 0 ? (
+            <p className="related-loading">No similar items</p>
+          ) : (
+            <div className="related-grid">
+              {relatedItems.map((ri: any) => {
+                const img = ri.image || null;
+                return (
+                  <a key={ri.id} href={`/school-items/${ri.id}`} className="related-card">
+                    {img
+                      ? <img src={img} alt={ri.name} className="related-card__img" />
+                      : <div className="related-card__img-placeholder">📦</div>}
+                    <div className="related-card__body">
+                      <p className="related-card__name">{ri.name}</p>
+                      {ri.category && <p className="related-card__cat">{ri.category}</p>}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

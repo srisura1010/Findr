@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -17,6 +16,7 @@ export async function POST(req: NextRequest) {
       "id, name, description, image_url, image_urls, ai_keywords, category, location, status",
     )
     .neq("status", "claimed")
+    .neq("status", "returned")
     .order("date_found", { ascending: false })
     .limit(200);
 
@@ -50,13 +50,28 @@ Instructions:
 - No markdown, no explanation, just the JSON array of integer IDs.`;
 
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY_2}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 200,
+        temperature: 0,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
 
-    console.log("Calling Gemini with gemini-2.5-flash model...");
-    const result = await model.generateContent(prompt);
+    if (!res.ok) {
+      const err = await res.json();
+      console.error("Groq search error:", err);
+      return NextResponse.json({ items: [] });
+    }
 
-    const textContent = result.response.text();
+    const data = await res.json();
+    const textContent = data.choices?.[0]?.message?.content ?? "[]";
     const raw = textContent.replace(/```json|```/g, "").trim();
     const matchedIds: number[] = JSON.parse(raw);
 

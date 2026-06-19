@@ -927,7 +927,7 @@ export default function ItemDetailPage() {
     const query = item.category || item.name;
     if (!query) return;
     setRelatedLoading(true);
-    fetch("/api/circle-search", {
+    fetch("/api/similar-items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query }),
