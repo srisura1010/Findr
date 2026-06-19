@@ -890,6 +890,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [foundCropIndex, setFoundCropIndex] = useState(0);
   const [foundCropSrc, setFoundCropSrc] = useState<string | null>(null);
   const [foundCropResults, setFoundCropResults] = useState<File[]>([]);
+  const [foundExistingFiles, setFoundExistingFiles] = useState<File[]>([]);
 
   // ── Lost form state ──────────────────────────────────────────────────────────
   const [lostName, setLostName] = useState("");
@@ -904,6 +905,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [lostCropIndex, setLostCropIndex] = useState(0);
   const [lostCropSrc, setLostCropSrc] = useState<string | null>(null);
   const [lostCropResults, setLostCropResults] = useState<File[]>([]);
+  const [lostExistingFiles, setLostExistingFiles] = useState<File[]>([]);
 
   // ── Admin login ──────────────────────────────────────────────────────────────
   const [adminPassword, setAdminPassword] = useState("");
@@ -925,13 +927,14 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
   // ── Crop helpers ─────────────────────────────────────────────────────────────
   const startFoundCropQueue = (files: File[]) => {
+    setFoundExistingFiles(foundFiles);
     setFoundCropResults([]); setFoundCropQueue(files); setFoundCropIndex(0);
     setFoundCropSrc(URL.createObjectURL(files[0]));
   };
   const advanceFoundCrop = (results: File[], queue: File[], idx: number) => {
     URL.revokeObjectURL(foundCropSrc!);
     if (idx + 1 < queue.length) { setFoundCropResults(results); setFoundCropIndex(idx + 1); setFoundCropSrc(URL.createObjectURL(queue[idx + 1])); }
-    else { setFoundFiles(results); setFoundCropSrc(null); setFoundCropQueue([]); setFoundCropResults([]); }
+    else { setFoundFiles([...foundExistingFiles, ...results]); setFoundCropSrc(null); setFoundCropQueue([]); setFoundCropResults([]); setFoundExistingFiles([]); }
   };
   const handleFoundCropConfirm = async (pixels: { x: number; y: number; width: number; height: number }, rotation: number) => {
     if (!foundCropSrc) return;
@@ -944,13 +947,14 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   };
 
   const startLostCropQueue = (files: File[]) => {
+    setLostExistingFiles(lostFiles);
     setLostCropResults([]); setLostCropQueue(files); setLostCropIndex(0);
     setLostCropSrc(URL.createObjectURL(files[0]));
   };
   const advanceLostCrop = (results: File[], queue: File[], idx: number) => {
     URL.revokeObjectURL(lostCropSrc!);
     if (idx + 1 < queue.length) { setLostCropResults(results); setLostCropIndex(idx + 1); setLostCropSrc(URL.createObjectURL(queue[idx + 1])); }
-    else { setLostFiles(results); setLostCropSrc(null); setLostCropQueue([]); setLostCropResults([]); }
+    else { setLostFiles([...lostExistingFiles, ...results]); setLostCropSrc(null); setLostCropQueue([]); setLostCropResults([]); setLostExistingFiles([]); }
   };
   const handleLostCropConfirm = async (pixels: { x: number; y: number; width: number; height: number }, rotation: number) => {
     if (!lostCropSrc) return;
@@ -962,17 +966,42 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     advanceLostCrop([...lostCropResults, lostCropQueue[lostCropIndex]], lostCropQueue, lostCropIndex);
   };
 
+  // ── AI keyword extraction (reuses /api/image-search → GROQ_API_KEY) ──────────
+  const extractKeywords = async (file: File): Promise<string> => {
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/image-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64: base64, mimeType: file.type }),
+      });
+      if (!res.ok) return "";
+      const { keywords } = await res.json();
+      return keywords ?? "";
+    } catch {
+      return "";
+    }
+  };
+
   // ── Submit found ─────────────────────────────────────────────────────────────
   const handleAddFound = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !foundName || !foundDesc) return;
     setFoundUploading(true);
     const imageUrls: string[] = [];
+    const aiKeywordsArray: string[] = [];
     for (const file of foundFiles.slice(0, 3)) {
       const fn = `school_${school.id}_${Date.now()}_${file.name}`;
       await supabase.storage.from("item-images").upload(fn, file);
       const { data } = supabase.storage.from("item-images").getPublicUrl(fn);
       imageUrls.push(data.publicUrl);
+      const keywords = await extractKeywords(file);
+      if (keywords) aiKeywordsArray.push(keywords);
     }
     const { data: inserted } = await supabase.from("school_items").insert({
       school_id: school.id, name: foundName, description: foundDesc,
@@ -982,9 +1011,10 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       author_name: user.fullName || user.username || "Anonymous",
       author_avatar: user.imageUrl, author_id: user.id,
       author_email: user.primaryEmailAddress?.emailAddress, status: "waiting",
+      ai_keywords: aiKeywordsArray.length > 0 ? aiKeywordsArray.join(", ") : null,
     }).select().single();
     if (inserted) setItems((prev) => [inserted as SchoolItem, ...prev]);
-    setFoundName(""); setFoundDesc(""); setFoundCategory(""); setFoundLocation(""); setFoundDate(""); setFoundFiles([]);
+    setFoundName(""); setFoundDesc(""); setFoundCategory(""); setFoundLocation(""); setFoundDate(""); setFoundFiles([]); setFoundExistingFiles([]);
     setFoundSuccess(true);
     setTimeout(() => { setFoundSuccess(false); setActiveTab("items"); }, 1500);
     setFoundUploading(false);
@@ -1017,7 +1047,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       return;
     }
     if (inserted) setLostItems((prev) => [inserted as SchoolLostItem, ...prev]);
-    setLostName(""); setLostDesc(""); setLostCategory(""); setLostLocation(""); setLostDate(""); setLostFiles([]);
+    setLostName(""); setLostDesc(""); setLostCategory(""); setLostLocation(""); setLostDate(""); setLostFiles([]); setLostExistingFiles([]);
     setLostSuccess(true);
     setTimeout(() => { setLostSuccess(false); setActiveTab("items"); setBoardTab("lost"); }, 1500);
     setLostUploading(false);
@@ -1365,7 +1395,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <span className="sc-form__file-icon" style={{ color: "var(--text-muted)" }}>+</span>
                       <span>{foundFiles.length > 0 ? `${foundFiles.length} ${s.photosSelected}` : s.uploadPhotos}</span>
                     </label>
-                    <input id="sc-found-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const files = Array.from(e.target.files).slice(0, 3); if (files.length > 0) startFoundCropQueue(files); } }} />
+                    <input id="sc-found-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const remaining = 3 - foundFiles.length; if (remaining <= 0) return; const files = Array.from(e.target.files).slice(0, remaining); if (files.length > 0) startFoundCropQueue(files); e.target.value = ""; } }} />
                     {foundFiles.length > 0 && (
                       <div className="sc-form__previews">
                         {foundFiles.map((file, idx) => (
@@ -1409,7 +1439,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <span className="sc-form__file-icon" style={{ color: "var(--text-muted)" }}>+</span>
                       <span>{lostFiles.length > 0 ? `${lostFiles.length} ${s.photosSelected}` : s.uploadPhotos}</span>
                     </label>
-                    <input id="sc-lost-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const files = Array.from(e.target.files).slice(0, 3); if (files.length > 0) startLostCropQueue(files); } }} />
+                    <input id="sc-lost-upload" className="sc-form__file" type="file" accept="image/*" multiple onChange={(e) => { if (e.target.files) { const remaining = 3 - lostFiles.length; if (remaining <= 0) return; const files = Array.from(e.target.files).slice(0, remaining); if (files.length > 0) startLostCropQueue(files); e.target.value = ""; } }} />
                     {lostFiles.length > 0 && (
                       <div className="sc-form__previews">
                         {lostFiles.map((file, idx) => (
