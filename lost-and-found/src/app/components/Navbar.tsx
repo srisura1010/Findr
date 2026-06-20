@@ -14,6 +14,7 @@ import {
   MdOutlineHelp,
   MdOutlineAdminPanelSettings,
 } from "react-icons/md";
+import { HiSparkles } from "react-icons/hi2";
 import { useSettings } from "@/context/SettingsContext";
 import { SUPER_ADMINS } from "@/lib/superAdmin";
 import AISearchButton from "./AISearchButton";
@@ -185,9 +186,37 @@ export default function Navbar() {
 
         {/* Right cluster */}
         <div className="topbar__right">
-  <AISearchButton />
-  <button
-    className="topbar__icon-btn topbar__icon-btn--settings"
+          {showSignedIn ? (
+            <AISearchButton />
+          ) : (
+            <SignInButton mode="modal">
+              <button
+                title="AI Search"
+                aria-label="AI Search"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "7px 13px",
+                  borderRadius: 10,
+                  border: "1.5px solid var(--border-input)",
+                  background: "var(--bg-input)",
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "background 0.15s, border-color 0.15s, color 0.15s",
+                }}
+              >
+                <HiSparkles size={16} />
+                <span>AI Search</span>
+              </button>
+            </SignInButton>
+          )}
+
+          <button
+            className="topbar__icon-btn topbar__icon-btn--settings"
             onClick={() => router.push("/settings")}
             aria-label="Settings"
             title="Settings"
@@ -195,15 +224,28 @@ export default function Navbar() {
             <CiSettings size={30} />
           </button>
 
-          <button
-            className="topbar__icon-btn"
-            onClick={() => router.push("/help")}
-            aria-label={helpText}
-            title={helpText}
-            style={{ marginRight: "8px", marginLeft: "2px" }}
-          >
-            <MdOutlineHelp size={30} />
-          </button>
+          {showSignedIn ? (
+            <button
+              className="topbar__icon-btn"
+              onClick={() => router.push("/help")}
+              aria-label={helpText}
+              title={helpText}
+              style={{ marginRight: "8px", marginLeft: "2px" }}
+            >
+              <MdOutlineHelp size={30} />
+            </button>
+          ) : (
+            <SignInButton mode="modal">
+              <button
+                className="topbar__icon-btn"
+                aria-label={helpText}
+                title={helpText}
+                style={{ marginRight: "8px", marginLeft: "2px" }}
+              >
+                <MdOutlineHelp size={30} />
+              </button>
+            </SignInButton>
+          )}
 
           <div className="topbar__divider" />
 
@@ -338,6 +380,48 @@ export default function Navbar() {
             }
             return btn;
           })}
+
+          {/* AI Search — mirrors AISearchButton's icon/label, gated like topbar */}
+          {showSignedIn ? (
+            <button
+              className="mobile-sidebar__item mobile-sidebar__item--icon"
+              onClick={() => navigate("/ai-search")}
+            >
+              <HiSparkles size={18} />
+              AI Search
+            </button>
+          ) : (
+            <SignInButton mode="modal">
+              <button
+                className="mobile-sidebar__item mobile-sidebar__item--icon"
+                onClick={() => setMobileOpen(false)}
+              >
+                <HiSparkles size={18} />
+                AI Search
+              </button>
+            </SignInButton>
+          )}
+
+          {/* Help — gated like topbar */}
+          {showSignedIn ? (
+            <button
+              className="mobile-sidebar__item mobile-sidebar__item--icon"
+              onClick={() => navigate("/help")}
+            >
+              <MdOutlineHelp size={18} />
+              {helpText}
+            </button>
+          ) : (
+            <SignInButton mode="modal">
+              <button
+                className="mobile-sidebar__item mobile-sidebar__item--icon"
+                onClick={() => setMobileOpen(false)}
+              >
+                <MdOutlineHelp size={18} />
+                {helpText}
+              </button>
+            </SignInButton>
+          )}
 
           <button
             className="mobile-sidebar__item mobile-sidebar__item--icon"
