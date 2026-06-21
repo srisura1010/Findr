@@ -2015,6 +2015,22 @@ export default function DashboardPage() {
   const [lostItemSuccess, setLostItemSuccess] = useState(false);
   const [lostLocation, setLostLocation] = useState<LocationData | null>(null);
 
+  const [matchModal, setMatchModal] = useState<{
+    items: Array<{
+      id: number;
+      name: string;
+      image: string | null;
+      category: string | null;
+      location: string | null;
+      description: string;
+      postedAt: string | null;
+      authorName: string | null;
+    }>;
+    mode: "found" | "lost";
+    onContinue: () => void;
+  } | null>(null);
+  const [matchChecking, setMatchChecking] = useState(false);
+
   // ── Crop state ────────────────────────────────────────────────────────────
   const [cropQueue, setCropQueue] = useState<File[]>([]);
   const [cropIndex, setCropIndex] = useState(0);
@@ -2230,8 +2246,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doFoundSubmit = async () => {
     if (
       !newItemName ||
       !newItemDesc ||
@@ -2325,8 +2340,40 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLostSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      !newItemName ||
+      !newItemDesc ||
+      selectedFiles.length === 0 ||
+      !user ||
+      !foundLocation
+    )
+      return;
+    setMatchChecking(true);
+    try {
+      const res = await fetch("/api/match-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `${newItemName}${newItemCategory ? " " + newItemCategory : ""} ${newItemDesc}`,
+          mode: "found",
+        }),
+      });
+      const data = await res.json();
+      if (data.items?.length > 0) {
+        setMatchModal({ items: data.items, mode: "found", onContinue: doFoundSubmit });
+        return;
+      }
+    } catch {
+      // fall through to submit if check fails
+    } finally {
+      setMatchChecking(false);
+    }
+    doFoundSubmit();
+  };
+
+  const doLostSubmit = async () => {
     if (!lostItemName || !lostItemDesc || !user || !lostLocation) return;
     setLostItemUploading(true);
     try {
@@ -2403,6 +2450,32 @@ export default function DashboardPage() {
     } finally {
       setLostItemUploading(false);
     }
+  };
+
+  const handleLostSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!lostItemName || !lostItemDesc || !user || !lostLocation) return;
+    setMatchChecking(true);
+    try {
+      const res = await fetch("/api/match-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `${lostItemName}${lostItemCategory ? " " + lostItemCategory : ""} ${lostItemDesc}`,
+          mode: "lost",
+        }),
+      });
+      const data = await res.json();
+      if (data.items?.length > 0) {
+        setMatchModal({ items: data.items, mode: "lost", onContinue: doLostSubmit });
+        return;
+      }
+    } catch {
+      // fall through to submit if check fails
+    } finally {
+      setMatchChecking(false);
+    }
+    doLostSubmit();
   };
 
   // ── Filtering logic ─────────────────────────────────────────────────────────
@@ -2676,9 +2749,9 @@ export default function DashboardPage() {
                       <button
                         type="submit"
                         className="panel-form__submit"
-                        disabled={isUploading || !foundLocation}
+                        disabled={isUploading || !foundLocation || matchChecking}
                       >
-                        {isUploading ? s.uploadingBtn : s.postItemBtn}
+                        {matchChecking ? "Checking..." : isUploading ? s.uploadingBtn : s.postItemBtn}
                       </button>
                     </div>
                   </form>
@@ -2817,9 +2890,9 @@ export default function DashboardPage() {
                       <button
                         type="submit"
                         className="panel-form__submit"
-                        disabled={lostItemUploading || !lostLocation}
+                        disabled={lostItemUploading || !lostLocation || matchChecking}
                       >
-                        {lostItemUploading ? s.postingBtn : s.postLostBtn}
+                        {matchChecking ? "Checking..." : lostItemUploading ? s.postingBtn : s.postLostBtn}
                       </button>
                     </div>
                   </form>
@@ -4341,6 +4414,238 @@ export default function DashboardPage() {
           </>
         )}
       </main>
+
+      {/* ── MATCH CHECK MODAL ── */}
+      {matchModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            zIndex: 1500,
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={() => setMatchModal(null)}
+        >
+          <div
+            style={{
+              background: "var(--bg-card)",
+              borderRadius: "20px 20px 0 0",
+              width: "100%",
+              maxWidth: "520px",
+              padding: "24px 20px 32px",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.22)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "14px",
+              border: "1px solid var(--border-default)",
+              borderBottom: "none",
+              animation: "sheet-up 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                  margin: "0 0 4px",
+                }}
+              >
+                {matchModal.mode === "found"
+                  ? "Someone might be looking for this!"
+                  : "This might already be found!"}
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                  margin: 0,
+                }}
+              >
+                {matchModal.mode === "found"
+                  ? "Before you post, check if someone already reported losing a similar item."
+                  : "Before you post, check if someone already found a similar item."}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {matchModal.items.map((item) => {
+                const daysAgo =
+                  item.postedAt
+                    ? Math.floor(
+                        (Date.now() - new Date(item.postedAt).getTime()) /
+                          86400000,
+                      )
+                    : null;
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                      padding: "12px",
+                      border: "1.5px solid var(--border-input)",
+                      borderRadius: "12px",
+                      background: "var(--bg-input)",
+                      cursor: matchModal.mode === "lost" ? "pointer" : "default",
+                      transition: "border-color 0.15s ease",
+                    }}
+                    onClick={() => {
+                      if (matchModal.mode === "lost") {
+                        setMatchModal(null);
+                        router.push(`/items/${item.id}`);
+                      }
+                    }}
+                  >
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 8,
+                          objectFit: "cover",
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 8,
+                          background: "var(--bg-hover)",
+                          flexShrink: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "var(--text-muted)",
+                          fontSize: 22,
+                        }}
+                      >
+                        ?
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          margin: "0 0 2px",
+                          fontFamily: "var(--font-body)",
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {item.name}
+                      </p>
+                      {item.description && (
+                        <p
+                          style={{
+                            margin: "0 0 4px",
+                            fontFamily: "var(--font-body)",
+                            fontSize: 12,
+                            color: "var(--text-secondary)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {item.description}
+                        </p>
+                      )}
+                      <p
+                        style={{
+                          margin: 0,
+                          fontFamily: "var(--font-body)",
+                          fontSize: 11,
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        {item.authorName && `by ${item.authorName}`}
+                        {daysAgo !== null &&
+                          ` · ${
+                            daysAgo === 0
+                              ? "today"
+                              : daysAgo === 1
+                                ? "yesterday"
+                                : `${daysAgo} days ago`
+                          }`}
+                        {item.location && ` · ${item.location}`}
+                      </p>
+                    </div>
+                    {matchModal.mode === "lost" && (
+                      <span
+                        style={{
+                          alignSelf: "center",
+                          color: "var(--accent)",
+                          fontSize: 20,
+                          flexShrink: 0,
+                        }}
+                      >
+                        ›
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                type="button"
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  border: "1.5px solid var(--border-input)",
+                  borderRadius: "10px",
+                  background: "var(--bg-input)",
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  const fn = matchModal.onContinue;
+                  setMatchModal(null);
+                  fn();
+                }}
+              >
+                No, post anyway
+              </button>
+              <button
+                type="button"
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  border: "none",
+                  borderRadius: "10px",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  fontFamily: "var(--font-body)",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                onClick={() => setMatchModal(null)}
+              >
+                Let me check
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── CROP MODAL ── */}
       {cropSrc && (
