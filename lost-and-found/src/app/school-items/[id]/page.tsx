@@ -435,7 +435,7 @@ export default function SchoolItemDetailPage() {
     );
     setClaimActionLoading(false);
     setShowClaimsModal(false);
-    setActionMsg(`✓ Accepted ${claim.claimant_name}'s claim. Coordinate the handoff!`);
+    setActionMsg(`Accepted ${claim.claimant_name}'s claim. Coordinate the handoff!`);
   };
 
   // ── reject claim (finder) ─────────────────────────────────────────────────
@@ -628,12 +628,12 @@ export default function SchoolItemDetailPage() {
   // ── status badge text ─────────────────────────────────────────────────────
   const statusBadgeText = () => {
     switch (currentStatus) {
-      case "waiting": return "✓ Available";
-      case "pending": return "⏳ Claim Pending";
-      case "claim_accepted": return "⏳ Claim Accepted";
-      case "handed_off": return "🤝 Awaiting Confirmation";
-      case "disputed": return "⚠️ Disputed";
-      default: return "✓ Available";
+      case "waiting": return "Available";
+      case "pending": return "Claim Pending";
+      case "claim_accepted": return "Claim Accepted";
+      case "handed_off": return "Awaiting Confirmation";
+      case "disputed": return "Disputed";
+      default: return "Available";
     }
   };
 
@@ -743,7 +743,7 @@ export default function SchoolItemDetailPage() {
 
           {/* Action message */}
           {actionMsg && (
-            <div className="detail-action-msg"><span>✓</span> {actionMsg}</div>
+            <div className="detail-action-msg">{actionMsg}</div>
           )}
 
           {/* ════════════════════════════════════════════════════════════════
@@ -773,21 +773,21 @@ export default function SchoolItemDetailPage() {
                 {/* Confirm handoff button (claim accepted, not yet handed off) */}
                 {currentStatus === "claim_accepted" && !item.handoff_confirmed_by_poster && (
                   <button className="detail-btn detail-btn--success" onClick={handleFinderConfirmHandoff} disabled={actionLoading}>
-                    {actionLoading ? "Confirming..." : "✓  Confirm I Handed Off Item"}
+                    {actionLoading ? "Confirming..." : "Confirm I Handed Off Item"}
                   </button>
                 )}
 
                 {/* Waiting for claimant to confirm */}
                 {currentStatus === "handed_off" && item.handoff_confirmed_by_poster && !item.handoff_confirmed_by_claimant && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    🤝 Waiting for claimant to confirm receipt...
+                    Waiting for claimant to confirm receipt...
                   </button>
                 )}
 
                 {/* Disputed */}
                 {currentStatus === "disputed" && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    ⚠️ Disputed — admin is reviewing
+                    Disputed - admin is reviewing
                   </button>
                 )}
 
@@ -810,7 +810,7 @@ export default function SchoolItemDetailPage() {
                 {/* Submit claim */}
                 {currentStatus === "waiting" && !myExistingClaim && !claimSubmitted && (
                   <button className="detail-btn detail-btn--primary" onClick={() => setShowClaimModal(true)}>
-                    This is Mine — Submit a Claim
+                    This is Mine - Submit a Claim
                   </button>
                 )}
 
@@ -833,21 +833,21 @@ export default function SchoolItemDetailPage() {
                   <>
                     <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--bg-card)", border: "1.5px solid var(--success)", marginBottom: 8 }}>
                       <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--success)", margin: "0 0 4px" }}>
-                        ✓ Your claim was accepted!
+                        Your claim was accepted!
                       </p>
                       <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-secondary)", margin: 0 }}>
                         Coordinate with the finder to retrieve your item, then confirm receipt below.
                       </p>
                     </div>
                     <button className="detail-btn detail-btn--success" onClick={handleClaimantConfirmReceipt} disabled={actionLoading}>
-                      {actionLoading ? "Confirming..." : "✓ I Received My Item"}
+                      {actionLoading ? "Confirming..." : "I Received My Item"}
                     </button>
                     <button
                       className="detail-btn detail-btn--secondary"
                       style={{ border: "1.5px solid var(--danger)", color: "var(--danger)", background: "transparent" }}
                       onClick={() => setShowDisputeModal(true)}
                     >
-                      ⚠️ No — File a Dispute
+                      No - File a Dispute
                     </button>
                   </>
                 )}
@@ -855,14 +855,14 @@ export default function SchoolItemDetailPage() {
                 {/* Disputed */}
                 {currentStatus === "disputed" && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    ⚠️ Dispute under admin review
+                    Dispute under admin review
                   </button>
                 )}
 
                 {/* Claim pending but item is in claim_accepted (someone else got it) */}
                 {currentStatus === "claim_accepted" && !isMyAcceptedClaim && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    ⏳ Another claim has been accepted
+                    Another claim has been accepted
                   </button>
                 )}
 
@@ -899,7 +899,7 @@ export default function SchoolItemDetailPage() {
                   <a key={ri.id} href={`/school-items/${ri.id}`} className="related-card">
                     {img
                       ? <img src={img} alt={ri.name} className="related-card__img" />
-                      : <div className="related-card__img-placeholder">📦</div>}
+                      : <div className="related-card__img-placeholder">No image</div>}
                     <div className="related-card__body">
                       <p className="related-card__name">{ri.name}</p>
                       {ri.category && <p className="related-card__cat">{ri.category}</p>}
@@ -926,7 +926,7 @@ export default function SchoolItemDetailPage() {
               Submit a Claim
             </p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-              Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible — the finder will use this to verify ownership.
+              Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible - the finder will use this to verify ownership.
             </p>
             <textarea
               className="school-claim-textarea"
@@ -1015,7 +1015,7 @@ export default function SchoolItemDetailPage() {
                         <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{new Date(claim.created_at).toLocaleDateString()}</p>
                       </div>
                       <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)", flexShrink: 0 }}>
-                        {claim.status === "accepted" ? "✓ Accepted" : claim.status === "rejected" ? "Rejected" : "Pending"}
+                        {claim.status === "accepted" ? "Accepted" : claim.status === "rejected" ? "Rejected" : "Pending"}
                       </span>
                     </div>
 
@@ -1173,7 +1173,6 @@ export default function SchoolItemDetailPage() {
           <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
             {reportDone ? (
               <div className="panel-success">
-                <span className="panel-success__icon">✓</span>
                 <p>Report submitted</p>
               </div>
             ) : (

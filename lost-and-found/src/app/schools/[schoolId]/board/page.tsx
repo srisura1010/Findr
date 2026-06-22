@@ -50,6 +50,7 @@ interface SchoolItem {
   created_at: string;
   category?: string | null;
   location?: string | null;
+  ai_keywords?: string | null;
   accepted_claimant_id?: string | null;
   accepted_claimant_name?: string | null;
   accepted_claimant_email?: string | null;
@@ -422,11 +423,11 @@ const CATEGORIES = [
 // ─── Status badge helper ───────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; color: string }> = {
-    waiting:        { label: "✓ Active",                   color: "var(--success)" },
-    pending:        { label: "⏳ Claim pending",            color: "var(--accent)" },
-    claim_accepted: { label: "⏳ Claim in progress",        color: "var(--warning)" },
-    handed_off:     { label: "🤝 Awaiting confirmation",   color: "var(--text-muted)" },
-    disputed:       { label: "⚠️ Disputed",                color: "var(--danger)" },
+    waiting:        { label: "Active",                  color: "var(--success)" },
+    pending:        { label: "Claim pending",            color: "var(--accent)" },
+    claim_accepted: { label: "Claim in progress",        color: "var(--warning)" },
+    handed_off:     { label: "Awaiting confirmation",    color: "var(--text-muted)" },
+    disputed:       { label: "Disputed",                 color: "var(--danger)" },
   };
   const info = map[status] ?? { label: status, color: "var(--text-muted)" };
   return (
@@ -460,7 +461,7 @@ function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDelete
   };
 
   if (loading) return <div className="sc-empty" style={{ padding: "32px 0" }}>Loading...</div>;
-  if (reports.length === 0) return <div className="sc-empty" style={{ padding: "32px 0" }}>No reports — all clear!</div>;
+  if (reports.length === 0) return <div className="sc-empty" style={{ padding: "32px 0" }}>No reports, all clear!</div>;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 0" }}>
@@ -556,7 +557,7 @@ function SchoolDisputesPanel({
   };
 
   if (loading) return <div className="sc-empty">Loading...</div>;
-  if (disputes.length === 0) return <div className="sc-empty">No disputes — all clear!</div>;
+  if (disputes.length === 0) return <div className="sc-empty">No disputes, all clear!</div>;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -1181,7 +1182,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       return true;
     });
 
-  const baseFound = searchQuery.trim() ? items.filter((i) => `${i.name} ${i.description}`.toLowerCase().includes(searchQuery.toLowerCase())) : items;
+  const baseFound = searchQuery.trim() ? items.filter((i) => `${i.name} ${i.description} ${i.ai_keywords ?? ""}`.toLowerCase().includes(searchQuery.toLowerCase())) : items;
   const baseLost = searchQuery.trim() ? lostItems.filter((i) => `${i.name} ${i.description}`.toLowerCase().includes(searchQuery.toLowerCase())) : lostItems;
   const filteredFound = applyFilters(baseFound as any) as SchoolItem[];
   const filteredLost = applyFilters(baseLost as any) as SchoolLostItem[];
@@ -1279,7 +1280,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               {/* Search + Filter bar */}
               <div style={{ marginBottom: 16, background: `color-mix(in srgb, ${color}08, var(--bg-card))`, border: `1.5px solid color-mix(in srgb, ${color} 18%, var(--border-default))`, borderRadius: 16, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
                 <div className="sc-search-wrap" style={{ maxWidth: "100%" }}>
-                  <input className="sc-search" placeholder={s.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ maxWidth: "100%", fontStyle: "bold", color: textOn }} />
+                  <input className="sc-search" placeholder={s.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ maxWidth: "100%", fontStyle: "bold" }} />
                   {searchQuery && <button className="sc-search__clear" onClick={() => setSearchQuery("")}>×</button>}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 8, alignItems: "center" }}>
@@ -1300,7 +1301,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                 {hasActiveFilters && (
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {filterCategory && <span onClick={() => setFilterCategory("")} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{filterCategory} <span style={{ opacity: 0.7 }}>×</span></span>}
-                    {(filterDateFrom || filterDateTo) && <span onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>📅 {filterDateFrom || "…"} – {filterDateTo || "…"} <span style={{ opacity: 0.7 }}>×</span></span>}
+                    {(filterDateFrom || filterDateTo) && <span onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{filterDateFrom || "..."} to {filterDateTo || "..."} <span style={{ opacity: 0.7 }}>×</span></span>}
                   </div>
                 )}
               </div>
@@ -1324,16 +1325,16 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{item.category}</span>}
+                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.foundBy} {item.author_name}</span>
                         </div>
-                        {item.status === "pending" && <span className="sc-item-card__status sc-item-card__status--pending">⏳ {s.claimPending}</span>}
-                        {item.status === "claim_accepted" && <span className="sc-item-card__status" style={{ color: "var(--warning)", fontWeight: 700 }}>⏳ Claim in progress</span>}
-                        {item.status === "handed_off" && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 700 }}>🤝 Awaiting confirmation</span>}
-                        {item.status === "disputed" && <span className="sc-item-card__status" style={{ color: "var(--danger)", fontWeight: 700 }}>⚠️ Disputed</span>}
+                        {item.status === "pending" && <span className="sc-item-card__status sc-item-card__status--pending">{s.claimPending}</span>}
+                        {item.status === "claim_accepted" && <span className="sc-item-card__status" style={{ color: "var(--warning)", fontWeight: 700 }}>Claim in progress</span>}
+                        {item.status === "handed_off" && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 700 }}>Awaiting confirmation</span>}
+                        {item.status === "disputed" && <span className="sc-item-card__status" style={{ color: "var(--danger)", fontWeight: 700 }}>Disputed</span>}
                       </div>
                     </div>
                   ))}
@@ -1349,8 +1350,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{item.name}</p>
                         <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{item.category}</span>}
+                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.lostBy} {item.author_name}</span>
@@ -1479,7 +1480,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ margin: "0 0 2px", fontFamily: "var(--font-body)", fontSize: 17, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName || user.username || "Anonymous"}</p>
                       <p style={{ margin: "0 0 8px", fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)" }}>{user.primaryEmailAddress?.emailAddress || ""}</p>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>✓ {school.name} member</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>{school.name} member</span>
                     </div>
                     <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
                       {([["Posted", totalFound, clrFound], ["Returned", totalReturnedByMe, clrReturned], ["Lost", totalLost, "var(--danger)"]] as [string, number, string][]).map(([label, val, clr]) => (
@@ -1581,7 +1582,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               <p className="sc-item-card__name">{item.name}</p>
                               <p className="sc-item-card__desc">{item.description}</p>
                               {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
+                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
                               <StatusBadge status={item.status} />
                             </div>
                             <div className="sc-item-card__actions">
@@ -1621,7 +1622,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               <p className="sc-item-card__name">{item.name}</p>
                               <p className="sc-item-card__desc">{item.description}</p>
                               {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>📍 {item.location}</p>}
+                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
                             </div>
                             <div className="sc-item-card__actions">
                               <button className="sc-btn sc-btn--success sc-btn--sm" style={{ width: "100%" }} onClick={(e) => handleMarkLostFound(e, item.id)}>{s.markFound}</button>
@@ -1650,11 +1651,11 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               <p className="sc-item-card__name">{claim.item_name}</p>
                               <p className="sc-item-card__desc">{claim.description_proof?.slice(0, 100)}{(claim.description_proof?.length || 0) > 100 ? "…" : ""}</p>
                               <span style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", borderRadius: 100, fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : "var(--warning)", color: "#fff" }}>
-                                {claim.status === "accepted" ? "Accepted — Coordinate Now" : "Pending Review"}
+                                {claim.status === "accepted" ? "Accepted - Coordinate Now" : "Pending Review"}
                               </span>
                               {/* Claimant confirm handoff */}
                               {claim.item_status === "handed_off" && (
-                                <span style={{ display: "block", marginTop: 4, fontSize: "0.72rem", fontFamily: "var(--font-body)", color: "var(--text-muted)", fontWeight: 600 }}>🤝 Finder marked as handed off</span>
+                                <span style={{ display: "block", marginTop: 4, fontSize: "0.72rem", fontFamily: "var(--font-body)", color: "var(--text-muted)", fontWeight: 600 }}>Finder marked as handed off</span>
                               )}
                             </div>
                             <div className="sc-item-card__actions">
@@ -1721,7 +1722,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 600, margin: "0 auto", width: "100%" }}>
               <div style={{ padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
                 <p style={{ margin: "0 0 4px", fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Leaderboard</p>
-                <p style={{ margin: "0 0 20px", fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)" }}>Top finders at {school.name} — ranked by items returned</p>
+                <p style={{ margin: "0 0 20px", fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)" }}>Top finders at {school.name}, ranked by items returned</p>
                 {leaderboardLoading ? (
                   <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}><LoadingSpinner /></div>
                 ) : leaderboard.length === 0 ? (
