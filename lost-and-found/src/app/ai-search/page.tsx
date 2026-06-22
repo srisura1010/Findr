@@ -246,6 +246,18 @@ export default function AISearchPage() {
 
   const profileImage = user?.imageUrl;
 
+  // Scale the fixed-size stage down on small viewports
+  const [stageScale, setStageScale] = useState(1);
+  useEffect(() => {
+    const update = () => {
+      const avail = window.innerWidth - 24; // 12px padding each side
+      setStageScale(avail < STAGE ? avail / STAGE : 1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
   return (
     <>
       <style>{`
@@ -258,6 +270,7 @@ export default function AISearchPage() {
           min-height: calc(100vh - 54px);
           box-sizing: border-box;
           font-family: Poppins, sans-serif;
+          overflow-x: hidden;
         }
 
         /* ── Stage ── */
@@ -495,13 +508,26 @@ export default function AISearchPage() {
 
         @keyframes aisp-spin { to { transform: rotate(360deg); } }
 
+        /* Push the GlobalChatbot FAB above the fixed search bar */
+        .global-chat-fab { bottom: 82px; }
+        .global-chat-panel { bottom: 148px; }
+
         @media (max-width: 680px) {
           .aisp-bar { left: 0; padding: 12px 16px 18px; }
         }
       `}</style>
 
       <div className="aisp-page">
-        <div className="aisp-stage" data-phase={transitionPhase}>
+        {/* Scale wrapper keeps the layout footprint == visual size */}
+        <div style={{
+          width: STAGE * stageScale,
+          height: STAGE * stageScale,
+          flexShrink: 0,
+          overflow: "hidden",
+        }}>
+        <div className="aisp-stage" data-phase={transitionPhase}
+          style={{ transform: `scale(${stageScale})`, transformOrigin: "top left" }}
+        >
           <div className="aisp-glow" />
           <div className="aisp-ring" />
 
@@ -701,6 +727,7 @@ export default function AISearchPage() {
             );
           })}
         </div>
+        </div>{/* end scale wrapper */}
       </div>
 
       {/* Bottom bar */}

@@ -1473,16 +1473,18 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               ) : (
                 <>
                   {/* Profile card */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
-                    {user.imageUrl
-                      ? <img src={user.imageUrl} alt="Profile" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: `2.5px solid ${color}`, flexShrink: 0 }} />
-                      : <div style={{ width: 56, height: 56, borderRadius: "50%", background: `${color}22`, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, fontFamily: "var(--font-body)", flexShrink: 0 }}>{(user.fullName || user.username || "?")[0]?.toUpperCase()}</div>}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: "0 0 2px", fontFamily: "var(--font-body)", fontSize: 17, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName || user.username || "Anonymous"}</p>
-                      <p style={{ margin: "0 0 8px", fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)" }}>{user.primaryEmailAddress?.emailAddress || ""}</p>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>{school.name} member</span>
+                  <div className="sc-my-dash-profile-card" style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
+                    <div className="sc-my-dash-profile-top">
+                      {user.imageUrl
+                        ? <img src={user.imageUrl} alt="Profile" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: `2.5px solid ${color}`, flexShrink: 0 }} />
+                        : <div style={{ width: 56, height: 56, borderRadius: "50%", background: `${color}22`, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, fontFamily: "var(--font-body)", flexShrink: 0 }}>{(user.fullName || user.username || "?")[0]?.toUpperCase()}</div>}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: "0 0 2px", fontFamily: "var(--font-body)", fontSize: 17, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName || user.username || "Anonymous"}</p>
+                        <p style={{ margin: "0 0 8px", fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.primaryEmailAddress?.emailAddress || ""}</p>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>{school.name} member</span>
+                      </div>
                     </div>
-                    <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
+                    <div className="sc-my-dash-stats" style={{ display: "flex", gap: 20, flexShrink: 0 }}>
                       {([["Posted", totalFound, clrFound], ["Returned", totalReturnedByMe, clrReturned], ["Lost", totalLost, "var(--danger)"]] as [string, number, string][]).map(([label, val, clr]) => (
                         <div key={label} style={{ textAlign: "center" }}>
                           <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: clr }}>{val}</p>
@@ -1493,7 +1495,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   </div>
 
                   {/* XP / Level card */}
-                  <div style={{ padding: "16px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)", display: "flex", alignItems: "center", gap: 20 }}>
+                  <div className="sc-my-dash-xp-card" style={{ padding: "16px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)", display: "flex", alignItems: "center", gap: 20 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
                         <span style={{ fontFamily: "var(--font-body)", fontSize: 26, fontWeight: 700, color }}>{xp} XP</span>
@@ -1506,7 +1508,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                         ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
                         : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color }}>Max level reached</p>}
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
+                    <div className="sc-my-dash-xp-breakdown" style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
                       <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
                       <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
                       <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
@@ -1515,8 +1517,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   </div>
 
                   {/* Charts */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)" }}>
+                  <div className="sc-my-dash-charts-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)", overflow: "hidden", minWidth: 0 }}>
                       <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Monthly activity</p>
                       <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
                         {([["Found", clrFound], ["Lost", clrLost], ["Returned", clrReturned]] as [string, string][]).map(([l, c]) => (
@@ -1525,9 +1527,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                           </span>
                         ))}
                       </div>
-                      <div style={{ position: "relative", height: 160 }}><canvas id={`schoolBarChart-${chartKey}`} role="img" aria-label="Monthly activity chart" /></div>
+                      <div style={{ position: "relative", height: 160, width: "100%" }}><canvas id={`schoolBarChart-${chartKey}`} role="img" aria-label="Monthly activity chart" /></div>
                     </div>
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)" }}>
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)", overflow: "hidden", minWidth: 0 }}>
                       <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Action breakdown</p>
                       {totalActions === 0 ? (
                         <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", padding: "20px 0" }}>No activity yet.</p>
@@ -1540,7 +1542,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               </span>
                             ))}
                           </div>
-                          <div style={{ position: "relative", height: 160 }}><canvas id={`schoolPieChart-${chartKey}`} role="img" aria-label="Action breakdown chart" /></div>
+                          <div style={{ position: "relative", height: 160, width: "100%" }}><canvas id={`schoolPieChart-${chartKey}`} role="img" aria-label="Action breakdown chart" /></div>
                         </>
                       )}
                     </div>

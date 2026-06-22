@@ -2058,6 +2058,15 @@ body.colorblind .sc-tab-btn--active {
   gap: 6px;
 }
 
+/* ─── School My Dashboard card base ──────────────────────────────────────── */
+.sc-my-dash-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
 /* ═══════════════════════════════════════════
    MOBILE  (≤ 768px)
 ═══════════════════════════════════════════ */
@@ -2068,39 +2077,57 @@ body.colorblind .sc-tab-btn--active {
 }
 
 @media (max-width: 768px) {
-  .sc-layout { flex-direction: column; }
+  /* Allow page to scroll naturally — remove fixed-height clip */
+  .sc-page {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible !important;
+  }
 
+  .sc-layout {
+    flex-direction: column;
+    height: auto !important;
+    min-height: unset;
+    overflow: visible !important;
+  }
+
+  /* Sticky tab bar */
   .sc-sidebar {
     width: 100%;
     min-width: unset;
     height: auto;
-    position: relative;
-    top: 0;
+    min-height: unset;
+    position: sticky;
+    top: 54px;
     border-right: none;
     border-bottom: 1px solid var(--border-default);
     overflow: visible;
     z-index: 20;
+    background: var(--bg-sidebar);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   }
 
   .sc-sidebar__brand { display: none; }
+  .sc-sidebar::before { display: none; }
 
   .sc-sidebar__tabs {
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 10px 12px 12px;
+    padding: 10px 12px 10px;
     gap: 8px;
     overflow: visible;
     white-space: normal;
+    flex: unset;
   }
 
   .sc-sidebar__tab {
     flex: 0 1 auto;
-    padding: 8px 16px;
+    padding: 7px 14px;
     border-radius: 20px;
     font-size: 13px;
     white-space: nowrap;
     width: auto;
-    min-height: 38px;
+    min-height: 36px;
     transform: none !important;
     border: 1.5px solid var(--border-default);
     background: var(--bg-input);
@@ -2123,27 +2150,78 @@ body.colorblind .sc-tab-btn--active {
   .sc-sidebar__schools {
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 8px 12px 12px;
+    padding: 0 12px 10px;
     gap: 8px;
     margin-top: 0;
-    border-top: 1px solid var(--border-default);
+    border-top: none;
   }
+  .sc-sidebar__schools-label { display: none; }
   .sc-sidebar__school-btn {
     flex: 0 1 auto;
     width: auto;
     border-radius: 20px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-left: none;
     border: 1.5px solid var(--border-default);
+    font-size: 12px;
+  }
+  .sc-sidebar__school-logo { width: 16px; height: 16px; }
+  .sc-sidebar__school-initial { width: 16px; height: 16px; font-size: 9px; }
+
+  /* Main content fills and scrolls naturally */
+  .sc-main {
+    flex: unset;
+    padding: 16px 12px 40px;
+    overflow: visible;
+    min-height: unset;
   }
 
-  .sc-main { padding: 12px 12px 32px; }
-
-  .sc-about { gap: 24px; }
-  .sc-about__hero { padding: 24px 20px; grid-template-columns: 1fr; }
-  .sc-about__hero-visual { min-height: 260px; }
-  .sc-about__stats { grid-template-columns: 1fr; }
+  .sc-about { gap: 20px; }
+  .sc-about__hero { padding: 20px 16px; grid-template-columns: 1fr; gap: 16px; }
+  .sc-about__hero-visual { min-height: 200px; }
+  .sc-about__stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .sc-about__features { grid-template-columns: 1fr; }
+
+  /* ── School My Dashboard responsive ── */
+  .sc-my-dash-profile-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .sc-my-dash-profile-top {
+    display: flex !important;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sc-my-dash-stats {
+    display: flex !important;
+    justify-content: space-around !important;
+    padding-top: 12px !important;
+    border-top: 1px solid var(--border-default) !important;
+    gap: 0 !important;
+  }
+
+  .sc-my-dash-xp-card {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .sc-my-dash-xp-breakdown {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px 16px !important;
+    text-align: left !important;
+  }
+
+  .sc-my-dash-xp-breakdown span:first-child { width: 100%; }
+
+  .sc-my-dash-charts-row {
+    grid-template-columns: 1fr !important;
+  }
 
   .sc-board__layout { flex-direction: column; }
   .sc-board__sidebar {

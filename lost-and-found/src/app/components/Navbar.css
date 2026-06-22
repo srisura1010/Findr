@@ -398,7 +398,6 @@ body.dawn .left-sidebar__item::after, body.lagoon .left-sidebar__item::after, bo
   }
 
   .ai-search-label { display: none; }
-  .topbar__icon-btn--settings { display: none; }
 
   #main-content { padding-left: 0 !important; }
 }
