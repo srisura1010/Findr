@@ -310,7 +310,7 @@ export default function ItemDetailPage() {
     fetchMsgs();
 
     const channel = supabase
-      .channel(`chat:${convId}`)
+      .channel(`chat:${convId}:${Date.now()}:${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         {
@@ -893,20 +893,6 @@ export default function ItemDetailPage() {
     setChatSending(true);
     const trimmed = chatText.trim();
     setChatText("");
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        conversation_id: conversationId,
-        sender_id: user.id,
-        sender_name: user.fullName || "Me",
-        receiver_id: effectivePartnerId,
-        item_id: String(item.id),
-        item_title: item.name,
-        text: trimmed,
-        created_at: new Date().toISOString(),
-      },
-    ]);
     await supabase.from("chat_messages").insert({
       conversation_id: conversationId,
       sender_id: user.id,

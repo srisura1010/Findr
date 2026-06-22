@@ -239,8 +239,9 @@ export default function SchoolItemDetailPage() {
       .order("created_at", { ascending: true })
       .then(({ data }) => { if (data) setMessages(data as ChatMessage[]); });
 
+    const channelName = `chat:${conversationId}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel(`chat:${conversationId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chat_messages", filter: `conversation_id=eq.${conversationId}` },
@@ -280,18 +281,6 @@ export default function SchoolItemDetailPage() {
     setChatSending(true);
     const trimmed = chatText.trim();
     setChatText("");
-    const optimistic: ChatMessage = {
-      id: Date.now(),
-      conversation_id: conversationId,
-      sender_id: user.id,
-      sender_name: user.fullName || "Me",
-      receiver_id: activeChatPartnerId,
-      item_id: String(item.id),
-      item_title: item.name,
-      text: trimmed,
-      created_at: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, optimistic]);
     await supabase.from("chat_messages").insert({
       conversation_id: conversationId,
       sender_id: user.id,
