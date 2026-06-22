@@ -1202,9 +1202,22 @@ export default function SchoolItemDetailPage() {
               <button className="chat-modal__close" onClick={closeChat}>×</button>
             </div>
             <div className="chat-modal__messages">
+              {item && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "var(--bg-input)", borderRadius: 10, margin: "8px 12px", border: "1px solid var(--border-default)" }}>
+                  {item.image && (
+                    <img src={item.image} alt={item.name} style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+                  )}
+                  <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", margin: 0, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {item.name}
+                  </p>
+                  <a href={`/school-items/${item.id}`} target="_blank" rel="noreferrer" style={{ background: "var(--accent)", color: "#fff", fontSize: 11, padding: "3px 10px", borderRadius: 100, textDecoration: "none", fontWeight: 600, fontFamily: "var(--font-body)", whiteSpace: "nowrap", flexShrink: 0 }}>
+                    View Item
+                  </a>
+                </div>
+              )}
               {messages.length === 0 && (
                 <div className="chat-modal__empty">
-                  <p>Start a conversation about <strong>{item.name}</strong></p>
+                  <p>Say hi about <strong>{item.name}</strong></p>
                 </div>
               )}
               {messages.map((msg) => {
@@ -1222,6 +1235,26 @@ export default function SchoolItemDetailPage() {
               })}
               <div ref={bottomRef} />
             </div>
+            {messages.length === 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px", borderTop: "1px solid var(--border-default)" }}>
+                {[
+                  "Hi! I think this might be mine. Can we arrange a pickup?",
+                  "Can you describe it in more detail?",
+                  "Where can we meet to return it?",
+                  "Is this still available?",
+                ].map((template) => (
+                  <button
+                    key={template}
+                    onClick={() => setChatText(template)}
+                    style={{ padding: "6px 12px", borderRadius: "100px", border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "all 0.15s ease", whiteSpace: "nowrap" }}
+                    onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.borderColor = "var(--accent)"; (e.target as HTMLButtonElement).style.color = "var(--accent)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.borderColor = "var(--border-input)"; (e.target as HTMLButtonElement).style.color = "var(--text-secondary)"; }}
+                  >
+                    {template}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="chat-modal__input-row">
               <textarea
                 rows={1}
