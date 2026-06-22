@@ -210,7 +210,7 @@ export default function Navbar() {
                 }}
               >
                 <HiSparkles size={16} />
-                <span>AI Search</span>
+                <span className="ai-search-label">AI Search</span>
               </button>
             </SignInButton>
           )}

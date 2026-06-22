@@ -17,7 +17,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
-          {/* Intentionally left blank */}
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
 
           {/*
             Ensure the theme class/data attribute is applied *before* the first paint.

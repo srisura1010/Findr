@@ -3073,6 +3073,7 @@ export default function DashboardPage() {
 
         return (
           <div
+            className="my-dash-root"
             style={{
               maxWidth: 960,
               width: "100%",
@@ -3085,6 +3086,7 @@ export default function DashboardPage() {
           >
             {/* ── Profile card ── */}
             <div
+              className="my-dash-profile-card"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -3096,82 +3098,87 @@ export default function DashboardPage() {
                 boxShadow: "var(--card-shadow)",
               }}
             >
-              {user?.imageUrl ? (
-                <img
-                  src={user.imageUrl}
-                  alt="Profile"
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: "2.5px solid var(--accent)",
-                    flexShrink: 0,
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: "50%",
-                    background: "var(--accent-light)",
-                    color: "var(--accent)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 24,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-body)",
-                    flexShrink: 0,
-                  }}
-                >
-                  {(user?.fullName || user?.username || "?")[0]?.toUpperCase()}
+              <div className="my-dash-profile-top">
+                {user?.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt="Profile"
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2.5px solid var(--accent)",
+                      flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: "50%",
+                      background: "var(--accent-light)",
+                      color: "var(--accent)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 24,
+                      fontWeight: 700,
+                      fontFamily: "var(--font-body)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {(user?.fullName || user?.username || "?")[0]?.toUpperCase()}
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p
+                    style={{
+                      margin: "0 0 2px",
+                      fontFamily: "var(--font-body)",
+                      fontSize: 18,
+                      fontWeight: 700,
+                      color: "var(--text-primary)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {user?.fullName || user?.username || "Anonymous"}
+                  </p>
+                  <p
+                    style={{
+                      margin: "0 0 8px",
+                      fontFamily: "var(--font-body)",
+                      fontSize: 12,
+                      color: "var(--text-muted)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {user?.primaryEmailAddress?.emailAddress || ""}
+                  </p>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "3px 10px",
+                      borderRadius: 20,
+                      background: "var(--accent-light)",
+                      color: "var(--accent)",
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
+                    Active member
+                  </span>
                 </div>
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p
-                  style={{
-                    margin: "0 0 2px",
-                    fontFamily: "var(--font-body)",
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: "var(--text-primary)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {user?.fullName || user?.username || "Anonymous"}
-                </p>
-                <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontFamily: "var(--font-body)",
-                    fontSize: 12,
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  {user?.primaryEmailAddress?.emailAddress || ""}
-                </p>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 5,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: "3px 10px",
-                    borderRadius: 20,
-                    background: "var(--accent-light)",
-                    color: "var(--accent)",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  ✓ Active member
-                </span>
               </div>
-              <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
+              <div className="my-dash-stats" style={{ display: "flex", gap: 20, flexShrink: 0 }}>
                 {(
                   [
                     ["Posted", totalFound, clrFound],
@@ -3210,6 +3217,7 @@ export default function DashboardPage() {
 
             {/* ── XP / Level card ── */}
             <div
+              className="my-dash-xp-card"
               style={{
                 padding: "16px 20px",
                 background: "var(--bg-card)",
@@ -3233,7 +3241,7 @@ export default function DashboardPage() {
                   ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
                   : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: clrFound }}>Max level reached</p>}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
+              <div className="my-dash-xp-breakdown" style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
                 <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
                 <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
                 <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
@@ -3242,7 +3250,7 @@ export default function DashboardPage() {
             </div>
 
             {/* ── Charts row ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="my-dash-charts-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               {/* Bar chart */}
               <div
                 style={{
@@ -3251,6 +3259,8 @@ export default function DashboardPage() {
                   borderRadius: 14,
                   padding: "16px 18px",
                   boxShadow: "var(--card-shadow)",
+                  overflow: "hidden",
+                  minWidth: 0,
                 }}
               >
                 <p
@@ -3298,7 +3308,7 @@ export default function DashboardPage() {
                     </span>
                   ))}
                 </div>
-                <div style={{ position: "relative", height: 180 }}>
+                <div style={{ position: "relative", height: 180, width: "100%" }}>
                   <canvas
                     id={`myDashBarChart-${chartKey}`}
                     role="img"
@@ -3317,6 +3327,8 @@ export default function DashboardPage() {
                   borderRadius: 14,
                   padding: "16px 18px",
                   boxShadow: "var(--card-shadow)",
+                  overflow: "hidden",
+                  minWidth: 0,
                 }}
               >
                 <p
@@ -3386,7 +3398,7 @@ export default function DashboardPage() {
                         </span>
                       ))}
                     </div>
-                    <div style={{ position: "relative", height: 180 }}>
+                    <div style={{ position: "relative", height: 180, width: "100%" }}>
                       <canvas
                         id={`myDashPieChart-${chartKey}`}
                         role="img"
@@ -3557,7 +3569,7 @@ export default function DashboardPage() {
                               fontFamily: "var(--font-body)",
                             }}
                           >
-                            📍 {item.location}
+                            {item.location}
                           </p>
                         )}
                         <p
@@ -3579,11 +3591,11 @@ export default function DashboardPage() {
                           {item.status === "pending"
                             ? s.claimPendingStatus
                             : item.status === "claim_accepted"
-                              ? "⏳ Claim in progress"
+                              ? "Claim in progress"
                               : item.status === "handed_off"
-                                ? "🤝 Awaiting confirmation"
+                                ? "Awaiting confirmation"
                                 : item.status === "disputed"
-                                  ? "⚠️ Disputed"
+                                  ? "Disputed"
                                   : s.activeStatus}
                         </p>
                       </div>
@@ -3687,7 +3699,7 @@ export default function DashboardPage() {
                               fontFamily: "var(--font-body)",
                             }}
                           >
-                            📍 {item.location}
+                            {item.location}
                           </p>
                         )}
                       </div>
@@ -3897,6 +3909,7 @@ export default function DashboardPage() {
 
               {/* Filter row */}
               <div
+                className="dash-filter-row"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr 1fr auto",
@@ -3989,9 +4002,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Date range filter */}
-                <div
-                  style={{ display: "flex", gap: "4px", alignItems: "center" }}
-                >
+                <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
                   <input
                     type="date"
                     value={filterDateFrom}
@@ -4002,9 +4013,7 @@ export default function DashboardPage() {
                       padding: "8px 6px",
                       borderRadius: "8px",
                       border: "1.5px solid var(--border-input)",
-                      background: filterDateFrom
-                        ? "var(--accent)"
-                        : "var(--bg-input)",
+                      background: filterDateFrom ? "var(--accent)" : "var(--bg-input)",
                       color: filterDateFrom ? "#fff" : "var(--text-muted)",
                       fontFamily: "var(--font-body)",
                       fontSize: "11px",
@@ -4016,15 +4025,7 @@ export default function DashboardPage() {
                       minWidth: 0,
                     }}
                   />
-                  <span
-                    style={{
-                      color: "var(--text-muted)",
-                      fontSize: 11,
-                      flexShrink: 0,
-                    }}
-                  >
-                    –
-                  </span>
+                  <span style={{ color: "var(--text-muted)", fontSize: 11, flexShrink: 0 }}>–</span>
                   <input
                     type="date"
                     value={filterDateTo}
@@ -4035,9 +4036,7 @@ export default function DashboardPage() {
                       padding: "8px 6px",
                       borderRadius: "8px",
                       border: "1.5px solid var(--border-input)",
-                      background: filterDateTo
-                        ? "var(--accent)"
-                        : "var(--bg-input)",
+                      background: filterDateTo ? "var(--accent)" : "var(--bg-input)",
                       color: filterDateTo ? "#fff" : "var(--text-muted)",
                       fontFamily: "var(--font-body)",
                       fontSize: "11px",

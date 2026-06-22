@@ -1372,12 +1372,24 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 }
 
 /* ═══════════════════════════════════════════
+   MY DASHBOARD CARDS
+═══════════════════════════════════════════ */
+.my-dash-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════════
    MOBILE  (≤ 768px)
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
   .dashboard-layout { flex-direction: column; }
 
-  .dashboard-main { padding: 12px; }
+  .dashboard-main { padding: 12px; overflow-x: hidden; }
+  .dashboard-layout { overflow-x: hidden; }
 
   .dashboard-sidebar {
     width: 100%;
@@ -1525,6 +1537,66 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
   .admin-banner__exit { margin-left: 0; padding: 6px 10px; font-size: 11px; }
 
   .main-panel-content > .panel-form .panel-form__actions { flex-direction: column; }
+
+  .dash-filter-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .dash-filter-row > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .dash-filter-row > button {
+    grid-column: 1 / -1;
+  }
+
+  /* ── My Dashboard responsive ── */
+  .my-dash-profile-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .my-dash-profile-top {
+    display: flex !important;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .my-dash-stats {
+    display: flex !important;
+    justify-content: space-around !important;
+    padding-top: 12px !important;
+    border-top: 1px solid var(--border-default) !important;
+    gap: 0 !important;
+  }
+
+  .my-dash-xp-card {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .my-dash-xp-breakdown {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px 16px !important;
+    text-align: left !important;
+  }
+
+  .my-dash-xp-breakdown span:first-child {
+    width: 100%;
+  }
+
+  .my-dash-charts-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .my-dash-root {
+    padding: 12px 0 !important;
+    gap: 14px !important;
+  }
 }
 
 @media (max-width: 380px) {

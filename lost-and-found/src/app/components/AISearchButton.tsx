@@ -38,7 +38,7 @@ export default function AISearchButton() {
       }}
     >
       <HiSparkles size={16} />
-      <span>AI Search</span>
+      <span className="ai-search-label">AI Search</span>
     </button>
   );
 }

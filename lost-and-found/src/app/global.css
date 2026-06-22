@@ -2,6 +2,7 @@ body {
   background-color: var(--bg);
   color: var(--fg);
   font-family: var(--font-body, "DM Sans", sans-serif);
+  overflow-x: hidden;
 }
 
 html[data-font-family] * { font-family: var(--font-body, "DM Sans", sans-serif) !important; }

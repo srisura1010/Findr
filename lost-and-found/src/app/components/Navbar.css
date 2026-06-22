@@ -388,6 +388,19 @@ body.dawn .left-sidebar__item::after, body.lagoon .left-sidebar__item::after, bo
   .topbar__hamburger { display: flex; }
   .topbar__signin-btn { display: none; }
   .left-sidebar { display: none; }
+
+  .topbar__logo {
+    width: auto;
+    padding-left: 12px;
+    padding-right: 12px;
+    justify-content: flex-start;
+    border-right: none;
+  }
+
+  .ai-search-label { display: none; }
+  .topbar__icon-btn--settings { display: none; }
+
+  #main-content { padding-left: 0 !important; }
 }
 
 /* ─── MOBILE OVERLAY + SIDEBAR ────────────────────────────────────────────── */
