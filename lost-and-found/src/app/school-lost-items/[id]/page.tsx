@@ -378,6 +378,26 @@ export default function SchoolLostItemDetailPage() {
               })}
               <div ref={bottomRef} />
             </div>
+            {messages.length === 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px", borderTop: "1px solid var(--border-default)" }}>
+                {[
+                  "Hi! I think I may have found your item!",
+                  "Can you describe it in more detail?",
+                  "Where did you last see it?",
+                  "Is this still missing?",
+                ].map((template) => (
+                  <button
+                    key={template}
+                    onClick={() => setChatText(template)}
+                    style={{ padding: "6px 12px", borderRadius: "100px", border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-secondary)", fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "all 0.15s ease", whiteSpace: "nowrap" }}
+                    onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.borderColor = "var(--accent)"; (e.target as HTMLButtonElement).style.color = "var(--accent)"; }}
+                    onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.borderColor = "var(--border-input)"; (e.target as HTMLButtonElement).style.color = "var(--text-secondary)"; }}
+                  >
+                    {template}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="chat-modal__input-row">
               <textarea
                 rows={1} value={chatText}
