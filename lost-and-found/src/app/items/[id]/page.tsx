@@ -1357,7 +1357,7 @@ export default function ItemDetailPage() {
                 onClick={() => setShowChat(true)}
                 disabled={actionLoading}
               >
-                I Found This! — Message Owner
+                I Found This! Message Owner
               </button>
             )}
             {isLost && isItemOwner && (

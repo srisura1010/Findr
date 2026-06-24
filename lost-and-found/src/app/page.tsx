@@ -216,6 +216,42 @@ export default function Home() {
   const [card6Body, setCard6Body] = useState(
     "Only your school community sees your items, keeping reports private and protected.",
   );
+  const [eyebrowText, setEyebrowText] = useState("Built for students, by students");
+  const [featLabelText, setFeatLabelText] = useState("Why Findr");
+  const [featTitleText, setFeatTitleText] = useState("Everything you need to find it");
+  const [featSubText, setFeatSubText] = useState("One platform for your entire campus — no bulletin boards, no missed pickups.");
+  const [hiwLabelText, setHiwLabelText] = useState("How it works");
+  const [hiwTitleText, setHiwTitleText] = useState("Just 3 Steps to Finding Your Items");
+  const [hiwSubText, setHiwSubText] = useState("Simple enough for anyone on campus, powerful enough for every item.");
+  const [step1TitleText, setStep1TitleText] = useState("Report It");
+  const [step1BodyText, setStep1BodyText] = useState("Found something? Snap a photo, pick a category, drop the location. It goes live instantly.");
+  const [step2TitleText, setStep2TitleText] = useState("Search & Match");
+  const [step2BodyText, setStep2BodyText] = useState("Browse the dashboard with item listings, filter by type and location, or get notified when a match appears.");
+  const [step3TitleText, setStep3TitleText] = useState("Get It Back");
+  const [step3BodyText, setStep3BodyText] = useState("Message the finder directly through Findr, confirm it's yours, and arrange a pickup.");
+  const [carouselLabelText, setCarouselLabelText] = useState("Features at a glance");
+  const [card7TitleText, setCard7TitleText] = useState("Real-Time Notifications");
+  const [card7BodyText, setCard7BodyText] = useState("Get alerted the moment something matching your item shows up on the board.");
+  const [card8TitleText, setCard8TitleText] = useState("Built-In Messaging");
+  const [card8BodyText, setCard8BodyText] = useState("Connect finders and owners directly inside the platform — no sharing personal info.");
+  const [stat1LabelText, setStat1LabelText] = useState("Recoveries Made");
+  const [stat2LabelText, setStat2LabelText] = useState("School-Private");
+  const [stat3LabelText, setStat3LabelText] = useState("Schools Connected");
+  const [stat4LabelText, setStat4LabelText] = useState("Items Supported");
+  const [ctaTitleText, setCtaTitleText] = useState("Ready to find what you lost?");
+  const [ctaSubText, setCtaSubText] = useState("Join your school community on Findr today or browse the general dashboard. It only takes a moment to sign up.");
+  const [goDashboardText, setGoDashboardText] = useState("Go to Dashboard →");
+  const [getStartedText, setGetStartedText] = useState("Get Started →");
+  const [footerTaglineText, setFooterTaglineText] = useState("Lost & found, built for schools.");
+  const [footerNavigateText, setFooterNavigateText] = useState("Navigate");
+  const [footerDashText, setFooterDashText] = useState("Dashboard");
+  const [footerSignInText, setFooterSignInText] = useState("Sign In");
+  const [footerMessagesText, setFooterMessagesText] = useState("Messages");
+  const [footerSchoolsText, setFooterSchoolsText] = useState("For Schools");
+  const [footerHelpText, setFooterHelpText] = useState("Help");
+  const [footerSettingsText, setFooterSettingsText] = useState("Settings");
+  const [footerContactText, setFooterContactText] = useState("Contact");
+  const [footerCopyText, setFooterCopyText] = useState("Built for students, by students.");
 
   // typing animation
   useEffect(() => {
@@ -302,6 +338,42 @@ export default function Home() {
       setCard6Body(
         "Only your school community sees your items, keeping reports private and protected.",
       );
+      setEyebrowText("Built for students, by students");
+      setFeatLabelText("Why Findr");
+      setFeatTitleText("Everything you need to find it");
+      setFeatSubText("One platform for your entire campus — no bulletin boards, no missed pickups.");
+      setHiwLabelText("How it works");
+      setHiwTitleText("Just 3 Steps to Finding Your Items");
+      setHiwSubText("Simple enough for anyone on campus, powerful enough for every item.");
+      setStep1TitleText("Report It");
+      setStep1BodyText("Found something? Snap a photo, pick a category, drop the location. It goes live instantly.");
+      setStep2TitleText("Search & Match");
+      setStep2BodyText("Browse the dashboard with item listings, filter by type and location, or get notified when a match appears.");
+      setStep3TitleText("Get It Back");
+      setStep3BodyText("Message the finder directly through Findr, confirm it's yours, and arrange a pickup.");
+      setCarouselLabelText("Features at a glance");
+      setCard7TitleText("Real-Time Notifications");
+      setCard7BodyText("Get alerted the moment something matching your item shows up on the board.");
+      setCard8TitleText("Built-In Messaging");
+      setCard8BodyText("Connect finders and owners directly inside the platform — no sharing personal info.");
+      setStat1LabelText("Recoveries Made");
+      setStat2LabelText("School-Private");
+      setStat3LabelText("Schools Connected");
+      setStat4LabelText("Items Supported");
+      setCtaTitleText("Ready to find what you lost?");
+      setCtaSubText("Join your school community on Findr today or browse the general dashboard. It only takes a moment to sign up.");
+      setGoDashboardText("Go to Dashboard →");
+      setGetStartedText("Get Started →");
+      setFooterTaglineText("Lost & found, built for schools.");
+      setFooterNavigateText("Navigate");
+      setFooterDashText("Dashboard");
+      setFooterSignInText("Sign In");
+      setFooterMessagesText("Messages");
+      setFooterSchoolsText("For Schools");
+      setFooterHelpText("Help");
+      setFooterSettingsText("Settings");
+      setFooterContactText("Contact");
+      setFooterCopyText("Built for students, by students.");
       setIsReady(true);
       return;
     }
@@ -387,6 +459,42 @@ export default function Home() {
           setter: setCard6Body,
           cacheKey: "home_card6Body",
         },
+        { key: "Built for students, by students", setter: setEyebrowText, cacheKey: "home_eyebrow" },
+        { key: "Why Findr", setter: setFeatLabelText, cacheKey: "home_featLabel" },
+        { key: "Everything you need to find it", setter: setFeatTitleText, cacheKey: "home_featTitle" },
+        { key: "One platform for your entire campus — no bulletin boards, no missed pickups.", setter: setFeatSubText, cacheKey: "home_featSub" },
+        { key: "How it works", setter: setHiwLabelText, cacheKey: "home_hiwLabel" },
+        { key: "Just 3 Steps to Finding Your Items", setter: setHiwTitleText, cacheKey: "home_hiwTitle" },
+        { key: "Simple enough for anyone on campus, powerful enough for every item.", setter: setHiwSubText, cacheKey: "home_hiwSub" },
+        { key: "Report It", setter: setStep1TitleText, cacheKey: "home_step1Title" },
+        { key: "Found something? Snap a photo, pick a category, drop the location. It goes live instantly.", setter: setStep1BodyText, cacheKey: "home_step1Body" },
+        { key: "Search & Match", setter: setStep2TitleText, cacheKey: "home_step2Title" },
+        { key: "Browse the dashboard with item listings, filter by type and location, or get notified when a match appears.", setter: setStep2BodyText, cacheKey: "home_step2Body" },
+        { key: "Get It Back", setter: setStep3TitleText, cacheKey: "home_step3Title" },
+        { key: "Message the finder directly through Findr, confirm it's yours, and arrange a pickup.", setter: setStep3BodyText, cacheKey: "home_step3Body" },
+        { key: "Features at a glance", setter: setCarouselLabelText, cacheKey: "home_carouselLabel" },
+        { key: "Real-Time Notifications", setter: setCard7TitleText, cacheKey: "home_card7Title" },
+        { key: "Get alerted the moment something matching your item shows up on the board.", setter: setCard7BodyText, cacheKey: "home_card7Body" },
+        { key: "Built-In Messaging", setter: setCard8TitleText, cacheKey: "home_card8Title" },
+        { key: "Connect finders and owners directly inside the platform — no sharing personal info.", setter: setCard8BodyText, cacheKey: "home_card8Body" },
+        { key: "Recoveries Made", setter: setStat1LabelText, cacheKey: "home_stat1" },
+        { key: "School-Private", setter: setStat2LabelText, cacheKey: "home_stat2" },
+        { key: "Schools Connected", setter: setStat3LabelText, cacheKey: "home_stat3" },
+        { key: "Items Supported", setter: setStat4LabelText, cacheKey: "home_stat4" },
+        { key: "Ready to find what you lost?", setter: setCtaTitleText, cacheKey: "home_ctaTitle" },
+        { key: "Join your school community on Findr today or browse the general dashboard. It only takes a moment to sign up.", setter: setCtaSubText, cacheKey: "home_ctaSub" },
+        { key: "Go to Dashboard →", setter: setGoDashboardText, cacheKey: "home_goDash" },
+        { key: "Get Started →", setter: setGetStartedText, cacheKey: "home_getStarted" },
+        { key: "Lost & found, built for schools.", setter: setFooterTaglineText, cacheKey: "home_footerTagline" },
+        { key: "Navigate", setter: setFooterNavigateText, cacheKey: "home_footerNavigate" },
+        { key: "Dashboard", setter: setFooterDashText, cacheKey: "home_footerDash" },
+        { key: "Sign In", setter: setFooterSignInText, cacheKey: "home_footerSignIn" },
+        { key: "Messages", setter: setFooterMessagesText, cacheKey: "home_footerMessages" },
+        { key: "For Schools", setter: setFooterSchoolsText, cacheKey: "home_footerSchools" },
+        { key: "Help", setter: setFooterHelpText, cacheKey: "home_footerHelp" },
+        { key: "Settings", setter: setFooterSettingsText, cacheKey: "home_footerSettings" },
+        { key: "Contact", setter: setFooterContactText, cacheKey: "home_footerContact" },
+        { key: "Built for students, by students.", setter: setFooterCopyText, cacheKey: "home_footerCopy" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
@@ -491,6 +599,17 @@ export default function Home() {
     },
   ];
 
+  const translatedCarouselCards = [
+    { icon: <IoFolder />, title: card1Title, body: card1Body },
+    { icon: <FaSchool />, title: card2Title, body: card2Body },
+    { icon: <FaSearch />, title: card3Title, body: card3Body },
+    { icon: <FaSlidersH />, title: card4Title, body: card4Body },
+    { icon: <FaHandsHelping />, title: card5Title, body: card5Body },
+    { icon: <FaShieldAlt />, title: card6Title, body: card6Body },
+    { icon: <FaBell />, title: card7TitleText, body: card7BodyText },
+    { icon: <FaComment />, title: card8TitleText, body: card8BodyText },
+  ];
+
   return (
     <div className="home-root">
       <div className="grid-background dark:block light:hidden" />
@@ -501,7 +620,7 @@ export default function Home() {
         <div className="hero-left">
           <div className="hero-eyebrow">
             <span className="eyebrow-dot" />
-            Built for students, by students
+            {eyebrowText}
           </div>
           <h1>
             <span className="hero-typing">
@@ -597,12 +716,9 @@ export default function Home() {
 
       {/* ── FEATURES ── */}
       <section className="features-section">
-        <p className="section-label">Why Findr</p>
-        <h2 className="section-title">Everything you need to find it</h2>
-        <p className="section-sub">
-          One platform for your entire campus — no bulletin boards, no missed
-          pickups.
-        </p>
+        <p className="section-label">{featLabelText}</p>
+        <h2 className="section-title">{featTitleText}</h2>
+        <p className="section-sub">{featSubText}</p>
         <div className="features-grid">
           {featureCards.map(({ icon, title, body }, i) => (
             <div className="feat-card" key={i}>
@@ -619,23 +735,16 @@ export default function Home() {
 
       {/* ── HOW IT WORKS ── */}
       <section className="hiw-section">
-        <p className="section-label">How it works</p>
-        <h2 className="section-title">
-          Just <i>3 Steps</i> to Finding Your Items
-        </h2>
-        <p className="section-sub">
-          Simple enough for anyone on campus, powerful enough for every item.
-        </p>
+        <p className="section-label">{hiwLabelText}</p>
+        <h2 className="section-title">{hiwTitleText}</h2>
+        <p className="section-sub">{hiwSubText}</p>
         <div className="steps-grid">
           <div className="step-card">
             <div className="step-icon">
               <PiNumberCircleOneFill />
             </div>
-            <h3 className="step-title">Report It</h3>
-            <p className="step-body">
-              Found something? Snap a photo, pick a category, drop the location.
-              It goes live instantly.
-            </p>
+            <h3 className="step-title">{step1TitleText}</h3>
+            <p className="step-body">{step1BodyText}</p>
           </div>
           <div className="step-connector" aria-hidden="true">
             · · ·
@@ -644,11 +753,8 @@ export default function Home() {
             <div className="step-icon">
               <PiNumberCircleTwoFill />
             </div>
-            <h3 className="step-title">Search &amp; Match</h3>
-            <p className="step-body">
-              Browse the dashboard with item listings, filter by type and
-              location, or get notified when a match appears.
-            </p>
+            <h3 className="step-title">{step2TitleText}</h3>
+            <p className="step-body">{step2BodyText}</p>
           </div>
           <div className="step-connector" aria-hidden="true">
             · · ·
@@ -657,11 +763,8 @@ export default function Home() {
             <div className="step-icon">
               <PiNumberCircleThreeFill />
             </div>
-            <h3 className="step-title">Get It Back</h3>
-            <p className="step-body">
-              Message the finder directly through Findr, confirm it's yours, and
-              arrange a pickup.
-            </p>
+            <h3 className="step-title">{step3TitleText}</h3>
+            <p className="step-body">{step3BodyText}</p>
           </div>
         </div>
       </section>
@@ -682,11 +785,11 @@ export default function Home() {
       {/* ── CAROUSEL ── */}
       <section className="carousel-section">
         <p className="section-label" style={{ marginBottom: "28px" }}>
-          Features at a glance
+          {carouselLabelText}
         </p>
         <div className="carousel-wrap">
           <div className="carousel-track">
-            {[...CAROUSEL_CARDS, ...CAROUSEL_CARDS].map(
+            {[...translatedCarouselCards, ...translatedCarouselCards].map(
               ({ icon, title, body }, i) => (
                 <div className="carousel-card" key={i}>
                   <span className="carousel-icon">{icon}</span>
@@ -707,22 +810,22 @@ export default function Home() {
         <div className="stats-inner">
           <div className="stat-item">
             <StatNumber value={40} suffix="+" />
-            <span className="stat-label">Recoveries Made</span>
+            <span className="stat-label">{stat1LabelText}</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
             <span className="stat-number">100%</span>
-            <span className="stat-label">School-Private</span>
+            <span className="stat-label">{stat2LabelText}</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
             <StatNumber value={10} />
-            <span className="stat-label">Schools Connected</span>
+            <span className="stat-label">{stat3LabelText}</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
             <StatNumber value={250} suffix="+" />
-            <span className="stat-label">Items Supported</span>
+            <span className="stat-label">{stat4LabelText}</span>
           </div>
         </div>
       </section>
@@ -743,21 +846,18 @@ export default function Home() {
       {/* ── CTA ── */}
       <section className="cta-section">
         <div className="cta-inner">
-          <h2 className="cta-title">Ready to find what you lost?</h2>
-          <p className="cta-sub">
-            Join your school community on Findr today or browse the general dashboard. It only takes a moment
-            to sign up.
-          </p>
+          <h2 className="cta-title">{ctaTitleText}</h2>
+          <p className="cta-sub">{ctaSubText}</p>
           {isSignedIn ? (
             <button
               className="cta-btn"
               onClick={() => router.push("/dashboard")}
             >
-              Go to Dashboard →
+              {goDashboardText}
             </button>
           ) : (
             <SignInButton mode="modal">
-              <button className="cta-btn">Get Started →</button>
+              <button className="cta-btn">{getStartedText}</button>
             </SignInButton>
           )}
         </div>
@@ -768,23 +868,21 @@ export default function Home() {
         <div className="footer-inner">
           <div className="footer-brand">
             <span className="footer-logo">Findr</span>
-            <p className="footer-tagline">
-              Lost &amp; found, built for schools.
-            </p>
+            <p className="footer-tagline">{footerTaglineText}</p>
           </div>
           <div className="footer-links">
             <div className="footer-col">
-              <span className="footer-col-heading">Navigate</span>
+              <span className="footer-col-heading">{footerNavigateText}</span>
               {isSignedIn ? (
                 <button
                   className="footer-link"
                   onClick={() => router.push("/dashboard")}
                 >
-                  Dashboard
+                  {footerDashText}
                 </button>
               ) : (
                 <SignInButton mode="modal">
-                  <button className="footer-link">Sign In</button>
+                  <button className="footer-link">{footerSignInText}</button>
                 </SignInButton>
               )}
               {isSignedIn && (
@@ -792,7 +890,7 @@ export default function Home() {
                   className="footer-link"
                   onClick={() => router.push("/messages")}
                 >
-                  Messages
+                  {footerMessagesText}
                 </button>
               )}
               {isSignedIn && (
@@ -800,7 +898,7 @@ export default function Home() {
                   className="footer-link"
                   onClick={() => router.push("../schools")}
                 >
-                  For Schools
+                  {footerSchoolsText}
                 </button>
               )}
               {isSignedIn && (
@@ -808,7 +906,7 @@ export default function Home() {
                   className="footer-link"
                   onClick={() => router.push("/help")}
                 >
-                  Help
+                  {footerHelpText}
                 </button>
               )}
               {isSignedIn && (
@@ -816,12 +914,12 @@ export default function Home() {
                   className="footer-link"
                   onClick={() => router.push("/settings")}
                 >
-                  Settings
+                  {footerSettingsText}
                 </button>
               )}
             </div>
             <div className="footer-col">
-              <span className="footer-col-heading">Contact</span>
+              <span className="footer-col-heading">{footerContactText}</span>
               <a className="footer-link" href="mailto:findr.support@gmail.com">
                 <FaEnvelope
                   style={{ display: "inline", marginRight: 6, fontSize: 12 }}
@@ -833,7 +931,7 @@ export default function Home() {
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Findr. Built for students, by students.
+            © {new Date().getFullYear()} Findr. {footerCopyText}
           </span>
         </div>
       </footer>

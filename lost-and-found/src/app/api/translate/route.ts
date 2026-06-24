@@ -14,7 +14,8 @@ const cache = new Map<string, string>();
 // keeps behavior predictable.
 const SUPPORTED_LANGUAGES = [
 "es", "fr", "de", "it", "pt", "ja", "zh", "ru", "ar", "hi",
-"nl", "pl", "ko", "tr", "sv", "id", "th", "vi", "he", "el"];
+"nl", "pl", "ko", "tr", "sv", "id", "th", "vi", "he", "el",
+"bn", "uk", "fa", "sw"];
 
 
 // POST /api/translate

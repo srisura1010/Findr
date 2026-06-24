@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { HiSparkles } from "react-icons/hi2";
+import { useSettings } from "@/context/SettingsContext";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 // ── types ────────────────────────────────────────────────────────────
 interface CircleItem {
@@ -37,6 +39,69 @@ const SPAWN_STAGGER = 90;         // ms between each chip spawning
 export default function AISearchPage() {
   const router = useRouter();
   const { user } = useUser();
+  const { language } = useSettings();
+
+  const [isReady, setIsReady] = useState(false);
+  const [loadingItemsText, setLoadingItemsText] = useState("Loading items…");
+  const [aiThinkingText, setAiThinkingText] = useState("AI is thinking…");
+  const [noMatchesText, setNoMatchesText] = useState("No matches found");
+  const [matchFoundText, setMatchFoundText] = useState("match found");
+  const [matchesFoundText, setMatchesFoundText] = useState("matches found");
+  const [itemsInOrbitText, setItemsInOrbitText] = useState("items in orbit");
+  const [placeholderText, setPlaceholderText] = useState("Describe what you lost… e.g. blue phone, keys, red jacket");
+  const [resetText, setResetText] = useState("Reset");
+  const [searchText, setSearchText] = useState("Search");
+  const [clickToViewText, setClickToViewText] = useState("Click to view item →");
+
+  useEffect(() => {
+    if (language === "en") {
+      setLoadingItemsText("Loading items…");
+      setAiThinkingText("AI is thinking…");
+      setNoMatchesText("No matches found");
+      setMatchFoundText("match found");
+      setMatchesFoundText("matches found");
+      setItemsInOrbitText("items in orbit");
+      setPlaceholderText("Describe what you lost… e.g. blue phone, keys, red jacket");
+      setResetText("Reset");
+      setSearchText("Search");
+      setClickToViewText("Click to view item →");
+      setIsReady(true);
+      return;
+    }
+    const translateAndCache = async () => {
+      const translations = [
+        { key: "Loading items", setter: setLoadingItemsText, cacheKey: "ai_loadingItems" },
+        { key: "AI is thinking", setter: setAiThinkingText, cacheKey: "ai_thinking" },
+        { key: "No matches found", setter: setNoMatchesText, cacheKey: "ai_noMatches" },
+        { key: "match found", setter: setMatchFoundText, cacheKey: "ai_matchFound" },
+        { key: "matches found", setter: setMatchesFoundText, cacheKey: "ai_matchesFound" },
+        { key: "items in orbit", setter: setItemsInOrbitText, cacheKey: "ai_inOrbit" },
+        { key: "Describe what you lost", setter: setPlaceholderText, cacheKey: "ai_placeholder" },
+        { key: "Reset", setter: setResetText, cacheKey: "ai_reset" },
+        { key: "Search", setter: setSearchText, cacheKey: "ai_search" },
+        { key: "Click to view item", setter: setClickToViewText, cacheKey: "ai_clickView" },
+      ];
+      for (const { key, setter, cacheKey } of translations) {
+        const cached = localStorage.getItem(`${cacheKey}_${language}`);
+        if (cached) { setter(cached); continue; }
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const translated = data.translatedText || key;
+            setter(translated);
+            localStorage.setItem(`${cacheKey}_${language}`, translated);
+          }
+        } catch { /* keep defaults */ }
+      }
+      setIsReady(true);
+    };
+    translateAndCache();
+  }, [language]);
 
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number>(0);
@@ -258,6 +323,8 @@ export default function AISearchPage() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  if (!isReady) return <LoadingSpinner />;
+
   return (
     <>
       <style>{`
@@ -270,7 +337,6 @@ export default function AISearchPage() {
           min-height: calc(100vh - 54px);
           box-sizing: border-box;
           font-family: Poppins, sans-serif;
-          overflow-x: hidden;
         }
 
         /* ── Stage ── */
@@ -523,7 +589,7 @@ export default function AISearchPage() {
           width: STAGE * stageScale,
           height: STAGE * stageScale,
           flexShrink: 0,
-          overflow: "hidden",
+          overflow: stageScale < 1 ? "hidden" : "visible",
         }}>
         <div className="aisp-stage" data-phase={transitionPhase}
           style={{ transform: `scale(${stageScale})`, transformOrigin: "top left" }}
@@ -546,15 +612,15 @@ export default function AISearchPage() {
 
           <div className="aisp-stage-label">
             {initialLoad
-              ? "Loading items…"
+              ? loadingItemsText
               : loading
-                ? "AI is thinking…"
+                ? aiThinkingText
                 : searched && items.length === 0 && transitionPhase === "idle"
-                  ? "No matches found"
+                  ? noMatchesText
                   : searched && transitionPhase === "idle"
-                    ? `${items.length} match${items.length !== 1 ? "es" : ""} found`
+                    ? `${items.length} ${items.length !== 1 ? matchesFoundText : matchFoundText}`
                     : transitionPhase === "idle"
-                      ? `${items.length} items in orbit`
+                      ? `${items.length} ${itemsInOrbitText}`
                       : ""}
           </div>
 
@@ -720,7 +786,7 @@ export default function AISearchPage() {
                     {item.description && (
                       <p className="aisp-popup-desc">{item.description}</p>
                     )}
-                    <span className="aisp-popup-cta">Click to view item →</span>
+                    <span className="aisp-popup-cta">{clickToViewText}</span>
                   </div>
                 )}
               </button>
@@ -736,7 +802,7 @@ export default function AISearchPage() {
           <input
             type="text"
             className="aisp-bar-input"
-            placeholder="Describe what you lost… e.g. blue phone, keys, red jacket"
+            placeholder={placeholderText}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -744,7 +810,7 @@ export default function AISearchPage() {
           />
           {searched && (
             <button className="aisp-bar-reset" onClick={handleReset}>
-              Reset
+              {resetText}
             </button>
           )}
           <button
@@ -756,7 +822,7 @@ export default function AISearchPage() {
               <span className="aisp-spinner" />
             ) : (
               <>
-                <HiSparkles size={15} /> Search
+                <HiSparkles size={15} /> {searchText}
               </>
             )}
           </button>

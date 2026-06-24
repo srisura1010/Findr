@@ -90,6 +90,8 @@ export default function Navbar() {
   const [helpText, setHelpText] = useState("Help");
   const [schoolsText, setSchoolsText] = useState("For Schools");
   const [superAdminText, setSuperAdminText] = useState("Super Admin");
+  const [settingsText, setSettingsText] = useState("Settings");
+  const [aiSearchText, setAiSearchText] = useState("AI Search");
 
   useEffect(() => {
     if (language === "en") return;
@@ -100,6 +102,8 @@ export default function Navbar() {
     setHelpText(localStorage.getItem(`nav_help_${language}`) || "Help");
     setSchoolsText(localStorage.getItem(`nav_schools_${language}`) || "For Schools");
     setSuperAdminText(localStorage.getItem(`nav_superAdmin_${language}`) || "Super Admin");
+    setSettingsText(localStorage.getItem(`nav_settings_${language}`) || "Settings");
+    setAiSearchText(localStorage.getItem(`nav_aiSearch_${language}`) || "AI Search");
   }, []);
 
   useEffect(() => {
@@ -111,6 +115,8 @@ export default function Navbar() {
       setHelpText("Help");
       setSchoolsText("For Schools");
       setSuperAdminText("Super Admin");
+      setSettingsText("Settings");
+      setAiSearchText("AI Search");
       return;
     }
     const translateAndCache = async () => {
@@ -122,6 +128,8 @@ export default function Navbar() {
         { key: "Help", setter: setHelpText, cacheKey: "nav_help" },
         { key: "For Schools", setter: setSchoolsText, cacheKey: "nav_schools" },
         { key: "Super Admin", setter: setSuperAdminText, cacheKey: "nav_superAdmin" },
+        { key: "Settings", setter: setSettingsText, cacheKey: "nav_settings" },
+        { key: "AI Search", setter: setAiSearchText, cacheKey: "nav_aiSearch" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         try {
@@ -388,7 +396,7 @@ export default function Navbar() {
               onClick={() => navigate("/ai-search")}
             >
               <HiSparkles size={18} />
-              AI Search
+              {aiSearchText}
             </button>
           ) : (
             <SignInButton mode="modal">
@@ -397,7 +405,7 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
               >
                 <HiSparkles size={18} />
-                AI Search
+                {aiSearchText}
               </button>
             </SignInButton>
           )}
@@ -428,7 +436,7 @@ export default function Navbar() {
             onClick={() => navigate("/settings")}
           >
             <CiSettings size={18} />
-            Settings
+            {settingsText}
           </button>
 
           {!showSignedIn && (

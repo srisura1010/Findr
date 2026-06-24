@@ -6,6 +6,8 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { SUPER_ADMINS } from "@/lib/superAdmin";
+import { useSettings } from "@/context/SettingsContext";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface AdminRequest {
   id: string;
@@ -76,9 +78,120 @@ async function sendEmail(route: string, body: Record<string, string>) {
 export default function SuperAdminPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const { language } = useSettings();
 
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
   const [schoolRequests, setSchoolRequests] = useState<SchoolRequest[]>([]);
+
+  const [isReady, setIsReady] = useState(false);
+  const [pageTitleText, setPageTitleText] = useState("Super Admin");
+  const [pageSubtitleText, setPageSubtitleText] = useState("Manage admin requests for Findr");
+  const [adminRequestsTabText, setAdminRequestsTabText] = useState("Admin Requests");
+  const [schoolRequestsTabText, setSchoolRequestsTabText] = useState("School Requests");
+  const [pendingText, setPendingText] = useState("Pending");
+  const [reviewedText, setReviewedText] = useState("Reviewed");
+  const [loadingText, setLoadingText] = useState("Loading...");
+  const [noPendingAdminsText, setNoPendingAdminsText] = useState("No pending requests 🎉");
+  const [noPendingSchoolsText, setNoPendingSchoolsText] = useState("No pending school requests 🎉");
+  const [approveText, setApproveText] = useState("✓ Approve");
+  const [approvingText, setApprovingText] = useState("Approving...");
+  const [rejectText, setRejectText] = useState("✕ Reject");
+  const [rejectingText, setRejectingText] = useState("Rejecting...");
+  const [removeAdminText, setRemoveAdminText] = useState("✕ Remove Admin");
+  const [removingText, setRemovingText] = useState("Removing...");
+  const [schoolLabelText, setSchoolLabelText] = useState("School");
+  const [teacherIdLabelText, setTeacherIdLabelText] = useState("Teacher ID");
+  const [extraInfoLabelText, setExtraInfoLabelText] = useState("Extra Info");
+  const [submittedLabelText, setSubmittedLabelText] = useState("Submitted");
+  const [viewIdPhotoText, setViewIdPhotoText] = useState("View ID Photo ↗");
+  const [repNameLabelText, setRepNameLabelText] = useState("Rep Name");
+  const [repRoleLabelText, setRepRoleLabelText] = useState("Rep Role");
+  const [websiteLabelText, setWebsiteLabelText] = useState("Website");
+  const [themeLabelText, setThemeLabelText] = useState("Theme");
+  const [brandColorLabelText, setBrandColorLabelText] = useState("Brand Color:");
+  const [viewVerificationDocText, setViewVerificationDocText] = useState("View Verification Doc ↗");
+
+  useEffect(() => {
+    if (language === "en") {
+      setPageTitleText("Super Admin");
+      setPageSubtitleText("Manage admin requests for Findr");
+      setAdminRequestsTabText("Admin Requests");
+      setSchoolRequestsTabText("School Requests");
+      setPendingText("Pending");
+      setReviewedText("Reviewed");
+      setLoadingText("Loading...");
+      setNoPendingAdminsText("No pending requests 🎉");
+      setNoPendingSchoolsText("No pending school requests 🎉");
+      setApproveText("✓ Approve");
+      setApprovingText("Approving...");
+      setRejectText("✕ Reject");
+      setRejectingText("Rejecting...");
+      setRemoveAdminText("✕ Remove Admin");
+      setRemovingText("Removing...");
+      setSchoolLabelText("School");
+      setTeacherIdLabelText("Teacher ID");
+      setExtraInfoLabelText("Extra Info");
+      setSubmittedLabelText("Submitted");
+      setViewIdPhotoText("View ID Photo ↗");
+      setRepNameLabelText("Rep Name");
+      setRepRoleLabelText("Rep Role");
+      setWebsiteLabelText("Website");
+      setThemeLabelText("Theme");
+      setBrandColorLabelText("Brand Color:");
+      setViewVerificationDocText("View Verification Doc ↗");
+      setIsReady(true);
+      return;
+    }
+    const translateAndCache = async () => {
+      const translations = [
+        { key: "Super Admin", setter: setPageTitleText, cacheKey: "sa_title" },
+        { key: "Manage admin requests for Findr", setter: setPageSubtitleText, cacheKey: "sa_subtitle" },
+        { key: "Admin Requests", setter: setAdminRequestsTabText, cacheKey: "sa_adminTab" },
+        { key: "School Requests", setter: setSchoolRequestsTabText, cacheKey: "sa_schoolTab" },
+        { key: "Pending", setter: setPendingText, cacheKey: "sa_pending" },
+        { key: "Reviewed", setter: setReviewedText, cacheKey: "sa_reviewed" },
+        { key: "Loading...", setter: setLoadingText, cacheKey: "sa_loading" },
+        { key: "No pending requests", setter: setNoPendingAdminsText, cacheKey: "sa_noPendingAdmins" },
+        { key: "No pending school requests", setter: setNoPendingSchoolsText, cacheKey: "sa_noPendingSchools" },
+        { key: "Approve", setter: setApproveText, cacheKey: "sa_approve" },
+        { key: "Approving...", setter: setApprovingText, cacheKey: "sa_approving" },
+        { key: "Reject", setter: setRejectText, cacheKey: "sa_reject" },
+        { key: "Rejecting...", setter: setRejectingText, cacheKey: "sa_rejecting" },
+        { key: "Remove Admin", setter: setRemoveAdminText, cacheKey: "sa_removeAdmin" },
+        { key: "Removing...", setter: setRemovingText, cacheKey: "sa_removing" },
+        { key: "School", setter: setSchoolLabelText, cacheKey: "sa_school" },
+        { key: "Teacher ID", setter: setTeacherIdLabelText, cacheKey: "sa_teacherId" },
+        { key: "Extra Info", setter: setExtraInfoLabelText, cacheKey: "sa_extraInfo" },
+        { key: "Submitted", setter: setSubmittedLabelText, cacheKey: "sa_submitted" },
+        { key: "View ID Photo", setter: setViewIdPhotoText, cacheKey: "sa_viewId" },
+        { key: "Rep Name", setter: setRepNameLabelText, cacheKey: "sa_repName" },
+        { key: "Rep Role", setter: setRepRoleLabelText, cacheKey: "sa_repRole" },
+        { key: "Website", setter: setWebsiteLabelText, cacheKey: "sa_website" },
+        { key: "Theme", setter: setThemeLabelText, cacheKey: "sa_theme" },
+        { key: "Brand Color", setter: setBrandColorLabelText, cacheKey: "sa_brandColor" },
+        { key: "View Verification Doc", setter: setViewVerificationDocText, cacheKey: "sa_viewDoc" },
+      ];
+      for (const { key, setter, cacheKey } of translations) {
+        const cached = localStorage.getItem(`${cacheKey}_${language}`);
+        if (cached) { setter(cached); continue; }
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const translated = data.translatedText || key;
+            setter(translated);
+            localStorage.setItem(`${cacheKey}_${language}`, translated);
+          }
+        } catch { /* keep defaults */ }
+      }
+      setIsReady(true);
+    };
+    translateAndCache();
+  }, [language]);
   const [loading, setLoading] = useState(true);
 
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -332,6 +445,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
   };
 
   if (!isLoaded || !isSuperAdmin) return null;
+  if (!isReady) return <LoadingSpinner />;
 
   const pendingAdmins = adminRequests.filter((r) => r.status === "pending");
   const reviewedAdmins = adminRequests.filter((r) => r.status !== "pending");
@@ -342,8 +456,8 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
     <div className="sa-page">
       <div className="sa-container">
         <div className="sa-header">
-          <h1 className="sa-title">Super Admin</h1>
-          <p className="sa-subtitle">Manage admin requests for Findr</p>
+          <h1 className="sa-title">{pageTitleText}</h1>
+          <p className="sa-subtitle">{pageSubtitleText}</p>
         </div>
 
         <div
@@ -376,7 +490,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                 bottom: "-1px",
               }}
             >
-              {s === "admins" ? "Admin Requests" : "School Requests"}
+              {s === "admins" ? adminRequestsTabText : schoolRequestsTabText}
               {s === "admins" && pendingAdmins.length > 0 && (
                 <span className="sa-badge" style={{ marginLeft: "6px" }}>
                   {pendingAdmins.length}
@@ -396,13 +510,13 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
           <>
             <section className="sa-section">
               <h2 className="sa-section-title">
-                Pending
+                {pendingText}
                 <span className="sa-badge">{pendingAdmins.length}</span>
               </h2>
               {loading ? (
-                <p className="sa-empty">Loading...</p>
+                <p className="sa-empty">{loadingText}</p>
               ) : pendingAdmins.length === 0 ? (
-                <p className="sa-empty">No pending requests 🎉</p>
+                <p className="sa-empty">{noPendingAdminsText}</p>
               ) : (
                 pendingAdmins.map((r) => (
                   <RequestCard
@@ -412,6 +526,15 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                     onReject={() => handleReject(r)}
                     approving={approvingId === r.id}
                     rejecting={rejectingId === r.id}
+                    approveText={approveText}
+                    approvingText={approvingText}
+                    rejectText={rejectText}
+                    rejectingText={rejectingText}
+                    schoolLabel={schoolLabelText}
+                    teacherIdLabel={teacherIdLabelText}
+                    extraInfoLabel={extraInfoLabelText}
+                    submittedLabel={submittedLabelText}
+                    viewIdPhotoText={viewIdPhotoText}
                   />
                 ))
               )}
@@ -419,7 +542,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
 
             {reviewedAdmins.length > 0 && (
               <section className="sa-section">
-                <h2 className="sa-section-title">Reviewed</h2>
+                <h2 className="sa-section-title">{reviewedText}</h2>
                 {reviewedAdmins.map((r) => (
                   <RequestCard
                     key={r.id}
@@ -431,6 +554,13 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                         : undefined
                     }
                     removing={removingId === r.id}
+                    removeAdminText={removeAdminText}
+                    removingText={removingText}
+                    schoolLabel={schoolLabelText}
+                    teacherIdLabel={teacherIdLabelText}
+                    extraInfoLabel={extraInfoLabelText}
+                    submittedLabel={submittedLabelText}
+                    viewIdPhotoText={viewIdPhotoText}
                   />
                 ))}
               </section>
@@ -443,13 +573,13 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
           <>
             <section className="sa-section">
               <h2 className="sa-section-title">
-                Pending
+                {pendingText}
                 <span className="sa-badge">{pendingSchools.length}</span>
               </h2>
               {loading ? (
-                <p className="sa-empty">Loading...</p>
+                <p className="sa-empty">{loadingText}</p>
               ) : pendingSchools.length === 0 ? (
-                <p className="sa-empty">No pending school requests 🎉</p>
+                <p className="sa-empty">{noPendingSchoolsText}</p>
               ) : (
                 pendingSchools.map((r) => (
                   <SchoolRequestCard
@@ -459,6 +589,18 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
                     onReject={() => handleRejectSchool(r)}
                     approving={schoolApprovingId === r.id}
                     rejecting={schoolRejectingId === r.id}
+                    approveText={approveText}
+                    approvingText={approvingText}
+                    rejectText={rejectText}
+                    rejectingText={rejectingText}
+                    repNameLabel={repNameLabelText}
+                    repRoleLabel={repRoleLabelText}
+                    websiteLabel={websiteLabelText}
+                    themeLabel={themeLabelText}
+                    extraInfoLabel={extraInfoLabelText}
+                    submittedLabel={submittedLabelText}
+                    brandColorLabel={brandColorLabelText}
+                    viewVerificationDocText={viewVerificationDocText}
                   />
                 ))
               )}
@@ -466,9 +608,21 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
 
             {reviewedSchools.length > 0 && (
               <section className="sa-section">
-                <h2 className="sa-section-title">Reviewed</h2>
+                <h2 className="sa-section-title">{reviewedText}</h2>
                 {reviewedSchools.map((r) => (
-                  <SchoolRequestCard key={r.id} request={r} reviewed />
+                  <SchoolRequestCard
+                    key={r.id}
+                    request={r}
+                    reviewed
+                    repNameLabel={repNameLabelText}
+                    repRoleLabel={repRoleLabelText}
+                    websiteLabel={websiteLabelText}
+                    themeLabel={themeLabelText}
+                    extraInfoLabel={extraInfoLabelText}
+                    submittedLabel={submittedLabelText}
+                    brandColorLabel={brandColorLabelText}
+                    viewVerificationDocText={viewVerificationDocText}
+                  />
                 ))}
               </section>
             )}
@@ -489,6 +643,17 @@ function RequestCard({
   reviewed,
   onRemove,
   removing,
+  approveText = "✓ Approve",
+  approvingText = "Approving...",
+  rejectText = "✕ Reject",
+  rejectingText = "Rejecting...",
+  removeAdminText = "✕ Remove Admin",
+  removingText = "Removing...",
+  schoolLabel = "School",
+  teacherIdLabel = "Teacher ID",
+  extraInfoLabel = "Extra Info",
+  submittedLabel = "Submitted",
+  viewIdPhotoText = "View ID Photo ↗",
 }: {
   request: AdminRequest;
   onApprove?: () => void;
@@ -498,6 +663,17 @@ function RequestCard({
   reviewed?: boolean;
   onRemove?: () => void;
   removing?: boolean;
+  approveText?: string;
+  approvingText?: string;
+  rejectText?: string;
+  rejectingText?: string;
+  removeAdminText?: string;
+  removingText?: string;
+  schoolLabel?: string;
+  teacherIdLabel?: string;
+  extraInfoLabel?: string;
+  submittedLabel?: string;
+  viewIdPhotoText?: string;
 }) {
   const statusClass =
     request.status === "approved"
@@ -521,13 +697,13 @@ function RequestCard({
       </div>
 
       <div className="sa-card-details">
-        <Detail label="School" value={request.school} />
-        <Detail label="Teacher ID" value={request.teacher_id} />
+        <Detail label={schoolLabel} value={request.school} />
+        <Detail label={teacherIdLabel} value={request.teacher_id} />
         {request.extra_info && (
-          <Detail label="Extra Info" value={request.extra_info} />
+          <Detail label={extraInfoLabel} value={request.extra_info} />
         )}
         <Detail
-          label="Submitted"
+          label={submittedLabel}
           value={new Date(request.submitted_at).toLocaleDateString()}
         />
       </div>
@@ -539,7 +715,7 @@ function RequestCard({
           rel="noreferrer"
           className="sa-image-link"
         >
-          View ID Photo ↗
+          {viewIdPhotoText}
         </a>
       )}
 
@@ -550,14 +726,14 @@ function RequestCard({
             onClick={onApprove}
             disabled={approving}
           >
-            {approving ? "Approving..." : "✓ Approve"}
+            {approving ? approvingText : approveText}
           </button>
           <button
             className="sa-btn sa-btn--reject"
             onClick={onReject}
             disabled={rejecting}
           >
-            {rejecting ? "Rejecting..." : "✕ Reject"}
+            {rejecting ? rejectingText : rejectText}
           </button>
         </div>
       )}
@@ -569,7 +745,7 @@ function RequestCard({
             onClick={onRemove}
             disabled={removing}
           >
-            {removing ? "Removing..." : "✕ Remove Admin"}
+            {removing ? removingText : removeAdminText}
           </button>
         </div>
       )}
@@ -585,6 +761,18 @@ function SchoolRequestCard({
   approving,
   rejecting,
   reviewed,
+  approveText = "✓ Approve",
+  approvingText = "Approving...",
+  rejectText = "✕ Reject",
+  rejectingText = "Rejecting...",
+  repNameLabel = "Rep Name",
+  repRoleLabel = "Rep Role",
+  websiteLabel = "Website",
+  themeLabel = "Theme",
+  extraInfoLabel = "Extra Info",
+  submittedLabel = "Submitted",
+  brandColorLabel = "Brand Color:",
+  viewVerificationDocText = "View Verification Doc ↗",
 }: {
   request: SchoolRequest;
   onApprove?: () => void;
@@ -592,6 +780,18 @@ function SchoolRequestCard({
   approving?: boolean;
   rejecting?: boolean;
   reviewed?: boolean;
+  approveText?: string;
+  approvingText?: string;
+  rejectText?: string;
+  rejectingText?: string;
+  repNameLabel?: string;
+  repRoleLabel?: string;
+  websiteLabel?: string;
+  themeLabel?: string;
+  extraInfoLabel?: string;
+  submittedLabel?: string;
+  brandColorLabel?: string;
+  viewVerificationDocText?: string;
 }) {
   const statusClass =
     request.status === "approved"
@@ -648,23 +848,23 @@ function SchoolRequestCard({
       </div>
 
       <div className="sa-card-details">
-        <Detail label="Rep Name" value={request.rep_name} />
+        <Detail label={repNameLabel} value={request.rep_name} />
         {request.rep_role && (
-          <Detail label="Rep Role" value={request.rep_role} />
+          <Detail label={repRoleLabel} value={request.rep_role} />
         )}
         {request.website_url && (
-          <Detail label="Website" value={request.website_url} />
+          <Detail label={websiteLabel} value={request.website_url} />
         )}
-        <Detail label="Theme" value={request.theme} />
+        <Detail label={themeLabel} value={request.theme} />
         {request.extra_info && (
-          <Detail label="Extra Info" value={request.extra_info} />
+          <Detail label={extraInfoLabel} value={request.extra_info} />
         )}
         <Detail
-          label="Submitted"
+          label={submittedLabel}
           value={new Date(request.created_at).toLocaleDateString()}
         />
         <div className="sa-detail">
-          <span className="sa-detail-label">Brand Color:</span>
+          <span className="sa-detail-label">{brandColorLabel}</span>
           <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <span
               style={{
@@ -689,7 +889,7 @@ function SchoolRequestCard({
           rel="noreferrer"
           className="sa-image-link"
         >
-          View Verification Doc ↗
+          {viewVerificationDocText}
         </a>
       )}
 
@@ -700,14 +900,14 @@ function SchoolRequestCard({
             onClick={onApprove}
             disabled={approving}
           >
-            {approving ? "Approving..." : "✓ Approve"}
+            {approving ? approvingText : approveText}
           </button>
           <button
             className="sa-btn sa-btn--reject"
             onClick={onReject}
             disabled={rejecting}
           >
-            {rejecting ? "Rejecting..." : "✕ Reject"}
+            {rejecting ? rejectingText : rejectText}
           </button>
         </div>
       )}
