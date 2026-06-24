@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
+import { useSettings } from "@/context/SettingsContext";
 import {
   FaFlag,
   FaMessage,
@@ -18,6 +19,106 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import LocationMap from "@/app/components/LocationMap";
 import { getConversationId } from "@/app/components/MessagingSystem";
 import "./school-item-detail.css";
+
+// ── translation strings ────────────────────────────────────────────────────────
+interface SItemStrings {
+  itemNotFound: string; backBtn: string; back: string; schoolItems: string;
+  schoolFoundItem: string; foundBy: string; foundDate: string; foundLocation: string;
+  description: string; report: string; deleteMyPost: string; deleteAdmin: string;
+  statusAvailable: string; statusClaimPending: string; statusClaimAccepted: string;
+  statusAwaiting: string; statusDisputed: string;
+  viewClaims: string; noClaimsYet: string; confirmHandoff: string; confirming: string;
+  waitingClaimant: string; disputedAdmin: string; messagePrefix: string;
+  messageFinder: string; submitClaimBtn: string; claimSubmittedBtn: string;
+  claimAcceptedMsg: string; claimAcceptedTitle: string; claimAcceptedSub: string;
+  iReceived: string; fileDisputeBtn: string; disputeReview: string; anotherClaim: string;
+  similarItems: string; noSimilarItems: string; noImage: string;
+  submitClaimTitle: string; cancel: string; submitClaim: string; submitting: string;
+  claimsFor: string; loading: string; noClaimsModal: string;
+  accept: string; accepting: string; reject: string; rejecting: string;
+  confirmReject: string; close: string; messageClaimant: string;
+  fileDisputeTitle: string; submitDispute: string; filing: string;
+  reportSubmitted: string; submitReport: string; submittingReport: string; viewItem: string;
+}
+const DEFAULT_SITEM: SItemStrings = {
+  itemNotFound: "Item not found.", backBtn: "← Back", back: "Back", schoolItems: "School Items",
+  schoolFoundItem: "School Found Item", foundBy: "Found by", foundDate: "Found",
+  foundLocation: "Found location", description: "Description", report: "Report",
+  deleteMyPost: "Delete My Post", deleteAdmin: "Delete (School Admin)",
+  statusAvailable: "Available", statusClaimPending: "Claim Pending",
+  statusClaimAccepted: "Claim Accepted", statusAwaiting: "Awaiting Confirmation",
+  statusDisputed: "Disputed", viewClaims: "View Claims", noClaimsYet: "No claims yet",
+  confirmHandoff: "Confirm I Handed Off Item", confirming: "Confirming...",
+  waitingClaimant: "Waiting for claimant to confirm receipt...",
+  disputedAdmin: "Disputed - admin is reviewing", messagePrefix: "Message",
+  messageFinder: "Message Finder", submitClaimBtn: "This is Mine - Submit a Claim",
+  claimSubmittedBtn: "Claim Submitted - Awaiting Review",
+  claimAcceptedMsg: "Your claim has been accepted! Coordinate with the finder for pickup.",
+  claimAcceptedTitle: "Your claim was accepted!",
+  claimAcceptedSub: "Coordinate with the finder to retrieve your item, then confirm receipt below.",
+  iReceived: "I Received My Item", fileDisputeBtn: "No - File a Dispute",
+  disputeReview: "Dispute under admin review", anotherClaim: "Another claim has been accepted",
+  similarItems: "Similar items", noSimilarItems: "No similar items", noImage: "No image",
+  submitClaimTitle: "Submit a Claim", cancel: "Cancel", submitClaim: "Submit Claim",
+  submitting: "Submitting...", claimsFor: "Claims for", loading: "Loading...",
+  noClaimsModal: "No claims yet.", accept: "Accept", accepting: "Accepting...",
+  reject: "Reject", rejecting: "Rejecting...", confirmReject: "Confirm Reject",
+  close: "Close", messageClaimant: "Message Claimant", fileDisputeTitle: "File a Dispute",
+  submitDispute: "Submit Dispute", filing: "Filing...", reportSubmitted: "Report submitted",
+  submitReport: "Submit Report", submittingReport: "Submitting...", viewItem: "View Item",
+};
+
+async function translateSItem(language: string): Promise<SItemStrings> {
+  if (language === "en") return DEFAULT_SITEM;
+  const pairs: [keyof SItemStrings, string][] = [
+    ["itemNotFound", "Item not found."], ["backBtn", "← Back"], ["back", "Back"],
+    ["schoolItems", "School Items"], ["schoolFoundItem", "School Found Item"],
+    ["foundBy", "Found by"], ["foundDate", "Found"], ["foundLocation", "Found location"],
+    ["description", "Description"], ["report", "Report"], ["deleteMyPost", "Delete My Post"],
+    ["deleteAdmin", "Delete (School Admin)"], ["statusAvailable", "Available"],
+    ["statusClaimPending", "Claim Pending"], ["statusClaimAccepted", "Claim Accepted"],
+    ["statusAwaiting", "Awaiting Confirmation"], ["statusDisputed", "Disputed"],
+    ["viewClaims", "View Claims"], ["noClaimsYet", "No claims yet"],
+    ["confirmHandoff", "Confirm I Handed Off Item"], ["confirming", "Confirming..."],
+    ["waitingClaimant", "Waiting for claimant to confirm receipt..."],
+    ["disputedAdmin", "Disputed - admin is reviewing"], ["messagePrefix", "Message"],
+    ["messageFinder", "Message Finder"], ["submitClaimBtn", "This is Mine - Submit a Claim"],
+    ["claimSubmittedBtn", "Claim Submitted - Awaiting Review"],
+    ["claimAcceptedMsg", "Your claim has been accepted! Coordinate with the finder for pickup."],
+    ["claimAcceptedTitle", "Your claim was accepted!"],
+    ["claimAcceptedSub", "Coordinate with the finder to retrieve your item, then confirm receipt below."],
+    ["iReceived", "I Received My Item"], ["fileDisputeBtn", "No - File a Dispute"],
+    ["disputeReview", "Dispute under admin review"], ["anotherClaim", "Another claim has been accepted"],
+    ["similarItems", "Similar items"], ["noSimilarItems", "No similar items"], ["noImage", "No image"],
+    ["submitClaimTitle", "Submit a Claim"], ["cancel", "Cancel"], ["submitClaim", "Submit Claim"],
+    ["submitting", "Submitting..."], ["claimsFor", "Claims for"], ["loading", "Loading..."],
+    ["noClaimsModal", "No claims yet."], ["accept", "Accept"], ["accepting", "Accepting..."],
+    ["reject", "Reject"], ["rejecting", "Rejecting..."], ["confirmReject", "Confirm Reject"],
+    ["close", "Close"], ["messageClaimant", "Message Claimant"], ["fileDisputeTitle", "File a Dispute"],
+    ["submitDispute", "Submit Dispute"], ["filing", "Filing..."],
+    ["reportSubmitted", "Report submitted"], ["submitReport", "Submit Report"],
+    ["submittingReport", "Submitting..."], ["viewItem", "View Item"],
+  ];
+  const result = { ...DEFAULT_SITEM };
+  await Promise.all(pairs.map(async ([field, text]) => {
+    const cacheKey = `si_${field}_${language}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { result[field] = cached; return; }
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, target: language }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const t = (data.translatedText as string | undefined)?.trim() || text;
+        result[field] = t;
+        localStorage.setItem(cacheKey, t);
+      }
+    } catch {}
+  }));
+  return result;
+}
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 const REPORT_REASONS = [
@@ -78,6 +179,10 @@ export default function SchoolItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
+  const { language } = useSettings();
+
+  const [s, setS] = useState<SItemStrings>(DEFAULT_SITEM);
+  const [isReady, setIsReady] = useState(false);
 
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -123,6 +228,53 @@ export default function SchoolItemDetailPage() {
   const [actionMsg, setActionMsg] = useState("");
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
   const [relatedLoaded, setRelatedLoaded] = useState(false);
+  const [translatedCategory, setTranslatedCategory] = useState<string>("");
+  const [translatedName, setTranslatedName] = useState<string>("");
+  const [translatedDescription, setTranslatedDescription] = useState<string>("");
+  const [translatedLocation, setTranslatedLocation] = useState<string>("");
+
+  // ── translations ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    translateSItem(language).then((result) => { setS(result); setIsReady(true); });
+  }, [language]);
+
+  // translate user content (name, description, location, category) when item loads
+  useEffect(() => {
+    if (!item) return;
+    if (language === "en") {
+      setTranslatedName(item.name || "");
+      setTranslatedDescription(item.description || "");
+      setTranslatedLocation(item.location || "");
+      setTranslatedCategory(item.category || "");
+      return;
+    }
+    const tx = async (text: string, field: string) => {
+      if (!text) return text;
+      const cacheKey = `si_c_${item.id}_${field}_${language}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return cached;
+      try {
+        const res = await fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, target: language }) });
+        const data = await res.json();
+        const t = (data.translatedText as string | undefined)?.trim() || text;
+        localStorage.setItem(cacheKey, t);
+        return t;
+      } catch { return text; }
+    };
+    const catKey = item.category ? `sc_cat_${item.category.replace(/\s+/g, "_")}_${language}` : "";
+    const cachedCat = catKey ? localStorage.getItem(catKey) : null;
+    Promise.all([
+      tx(item.name, "name"),
+      tx(item.description, "desc"),
+      tx(item.location, "loc"),
+      cachedCat ? Promise.resolve(cachedCat) : (item.category ? tx(item.category, "cat").then((t) => { if (catKey) localStorage.setItem(catKey, t); return t; }) : Promise.resolve("")),
+    ]).then(([name, desc, loc, cat]) => {
+      setTranslatedName(name);
+      setTranslatedDescription(desc);
+      setTranslatedLocation(loc);
+      setTranslatedCategory(cat);
+    });
+  }, [item, language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── fetch item ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -591,11 +743,11 @@ export default function SchoolItemDetailPage() {
   };
 
   // ── guards ────────────────────────────────────────────────────────────────
-  if (!isLoaded || loading) return <LoadingSpinner />;
+  if (!isLoaded || loading || !isReady) return <LoadingSpinner />;
   if (!item) return (
     <div className="detail-not-found">
-      <p>Item not found.</p>
-      <button onClick={() => router.back()} className="detail-back-btn">← Back</button>
+      <p>{s.itemNotFound}</p>
+      <button onClick={() => router.back()} className="detail-back-btn">{s.backBtn}</button>
     </div>
   );
 
@@ -617,12 +769,12 @@ export default function SchoolItemDetailPage() {
   // ── status badge text ─────────────────────────────────────────────────────
   const statusBadgeText = () => {
     switch (currentStatus) {
-      case "waiting": return "Available";
-      case "pending": return "Claim Pending";
-      case "claim_accepted": return "Claim Accepted";
-      case "handed_off": return "Awaiting Confirmation";
-      case "disputed": return "Disputed";
-      default: return "Available";
+      case "waiting": return s.statusAvailable;
+      case "pending": return s.statusClaimPending;
+      case "claim_accepted": return s.statusClaimAccepted;
+      case "handed_off": return s.statusAwaiting;
+      case "disputed": return s.statusDisputed;
+      default: return s.statusAvailable;
     }
   };
 
@@ -631,12 +783,12 @@ export default function SchoolItemDetailPage() {
       {/* Breadcrumb */}
       <div className="detail-breadcrumb" style={{ marginLeft: 0, alignSelf: "flex-start" }}>
         <button className="detail-back-btn" onClick={() => router.back()}>
-          <FaArrowLeft /><span>Back</span>
+          <FaArrowLeft /><span>{s.back}</span>
         </button>
         <span className="detail-breadcrumb__sep">/</span>
-        <span className="detail-breadcrumb__label">School Items</span>
+        <span className="detail-breadcrumb__label">{s.schoolItems}</span>
         <span className="detail-breadcrumb__sep">/</span>
-        <span className="detail-breadcrumb__current">{item.name}</span>
+        <span className="detail-breadcrumb__current">{translatedName || item.name}</span>
       </div>
 
       {/* Main layout */}
@@ -651,20 +803,20 @@ export default function SchoolItemDetailPage() {
 
         {/* RIGHT: Info + Actions */}
         <div className="detail-info-col">
-          <div className="detail-type-pill">School Found Item</div>
+          <div className="detail-type-pill">{s.schoolFoundItem}</div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h1 className="detail-title">{item.name}</h1>
+            <h1 className="detail-title">{translatedName || item.name}</h1>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               {!isItemOwner && (
                 <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={() => setShowReport(true)}>
-                  <FaFlag style={{ marginRight: 6 }} />Report
+                  <FaFlag style={{ marginRight: 6 }} />{s.report}
                 </button>
               )}
               {canDelete && (
                 <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete} disabled={actionLoading}>
                   <FaTrash style={{ marginRight: 6 }} />
-                  {isSchoolAdmin && !isItemOwner ? "Delete (School Admin)" : "Delete My Post"}
+                  {isSchoolAdmin && !isItemOwner ? s.deleteAdmin : s.deleteMyPost}
                 </button>
               )}
             </div>
@@ -676,7 +828,7 @@ export default function SchoolItemDetailPage() {
               <img src={item.authorAvatar} alt={item.authorName} className="detail-poster__avatar" />
             )}
             <div className="detail-poster__info">
-              <span className="detail-poster__label">Found by</span>
+              <span className="detail-poster__label">{s.foundBy}</span>
               <span className="detail-poster__name">{item.authorName || "Anonymous"}</span>
             </div>
           </div>
@@ -688,19 +840,19 @@ export default function SchoolItemDetailPage() {
             {dateLabel && (
               <div className="detail-meta-chip">
                 <FaCalendar className="detail-meta-chip__icon" />
-                <span>Found {dateLabel}</span>
+                <span>{s.foundDate} {dateLabel}</span>
               </div>
             )}
             {item.location && (
               <div className="detail-meta-chip">
                 <FaMapPin className="detail-meta-chip__icon" />
-                <span>{item.location}</span>
+                <span>{translatedLocation || item.location}</span>
               </div>
             )}
             {item.category && (
               <div className="detail-meta-chip">
                 <FaTag className="detail-meta-chip__icon" />
-                <span>{item.category}</span>
+                <span>{translatedCategory || item.category}</span>
               </div>
             )}
           </div>
@@ -716,15 +868,15 @@ export default function SchoolItemDetailPage() {
 
           {/* Description */}
           <div className="detail-description-box">
-            <p className="detail-description-label">Description</p>
-            <p className="detail-description-text">{item.description}</p>
+            <p className="detail-description-label">{s.description}</p>
+            <p className="detail-description-text">{translatedDescription || item.description}</p>
           </div>
 
           {/* Location map */}
           {hasLocation && (
             <div style={{ marginTop: "4px" }}>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--text-muted)", margin: "0 0 8px" }}>
-                Found location
+                {s.foundLocation}
               </p>
               <LocationMap lat={Number(item.latitude)} lng={Number(item.longitude)} address={item.location ?? undefined} />
             </div>
@@ -750,11 +902,11 @@ export default function SchoolItemDetailPage() {
                       className="detail-btn detail-btn--secondary"
                       onClick={() => { setShowClaimsModal(true); fetchClaims(); }}
                     >
-                      View Claims ({pendingClaims.length})
+                      {s.viewClaims} ({pendingClaims.length})
                     </button>
                   ) : (
                     <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "8px 0", margin: 0 }}>
-                      No claims yet
+                      {s.noClaimsYet}
                     </p>
                   )
                 )}
@@ -762,21 +914,21 @@ export default function SchoolItemDetailPage() {
                 {/* Confirm handoff button (claim accepted, not yet handed off) */}
                 {currentStatus === "claim_accepted" && !item.handoff_confirmed_by_poster && (
                   <button className="detail-btn detail-btn--success" onClick={handleFinderConfirmHandoff} disabled={actionLoading}>
-                    {actionLoading ? "Confirming..." : "Confirm I Handed Off Item"}
+                    {actionLoading ? s.confirming : s.confirmHandoff}
                   </button>
                 )}
 
                 {/* Waiting for claimant to confirm */}
                 {currentStatus === "handed_off" && item.handoff_confirmed_by_poster && !item.handoff_confirmed_by_claimant && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    Waiting for claimant to confirm receipt...
+                    {s.waitingClaimant}
                   </button>
                 )}
 
                 {/* Disputed */}
                 {currentStatus === "disputed" && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    Disputed - admin is reviewing
+                    {s.disputedAdmin}
                   </button>
                 )}
 
@@ -787,7 +939,7 @@ export default function SchoolItemDetailPage() {
                     onClick={() => openChatWith(item.accepted_claimant_id, item.accepted_claimant_name || "Claimant")}
                   >
                     <FaMessage style={{ marginRight: 8 }} />
-                    Message {item.accepted_claimant_name || "Claimant"}
+                    {s.messagePrefix} {item.accepted_claimant_name || "Claimant"}
                   </button>
                 )}
               </>
@@ -799,21 +951,21 @@ export default function SchoolItemDetailPage() {
                 {/* Submit claim */}
                 {currentStatus === "waiting" && !myExistingClaim && !claimSubmitted && (
                   <button className="detail-btn detail-btn--primary" onClick={() => setShowClaimModal(true)}>
-                    This is Mine - Submit a Claim
+                    {s.submitClaimBtn}
                   </button>
                 )}
 
                 {/* Already submitted a claim */}
                 {(myExistingClaim || claimSubmitted) && myExistingClaim?.status !== "accepted" && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    Claim Submitted - Awaiting Review
+                    {s.claimSubmittedBtn}
                   </button>
                 )}
 
                 {/* My claim was accepted — info only; receipt button appears only after finder confirms handoff */}
                 {isMyAcceptedClaim && currentStatus === "claim_accepted" && (
                   <div style={{ padding: "12px 16px", borderRadius: 10, border: "1px solid var(--success)", background: "rgba(16,185,129,0.08)", fontFamily: "var(--font-body)", fontSize: 13, color: "var(--success)" }}>
-                    Your claim has been accepted! Coordinate with the finder for pickup.
+                    {s.claimAcceptedMsg}
                   </div>
                 )}
 
@@ -822,21 +974,21 @@ export default function SchoolItemDetailPage() {
                   <>
                     <div style={{ padding: "12px 16px", borderRadius: 10, background: "var(--bg-card)", border: "1.5px solid var(--success)", marginBottom: 8 }}>
                       <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--success)", margin: "0 0 4px" }}>
-                        Your claim was accepted!
+                        {s.claimAcceptedTitle}
                       </p>
                       <p style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-secondary)", margin: 0 }}>
-                        Coordinate with the finder to retrieve your item, then confirm receipt below.
+                        {s.claimAcceptedSub}
                       </p>
                     </div>
                     <button className="detail-btn detail-btn--success" onClick={handleClaimantConfirmReceipt} disabled={actionLoading}>
-                      {actionLoading ? "Confirming..." : "I Received My Item"}
+                      {actionLoading ? s.confirming : s.iReceived}
                     </button>
                     <button
                       className="detail-btn detail-btn--secondary"
                       style={{ border: "1.5px solid var(--danger)", color: "var(--danger)", background: "transparent" }}
                       onClick={() => setShowDisputeModal(true)}
                     >
-                      No - File a Dispute
+                      {s.fileDisputeBtn}
                     </button>
                   </>
                 )}
@@ -844,14 +996,14 @@ export default function SchoolItemDetailPage() {
                 {/* Disputed */}
                 {currentStatus === "disputed" && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    Dispute under admin review
+                    {s.disputeReview}
                   </button>
                 )}
 
                 {/* Claim pending but item is in claim_accepted (someone else got it) */}
                 {currentStatus === "claim_accepted" && !isMyAcceptedClaim && (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    Another claim has been accepted
+                    {s.anotherClaim}
                   </button>
                 )}
 
@@ -862,7 +1014,7 @@ export default function SchoolItemDetailPage() {
                     onClick={() => openChatWith(item.authorId, item.authorName || "Finder")}
                   >
                     <FaMessage style={{ marginRight: 8}} />
-                    Message Finder
+                    {s.messageFinder}
                   </button>
                 )}
               </>
@@ -876,10 +1028,10 @@ export default function SchoolItemDetailPage() {
       {relatedLoaded && (
         <div className="related-section">
           <div className="related-section__header">
-            <p className="related-section__title">Similar items</p>
+            <p className="related-section__title">{s.similarItems}</p>
           </div>
           {relatedItems.length === 0 ? (
-            <p className="related-loading">No similar items</p>
+            <p className="related-loading">{s.noSimilarItems}</p>
           ) : (
             <div className="related-grid">
               {relatedItems.map((ri: any) => {
@@ -888,7 +1040,7 @@ export default function SchoolItemDetailPage() {
                   <a key={ri.id} href={`/school-items/${ri.id}`} className="related-card">
                     {img
                       ? <img src={img} alt={ri.name} className="related-card__img" />
-                      : <div className="related-card__img-placeholder">No image</div>}
+                      : <div className="related-card__img-placeholder">{s.noImage}</div>}
                     <div className="related-card__body">
                       <p className="related-card__name">{ri.name}</p>
                       {ri.category && <p className="related-card__cat">{ri.category}</p>}
@@ -912,7 +1064,7 @@ export default function SchoolItemDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <p style={{ fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-              Submit a Claim
+              {s.submitClaimTitle}
             </p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
               Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible - the finder will use this to verify ownership.
@@ -959,14 +1111,14 @@ export default function SchoolItemDetailPage() {
                 onClick={() => { setShowClaimModal(false); setClaimProof(""); setClaimProofFile(null); }}
                 style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
               >
-                Cancel
+                {s.cancel}
               </button>
               <button
                 onClick={handleSubmitClaim}
                 disabled={claimProof.trim().length < 20 || claimSubmitting}
                 style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, cursor: claimProof.trim().length >= 20 ? "pointer" : "not-allowed", opacity: claimProof.trim().length >= 20 ? 1 : 0.5 }}
               >
-                {claimSubmitting ? "Submitting..." : "Submit Claim"}
+                {claimSubmitting ? s.submitting : s.submitClaim}
               </button>
             </div>
           </div>
@@ -984,12 +1136,12 @@ export default function SchoolItemDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <p style={{ fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-              Claims for "{item.name}"
+              {s.claimsFor} "{item.name}"
             </p>
             {claimsLoading ? (
-              <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>Loading...</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>{s.loading}</p>
             ) : claims.length === 0 ? (
-              <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>No claims yet.</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>{s.noClaimsModal}</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {claims.map((claim) => (
@@ -1004,7 +1156,7 @@ export default function SchoolItemDetailPage() {
                         <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{new Date(claim.created_at).toLocaleDateString()}</p>
                       </div>
                       <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)", flexShrink: 0 }}>
-                        {claim.status === "accepted" ? "Accepted" : claim.status === "rejected" ? "Rejected" : "Pending"}
+                        {claim.status === "accepted" ? s.accept : claim.status === "rejected" ? s.reject : "Pending"}
                       </span>
                     </div>
 
@@ -1042,7 +1194,7 @@ export default function SchoolItemDetailPage() {
                                 disabled={claimActionLoading || !(rejectReasons[claim.id] || "").trim()}
                                 style={{ flex: 2, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, cursor: (rejectReasons[claim.id] || "").trim() ? "pointer" : "not-allowed", opacity: (rejectReasons[claim.id] || "").trim() ? 1 : 0.5 }}
                               >
-                                {claimActionLoading ? "Rejecting..." : "Confirm Reject"}
+                                {claimActionLoading ? s.rejecting : s.confirmReject}
                               </button>
                             </div>
                           </div>
@@ -1053,13 +1205,13 @@ export default function SchoolItemDetailPage() {
                               disabled={claimActionLoading}
                               style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--success)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
                             >
-                              {claimActionLoading ? "Accepting..." : "Accept"}
+                              {claimActionLoading ? s.accepting : s.accept}
                             </button>
                             <button
                               onClick={() => setRejectingId(claim.id)}
                               style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
                             >
-                              Reject
+                              {s.reject}
                             </button>
                           </div>
                         )}
@@ -1075,7 +1227,7 @@ export default function SchoolItemDetailPage() {
                             (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
                           }}
                         >
-                          Message Claimant
+                          {s.messageClaimant}
                         </button>
                       </>
                     )}
@@ -1094,7 +1246,7 @@ export default function SchoolItemDetailPage() {
                           (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
                         }}
                       >
-                        Message Claimant
+                        {s.messageClaimant}
                       </button>
                     )}
                   </div>
@@ -1105,7 +1257,7 @@ export default function SchoolItemDetailPage() {
               onClick={() => setShowClaimsModal(false)}
               style={{ padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
             >
-              Close
+              {s.close}
             </button>
           </div>
         </div>
@@ -1122,7 +1274,7 @@ export default function SchoolItemDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <p style={{ fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: "var(--danger)", margin: 0 }}>
-              File a Dispute
+              {s.fileDisputeTitle}
             </p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
               Explain what happened. The school admin will review and contact both parties.
@@ -1142,14 +1294,14 @@ export default function SchoolItemDetailPage() {
                 onClick={() => { setShowDisputeModal(false); setDisputeReason(""); }}
                 style={{ flex: 1, padding: "11px 0", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
               >
-                Cancel
+                {s.cancel}
               </button>
               <button
                 onClick={handleSubmitDispute}
                 disabled={disputeReason.trim().length < 50 || disputeSubmitting}
                 style={{ flex: 2, padding: "11px 0", borderRadius: 9, border: "none", background: "var(--danger)", color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, cursor: disputeReason.trim().length >= 50 ? "pointer" : "not-allowed", opacity: disputeReason.trim().length >= 50 ? 1 : 0.5 }}
               >
-                {disputeSubmitting ? "Filing..." : "Submit Dispute"}
+                {disputeSubmitting ? s.filing : s.submitDispute}
               </button>
             </div>
           </div>
@@ -1162,7 +1314,7 @@ export default function SchoolItemDetailPage() {
           <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
             {reportDone ? (
               <div className="panel-success">
-                <p>Report submitted</p>
+                <p>{s.reportSubmitted}</p>
               </div>
             ) : (
               <>
@@ -1176,9 +1328,9 @@ export default function SchoolItemDetailPage() {
                   ))}
                 </div>
                 <div className="detail-modal__actions">
-                  <button className="detail-modal__cancel" onClick={() => setShowReport(false)}>Cancel</button>
+                  <button className="detail-modal__cancel" onClick={() => setShowReport(false)}>{s.cancel}</button>
                   <button className="detail-modal__submit" onClick={handleReportSubmit} disabled={!reportReason || reportSubmitting}>
-                    {reportSubmitting ? "Submitting..." : "Submit Report"}
+                    {reportSubmitting ? s.submittingReport : s.submitReport}
                   </button>
                 </div>
               </>
@@ -1211,7 +1363,7 @@ export default function SchoolItemDetailPage() {
                     {item.name}
                   </p>
                   <a href={`/school-items/${item.id}`} target="_blank" rel="noreferrer" style={{ background: "var(--accent)", color: "#fff", fontSize: 11, padding: "3px 10px", borderRadius: 100, textDecoration: "none", fontWeight: 600, fontFamily: "var(--font-body)", whiteSpace: "nowrap", flexShrink: 0 }}>
-                    View Item
+                    {s.viewItem}
                   </a>
                 </div>
               )}

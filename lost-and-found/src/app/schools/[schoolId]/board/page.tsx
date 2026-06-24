@@ -348,6 +348,33 @@ interface BoardStrings {
   filterDateFrom: string;
   filterDateTo: string;
   clearFilters: string;
+  statPosted: string;
+  statReturned: string;
+  statLost: string;
+  xpToNextLevel: string;
+  maxLevelReached: string;
+  xpBreakdown: string;
+  xpReturn: string;
+  xpPost: string;
+  xpReportLost: string;
+  monthlyActivity: string;
+  chartFound: string;
+  chartLost: string;
+  chartReturned: string;
+  actionBreakdown: string;
+  noActivity: string;
+  chartFoundPosted: string;
+  chartLostReported: string;
+  pendingClaimsTitle: string;
+  myActiveClaims: string;
+  noActiveClaims: string;
+  confirmHandoff: string;
+  acceptedCoordinate: string;
+  pendingReview: string;
+  goToItem: string;
+  confirmReceipt: string;
+  cancelClaim: string;
+  review: string;
 }
 
 const DEFAULT_BOARD: BoardStrings = {
@@ -410,6 +437,33 @@ const DEFAULT_BOARD: BoardStrings = {
   filterDateFrom: "Date from",
   filterDateTo: "Date to",
   clearFilters: "Clear filters",
+  statPosted: "Posted",
+  statReturned: "Returned",
+  statLost: "Lost",
+  xpToNextLevel: "XP to next level",
+  maxLevelReached: "Max level reached",
+  xpBreakdown: "XP breakdown",
+  xpReturn: "Return: +100 XP each",
+  xpPost: "Post: +20 XP each",
+  xpReportLost: "Report lost: +5 XP each",
+  monthlyActivity: "Monthly activity",
+  chartFound: "Found",
+  chartLost: "Lost",
+  chartReturned: "Returned",
+  actionBreakdown: "Action breakdown",
+  noActivity: "No activity yet.",
+  chartFoundPosted: "Found posted",
+  chartLostReported: "Lost reported",
+  pendingClaimsTitle: "Pending Claims on My Items",
+  myActiveClaims: "My Active Claims",
+  noActiveClaims: "You have no active claims at this school.",
+  confirmHandoff: "Confirm Handoff",
+  acceptedCoordinate: "Accepted - Coordinate Now",
+  pendingReview: "Pending Review",
+  goToItem: "Go to Item",
+  confirmReceipt: "Confirm Receipt",
+  cancelClaim: "Cancel Claim",
+  review: "Review",
 };
 
 const CATEGORIES = [
@@ -725,6 +779,33 @@ export default function SchoolBoardPage() {
       ["filterDateFrom", "Date from", "sc_board_filterDateFrom"],
       ["filterDateTo", "Date to", "sc_board_filterDateTo"],
       ["clearFilters", "Clear filters", "sc_board_clearFilters"],
+      ["statPosted", "Posted", "sc_board_statPosted"],
+      ["statReturned", "Returned", "sc_board_statReturned"],
+      ["statLost", "Lost", "sc_board_statLost"],
+      ["xpToNextLevel", "XP to next level", "sc_board_xpToNextLevel"],
+      ["maxLevelReached", "Max level reached", "sc_board_maxLevelReached"],
+      ["xpBreakdown", "XP breakdown", "sc_board_xpBreakdown"],
+      ["xpReturn", "Return: +100 XP each", "sc_board_xpReturn"],
+      ["xpPost", "Post: +20 XP each", "sc_board_xpPost"],
+      ["xpReportLost", "Report lost: +5 XP each", "sc_board_xpReportLost"],
+      ["monthlyActivity", "Monthly activity", "sc_board_monthlyActivity"],
+      ["chartFound", "Found", "sc_board_chartFound"],
+      ["chartLost", "Lost", "sc_board_chartLost"],
+      ["chartReturned", "Returned", "sc_board_chartReturned"],
+      ["actionBreakdown", "Action breakdown", "sc_board_actionBreakdown"],
+      ["noActivity", "No activity yet.", "sc_board_noActivity"],
+      ["chartFoundPosted", "Found posted", "sc_board_chartFoundPosted"],
+      ["chartLostReported", "Lost reported", "sc_board_chartLostReported"],
+      ["pendingClaimsTitle", "Pending Claims on My Items", "sc_board_pendingClaimsTitle"],
+      ["myActiveClaims", "My Active Claims", "sc_board_myActiveClaims"],
+      ["noActiveClaims", "You have no active claims at this school.", "sc_board_noActiveClaims"],
+      ["confirmHandoff", "Confirm Handoff", "sc_board_confirmHandoff"],
+      ["acceptedCoordinate", "Accepted - Coordinate Now", "sc_board_acceptedCoordinate"],
+      ["pendingReview", "Pending Review", "sc_board_pendingReview"],
+      ["goToItem", "Go to Item", "sc_board_goToItem"],
+      ["confirmReceipt", "Confirm Receipt", "sc_board_confirmReceipt"],
+      ["cancelClaim", "Cancel Claim", "sc_board_cancelClaim"],
+      ["review", "Review", "sc_board_review"],
     ];
     Promise.all(pairs.map(([field, key, cacheKey]) =>
       fetchTranslation(key, language, cacheKey, (val) => setS((prev) => ({ ...prev, [field]: val })))
@@ -747,6 +828,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   type BoardTab = "items" | "add-item" | "my-dash" | "leaderboard" | "admin-login" | "reports" | "inbox";
 
   const router = useRouter();
+  const { language } = useSettings();
+  const [catMap, setCatMap] = useState<Record<string, string>>({});
   const color = school.color;
   const color2 = school.secondary_color ?? "#f5c842";
   const textOn = textOnColor(color);
@@ -810,6 +893,60 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     };
     fetch();
   }, [school.id]);
+
+  // ── Translate categories ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (language === "en") { setCatMap({}); return; }
+    const unique = [...new Set([...CATEGORIES, ...items.map((i) => i.category), ...lostItems.map((i) => i.category)].filter(Boolean))] as string[];
+    Promise.all(unique.map(async (cat) => {
+      const cacheKey = `sc_cat_${cat.replace(/\s+/g, "_")}_${language}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return [cat, cached] as [string, string];
+      try {
+        const res = await fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: cat, target: language }) });
+        if (res.ok) {
+          const data = await res.json();
+          const t = (data.translatedText as string | undefined)?.trim() || cat;
+          localStorage.setItem(cacheKey, t);
+          return [cat, t] as [string, string];
+        }
+      } catch {}
+      return [cat, cat] as [string, string];
+    })).then((pairs) => setCatMap(Object.fromEntries(pairs)));
+  }, [language, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Translate item content (name, description, location) ────────────────────
+  const [contentMap, setContentMap] = useState<Record<string, { name: string; description: string; location: string }>>({});
+  useEffect(() => {
+    if (language === "en") { setContentMap({}); return; }
+    const allItems = [
+      ...items.map((i) => ({ k: `f_${i.id}`, id: i.id, t: "f", name: i.name || "", description: i.description || "", location: i.location || "" })),
+      ...lostItems.map((i) => ({ k: `l_${i.id}`, id: i.id, t: "l", name: i.name || "", description: i.description || "", location: i.location || "" })),
+    ];
+    if (allItems.length === 0) return;
+    const tx = async (text: string, cacheKey: string) => {
+      if (!text) return text;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return cached;
+      try {
+        const res = await fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, target: language }) });
+        const data = await res.json();
+        const t = (data.translatedText as string | undefined)?.trim() || text;
+        localStorage.setItem(cacheKey, t);
+        return t;
+      } catch { return text; }
+    };
+    const newMap: Record<string, { name: string; description: string; location: string }> = {};
+    Promise.all(allItems.map(async (item) => {
+      const p = `sb_${item.t}_${item.id}`;
+      const [name, description, location] = await Promise.all([
+        tx(item.name, `${p}_name_${language}`),
+        tx(item.description, `${p}_desc_${language}`),
+        tx(item.location, `${p}_loc_${language}`),
+      ]);
+      newMap[item.k] = { name, description, location };
+    })).then(() => setContentMap({ ...newMap }));
+  }, [language, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── My active claims (as claimant) ──────────────────────────────────────────
   useEffect(() => {
@@ -1287,7 +1424,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <div style={{ position: "relative" }}>
                     <select className="sc-board-filter-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ width: "100%", padding: "8px 28px 8px 10px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: filterCategory ? color : "var(--bg-input)", color: filterCategory ? textOn : "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", appearance: "none", WebkitAppearance: "none", outline: "none", transition: "all 0.15s ease", boxSizing: "border-box" }}>
                       <option value="">{s.filterCategory}</option>
-                      {CATEGORIES.map((cat) => <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>{cat}</option>)}
+                      {CATEGORIES.map((cat) => <option key={cat} value={cat} style={{ background: "var(--bg-input)", color: "var(--text-primary)" }}>{catMap[cat] || cat}</option>)}
                     </select>
                     <FaChevronDown style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", color: filterCategory ? "rgba(255,255,255,0.7)" : "var(--text-muted)", fontSize: 10, pointerEvents: "none" }} />
                   </div>
@@ -1300,7 +1437,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                 </div>
                 {hasActiveFilters && (
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {filterCategory && <span onClick={() => setFilterCategory("")} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{filterCategory} <span style={{ opacity: 0.7 }}>×</span></span>}
+                    {filterCategory && <span onClick={() => setFilterCategory("")} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{catMap[filterCategory] || filterCategory} <span style={{ opacity: 0.7 }}>×</span></span>}
                     {(filterDateFrom || filterDateTo) && <span onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); }} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 100, background: `${color}22`, border: `1px solid ${color}`, color, fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{filterDateFrom || "..."} to {filterDateTo || "..."} <span style={{ opacity: 0.7 }}>×</span></span>}
                   </div>
                 )}
@@ -1323,10 +1460,10 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                         {item.image_url ? <img src={item.image_url} alt={item.name} className="sc-item-card__img" /> : <div className="sc-item-card__no-img">{s.noImage}</div>}
                       </div>
                       <div className="sc-item-card__info">
-                        <p className="sc-item-card__name">{item.name}</p>
-                        <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
+                        <p className="sc-item-card__name">{contentMap[`f_${item.id}`]?.name || item.name}</p>
+                        <p className="sc-item-card__desc">{contentMap[`f_${item.id}`]?.description || item.description}</p>
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{catMap[item.category] || item.category}</span>}
+                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`f_${item.id}`]?.location || item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.foundBy} {item.author_name}</span>
@@ -1343,15 +1480,15 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               ) : (
                 <div className="sc-items-grid">
                   {filteredLost.map((item) => (
-                    <div key={item.id} className="sc-item-card sc-item-card--clickable" onClick={() => router.push(`/school-items/${item.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/school-items/${item.id}`); }}>
+                    <div key={item.id} className="sc-item-card sc-item-card--clickable" onClick={() => router.push(`/school-lost-items/${item.id}`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/school-lost-items/${item.id}`); }}>
                       <div className="sc-item-card__img-wrap">
                         {item.image_url ? <img src={item.image_url} alt={item.name} className="sc-item-card__img" /> : <div className="sc-item-card__no-img">{s.noImage}</div>}
                       </div>
                       <div className="sc-item-card__info">
-                        <p className="sc-item-card__name">{item.name}</p>
-                        <p className="sc-item-card__desc">{item.description}</p>
-                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
+                        <p className="sc-item-card__name">{contentMap[`l_${item.id}`]?.name || item.name}</p>
+                        <p className="sc-item-card__desc">{contentMap[`l_${item.id}`]?.description || item.description}</p>
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{catMap[item.category] || item.category}</span>}
+                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`l_${item.id}`]?.location || item.location}</p>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.lostBy} {item.author_name}</span>
@@ -1485,7 +1622,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       </div>
                     </div>
                     <div className="sc-my-dash-stats" style={{ display: "flex", gap: 20, flexShrink: 0 }}>
-                      {([["Posted", totalFound, clrFound], ["Returned", totalReturnedByMe, clrReturned], ["Lost", totalLost, "var(--danger)"]] as [string, number, string][]).map(([label, val, clr]) => (
+                      {([[s.statPosted, totalFound, clrFound], [s.statReturned, totalReturnedByMe, clrReturned], [s.statLost, totalLost, "var(--danger)"]] as [string, number, string][]).map(([label, val, clr]) => (
                         <div key={label} style={{ textAlign: "center" }}>
                           <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 20, fontWeight: 700, color: clr }}>{val}</p>
                           <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</p>
@@ -1505,23 +1642,23 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                         <div style={{ height: "100%", width: `${xpPct}%`, background: color, borderRadius: 3, transition: "width 0.5s ease" }} />
                       </div>
                       {xpNext !== null
-                        ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
-                        : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color }}>Max level reached</p>}
+                        ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} {s.xpToNextLevel}</p>
+                        : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color }}>{s.maxLevelReached}</p>}
                     </div>
                     <div className="sc-my-dash-xp-breakdown" style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
-                      <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
-                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
-                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
-                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{s.xpBreakdown}</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>{s.xpReturn}</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>{s.xpPost}</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>{s.xpReportLost}</span>
                     </div>
                   </div>
 
                   {/* Charts */}
                   <div className="sc-my-dash-charts-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)", overflow: "hidden", minWidth: 0 }}>
-                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Monthly activity</p>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{s.monthlyActivity}</p>
                       <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
-                        {([["Found", clrFound], ["Lost", clrLost], ["Returned", clrReturned]] as [string, string][]).map(([l, c]) => (
+                        {([[s.chartFound, clrFound], [s.chartLost, clrLost], [s.chartReturned, clrReturned]] as [string, string][]).map(([l, c]) => (
                           <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
                             <span style={{ width: 9, height: 9, borderRadius: 2, background: c, flexShrink: 0 }} />{l}
                           </span>
@@ -1530,13 +1667,13 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div style={{ position: "relative", height: 160, width: "100%" }}><canvas id={`schoolBarChart-${chartKey}`} role="img" aria-label="Monthly activity chart" /></div>
                     </div>
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 14, padding: "16px 18px", boxShadow: "var(--card-shadow)", overflow: "hidden", minWidth: 0 }}>
-                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>Action breakdown</p>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{s.actionBreakdown}</p>
                       {totalActions === 0 ? (
-                        <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", padding: "20px 0" }}>No activity yet.</p>
+                        <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", padding: "20px 0" }}>{s.noActivity}</p>
                       ) : (
                         <>
                           <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
-                            {([["Found posted", clrFound, totalFound], ["Lost reported", clrLost, totalLost], ["Returned", clrReturned, totalReturnedByMe]] as [string, string, number][]).map(([l, c, v]) => (
+                            {([[s.chartFoundPosted, clrFound, totalFound], [s.chartLostReported, clrLost, totalLost], [s.chartReturned, clrReturned, totalReturnedByMe]] as [string, string, number][]).map(([l, c, v]) => (
                               <span key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>
                                 <span style={{ width: 9, height: 9, borderRadius: 2, background: c, flexShrink: 0 }} />{l} {totalActions > 0 ? Math.round((v / totalActions) * 100) : 0}%
                               </span>
@@ -1552,7 +1689,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   {/* Pending claims on my items */}
                   {Object.values(myItemClaims).some((n) => n > 0) && (
                     <div>
-                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>Pending Claims on My Items</p>
+                      <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>{s.pendingClaimsTitle}</p>
                       {myFoundItems.filter((item) => (myItemClaims[item.id] ?? 0) > 0).map((item) => (
                         <div key={item.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
                           {item.image_url && <img src={item.image_url} alt={item.name} style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />}
@@ -1561,7 +1698,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             {myItemClaims[item.id]} pending claim{myItemClaims[item.id] !== 1 ? "s" : ""}
                           </span>
                           <button style={{ background: color, color: textOn, fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", flexShrink: 0 }} onClick={() => router.push(`/school-items/${item.id}`)}>
-                            Review
+                            {s.review}
                           </button>
                         </div>
                       ))}
@@ -1581,17 +1718,17 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               {item.image_url ? <img src={item.image_url} alt={item.name} className="sc-item-card__img" /> : <div className="sc-item-card__no-img">{s.noImage}</div>}
                             </div>
                             <div className="sc-item-card__info">
-                              <p className="sc-item-card__name">{item.name}</p>
-                              <p className="sc-item-card__desc">{item.description}</p>
-                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
+                              <p className="sc-item-card__name">{contentMap[`f_${item.id}`]?.name || item.name}</p>
+                              <p className="sc-item-card__desc">{contentMap[`f_${item.id}`]?.description || item.description}</p>
+                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{catMap[item.category] || item.category}</span>}
+                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`f_${item.id}`]?.location || item.location}</p>}
                               <StatusBadge status={item.status} />
                             </div>
                             <div className="sc-item-card__actions">
                               {/* Finder confirm handoff */}
                               {(item.status === "claim_accepted" || item.status === "handed_off") && item.author_id === user.id && !item.handoff_confirmed_by_poster && (
                                 <button className="sc-btn sc-btn--success sc-btn--sm" style={{ width: "100%" }} onClick={() => handleConfirmHandoff(item.id)}>
-                                  Confirm Handoff
+                                  {s.confirmHandoff}
                                 </button>
                               )}
                               <div className="sc-item-card__actions-row">
@@ -1621,10 +1758,10 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               {item.image_url ? <img src={item.image_url} alt={item.name} className="sc-item-card__img" /> : <div className="sc-item-card__no-img">{s.noImage}</div>}
                             </div>
                             <div className="sc-item-card__info">
-                              <p className="sc-item-card__name">{item.name}</p>
-                              <p className="sc-item-card__desc">{item.description}</p>
-                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{item.location}</p>}
+                              <p className="sc-item-card__name">{contentMap[`l_${item.id}`]?.name || item.name}</p>
+                              <p className="sc-item-card__desc">{contentMap[`l_${item.id}`]?.description || item.description}</p>
+                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{catMap[item.category] || item.category}</span>}
+                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`l_${item.id}`]?.location || item.location}</p>}
                             </div>
                             <div className="sc-item-card__actions">
                               <button className="sc-btn sc-btn--success sc-btn--sm" style={{ width: "100%" }} onClick={(e) => handleMarkLostFound(e, item.id)}>{s.markFound}</button>
@@ -1640,11 +1777,11 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
                   {/* My Active Claims (as claimant) */}
                   <div>
-                    <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>My Active Claims</p>
+                    <p style={{ margin: "0 0 10px", fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>{s.myActiveClaims}</p>
                     {activeClaimsLoading ? (
-                      <div className="sc-empty">Loading...</div>
+                      <div className="sc-empty">{s.loadingText}</div>
                     ) : myActiveClaims.length === 0 ? (
-                      <div className="sc-empty">You have no active claims at this school.</div>
+                      <div className="sc-empty">{s.noActiveClaims}</div>
                     ) : (
                       <div className="sc-items-grid" style={{ margin: 0 }}>
                         {myActiveClaims.map((claim: any) => (
@@ -1653,7 +1790,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               <p className="sc-item-card__name">{claim.item_name}</p>
                               <p className="sc-item-card__desc">{claim.description_proof?.slice(0, 100)}{(claim.description_proof?.length || 0) > 100 ? "…" : ""}</p>
                               <span style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", borderRadius: 100, fontSize: "0.7rem", fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : "var(--warning)", color: "#fff" }}>
-                                {claim.status === "accepted" ? "Accepted - Coordinate Now" : "Pending Review"}
+                                {claim.status === "accepted" ? s.acceptedCoordinate : s.pendingReview}
                               </span>
                               {/* Claimant confirm handoff */}
                               {claim.item_status === "handed_off" && (
@@ -1663,17 +1800,17 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             <div className="sc-item-card__actions">
                               {claim.status === "accepted" && (
                                 <button className="sc-btn sc-btn--success sc-btn--sm" style={{ width: "100%", background: color, borderColor: color, color: textOn }} onClick={() => router.push(`/school-items/${claim.item_id}`)}>
-                                  Go to Item
+                                  {s.goToItem}
                                 </button>
                               )}
                               {claim.item_status === "handed_off" && (
                                 <button className="sc-btn sc-btn--primary sc-btn--sm" style={{ width: "100%", background: color, borderColor: color, color: textOn }} onClick={() => handleConfirmHandoff(claim.item_id)}>
-                                  Confirm Receipt
+                                  {s.confirmReceipt}
                                 </button>
                               )}
                               {claim.status === "pending" && (
                                 <button className="sc-btn sc-btn--ghost sc-btn--sm" style={{ width: "100%", border: "1.5px solid var(--danger)", color: "var(--danger)" }} onClick={() => handleCancelClaim(claim.id, claim.item_id)}>
-                                  Cancel Claim
+                                  {s.cancelClaim}
                                 </button>
                               )}
                             </div>
