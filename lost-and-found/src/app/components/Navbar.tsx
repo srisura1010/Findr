@@ -264,7 +264,7 @@ export default function Navbar() {
               <SignInButton mode="modal">
                 <button className="topbar__signin-btn">{signInText}</button>
               </SignInButton>
-              <SignUpButton>
+              <SignUpButton mode="modal">
                 <button className="topbar__signup-btn">{signUpText}</button>
               </SignUpButton>
             </>
@@ -440,7 +440,7 @@ export default function Navbar() {
           </button>
 
           {!showSignedIn && (
-            <SignUpButton>
+            <SignUpButton mode="modal">
               <button
                 className="mobile-sidebar__signup"
                 onClick={() => setMobileOpen(false)}
