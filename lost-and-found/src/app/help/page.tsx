@@ -53,7 +53,7 @@ const FAQ_CATEGORIES = [
   label: "Getting Started",
   icon: "",
   questions: [
-  { q: "What is Findr?", a: "Findr is a lost & found platform for schools and institutions. Finders post items they've found, and claimants submit proof-based claims to retrieve them — all in one place with a full verification workflow." },
+  { q: "What is Findr?", a: "Findr is a lost & found platform for schools and institutions. Finders post items they've found, and claimants submit proof-based claims to retrieve themall in one place with a full verification workflow." },
   { q: "Do I need an account to use Findr?", a: "You can browse posted items without an account, but you'll need to sign in to post a found item, submit a claim, or message a finder." },
   { q: "How do I sign in?", a: "Click 'Sign In' in the top navigation. We use Clerk for authentication, so you can sign in with your email or a social account. Your profile info is automatically filled in when you post items." }]
 },
@@ -63,17 +63,17 @@ const FAQ_CATEGORIES = [
   icon: "",
   questions: [
   { q: "How do I search for a lost item?", a: "Use the search bar on the dashboard. You can type keywords like the color, brand, item type, or location where you lost it. Our AI-powered search understands natural language, so try things like 'blue water bottle' or 'AirPods case'." },
-  { q: "How does the AI image search work?", a: "When a finder uploads a photo of an item, our AI automatically reads and tags the image with keywords — things like color, brand, and type. This makes items searchable even if the finder didn't describe them perfectly." },
+  { q: "How does the AI image search work?", a: "When a finder uploads a photo of an item, our AI automatically reads and tags the image with keywordsthings like color, brand, and type. This makes items searchable even if the finder didn't describe them perfectly." },
   { q: "What do the item status labels mean?", a: "'Available' means the item is waiting to be claimed. 'Claim in progress' means a claim was accepted and the finder is arranging the handoff. 'Awaiting confirmation' means the finder confirmed the handoff and the claimant needs to confirm receipt. 'Disputed' means the claimant opened a dispute that an admin is reviewing." },
-  { q: "Can I filter items by category or date?", a: "Yes — use the filter bar on the dashboard to filter by category, location, or date range. Active filters show as removable chips so you can see exactly what's applied." }]
+  { q: "Can I filter items by category or date?", a: "Yesuse the filter bar on the dashboard to filter by category, location, or date range. Active filters show as removable chips so you can see exactly what's applied." }]
 },
 {
   id: "claiming",
   label: "Claiming Items",
   icon: "",
   questions: [
-  { q: "How do I claim an item I lost?", a: "Find your item and click 'This is mine'. You'll need to describe something specific about the item that is NOT visible in the photo — a scratch, a name written inside, a sticker placement, etc. You can also upload optional proof like a receipt or photo. The finder reviews your claim and decides to accept or reject it." },
-  { q: "Why do I need to provide proof?", a: "Proof protects against false claims. Since anyone can see the item photo, we ask you to describe something only the true owner would know — something not visible in the image. The finder uses this to verify your ownership." },
+  { q: "How do I claim an item I lost?", a: "Find your item and click 'This is mine'. You'll need to describe something specific about the item that is NOT visible in the photoa scratch, a name written inside, a sticker placement, etc. You can also upload optional proof like a receipt or photo. The finder reviews your claim and decides to accept or reject it." },
+  { q: "Why do I need to provide proof?", a: "Proof protects against false claims. Since anyone can see the item photo, we ask you to describe something only the true owner would knowsomething not visible in the image. The finder uses this to verify your ownership." },
   { q: "How many claims can I have active at once?", a: "You can have a maximum of 2 active claims at any time. Once a claim is resolved (accepted, rejected, or cancelled), the slot frees up. Cancelled claims still count toward the limit for 24 hours to prevent abuse." },
   { q: "Can I cancel a claim I submitted?", a: "Yes, as long as the item is still in 'waiting' status and the finder hasn't accepted your claim yet. Go to 'My Dashboard' and find it under 'My Active Claims'. Once a claim is accepted, it can no longer be cancelled." },
   { q: "What happens if my claim is rejected?", a: "You'll receive a notification with the finder's reason. Once rejected on a specific item, you cannot re-submit a claim for that same item. If you believe the rejection was wrong, you can report the item from the dashboard." },
@@ -87,7 +87,7 @@ const FAQ_CATEGORIES = [
   { q: "What happens after my claim is accepted?", a: "The finder will see a banner prompting them to physically hand the item back to you. Once they do, they click 'Confirm I Handed It Back'. You then receive a notification to confirm receipt on your end." },
   { q: "How do I confirm I received my item?", a: "After the finder confirms the handoff, go to the item page and click 'Confirm I Received It'. This completes the return and removes the listing. You have 48 hours before the system auto-confirms." },
   { q: "What if I didn't actually receive the item?", a: "Click 'Dispute' on the item page instead of confirming receipt. Write a description of what went wrong (minimum 50 characters). All registered admins are notified immediately and the item is flagged as disputed. An admin will review and either resolve it in your favor (deleting the listing) or dismiss the dispute (returning the item to claim_accepted status)." },
-  { q: "Can I message the finder?", a: "Yes — use 'Message Finder' on any item page to open a real-time chat. You can also access all your conversations from the Messages page in the navigation. Conversations are organized per person, so all messages with the same user appear in one thread regardless of which item you're discussing." }]
+  { q: "Can I message the finder?", a: "Yesuse 'Message Finder' on any item page to open a real-time chat. You can also access all your conversations from the Messages page in the navigation. Conversations are organized per person, so all messages with the same user appear in one thread regardless of which item you're discussing." }]
 },
 {
   id: "posting-items",
@@ -95,9 +95,9 @@ const FAQ_CATEGORIES = [
   icon: "",
   questions: [
   { q: "How do I post a found item?", a: "Go to the Dashboard and click 'Lost/Found Item' in the sidebar, then select 'Found an Item'. Fill in the item name, category, description (include where and when you found it), location, and upload a clear photo. Hit 'Post Item' and it'll be live instantly." },
-  { q: "What makes a good item description?", a: "Include: where you found it (e.g., 'near the gym lockers'), when you found it, any identifying features (color, brand, engravings), and the general condition of the item. Don't reveal every detail — leave some features for claimants to describe so you can verify their proof." },
+  { q: "What makes a good item description?", a: "Include: where you found it (e.g., 'near the gym lockers'), when you found it, any identifying features (color, brand, engravings), and the general condition of the item. Don't reveal every detailleave some features for claimants to describe so you can verify their proof." },
   { q: "How do I review claims on my item?", a: "When claims come in, a 'View Claims (N)' button appears on your item page showing how many pending claims exist. Click it to open a review panel where you can read each claimant's proof description, view any proof images they uploaded, and choose to Accept or Reject. Accepting requires no reason; Rejecting requires you to enter a reason." },
-  { q: "Can I message a claimant to ask for more info?", a: "Yes — in the claims review modal, each claim card has a 'Message Claimant' option. Your message goes directly into the in-app chat thread with that user." },
+  { q: "Can I message a claimant to ask for more info?", a: "Yesin the claims review modal, each claim card has a 'Message Claimant' option. Your message goes directly into the in-app chat thread with that user." },
   { q: "Can I delete my posted item?", a: "Yes, but with restrictions based on claim status. If there are no claims: simple delete. If there are pending claims: you'll be warned and claimants will be notified. If a claim is accepted: you'll be warned and the accepted claimant will be notified. If the item is in 'handed_off' or 'disputed' status, deletion is blocked until the situation resolves." },
   { q: "What happens if my item gets too many rejected claims?", a: "If 5 or more claims are rejected on a single item, it's automatically flagged in the admin Reports panel as potential finder misconduct. An admin may review the situation." }]
 },
@@ -109,7 +109,7 @@ const FAQ_CATEGORIES = [
   { q: "What is a School Board?", a: "School Boards are private lost & found boards for specific schools or institutions. Each school has its own themed board with its own found items and lost item reports, separate from the main Findr board." },
   { q: "How do I join a school board?", a: "Go to the Schools page in the navigation and enter your school's code. Once joined, the school's board appears in your schools list and you can post and browse items specific to that school." },
   { q: "How do I become a school admin?", a: "On your school's board page, click the Admin tab and enter the school admin password from your Findr approval email. Once unlocked, you can delete items, view school-specific reports, and access the school inbox." },
-  { q: "Can I message a school admin?", a: "Yes — on the Messages page, click 'Contact a School Admin' to select your school and choose who to message. School admin conversations are separate from regular item chats." }]
+  { q: "Can I message a school admin?", a: "Yeson the Messages page, click 'Contact a School Admin' to select your school and choose who to message. School admin conversations are separate from regular item chats." }]
 },
 {
   id: "admin",
@@ -126,9 +126,9 @@ const FAQ_CATEGORIES = [
   label: "Settings & Accessibility",
   icon: "",
   questions: [
-  { q: "Can I change the language?", a: "Yes — go to Settings and pick your preferred language. Findr uses AI-powered translation to localize the entire interface including item descriptions." },
-  { q: "Does Findr have text-to-speech?", a: "Yes — go to the Settings page to enable TTS, which will read item descriptions aloud." },
-  { q: "Does Findr have accessibility modes?", a: "Yes — Settings includes a high-contrast mode and a colorblind-friendly mode in addition to the standard light and dark themes." }]
+  { q: "Can I change the language?", a: "Yesgo to Settings and pick your preferred language. Findr uses AI-powered translation to localize the entire interface including item descriptions." },
+  { q: "Does Findr have text-to-speech?", a: "Yesgo to the Settings page to enable TTS, which will read item descriptions aloud." },
+  { q: "Does Findr have accessibility modes?", a: "YesSettings includes a high-contrast mode and a colorblind-friendly mode in addition to the standard light and dark themes." }]
 }];
 
 
@@ -216,7 +216,7 @@ DELETION RULES:
 - Handed off or disputed: BLOCKED, cannot delete
 
 MESSAGING:
-- All conversations are per user-pair (not per item) — one thread per two people regardless of items
+- All conversations are per user-pair (not per item)one thread per two people regardless of items
 - Messages page shows all conversations with unread indicators
 - "Message Finder" on item page, "Message Claimant" in claims review modal
 - Admins can message dispute parties from the Disputes panel
@@ -290,7 +290,7 @@ function GroqChatbot({ language }: {language: string;}) {
 
   return (
     <>
-      <p className="chatbot-intro">{poweredByText} <strong>Groq</strong> — {askAnythingText}</p>
+      <p className="chatbot-intro">{poweredByText} <strong>Groq</strong>{askAnythingText}</p>
       <div className="chatbot">
         <div className="chatbot__header">
           <div className="chatbot__header-dot" />
@@ -334,13 +334,13 @@ const STEPS = [
 
 
 const PRO_TIPS = [
-"Use descriptive keywords when searching — the AI understands 'black north face backpack'",
+"Use descriptive keywords when searchingthe AI understands 'black north face backpack'",
 "When claiming, describe something not in the photo: a name written inside, a specific scratch, a sticker placement",
 "Message the finder before or after claiming if you need to confirm details or arrange pickup",
-"If you find something, avoid describing every detail in your post — leave some details for claimants to prove ownership",
+"If you find something, avoid describing every detail in your postleave some details for claimants to prove ownership",
 "Check 'My Dashboard' to see pending claims on items you've posted without having to visit each item page",
-"Admins can help resolve disputes — use the Dispute button if the finder confirmed a handoff that didn't happen",
-"Switch languages in Settings if English isn't your first language — the whole interface translates"];
+"Admins can help resolve disputesuse the Dispute button if the finder confirmed a handoff that didn't happen",
+"Switch languages in Settings if English isn't your first languagethe whole interface translates"];
 
 
 export default function HelpPage() {
@@ -354,7 +354,7 @@ export default function HelpPage() {
   const faqLabel = useTranslated("FAQs", language);
   const aiSupportLabel = useTranslated("AI Support", language);
   const helpTitle = useTranslated("Help & Support", language);
-  const helpSubtitle = useTranslated("Everything you need to use Findr — guides, FAQs, and live AI support.", language);
+  const helpSubtitle = useTranslated("Everything you need to use Findrguides, FAQs, and live AI support.", language);
   const howItWorksText = useTranslated("How it works", language);
   const proTipsText = useTranslated("Pro Tips", language);
   const faqHeading = useTranslated("Frequently Asked Questions", language);
