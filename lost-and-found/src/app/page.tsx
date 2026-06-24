@@ -184,6 +184,7 @@ export default function Home() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [translatedPhrases, setTranslatedPhrases] = useState<string[]>(TYPING_PHRASES);
 
   // translatable strings
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
@@ -255,7 +256,7 @@ export default function Home() {
 
   // typing animation
   useEffect(() => {
-    const current = TYPING_PHRASES[phraseIndex];
+    const current = translatedPhrases[phraseIndex] ?? TYPING_PHRASES[phraseIndex];
     const timeout = setTimeout(
       () => {
         if (!isDeleting) {
@@ -269,14 +270,14 @@ export default function Home() {
           setCharIndex((c) => c - 1);
           if (charIndex - 1 === 0) {
             setIsDeleting(false);
-            setPhraseIndex((p) => (p + 1) % TYPING_PHRASES.length);
+            setPhraseIndex((p) => (p + 1) % translatedPhrases.length);
           }
         }
       },
       isDeleting ? 42 : 82,
     );
     return () => clearTimeout(timeout);
-  }, [charIndex, isDeleting, phraseIndex]);
+  }, [charIndex, isDeleting, phraseIndex, translatedPhrases]);
 
   // ban check
   useEffect(() => {
@@ -374,6 +375,7 @@ export default function Home() {
       setFooterSettingsText("Settings");
       setFooterContactText("Contact");
       setFooterCopyText("Built for students, by students.");
+      setTranslatedPhrases(TYPING_PHRASES);
       setIsReady(true);
       return;
     }
@@ -518,6 +520,37 @@ export default function Home() {
           /* keep defaults */
         }
       }
+
+      // translate typing phrases
+      const phraseCacheKeys = TYPING_PHRASES.map((_, i) => `home_phrase${i}`);
+      const translated: string[] = [];
+      for (let i = 0; i < TYPING_PHRASES.length; i++) {
+        const cacheKey = phraseCacheKeys[i];
+        const cached = localStorage.getItem(`${cacheKey}_${language}`);
+        if (cached) {
+          translated.push(cached);
+          continue;
+        }
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: TYPING_PHRASES[i], target: language }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const t = data.translatedText || TYPING_PHRASES[i];
+            translated.push(t);
+            localStorage.setItem(`${cacheKey}_${language}`, t);
+          } else {
+            translated.push(TYPING_PHRASES[i]);
+          }
+        } catch {
+          translated.push(TYPING_PHRASES[i]);
+        }
+      }
+      setTranslatedPhrases(translated);
+
       setIsReady(true);
     };
     translateAndCache();
