@@ -305,6 +305,33 @@ interface DashStrings {
   filterDate: string;
   filterAll: string;
   clearFilters: string;
+  myDashboardTab: string;
+  activeMember: string;
+  statPosted: string;
+  statReturned: string;
+  statLost: string;
+  xpToNextLevel: string;
+  maxLevelReached: string;
+  xpBreakdown: string;
+  xpReturn: string;
+  xpPost: string;
+  xpReportLost: string;
+  monthlyActivity: string;
+  chartFound: string;
+  chartLost: string;
+  chartReturned: string;
+  actionBreakdown: string;
+  chartFoundPosted: string;
+  chartLostReported: string;
+  noActivity: string;
+  pendingClaimsTitle: string;
+  levelLegend: string;
+  levelChampion: string;
+  levelFinder: string;
+  levelHelper: string;
+  levelNewcomer: string;
+  brandTitle: string;
+  brandSub: string;
 }
 
 const DEFAULT_STRINGS: DashStrings = {
@@ -428,6 +455,33 @@ const DEFAULT_STRINGS: DashStrings = {
   filterDate: "Date",
   filterAll: "All",
   clearFilters: "Clear filters",
+  myDashboardTab: "My Dashboard",
+  activeMember: "Active member",
+  statPosted: "Posted",
+  statReturned: "Returned",
+  statLost: "Lost",
+  xpToNextLevel: "XP to next level",
+  maxLevelReached: "Max level reached",
+  xpBreakdown: "XP breakdown",
+  xpReturn: "Return: +100 XP each",
+  xpPost: "Post: +20 XP each",
+  xpReportLost: "Report lost: +5 XP each",
+  monthlyActivity: "Monthly activity",
+  chartFound: "Found",
+  chartLost: "Lost",
+  chartReturned: "Returned",
+  actionBreakdown: "Action breakdown",
+  chartFoundPosted: "Found posted",
+  chartLostReported: "Lost reported",
+  noActivity: "No activity yet.",
+  pendingClaimsTitle: "Pending Claims on My Items",
+  levelLegend: "Legend",
+  levelChampion: "Champion",
+  levelFinder: "Finder",
+  levelHelper: "Helper",
+  levelNewcomer: "Newcomer",
+  brandTitle: "Findr Dashboard",
+  brandSub: "Your Lost & Found",
 };
 
 // ── Sub-panels ────────────────────────────────────────────────────────────────
@@ -1485,10 +1539,12 @@ function MyDashboardCharts({
   chartKey,
   chartData,
   pieData,
+  labels,
 }: {
   chartKey: string;
   chartData: string;
   pieData: string;
+  labels: { found: string; lost: string; returned: string; foundPosted: string; lostReported: string };
 }) {
   useEffect(() => {
     const { monthLabels, foundByMonth, lostByMonth, returnedByMonth } =
@@ -1531,21 +1587,21 @@ function MyDashboardCharts({
             labels: monthLabels,
             datasets: [
               {
-                label: "Found",
+                label: labels.found,
                 data: foundByMonth,
                 backgroundColor: clrFound,
                 borderRadius: 5,
                 borderSkipped: false,
               },
               {
-                label: "Lost",
+                label: labels.lost,
                 data: lostByMonth,
                 backgroundColor: clrLost,
                 borderRadius: 5,
                 borderSkipped: false,
               },
               {
-                label: "Returned",
+                label: labels.returned,
                 data: returnedByMonth,
                 backgroundColor: clrClaimed,
                 borderRadius: 5,
@@ -1601,7 +1657,7 @@ function MyDashboardCharts({
         new C(pieEl, {
           type: "doughnut",
           data: {
-            labels: ["Found posted", "Lost reported", "Returned"],
+            labels: [labels.foundPosted, labels.lostReported, labels.returned],
             datasets: [
               {
                 data: [totalFound, totalLost, totalReturned],
@@ -1638,7 +1694,7 @@ function MyDashboardCharts({
         });
       }
     });
-  }, [chartKey]);
+  }, [chartKey, labels]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 }
@@ -1982,6 +2038,33 @@ export default function DashboardPage() {
       ["filterDate", "Date", "dash_filterDate"],
       ["filterAll", "All", "dash_filterAll"],
       ["clearFilters", "Clear filters", "dash_clearFilters"],
+      ["myDashboardTab", "My Dashboard", "dash_myDashboardTab"],
+      ["activeMember", "Active member", "dash_activeMember"],
+      ["statPosted", "Posted", "dash_statPosted"],
+      ["statReturned", "Returned", "dash_statReturned"],
+      ["statLost", "Lost", "dash_statLost"],
+      ["xpToNextLevel", "XP to next level", "dash_xpToNextLevel"],
+      ["maxLevelReached", "Max level reached", "dash_maxLevelReached"],
+      ["xpBreakdown", "XP breakdown", "dash_xpBreakdown"],
+      ["xpReturn", "Return: +100 XP each", "dash_xpReturn"],
+      ["xpPost", "Post: +20 XP each", "dash_xpPost"],
+      ["xpReportLost", "Report lost: +5 XP each", "dash_xpReportLost"],
+      ["monthlyActivity", "Monthly activity", "dash_monthlyActivity"],
+      ["chartFound", "Found", "dash_chartFound"],
+      ["chartLost", "Lost", "dash_chartLost"],
+      ["chartReturned", "Returned", "dash_chartReturned"],
+      ["actionBreakdown", "Action breakdown", "dash_actionBreakdown"],
+      ["chartFoundPosted", "Found posted", "dash_chartFoundPosted"],
+      ["chartLostReported", "Lost reported", "dash_chartLostReported"],
+      ["noActivity", "No activity yet.", "dash_noActivity"],
+      ["pendingClaimsTitle", "Pending Claims on My Items", "dash_pendingClaimsTitle"],
+      ["levelLegend", "Legend", "dash_levelLegend"],
+      ["levelChampion", "Champion", "dash_levelChampion"],
+      ["levelFinder", "Finder", "dash_levelFinder"],
+      ["levelHelper", "Helper", "dash_levelHelper"],
+      ["levelNewcomer", "Newcomer", "dash_levelNewcomer"],
+      ["brandTitle", "Findr Dashboard", "dash_brandTitle"],
+      ["brandSub", "Your Lost & Found", "dash_brandSub"],
     ];
 
     const translateAll = async () => {
@@ -2540,7 +2623,7 @@ export default function DashboardPage() {
     adminOnly?: boolean;
   }[] = [
     { id: "items", label: s.tabItems, icon: <HiOutlineMagnifyingGlass /> },
-    { id: "my-items", label: "My Dashboard", icon: <FaClipboard /> },
+    { id: "my-items", label: s.myDashboardTab, icon: <FaClipboard /> },
     { id: "report-item", label: s.tabReportItem, icon: <FaPlus /> },
     { id: "become-admin", label: s.tabBecomeAdmin, icon: <FaClipboard /> },
     { id: "admin-login", label: s.tabAdmin, icon: <CiLogin /> },
@@ -3013,7 +3096,7 @@ export default function DashboardPage() {
         const totalActions = totalFound + totalLost + totalClaimed;
 
         const xp = totalReturnedByMe * 100 + totalFound * 20 + totalLost * 5;
-        const userLevel = xp >= 1000 ? "Legend" : xp >= 600 ? "Champion" : xp >= 300 ? "Finder" : xp >= 100 ? "Helper" : "Newcomer";
+        const userLevel = xp >= 1000 ? s.levelLegend : xp >= 600 ? s.levelChampion : xp >= 300 ? s.levelFinder : xp >= 100 ? s.levelHelper : s.levelNewcomer;
         const xpNext = xp >= 1000 ? null : xp >= 600 ? 1000 : xp >= 300 ? 600 : xp >= 100 ? 300 : 100;
         const xpPrev = xp >= 1000 ? 600 : xp >= 600 ? 600 : xp >= 300 ? 300 : xp >= 100 ? 100 : 0;
         const xpPct = xpNext !== null ? Math.min(100, Math.round(((xp - xpPrev) / (xpNext - xpPrev)) * 100)) : 100;
@@ -3174,16 +3257,16 @@ export default function DashboardPage() {
                       fontFamily: "var(--font-body)",
                     }}
                   >
-                    Active member
+                    {s.activeMember}
                   </span>
                 </div>
               </div>
               <div className="my-dash-stats" style={{ display: "flex", gap: 20, flexShrink: 0 }}>
                 {(
                   [
-                    ["Posted", totalFound, clrFound],
-                    ["Returned", totalClaimed, clrClaimed],
-                    ["Lost", totalLost, clrLost],
+                    [s.statPosted, totalFound, clrFound],
+                    [s.statReturned, totalClaimed, clrClaimed],
+                    [s.statLost, totalLost, clrLost],
                   ] as [string, number, string][]
                 ).map(([label, val, color]) => (
                   <div key={label} style={{ textAlign: "center" }}>
@@ -3238,14 +3321,14 @@ export default function DashboardPage() {
                   <div style={{ height: "100%", width: `${xpPct}%`, background: clrFound, borderRadius: 3, transition: "width 0.5s ease" }} />
                 </div>
                 {xpNext !== null
-                  ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} XP to next level</p>
-                  : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: clrFound }}>Max level reached</p>}
+                  ? <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)" }}>{xp} / {xpNext} {s.xpToNextLevel}</p>
+                  : <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 10, color: clrFound }}>{s.maxLevelReached}</p>}
               </div>
               <div className="my-dash-xp-breakdown" style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, textAlign: "right" }}>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>XP breakdown</span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Return: +100 XP each</span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Post: +20 XP each</span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>Report lost: +5 XP each</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{s.xpBreakdown}</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>{s.xpReturn}</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>{s.xpPost}</span>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-secondary)" }}>{s.xpReportLost}</span>
               </div>
             </div>
 
@@ -3272,16 +3355,16 @@ export default function DashboardPage() {
                     color: "var(--text-primary)",
                   }}
                 >
-                  Monthly activity
+                  {s.monthlyActivity}
                 </p>
                 <div
                   style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}
                 >
                   {(
                     [
-                      ["Found", clrFound],
-                      ["Lost", clrLost],
-                      ["Returned", clrClaimed],
+                      [s.chartFound, clrFound],
+                      [s.chartLost, clrLost],
+                      [s.chartReturned, clrClaimed],
                     ] as [string, string][]
                   ).map(([l, c]) => (
                     <span
@@ -3340,7 +3423,7 @@ export default function DashboardPage() {
                     color: "var(--text-primary)",
                   }}
                 >
-                  Action breakdown
+                  {s.actionBreakdown}
                 </p>
                 {totalActions === 0 ? (
                   <p
@@ -3351,7 +3434,7 @@ export default function DashboardPage() {
                       padding: "20px 0",
                     }}
                   >
-                    No activity yet.
+                    {s.noActivity}
                   </p>
                 ) : (
                   <>
@@ -3365,9 +3448,9 @@ export default function DashboardPage() {
                     >
                       {(
                         [
-                          ["Found posted", clrFound, totalFound],
-                          ["Lost reported", clrLost, totalLost],
-                          ["Returned", clrClaimed, totalClaimed],
+                          [s.chartFoundPosted, clrFound, totalFound],
+                          [s.chartLostReported, clrLost, totalLost],
+                          [s.chartReturned, clrClaimed, totalClaimed],
                         ] as [string, string, number][]
                       ).map(([l, c, v]) => (
                         <span
@@ -3417,6 +3500,7 @@ export default function DashboardPage() {
               chartKey={chartKey}
               chartData={chartDataJson}
               pieData={pieDataJson}
+              labels={{ found: s.chartFound, lost: s.chartLost, returned: s.chartReturned, foundPosted: s.chartFoundPosted, lostReported: s.chartLostReported }}
             />
 
             {/* ── Pending claims on my items ── */}
@@ -3433,7 +3517,7 @@ export default function DashboardPage() {
                     letterSpacing: "0.8px",
                   }}
                 >
-                  Pending Claims on My Items
+                  {s.pendingClaimsTitle}
                 </p>
                 {myFoundItems
                   .filter((item) => (myItemClaims[item.id] ?? 0) > 0)
@@ -3832,8 +3916,8 @@ export default function DashboardPage() {
             <HiOutlineMagnifyingGlass />
           </span>
           <div>
-            <p className="dashboard-sidebar__brand-title">Findr Dashboard</p>
-            <p className="dashboard-sidebar__brand-sub">Your Lost & Found</p>
+            <p className="dashboard-sidebar__brand-title">{s.brandTitle}</p>
+            <p className="dashboard-sidebar__brand-sub">{s.brandSub}</p>
           </div>
         </div>
         <div className="sidebar-tabs">
