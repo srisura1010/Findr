@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { MdOutlineSchool } from "react-icons/md";
 import { getSchoolAdminConversationId } from "./MessagingSystem";
+import { useSettings } from "@/context/SettingsContext";
 
 export interface SchoolAdminConvData {
   conversationId: string;
@@ -41,6 +42,59 @@ export function SchoolAdminContactModal({
   onConversationStart: (data: SchoolAdminConvData) => void;
   onClose: () => void;
 }) {
+  const { language } = useSettings();
+  const [contactTitle, setContactTitle] = useState("Contact School Admin");
+  const [selectSchoolText, setSelectSchoolText] = useState("Select your school.");
+  const [loadingSchoolsText, setLoadingSchoolsText] = useState("Loading schools…");
+  const [noSchoolsText, setNoSchoolsText] = useState("No schools found. Join a school first.");
+  const [backText, setBackText] = useState("← Back to schools");
+  const [loadingAdminsText, setLoadingAdminsText] = useState("Loading admins…");
+  const [noAdminsText, setNoAdminsText] = useState("No admins available for this school yet.");
+  const [selectWhoText, setSelectWhoText] = useState("select who to message.");
+  const [cancelText, setCancelText] = useState("Cancel");
+  const [repText, setRepText] = useState("Representative");
+  const [staffText, setStaffText] = useState("Staff");
+
+  useEffect(() => {
+    const strings = [
+      { key: "Contact School Admin", setter: setContactTitle },
+      { key: "Select your school.", setter: setSelectSchoolText },
+      { key: "Loading schools…", setter: setLoadingSchoolsText },
+      { key: "No schools found. Join a school first.", setter: setNoSchoolsText },
+      { key: "← Back to schools", setter: setBackText },
+      { key: "Loading admins…", setter: setLoadingAdminsText },
+      { key: "No admins available for this school yet.", setter: setNoAdminsText },
+      { key: "select who to message.", setter: setSelectWhoText },
+      { key: "Cancel", setter: setCancelText },
+      { key: "Representative", setter: setRepText },
+      { key: "Staff", setter: setStaffText },
+    ];
+    if (language === "en") {
+      for (const { key, setter } of strings) setter(key);
+      return;
+    }
+    for (const { key, setter } of strings) {
+      const cached = localStorage.getItem(`t:${language}:${key}`);
+      if (cached) setter(cached);
+    }
+    (async () => {
+      for (const { key, setter } of strings) {
+        if (localStorage.getItem(`t:${language}:${key}`)) continue;
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          const d = await res.json();
+          const v = d.translatedText || key;
+          setter(v);
+          localStorage.setItem(`t:${language}:${key}`, v);
+        } catch {}
+      }
+    })();
+  }, [language]);
+
   const [step, setStep] = useState<"pick-school" | "pick-admin">(
     prefilledSchoolId ? "pick-admin" : "pick-school",
   );
@@ -139,17 +193,17 @@ export function SchoolAdminContactModal({
       <div className="report-modal" onClick={(e) => e.stopPropagation()}>
         <p className="report-modal__title">
           <MdOutlineSchool style={{ fontSize: 18 }} />
-          Contact School Admin
+          {contactTitle}
         </p>
 
         {step === "pick-school" && (
           <>
-            <p className="report-modal__subtitle">Select your school.</p>
+            <p className="report-modal__subtitle">{selectSchoolText}</p>
             {loading ? (
-              <div className="admin-modal-loading">Loading schools…</div>
+              <div className="admin-modal-loading">{loadingSchoolsText}</div>
             ) : schools.length === 0 ? (
               <div className="admin-modal-loading">
-                No schools found. Join a school first.
+                {noSchoolsText}
               </div>
             ) : (
               <div style={{ margin: "12px 0" }}>
@@ -176,7 +230,7 @@ export function SchoolAdminContactModal({
         {step === "pick-admin" && (
           <>
             <p className="report-modal__subtitle">
-              {selectedSchool?.name ?? "School"} — select who to message.
+              {selectedSchool?.name ?? "School"} — {selectWhoText}
             </p>
             {!prefilledSchoolId && (
               <button
@@ -187,14 +241,14 @@ export function SchoolAdminContactModal({
                   setSelectedSchool(null);
                 }}
               >
-                ← Back to schools
+                {backText}
               </button>
             )}
             {loading ? (
-              <div className="admin-modal-loading">Loading admins…</div>
+              <div className="admin-modal-loading">{loadingAdminsText}</div>
             ) : admins.length === 0 ? (
               <div className="admin-modal-loading">
-                No admins available for this school yet.
+                {noAdminsText}
               </div>
             ) : (
               <div style={{ margin: "12px 0" }}>
@@ -212,7 +266,7 @@ export function SchoolAdminContactModal({
                       <div className="admin-select-email">{admin.email}</div>
                     </div>
                     <div className="admin-select-tag admin-select-tag--school">
-                      {admin.role}
+                      {admin.role === "Representative" ? repText : staffText}
                     </div>
                   </button>
                 ))}
@@ -223,7 +277,7 @@ export function SchoolAdminContactModal({
 
         <div className="report-modal__actions" style={{ marginTop: 4 }}>
           <button className="report-modal__cancel" onClick={onClose}>
-            Cancel
+            {cancelText}
           </button>
         </div>
       </div>

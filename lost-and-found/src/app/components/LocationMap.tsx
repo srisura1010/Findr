@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSettings } from "@/context/SettingsContext";
 
 interface LocationMapProps {
   lat: number;
@@ -18,6 +19,37 @@ export default function LocationMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
+  const { language } = useSettings();
+  const [loadingText, setLoadingText] = useState("Loading map…");
+  const [openText, setOpenText] = useState("Open ↗");
+
+  useEffect(() => {
+    if (language === "en") { setLoadingText("Loading map…"); setOpenText("Open ↗"); return; }
+    const strings = [
+      { key: "Loading map…", setter: setLoadingText },
+      { key: "Open ↗", setter: setOpenText },
+    ];
+    for (const { key, setter } of strings) {
+      const cached = localStorage.getItem(`t:${language}:${key}`);
+      if (cached) setter(cached);
+    }
+    (async () => {
+      for (const { key, setter } of strings) {
+        if (localStorage.getItem(`t:${language}:${key}`)) continue;
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          const d = await res.json();
+          const v = d.translatedText || key;
+          setter(v);
+          localStorage.setItem(`t:${language}:${key}`, v);
+        } catch {}
+      }
+    })();
+  }, [language]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -190,7 +222,7 @@ export default function LocationMap({
               (e.currentTarget.style.background = "var(--bg-input)")
             }
           >
-            Open ↗
+            {openText}
           </button>
         </div>
       )}
@@ -211,7 +243,7 @@ export default function LocationMap({
               fontFamily: "var(--font-body)",
             }}
           >
-            Loading map…
+            {loadingText}
           </div>
         )}
       </div>

@@ -1727,6 +1727,8 @@ export default function DashboardPage() {
   const [reportsTab, setReportsTab] = useState<"items" | "users" | "disputes">("items");
   const [reportMode, setReportMode] = useState<"found" | "lost">("found");
   const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
+  const [catMap, setCatMap] = useState<Record<string, string>>({});
+  const [nameMap, setNameMap] = useState<Record<number, string>>({});
 
   // ── Filter state ────────────────────────────────────────────────────────────
   const [filterCategory, setFilterCategory] = useState("");
@@ -2075,11 +2077,91 @@ export default function DashboardPage() {
           ),
         ),
       );
+
       setIsReady(true);
     };
 
     translateAll();
   }, [language]);
+
+  // Translate categories independently so they're ready as soon as language changes.
+  useEffect(() => {
+    if (language === "en") { setCatMap({}); return; }
+
+    // Apply any already-cached category translations immediately (synchronous).
+    const initial: Record<string, string> = {};
+    for (const cat of CATEGORIES) {
+      const cached = localStorage.getItem(`t:${language}:${cat}`);
+      if (cached) initial[cat] = cached;
+    }
+    setCatMap(initial);
+
+    const missing = CATEGORIES.filter((cat) => !initial[cat]);
+    if (missing.length === 0) return;
+
+    (async () => {
+      const updates = { ...initial };
+      await Promise.all(
+        missing.map(async (cat) => {
+          try {
+            const res = await fetch("/api/translate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: cat, target: language }),
+            });
+            if (res.ok) {
+              const d = await res.json();
+              const v = d.translatedText || cat;
+              updates[cat] = v;
+              localStorage.setItem(`t:${language}:${cat}`, v);
+            }
+          } catch {}
+        }),
+      );
+      setCatMap(updates);
+    })();
+  }, [language]);
+
+  // Translate item titles whenever items load or language changes.
+  useEffect(() => {
+    if (language === "en") { setNameMap({}); return; }
+    const allItems = [
+      ...(items ?? []).map((i) => ({ id: i.id, name: i.name })),
+      ...(lostItems ?? []).map((i) => ({ id: i.id, name: i.name })),
+    ];
+    if (allItems.length === 0) return;
+
+    const initial: Record<number, string> = {};
+    for (const { id, name } of allItems) {
+      const cached = localStorage.getItem(`t:${language}:${name}`);
+      if (cached) initial[id] = cached;
+    }
+    setNameMap(initial);
+
+    (async () => {
+      const updates = { ...initial };
+      let changed = false;
+      for (const { id, name } of allItems) {
+        if (initial[id]) continue;
+        const key = `t:${language}:${name}`;
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: name, target: language }),
+          });
+          if (res.ok) {
+            const d = await res.json();
+            const v = d.translatedText || name;
+            updates[id] = v;
+            localStorage.setItem(key, v);
+            changed = true;
+          }
+        } catch {}
+      }
+      if (changed) setNameMap(updates);
+    })();
+  }, [language, items, lostItems]);
 
   // ── Item form state ───────────────────────────────────────────────────────
   const [newItemName, setNewItemName] = useState("");
@@ -3624,7 +3706,7 @@ export default function DashboardPage() {
                         <img className="item-image" src={item.image} alt={item.name} />
                       </div>
                       <div className="item-info">
-                        <h3>{item.name}</h3>
+                        <h3>{nameMap[item.id] || item.name}</h3>
                         <p>{item.description}</p>
                         {item.category && (
                           <span
@@ -3641,7 +3723,7 @@ export default function DashboardPage() {
                               marginBottom: 2,
                             }}
                           >
-                            {item.category}
+                            {catMap[item.category] || item.category}
                           </span>
                         )}
                         {item.location && (
@@ -3754,7 +3836,7 @@ export default function DashboardPage() {
                         )}
                       </div>
                       <div className="item-info">
-                        <h3>{item.name}</h3>
+                        <h3>{nameMap[item.id] || item.name}</h3>
                         <p>{item.description}</p>
                         {item.category && (
                           <span
@@ -3771,7 +3853,7 @@ export default function DashboardPage() {
                               marginBottom: 2,
                             }}
                           >
-                            {item.category}
+                            {catMap[item.category] || item.category}
                           </span>
                         )}
                         {item.location && (
@@ -4292,7 +4374,7 @@ export default function DashboardPage() {
                         />
                       </div>
                       <div className="item-info item-info--card">
-                        <h3>{item.name}</h3>
+                        <h3>{nameMap[item.id] || item.name}</h3>
                         <div className="posted-by">
                           {item.authorAvatar && (
                             <img
@@ -4326,7 +4408,7 @@ export default function DashboardPage() {
                               fontFamily: "var(--font-body)",
                             }}
                           >
-                            🏷️ {item.category}
+                            🏷️ {catMap[item.category] || item.category}
                           </p>
                         )}
                         {item.status === "pending" && (
@@ -4442,7 +4524,7 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div className="item-info item-info--card">
-                      <h3>{item.name}</h3>
+                      <h3>{nameMap[item.id] || item.name}</h3>
                       <div className="posted-by">
                         {item.authorAvatar && (
                           <img
@@ -4476,7 +4558,7 @@ export default function DashboardPage() {
                             fontFamily: "var(--font-body)",
                           }}
                         >
-                          🏷️ {item.category}
+                          🏷️ {catMap[item.category] || item.category}
                         </p>
                       )}
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useSettings } from "@/context/SettingsContext";
 
 export interface LocationData {
   lat: number;
@@ -84,6 +85,46 @@ export default function LocationPicker({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { language } = useSettings();
+  const [placeholderText, setPlaceholderText] = useState("Search address, place, or landmark…");
+  const [useLocationTitle, setUseLocationTitle] = useState("Use my location");
+  const [loadingMapText, setLoadingMapText] = useState("Loading map…");
+  const [noResultsText, setNoResultsText] = useState("No results found — try a more specific address");
+  const [attributionText, setAttributionText] = useState("Results from OpenStreetMap");
+
+  useEffect(() => {
+    const strings = [
+      { key: "Search address, place, or landmark…", setter: setPlaceholderText },
+      { key: "Use my location", setter: setUseLocationTitle },
+      { key: "Loading map…", setter: setLoadingMapText },
+      { key: "No results found — try a more specific address", setter: setNoResultsText },
+      { key: "Results from OpenStreetMap", setter: setAttributionText },
+    ];
+    if (language === "en") {
+      for (const { key, setter } of strings) setter(key);
+      return;
+    }
+    for (const { key, setter } of strings) {
+      const cached = localStorage.getItem(`t:${language}:${key}`);
+      if (cached) setter(cached);
+    }
+    (async () => {
+      for (const { key, setter } of strings) {
+        if (localStorage.getItem(`t:${language}:${key}`)) continue;
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          const d = await res.json();
+          const v = d.translatedText || key;
+          setter(v);
+          localStorage.setItem(`t:${language}:${key}`, v);
+        } catch {}
+      }
+    })();
+  }, [language]);
 
   const [searchQuery, setSearchQuery] = useState(value?.address ?? "");
   const [searchResults, setSearchResults] = useState<GeoResult[]>([]);
@@ -397,7 +438,7 @@ export default function LocationPicker({
               if (searchResults.length > 0) setShowDropdown(true);
             }}
             className="location-picker__input"
-            placeholder="Search address, place, or landmark…"
+            placeholder={placeholderText}
             style={{
               flex: 1,
               border: "none",
@@ -456,7 +497,7 @@ export default function LocationPicker({
           <button
             type="button"
             onClick={handleUseMyLocation}
-            title="Use my location"
+            title={useLocationTitle}
             style={{
               flexShrink: 0,
               background: isLocating ? "var(--accent)" : "var(--bg-card)",
@@ -639,7 +680,7 @@ export default function LocationPicker({
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              Results from OpenStreetMap
+              {attributionText}
             </div>
           </div>
         )}
@@ -666,7 +707,7 @@ export default function LocationPicker({
                 color: "var(--text-muted)",
               }}
             >
-              No results for "{searchQuery}" — try a more specific address
+              {noResultsText}
             </div>
           )}
       </div>
@@ -697,7 +738,7 @@ export default function LocationPicker({
               fontFamily: "var(--font-body)",
             }}
           >
-            Loading map…
+            {loadingMapText}
           </div>
         )}
       </div>

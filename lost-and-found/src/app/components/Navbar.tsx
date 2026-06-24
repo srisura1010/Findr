@@ -94,44 +94,33 @@ export default function Navbar() {
   const [aiSearchText, setAiSearchText] = useState("AI Search");
 
   useEffect(() => {
-    if (language === "en") return;
-    setDashboardText(localStorage.getItem(`nav_dashboard_${language}`) || "Dashboard");
-    setMessagesText(localStorage.getItem(`nav_messages_${language}`) || "Messages");
-    setSignInText(localStorage.getItem(`nav_signIn_${language}`) || "Sign In");
-    setSignUpText(localStorage.getItem(`nav_signUp_${language}`) || "Sign Up");
-    setHelpText(localStorage.getItem(`nav_help_${language}`) || "Help");
-    setSchoolsText(localStorage.getItem(`nav_schools_${language}`) || "For Schools");
-    setSuperAdminText(localStorage.getItem(`nav_superAdmin_${language}`) || "Super Admin");
-    setSettingsText(localStorage.getItem(`nav_settings_${language}`) || "Settings");
-    setAiSearchText(localStorage.getItem(`nav_aiSearch_${language}`) || "AI Search");
-  }, []);
+    const strings = [
+      { key: "Dashboard", setter: setDashboardText },
+      { key: "Messages", setter: setMessagesText },
+      { key: "Sign In", setter: setSignInText },
+      { key: "Sign Up", setter: setSignUpText },
+      { key: "Help", setter: setHelpText },
+      { key: "For Schools", setter: setSchoolsText },
+      { key: "Super Admin", setter: setSuperAdminText },
+      { key: "Settings", setter: setSettingsText },
+      { key: "AI Search", setter: setAiSearchText },
+    ];
 
-  useEffect(() => {
     if (language === "en") {
-      setDashboardText("Dashboard");
-      setMessagesText("Messages");
-      setSignInText("Sign In");
-      setSignUpText("Sign Up");
-      setHelpText("Help");
-      setSchoolsText("For Schools");
-      setSuperAdminText("Super Admin");
-      setSettingsText("Settings");
-      setAiSearchText("AI Search");
+      for (const { key, setter } of strings) setter(key);
       return;
     }
-    const translateAndCache = async () => {
-      const translations = [
-        { key: "Dashboard", setter: setDashboardText, cacheKey: "nav_dashboard" },
-        { key: "Messages", setter: setMessagesText, cacheKey: "nav_messages" },
-        { key: "Sign In", setter: setSignInText, cacheKey: "nav_signIn" },
-        { key: "Sign Up", setter: setSignUpText, cacheKey: "nav_signUp" },
-        { key: "Help", setter: setHelpText, cacheKey: "nav_help" },
-        { key: "For Schools", setter: setSchoolsText, cacheKey: "nav_schools" },
-        { key: "Super Admin", setter: setSuperAdminText, cacheKey: "nav_superAdmin" },
-        { key: "Settings", setter: setSettingsText, cacheKey: "nav_settings" },
-        { key: "AI Search", setter: setAiSearchText, cacheKey: "nav_aiSearch" },
-      ];
-      for (const { key, setter, cacheKey } of translations) {
+
+    // Apply any already-cached translations immediately (zero flicker).
+    for (const { key, setter } of strings) {
+      const cached = localStorage.getItem(`t:${language}:${key}`);
+      if (cached) setter(cached);
+    }
+
+    // Fetch only the ones not yet cached.
+    const fetchMissing = async () => {
+      for (const { key, setter } of strings) {
+        if (localStorage.getItem(`t:${language}:${key}`)) continue;
         try {
           const res = await fetch("/api/translate", {
             method: "POST",
@@ -142,12 +131,12 @@ export default function Navbar() {
             const data = await res.json();
             const translated = data.translatedText || key;
             setter(translated);
-            localStorage.setItem(`${cacheKey}_${language}`, translated);
+            localStorage.setItem(`t:${language}:${key}`, translated);
           }
         } catch {}
       }
     };
-    translateAndCache();
+    fetchMissing();
   }, [language]);
 
   // ─── sidebar nav items ──────────────────────────────────────────────

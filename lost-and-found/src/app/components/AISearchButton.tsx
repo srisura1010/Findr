@@ -1,16 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HiSparkles } from "react-icons/hi2";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function AISearchButton() {
   const router = useRouter();
+  const { language } = useSettings();
+  const [label, setLabel] = useState("AI Search");
+
+  useEffect(() => {
+    if (language === "en") { setLabel("AI Search"); return; }
+    const key = `t:${language}:AI Search`;
+    const cached = localStorage.getItem(key);
+    if (cached) { setLabel(cached); return; }
+    fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "AI Search", target: language }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        const v = d.translatedText || "AI Search";
+        setLabel(v);
+        localStorage.setItem(key, v);
+      })
+      .catch(() => {});
+  }, [language]);
 
   return (
     <button
       onClick={() => router.push("/ai-search")}
-      title="AI Search"
-      aria-label="AI Search"
+      title={label}
+      aria-label={label}
       style={{
         display: "flex",
         alignItems: "center",
@@ -38,7 +61,7 @@ export default function AISearchButton() {
       }}
     >
       <HiSparkles size={16} />
-      <span className="ai-search-label">AI Search</span>
+      <span className="ai-search-label">{label}</span>
     </button>
   );
 }

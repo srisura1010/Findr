@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { FaShieldHalved } from "react-icons/fa6";
 import { BsMailbox } from "react-icons/bs";
+import { useSettings } from "@/context/SettingsContext";
 
 // AdminInboxPanel
 //
@@ -52,6 +53,49 @@ export function AdminInboxPanel({
   adminName,
   adminEmail
 }: { adminId: string; adminName: string; adminEmail: string }) {
+  const { language } = useSettings();
+  const [adminInboxText, setAdminInboxText] = useState("Admin Inbox");
+  const [noMessagesText, setNoMessagesText] = useState("No messages yet");
+  const [selectConvText, setSelectConvText] = useState("Select a conversation to reply");
+  const [replyPlaceholder, setReplyPlaceholder] = useState("Reply as admin…");
+  const [noMessagesLiveText, setNoMessagesLiveText] = useState("No messages yet — they'll appear here in real time");
+  const [userSupportLabel, setUserSupportLabel] = useState("User · Admin Support");
+
+  useEffect(() => {
+    const strings = [
+      { key: "Admin Inbox", setter: setAdminInboxText },
+      { key: "No messages yet", setter: setNoMessagesText },
+      { key: "Select a conversation to reply", setter: setSelectConvText },
+      { key: "Reply as admin…", setter: setReplyPlaceholder },
+      { key: "No messages yet — they'll appear here in real time", setter: setNoMessagesLiveText },
+      { key: "User · Admin Support", setter: setUserSupportLabel },
+    ];
+    if (language === "en") {
+      for (const { key, setter } of strings) setter(key);
+      return;
+    }
+    for (const { key, setter } of strings) {
+      const cached = localStorage.getItem(`t:${language}:${key}`);
+      if (cached) setter(cached);
+    }
+    (async () => {
+      for (const { key, setter } of strings) {
+        if (localStorage.getItem(`t:${language}:${key}`)) continue;
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: key, target: language }),
+          });
+          const d = await res.json();
+          const v = d.translatedText || key;
+          setter(v);
+          localStorage.setItem(`t:${language}:${key}`, v);
+        } catch {}
+      }
+    })();
+  }, [language]);
+
   // List of conversations (left column).
   const [convs, setConvs] = useState<ConvSummary[]>([]);
 
@@ -210,7 +254,7 @@ export function AdminInboxPanel({
         <div style={{ padding: "16px 14px 10px", borderBottom: "1px solid #f1f5f9" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <FaShieldHalved style={{ color: "#2563eb", fontSize: 16 }} />
-            <span style={{ fontWeight: 800, fontSize: 16, color: "#0f172a" }}>Admin Inbox</span>
+            <span style={{ fontWeight: 800, fontSize: 16, color: "#0f172a" }}>{adminInboxText}</span>
             {totalUnread > 0 &&
             <span style={{
               background: "#ef4444", color: "#fff", fontSize: 11,
@@ -224,7 +268,7 @@ export function AdminInboxPanel({
           {convs.length === 0 &&
           <div style={{ padding: 28, textAlign: "center", color: "#94a3b8", fontSize: 13 }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}><BsMailbox /></div>
-              No messages yet
+              {noMessagesText}
             </div>
           }
           {convs.map((conv) =>
@@ -286,7 +330,7 @@ export function AdminInboxPanel({
           alignItems: "center", justifyContent: "center", color: "#94a3b8"
         }}>
             <FaShieldHalved style={{ fontSize: 40, color: "#c7d2fe", marginBottom: 10 }} />
-            <p style={{ fontSize: 14 }}>Select a conversation to reply</p>
+            <p style={{ fontSize: 14 }}>{selectConvText}</p>
           </div> :
 
         <>
@@ -303,7 +347,7 @@ export function AdminInboxPanel({
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14, color: "#0f172a" }}>{activeConv?.otherUserName}</div>
-                <div style={{ fontSize: 11, color: "#94a3b8" }}>User · Admin Support</div>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>{userSupportLabel}</div>
               </div>
             </div>
 
@@ -315,7 +359,7 @@ export function AdminInboxPanel({
             <div style={{
               flex: 1, display: "flex", alignItems: "center",
               justifyContent: "center", color: "#94a3b8", fontSize: 13
-            }}>No messages yet — they'll appear here in real time</div>
+            }}>{noMessagesLiveText}</div>
             }
               {messages.map((msg) => {
               const isOwn = msg.sender_id === adminId;
@@ -352,7 +396,7 @@ export function AdminInboxPanel({
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Reply as admin…"
+              placeholder={replyPlaceholder}
               style={{
                 flex: 1, border: "1.5px solid #e2e8f0", borderRadius: 20,
                 padding: "9px 14px", fontSize: 14, resize: "none",
