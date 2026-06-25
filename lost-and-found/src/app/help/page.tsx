@@ -344,7 +344,7 @@ const PRO_TIPS = [
 
 
 export default function HelpPage() {
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const { user } = useUser();
   const router = useRouter();
   const [banChecked, setBanChecked] = useState(false);
@@ -362,6 +362,7 @@ export default function HelpPage() {
   const [aiSupportHeading, setAiSupportHeading] = useState("AI Support Chat");
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setQuickStartLabel("Quick Start");
       setFaqLabel("FAQs");
@@ -407,7 +408,7 @@ export default function HelpPage() {
       setIsReady(true);
     };
     translateAndCache();
-  }, [language]);
+  }, [language, hydrated]);
 
   useEffect(() => {
     if (!user) {setBanChecked(true);return;}

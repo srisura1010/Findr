@@ -42,7 +42,7 @@ export function SchoolAdminContactModal({
   onConversationStart: (data: SchoolAdminConvData) => void;
   onClose: () => void;
 }) {
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [contactTitle, setContactTitle] = useState("Contact School Admin");
   const [selectSchoolText, setSelectSchoolText] = useState("Select your school.");
   const [loadingSchoolsText, setLoadingSchoolsText] = useState("Loading schools…");
@@ -56,6 +56,7 @@ export function SchoolAdminContactModal({
   const [staffText, setStaffText] = useState("Staff");
 
   useEffect(() => {
+    if (!hydrated) return;
     const strings = [
       { key: "Contact School Admin", setter: setContactTitle },
       { key: "Select your school.", setter: setSelectSchoolText },
@@ -93,7 +94,7 @@ export function SchoolAdminContactModal({
         } catch {}
       }
     })();
-  }, [language]);
+  }, [language, hydrated]);
 
   const [step, setStep] = useState<"pick-school" | "pick-admin">(
     prefilledSchoolId ? "pick-admin" : "pick-school",

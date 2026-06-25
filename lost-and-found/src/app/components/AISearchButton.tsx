@@ -7,10 +7,11 @@ import { useSettings } from "@/context/SettingsContext";
 
 export default function AISearchButton() {
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [label, setLabel] = useState("AI Search");
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setLabel("AI Search"); return; }
     const key = `t:${language}:AI Search`;
     const cached = localStorage.getItem(key);
@@ -27,7 +28,7 @@ export default function AISearchButton() {
         localStorage.setItem(key, v);
       })
       .catch(() => {});
-  }, [language]);
+  }, [language, hydrated]);
 
   return (
     <button

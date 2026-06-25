@@ -204,7 +204,7 @@ export default function SchoolItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
 
   const [s, setS] = useState<SItemStrings>(DEFAULT_SITEM);
   const [isReady, setIsReady] = useState(false);
@@ -263,16 +263,18 @@ export default function SchoolItemDetailPage() {
 
   // ── translations ──────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setS(DEFAULT_SITEM); setIsReady(true); return; }
     const pairs = (Object.keys(DEFAULT_SITEM) as Array<keyof SItemStrings>).map(
       (k): [keyof SItemStrings, string] => [k, DEFAULT_SITEM[k]]
     );
     batchTranslateSItem(pairs, language, (u) => setS((prev) => ({ ...prev, ...u })))
       .then(() => setIsReady(true));
-  }, [language]);
+  }, [language, hydrated]);
 
   // translate user content (name, description, location, category) when item loads
   useEffect(() => {
+    if (!hydrated) return;
     if (!item) return;
     if (language === "en") {
       setTranslatedName(item.name || "");
@@ -307,10 +309,11 @@ export default function SchoolItemDetailPage() {
       setTranslatedLocation(loc);
       setTranslatedCategory(cat);
     });
-  }, [item, language]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [item, language, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // translate ai keywords
   useEffect(() => {
+    if (!hydrated) return;
     if (!item?.aiKeywords) { setTranslatedKeywords([]); return; }
     const kws: string[] = item.aiKeywords.split(",").map((k: string) => k.trim()).filter(Boolean);
     if (language === "en") { setTranslatedKeywords(kws); return; }
@@ -334,7 +337,7 @@ export default function SchoolItemDetailPage() {
           return localStorage.getItem(`si_kw_${kw.replace(/\s+/g, "_")}_${language}`) ?? kw;
         }));
       }).catch(() => {});
-  }, [item?.aiKeywords, language]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [item?.aiKeywords, language, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // translate related item names + categories
   useEffect(() => {

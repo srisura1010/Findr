@@ -43,6 +43,7 @@ interface SettingsContextType {
   fontSize: FontSize;
   fontFamily: FontFamily;
   language: Language;
+  hydrated: boolean;
   setTheme: (t: ThemeId) => void;
   setFontSize: (s: FontSize) => void;
   setFontFamily: (f: FontFamily) => void;
@@ -124,6 +125,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         fontSize,
         fontFamily,
         language,
+        hydrated,
         setTheme,
         setFontSize,
         setFontFamily,

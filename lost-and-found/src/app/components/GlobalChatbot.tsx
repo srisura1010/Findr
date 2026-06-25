@@ -55,7 +55,7 @@ async function t(text: string, language: string): Promise<string> {
 export default function GlobalChatbot() {
   const pathname = usePathname();
   const { messages, setMessages, isOpen, setIsOpen } = useGlobalChat();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -67,6 +67,7 @@ export default function GlobalChatbot() {
   );
 
   useEffect(() => {
+    if (!hydrated) return;
     const translate = async () => {
       const [title, placeholder, greeting] = await Promise.all([
         t("Findr AI Support", language),
@@ -78,7 +79,7 @@ export default function GlobalChatbot() {
       setUiGreeting(greeting);
     };
     translate();
-  }, [language]);
+  }, [language, hydrated]);
 
   // Keep the greeting message in sync with the current language
   useEffect(() => {
@@ -152,7 +153,7 @@ export default function GlobalChatbot() {
   return (
     <>
       <button
-        className="global-chat-fab"
+        className="global-cat-fab"
         onClick={() => setIsOpen((v) => !v)}
         aria-label="Toggle support chat"
       >

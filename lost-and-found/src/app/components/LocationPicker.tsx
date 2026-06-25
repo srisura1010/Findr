@@ -85,7 +85,7 @@ export default function LocationPicker({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [placeholderText, setPlaceholderText] = useState("Search address, place, or landmark…");
   const [useLocationTitle, setUseLocationTitle] = useState("Use my location");
   const [loadingMapText, setLoadingMapText] = useState("Loading map…");
@@ -93,6 +93,7 @@ export default function LocationPicker({
   const [attributionText, setAttributionText] = useState("Results from OpenStreetMap");
 
   useEffect(() => {
+    if (!hydrated) return;
     const strings = [
       { key: "Search address, place, or landmark…", setter: setPlaceholderText },
       { key: "Use my location", setter: setUseLocationTitle },
@@ -124,7 +125,7 @@ export default function LocationPicker({
         } catch {}
       }
     })();
-  }, [language]);
+  }, [language, hydrated]);
 
   const [searchQuery, setSearchQuery] = useState(value?.address ?? "");
   const [searchResults, setSearchResults] = useState<GeoResult[]>([]);

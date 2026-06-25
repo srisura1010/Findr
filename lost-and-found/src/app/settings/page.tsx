@@ -264,6 +264,7 @@ const SettingsPage = () => {
     language,
     fontFamily,
     fontSize,
+    hydrated,
     setTheme,
     setLanguage,
     setFontFamily,
@@ -415,6 +416,7 @@ const SettingsPage = () => {
   }
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setSettingsTitleText("Settings");
       setAppearanceText("Appearance");
@@ -591,7 +593,7 @@ const SettingsPage = () => {
       setIsReady(true);
     };
     translateAndCache();
-  }, [language]);
+  }, [language, hydrated]);
 
   if (!isLoaded || !banChecked || !isReady) return <LoadingSpinner />;
 

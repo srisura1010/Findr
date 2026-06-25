@@ -93,7 +93,7 @@ export default function SchoolLostItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
 
   const [s, setS] = useState<SLostStrings>(DEFAULT_SLOST);
   const [isReady, setIsReady] = useState(false);
@@ -116,6 +116,7 @@ export default function SchoolLostItemDetailPage() {
 
   // translations
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setS(DEFAULT_SLOST); setIsReady(true); return; }
     // Clear confirmed-stale English values cached under non-English keys.
     const staleChecks: Array<[keyof SLostStrings, string]> = [
@@ -135,10 +136,11 @@ export default function SchoolLostItemDetailPage() {
     );
     batchTranslateSLost(pairs, language, (u) => setS((prev) => ({ ...prev, ...u })))
       .then(() => setIsReady(true));
-  }, [language]);
+  }, [language, hydrated]);
 
   // translate user content (name, description, location, category) when item loads
   useEffect(() => {
+    if (!hydrated) return;
     if (!item) return;
     if (language === "en") {
       setTranslatedName(item.name || "");
@@ -173,7 +175,7 @@ export default function SchoolLostItemDetailPage() {
       setTranslatedLocation(loc);
       setTranslatedCategory(cat);
     });
-  }, [item, language]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [item, language, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // fetch item
   useEffect(() => {

@@ -53,7 +53,7 @@ export function AdminInboxPanel({
   adminName,
   adminEmail
 }: { adminId: string; adminName: string; adminEmail: string }) {
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [adminInboxText, setAdminInboxText] = useState("Admin Inbox");
   const [noMessagesText, setNoMessagesText] = useState("No messages yet");
   const [selectConvText, setSelectConvText] = useState("Select a conversation to reply");
@@ -62,6 +62,7 @@ export function AdminInboxPanel({
   const [userSupportLabel, setUserSupportLabel] = useState("User · Admin Support");
 
   useEffect(() => {
+    if (!hydrated) return;
     const strings = [
       { key: "Admin Inbox", setter: setAdminInboxText },
       { key: "No messages yet", setter: setNoMessagesText },
@@ -94,7 +95,7 @@ export function AdminInboxPanel({
         } catch {}
       }
     })();
-  }, [language]);
+  }, [language, hydrated]);
 
   // List of conversations (left column).
   const [convs, setConvs] = useState<ConvSummary[]>([]);

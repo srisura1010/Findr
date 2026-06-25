@@ -193,7 +193,7 @@ export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const { items, lostItems, updateItemStatus, removeLostItem, removeItem } =
     useItems();
 
@@ -1046,13 +1046,15 @@ export default function ItemDetailPage() {
 
   // ── UI string translation ────────────────────────────────────────────────────
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setS(DEFAULT_DETAIL); return; }
     const entries = Object.entries(DEFAULT_DETAIL) as Array<[keyof DetailStrings, string]>;
     batchTranslateDetail(entries, language, (u) => setS((prev) => ({ ...prev, ...u })));
-  }, [language]);
+  }, [language, hydrated]);
 
   // ── Dynamic content translation (category, keywords, related item names) ────
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setTranslatedCategory(item?.category || "");
       setTranslatedKeywords(
@@ -1082,7 +1084,7 @@ export default function ItemDetailPage() {
         setTranslatedKeywords(results.slice(1));
       } catch {}
     })();
-  }, [language, item?.id, item?.category, item?.aiKeywords]);
+  }, [language, hydrated, item?.id, item?.category, item?.aiKeywords]);
 
   // ── Translate related item names + categories ────────────────────────────────
   useEffect(() => {

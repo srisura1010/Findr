@@ -1259,7 +1259,7 @@ const DEFAULT_MY_SCHOOLS: MySchoolsStrings = {
 export default function SchoolsPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [mounted, setMounted] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -1365,6 +1365,7 @@ export default function SchoolsPage() {
 
   // ── Translation ───────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setAboutTabText("About");
       setEnterCodeTabText("Enter Code");
@@ -1512,7 +1513,7 @@ export default function SchoolsPage() {
     };
 
     translateAll();
-  }, [language]);
+  }, [language, hydrated]);
 
   const handleJoined = (school: School) => {
     setMySchools((prev) => {

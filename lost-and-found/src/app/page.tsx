@@ -173,7 +173,7 @@ function StatNumber({ value, suffix = "" }: { value: number; suffix?: string }) 
 }
 
 export default function Home() {
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const router = useRouter();
   const { isSignedIn, user, isLoaded } = useUser();
   const [isReady, setIsReady] = useState(false);
@@ -317,6 +317,7 @@ export default function Home() {
 
   // translations
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setDontPanicText("Don't Panic.");
       setConnectingText(
@@ -611,7 +612,7 @@ export default function Home() {
       setIsReady(true);
     };
     translateAndCache();
-  }, [language]);
+  }, [language, hydrated]);
 
   const [positions, setPositions] = useState<
     Record<number, { x: number; y: number }>

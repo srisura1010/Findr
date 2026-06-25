@@ -21,7 +21,7 @@ import AISearchButton from "./AISearchButton";
 
 export default function Navbar() {
   const { isSignedIn, user, isLoaded } = useUser();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
@@ -94,6 +94,7 @@ export default function Navbar() {
   const [aiSearchText, setAiSearchText] = useState("AI Search");
 
   useEffect(() => {
+    if (!hydrated) return;
     const strings = [
       { key: "Dashboard", setter: setDashboardText },
       { key: "Messages", setter: setMessagesText },
@@ -137,7 +138,7 @@ export default function Navbar() {
       }
     };
     fetchMissing();
-  }, [language]);
+  }, [language, hydrated]);
 
   // ─── sidebar nav items ──────────────────────────────────────────────
   const navItems = [

@@ -19,11 +19,12 @@ export default function LocationMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [loadingText, setLoadingText] = useState("Loading map…");
   const [openText, setOpenText] = useState("Open ↗");
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setLoadingText("Loading map…"); setOpenText("Open ↗"); return; }
     const strings = [
       { key: "Loading map…", setter: setLoadingText },
@@ -49,7 +50,7 @@ export default function LocationMap({
         } catch {}
       }
     })();
-  }, [language]);
+  }, [language, hydrated]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;

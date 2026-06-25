@@ -39,7 +39,7 @@ const SPAWN_STAGGER = 90;         // ms between each chip spawning
 export default function AISearchPage() {
   const router = useRouter();
   const { user } = useUser();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
 
   const [isReady, setIsReady] = useState(false);
   const [loadingItemsText, setLoadingItemsText] = useState("Loading items…");
@@ -54,6 +54,7 @@ export default function AISearchPage() {
   const [clickToViewText, setClickToViewText] = useState("Click to view item →");
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setLoadingItemsText("Loading items…");
       setAiThinkingText("AI is thinking…");
@@ -101,7 +102,7 @@ export default function AISearchPage() {
       setIsReady(true);
     };
     translateAndCache();
-  }, [language]);
+  }, [language, hydrated]);
 
   const rafRef = useRef<number | null>(null);
   const lastTsRef = useRef<number>(0);

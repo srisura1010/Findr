@@ -89,7 +89,7 @@ function ReportUserModal({
   currentUser: { id: string; fullName: string | null; email: string };
   onClose: () => void;
 }) {
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [selectedReason, setSelectedReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -102,6 +102,7 @@ function ReportUserModal({
   const [uiSubmitReport, setUiSubmitReport] = useState("Submit Report");
 
   useEffect(() => {
+    if (!hydrated) return;
     const run = async () => {
       const results = await Promise.all([
         t("Report submitted", language),
@@ -121,7 +122,7 @@ function ReportUserModal({
       setTranslatedReasons(results.slice(6));
     };
     run();
-  }, [language]);
+  }, [language, hydrated]);
 
   const handleSubmit = async () => {
     if (!selectedReason || submitting) return;
@@ -195,7 +196,7 @@ function ContactAdminModal({
   onSelect: (admin: Admin) => void;
   onClose: () => void;
 }) {
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [uiTitle, setUiTitle] = useState("Contact an Admin");
   const [uiSubtitle, setUiSubtitle] = useState("Select an admin to start a conversation.");
   const [uiLoading, setUiLoading] = useState("Loading admins…");
@@ -204,6 +205,7 @@ function ContactAdminModal({
   const [uiCancel, setUiCancel] = useState("Cancel");
 
   useEffect(() => {
+    if (!hydrated) return;
     const run = async () => {
       const results = await Promise.all([
         t("Contact an Admin", language),
@@ -221,7 +223,7 @@ function ContactAdminModal({
       setUiCancel(results[5]);
     };
     run();
-  }, [language]);
+  }, [language, hydrated]);
 
   return (
     <div className="report-modal-overlay" onClick={onClose}>
@@ -276,7 +278,7 @@ function ContactAdminModal({
 export default function MessagesPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
 
   const [banChecked, setBanChecked] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -312,6 +314,7 @@ export default function MessagesPage() {
   const [uiAdminChatEmpty, setUiAdminChatEmpty] = useState("You're chatting with an admin. Ask anything — they're here to help.");
 
   useEffect(() => {
+    if (!hydrated) return;
     const translateUI = async () => {
       setIsReady(false);
       const [
@@ -356,7 +359,7 @@ export default function MessagesPage() {
       setIsReady(true);
     };
     translateUI();
-  }, [language]);
+  }, [language, hydrated]);
 
   useEffect(() => {
     if (isLoaded && !user) router.push("/");

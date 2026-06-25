@@ -25,7 +25,7 @@ async function tx(text: string, language: string): Promise<string> {
 
 export default function BannedPage() {
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [titleText, setTitleText] = useState("Account Suspended");
   const [bodyText, setBodyText] = useState(
     "Your account has been banned or suspended from Findr. If you believe this is a mistake, please contact your school administrator."
@@ -33,6 +33,7 @@ export default function BannedPage() {
   const [btnText, setBtnText] = useState("Go Home");
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setTitleText("Account Suspended");
       setBodyText("Your account has been banned or suspended from Findr. If you believe this is a mistake, please contact your school administrator.");
@@ -48,7 +49,7 @@ export default function BannedPage() {
       setBodyText(t2);
       setBtnText(t3);
     });
-  }, [language]);
+  }, [language, hydrated]);
 
   return (
     <div style={{

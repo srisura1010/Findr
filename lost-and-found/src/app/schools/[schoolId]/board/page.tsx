@@ -841,7 +841,7 @@ export default function SchoolBoardPage() {
   const { schoolId } = useParams<{ schoolId: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
 
   const [school, setSchool] = useState<School | null>(null);
   const [loadingSchool, setLoadingSchool] = useState(true);
@@ -855,6 +855,7 @@ export default function SchoolBoardPage() {
   }, [schoolId]);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setS(DEFAULT_BOARD); setStringsReady(true); return; }
     const pairs: [keyof BoardStrings, string, string][] = [
       ["backBtn", "← Back", "sc_board_backBtn"],
@@ -1011,7 +1012,7 @@ export default function SchoolBoardPage() {
     Promise.all(pairs.map(([field, key, cacheKey]) =>
       fetchTranslation(key, language, cacheKey, (val) => setS((prev) => ({ ...prev, [field]: val })))
     )).then(() => setStringsReady(true));
-  }, [language]);
+  }, [language, hydrated]);
 
   if (!isLoaded || loadingSchool || !stringsReady) return <LoadingSpinner />;
   if (!school) return (
@@ -1029,7 +1030,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   type BoardTab = "items" | "add-item" | "my-dash" | "leaderboard" | "admin-login" | "reports" | "inbox";
 
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [catMap, setCatMap] = useState<Record<string, string>>({});
   const color = school.color;
   const color2 = school.secondary_color ?? "#f5c842";
@@ -1097,6 +1098,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
   // ── Translate categories ─────────────────────────────────────────────────────
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setCatMap({}); return; }
     const unique = [...new Set([...CATEGORIES, ...items.map((i) => i.category), ...lostItems.map((i) => i.category)].filter(Boolean))] as string[];
     // Apply cached translations immediately.
@@ -1121,11 +1123,12 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       } catch {}
       return [cat, cat] as [string, string];
     })).then((pairs) => setCatMap((prev) => ({ ...prev, ...Object.fromEntries(pairs) })));
-  }, [language, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [language, hydrated, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Translate item content (name, description, location) ────────────────────
   const [contentMap, setContentMap] = useState<Record<string, { name: string; description: string; location: string }>>({});
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setContentMap({}); return; }
     const allItems = [
       ...items.map((i) => ({ k: `f_${i.id}`, id: i.id, t: "f", name: i.name || "", description: i.description || "", location: i.location || "" })),
@@ -1154,7 +1157,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       ]);
       newMap[item.k] = { name, description, location };
     })).then(() => setContentMap({ ...newMap }));
-  }, [language, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [language, hydrated, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── My active claims (as claimant) ──────────────────────────────────────────
   useEffect(() => {

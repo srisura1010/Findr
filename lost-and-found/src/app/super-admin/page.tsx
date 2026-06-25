@@ -78,7 +78,7 @@ async function sendEmail(route: string, body: Record<string, string>) {
 export default function SuperAdminPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
 
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
   const [schoolRequests, setSchoolRequests] = useState<SchoolRequest[]>([]);
@@ -112,6 +112,7 @@ export default function SuperAdminPage() {
   const [viewVerificationDocText, setViewVerificationDocText] = useState("View Verification Doc ↗");
 
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setPageTitleText("Super Admin");
       setPageSubtitleText("Manage admin requests for Findr");
@@ -191,7 +192,7 @@ export default function SuperAdminPage() {
       setIsReady(true);
     };
     translateAndCache();
-  }, [language]);
+  }, [language, hydrated]);
   const [loading, setLoading] = useState(true);
 
   const [approvingId, setApprovingId] = useState<string | null>(null);

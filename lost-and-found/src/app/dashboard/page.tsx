@@ -1809,7 +1809,7 @@ export default function DashboardPage() {
     removeItem,
   } = useItems();
   const { user, isLoaded } = useUser();
-  const { language, theme } = useSettings();
+  const { language, theme, hydrated } = useSettings();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<TabId>("items");
@@ -1965,6 +1965,7 @@ export default function DashboardPage() {
 
   // ── Translation effect ──────────────────────────────────────────────────────
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") {
       setS(DEFAULT_STRINGS);
       setIsReady(true);
@@ -2246,10 +2247,11 @@ export default function DashboardPage() {
     };
 
     translateAll();
-  }, [language]);
+  }, [language, hydrated]);
 
   // Translate categories independently so they're ready as soon as language changes.
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setCatMap({}); return; }
 
     // Apply any already-cached category translations immediately (synchronous).
@@ -2284,10 +2286,11 @@ export default function DashboardPage() {
       );
       setCatMap(updates);
     })();
-  }, [language]);
+  }, [language, hydrated]);
 
   // Translate item titles whenever items load or language changes.
   useEffect(() => {
+    if (!hydrated) return;
     if (language === "en") { setNameMap({}); return; }
     const allItems = [
       ...(items ?? []).map((i) => ({ id: i.id, name: i.name })),
@@ -2325,7 +2328,7 @@ export default function DashboardPage() {
       }
       if (changed) setNameMap(updates);
     })();
-  }, [language, items, lostItems]);
+  }, [language, hydrated, items, lostItems]);
 
   // ── Item form state ───────────────────────────────────────────────────────
   const [newItemName, setNewItemName] = useState("");

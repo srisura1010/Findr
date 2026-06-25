@@ -12,7 +12,7 @@ interface ImageGalleryProps {
 
 export default function ImageGallery({ images, title = "" }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { language } = useSettings();
+  const { language, hydrated } = useSettings();
   const [noImageText, setNoImageText] = useState("No image available");
   const [prevLabel, setPrevLabel] = useState("Previous image");
   const [nextLabel, setNextLabel] = useState("Next image");
@@ -24,6 +24,7 @@ export default function ImageGallery({ images, title = "" }: ImageGalleryProps) 
   const validImages = images.filter(img => img && typeof img === 'string');
 
   useEffect(() => {
+    if (!hydrated) return;
     const strings = [
       { key: "No image available", setter: setNoImageText },
       { key: "Previous image", setter: setPrevLabel },
@@ -57,7 +58,7 @@ export default function ImageGallery({ images, title = "" }: ImageGalleryProps) 
         } catch {}
       }
     })();
-  }, [language]);
+  }, [language, hydrated]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
