@@ -15,7 +15,13 @@ interface SLostStrings {
   schoolLostItem: string; lostBy: string; lostDate: string; lostLocation: string;
   description: string; deleteBtn: string; markFoundBtn: string; messageOwner: string;
   stillLooking: string; noImage: string; similarItems: string; noSimilarItems: string;
-  cancel: string; viewItem: string; loading: string;
+  cancel: string; viewItem: string; loading: string; typeMessage: string;
+  deleteConfirm: string;
+  sayHiAbout: string;
+  chatTemplateFound: string;
+  chatTemplateDescribe: string;
+  chatTemplateLastSeen: string;
+  chatTemplateMissing: string;
 }
 
 const DEFAULT_SLOST: SLostStrings = {
@@ -27,39 +33,45 @@ const DEFAULT_SLOST: SLostStrings = {
   stillLooking: "Still Looking", noImage: "No image",
   similarItems: "Similar items", noSimilarItems: "No similar items",
   cancel: "Cancel", viewItem: "View Item", loading: "Loading...",
+  typeMessage: "Type a message...",
+  deleteConfirm: "Delete this lost item report?",
+  sayHiAbout: "Say hi about",
+  chatTemplateFound: "Hi! I think I may have found your item!",
+  chatTemplateDescribe: "Can you describe it in more detail?",
+  chatTemplateLastSeen: "Where did you last see it?",
+  chatTemplateMissing: "Is this still missing?",
 };
 
-async function translateSLost(language: string): Promise<SLostStrings> {
-  if (language === "en") return DEFAULT_SLOST;
-  const pairs: [keyof SLostStrings, string][] = [
-    ["itemNotFound", "Item not found."], ["backBtn", "← Back"], ["back", "Back"],
-    ["schoolItems", "School Items"], ["schoolLostItem", "School Lost Item"],
-    ["lostBy", "Lost by"], ["lostDate", "Lost"], ["lostLocation", "Last seen"],
-    ["description", "Description"], ["deleteBtn", "Delete Report"],
-    ["markFoundBtn", "Mark as Found"], ["messageOwner", "Message Owner"],
-    ["stillLooking", "Still Looking"], ["noImage", "No image"],
-    ["similarItems", "Similar items"], ["noSimilarItems", "No similar items"],
-    ["cancel", "Cancel"], ["viewItem", "View Item"], ["loading", "Loading..."],
-  ];
-  const result = { ...DEFAULT_SLOST };
-  await Promise.all(pairs.map(async ([field, text]) => {
-    const cacheKey = `sl_${field}_${language}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) { result[field] = cached; return; }
-    try {
-      const res = await fetch("/api/translate", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, target: language }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const t = (data.translatedText as string | undefined)?.trim() || text;
-        result[field] = t;
-        localStorage.setItem(cacheKey, t);
-      }
-    } catch {}
-  }));
-  return result;
+async function batchTranslateSLost(
+  entries: Array<[keyof SLostStrings, string]>,
+  target: string,
+  apply: (u: Partial<SLostStrings>) => void,
+): Promise<void> {
+  const updates: Partial<SLostStrings> = {};
+  const uncached: typeof entries = [];
+  for (const [field, key] of entries) {
+    const hit = localStorage.getItem(`sl_${field}_${target}`);
+    if (hit) { updates[field] = hit; } else { uncached.push([field, key]); }
+  }
+  if (Object.keys(updates).length > 0) apply(updates);
+  if (uncached.length === 0) return;
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: uncached.map(([, k]) => k), target }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const results: string[] = data.translatedTexts ?? [];
+    const newU: Partial<SLostStrings> = {};
+    for (let i = 0; i < uncached.length; i++) {
+      const [field, key] = uncached[i];
+      const t = results[i]?.trim() || key;
+      newU[field] = t;
+      localStorage.setItem(`sl_${field}_${target}`, t);
+    }
+    apply(newU);
+  } catch {}
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────────
@@ -102,7 +114,12 @@ export default function SchoolLostItemDetailPage() {
 
   // translations
   useEffect(() => {
-    translateSLost(language).then((r) => { setS(r); setIsReady(true); });
+    if (language === "en") { setS(DEFAULT_SLOST); setIsReady(true); return; }
+    const pairs = (Object.keys(DEFAULT_SLOST) as Array<keyof SLostStrings>).map(
+      (k): [keyof SLostStrings, string] => [k, DEFAULT_SLOST[k]]
+    );
+    batchTranslateSLost(pairs, language, (u) => setS((prev) => ({ ...prev, ...u })))
+      .then(() => setIsReady(true));
   }, [language]);
 
   // translate user content (name, description, location, category) when item loads
@@ -209,7 +226,7 @@ export default function SchoolLostItemDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!item || !confirm("Delete this lost item report?")) return;
+    if (!item || !confirm(s.deleteConfirm)) return;
     setActionLoading(true);
     await supabase.from("school_lost_items").delete().eq("id", item.id);
     router.back();
@@ -362,7 +379,7 @@ export default function SchoolLostItemDetailPage() {
               )}
               {messages.length === 0 && (
                 <div className="chat-modal__empty">
-                  <p>Say hi about <strong>{item.name}</strong></p>
+                  <p>{s.sayHiAbout} <strong>{item.name}</strong></p>
                 </div>
               )}
               {messages.map((msg) => {
@@ -381,10 +398,10 @@ export default function SchoolLostItemDetailPage() {
             {messages.length === 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px", borderTop: "1px solid var(--border-default)" }}>
                 {[
-                  "Hi! I think I may have found your item!",
-                  "Can you describe it in more detail?",
-                  "Where did you last see it?",
-                  "Is this still missing?",
+                  s.chatTemplateFound,
+                  s.chatTemplateDescribe,
+                  s.chatTemplateLastSeen,
+                  s.chatTemplateMissing,
                 ].map((template) => (
                   <button
                     key={template}
@@ -403,7 +420,7 @@ export default function SchoolLostItemDetailPage() {
                 rows={1} value={chatText}
                 onChange={(e) => setChatText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
-                placeholder="Type a message..."
+                placeholder={s.typeMessage}
                 className="chat-modal__textarea"
               />
               <button onClick={handleSendChat} disabled={!chatText.trim() || chatSending}

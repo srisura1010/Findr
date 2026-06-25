@@ -34,11 +34,29 @@ interface SItemStrings {
   iReceived: string; fileDisputeBtn: string; disputeReview: string; anotherClaim: string;
   similarItems: string; noSimilarItems: string; noImage: string;
   submitClaimTitle: string; cancel: string; submitClaim: string; submitting: string;
-  claimsFor: string; loading: string; noClaimsModal: string;
+  claimsFor: string; loading: string; noClaimsModal: string; pending: string;
   accept: string; accepting: string; reject: string; rejecting: string;
   confirmReject: string; close: string; messageClaimant: string;
   fileDisputeTitle: string; submitDispute: string; filing: string;
   reportSubmitted: string; submitReport: string; submittingReport: string; viewItem: string;
+  claimInstructions: string; claimPlaceholder: string; minChars: string;
+  uploadProof: string; chooseImage: string; rejectPlaceholder: string;
+  disputeInstructions: string; disputePlaceholder: string; whyReporting: string;
+  reasonInappropriate: string; reasonSpam: string; reasonMisleading: string;
+  reasonClaimed: string; reasonOther: string;
+  typeMessage: string;
+  handoffConfirmedMsg: string;
+  receiptConfirmedMsg: string;
+  itemReturnedMsg: string;
+  disputeFiledMsg: string;
+  deleteConfirm: string;
+  sayHiAbout: string;
+  chatTemplateMine: string;
+  chatTemplateDescribe: string;
+  chatTemplateMeet: string;
+  chatTemplateAvailable: string;
+  acceptedClaimPre: string;
+  acceptedClaimPost: string;
 }
 const DEFAULT_SITEM: SItemStrings = {
   itemNotFound: "Item not found.", backBtn: "← Back", back: "Back", schoolItems: "School Items",
@@ -61,63 +79,70 @@ const DEFAULT_SITEM: SItemStrings = {
   similarItems: "Similar items", noSimilarItems: "No similar items", noImage: "No image",
   submitClaimTitle: "Submit a Claim", cancel: "Cancel", submitClaim: "Submit Claim",
   submitting: "Submitting...", claimsFor: "Claims for", loading: "Loading...",
-  noClaimsModal: "No claims yet.", accept: "Accept", accepting: "Accepting...",
+  noClaimsModal: "No claims yet.", pending: "Pending",
+  accept: "Accept", accepting: "Accepting...",
   reject: "Reject", rejecting: "Rejecting...", confirmReject: "Confirm Reject",
   close: "Close", messageClaimant: "Message Claimant", fileDisputeTitle: "File a Dispute",
   submitDispute: "Submit Dispute", filing: "Filing...", reportSubmitted: "Report submitted",
   submitReport: "Submit Report", submittingReport: "Submitting...", viewItem: "View Item",
+  claimInstructions: "Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible - the finder will use this to verify ownership.",
+  claimPlaceholder: "e.g. It's a navy blue JanSport with a keychain of a red mushroom on the zipper, and my name 'Jamie' written inside the front pocket...",
+  minChars: "min chars",
+  uploadProof: "Upload proof (optional)", chooseImage: "Choose image",
+  rejectPlaceholder: "Enter rejection reason (required)",
+  disputeInstructions: "Explain what happened. The school admin will review and contact both parties.",
+  disputePlaceholder: "e.g. I arranged to meet the finder but they never showed up. I believe the item hasn't actually been handed off...",
+  whyReporting: "Why are you reporting this item?",
+  reasonInappropriate: "Inappropriate content",
+  reasonSpam: "Spam or duplicate",
+  reasonMisleading: "Misleading information",
+  reasonClaimed: "Already claimed / resolved",
+  reasonOther: "Other",
+  typeMessage: "Type a message...",
+  handoffConfirmedMsg: "You've confirmed the handoff. The claimant has been notified.",
+  receiptConfirmedMsg: "Receipt confirmed! Waiting for the finder to confirm handoff.",
+  itemReturnedMsg: "Item successfully returned! Redirecting...",
+  disputeFiledMsg: "Dispute filed. The school admin will review and contact you.",
+  deleteConfirm: "Delete this item permanently?",
+  sayHiAbout: "Say hi about",
+  chatTemplateMine: "Hi! I think this might be mine. Can we arrange a pickup?",
+  chatTemplateDescribe: "Can you describe it in more detail?",
+  chatTemplateMeet: "Where can we meet to return it?",
+  chatTemplateAvailable: "Is this still available?",
+  acceptedClaimPre: "Accepted",
+  acceptedClaimPost: "'s claim. Coordinate the handoff!",
 };
 
-async function translateSItem(language: string): Promise<SItemStrings> {
-  if (language === "en") return DEFAULT_SITEM;
-  const pairs: [keyof SItemStrings, string][] = [
-    ["itemNotFound", "Item not found."], ["backBtn", "← Back"], ["back", "Back"],
-    ["schoolItems", "School Items"], ["schoolFoundItem", "School Found Item"],
-    ["foundBy", "Found by"], ["foundDate", "Found"], ["foundLocation", "Found location"],
-    ["description", "Description"], ["report", "Report"], ["deleteMyPost", "Delete My Post"],
-    ["deleteAdmin", "Delete (School Admin)"], ["statusAvailable", "Available"],
-    ["statusClaimPending", "Claim Pending"], ["statusClaimAccepted", "Claim Accepted"],
-    ["statusAwaiting", "Awaiting Confirmation"], ["statusDisputed", "Disputed"],
-    ["viewClaims", "View Claims"], ["noClaimsYet", "No claims yet"],
-    ["confirmHandoff", "Confirm I Handed Off Item"], ["confirming", "Confirming..."],
-    ["waitingClaimant", "Waiting for claimant to confirm receipt..."],
-    ["disputedAdmin", "Disputed - admin is reviewing"], ["messagePrefix", "Message"],
-    ["messageFinder", "Message Finder"], ["submitClaimBtn", "This is Mine - Submit a Claim"],
-    ["claimSubmittedBtn", "Claim Submitted - Awaiting Review"],
-    ["claimAcceptedMsg", "Your claim has been accepted! Coordinate with the finder for pickup."],
-    ["claimAcceptedTitle", "Your claim was accepted!"],
-    ["claimAcceptedSub", "Coordinate with the finder to retrieve your item, then confirm receipt below."],
-    ["iReceived", "I Received My Item"], ["fileDisputeBtn", "No - File a Dispute"],
-    ["disputeReview", "Dispute under admin review"], ["anotherClaim", "Another claim has been accepted"],
-    ["similarItems", "Similar items"], ["noSimilarItems", "No similar items"], ["noImage", "No image"],
-    ["submitClaimTitle", "Submit a Claim"], ["cancel", "Cancel"], ["submitClaim", "Submit Claim"],
-    ["submitting", "Submitting..."], ["claimsFor", "Claims for"], ["loading", "Loading..."],
-    ["noClaimsModal", "No claims yet."], ["accept", "Accept"], ["accepting", "Accepting..."],
-    ["reject", "Reject"], ["rejecting", "Rejecting..."], ["confirmReject", "Confirm Reject"],
-    ["close", "Close"], ["messageClaimant", "Message Claimant"], ["fileDisputeTitle", "File a Dispute"],
-    ["submitDispute", "Submit Dispute"], ["filing", "Filing..."],
-    ["reportSubmitted", "Report submitted"], ["submitReport", "Submit Report"],
-    ["submittingReport", "Submitting..."], ["viewItem", "View Item"],
-  ];
-  const result = { ...DEFAULT_SITEM };
-  await Promise.all(pairs.map(async ([field, text]) => {
-    const cacheKey = `si_${field}_${language}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) { result[field] = cached; return; }
-    try {
-      const res = await fetch("/api/translate", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, target: language }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const t = (data.translatedText as string | undefined)?.trim() || text;
-        result[field] = t;
-        localStorage.setItem(cacheKey, t);
-      }
-    } catch {}
-  }));
-  return result;
+async function batchTranslateSItem(
+  entries: Array<[keyof SItemStrings, string]>,
+  target: string,
+  apply: (u: Partial<SItemStrings>) => void,
+): Promise<void> {
+  const updates: Partial<SItemStrings> = {};
+  const uncached: typeof entries = [];
+  for (const [field, key] of entries) {
+    const hit = localStorage.getItem(`si_${field}_${target}`);
+    if (hit) { updates[field] = hit; } else { uncached.push([field, key]); }
+  }
+  if (Object.keys(updates).length > 0) apply(updates);
+  if (uncached.length === 0) return;
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: uncached.map(([, k]) => k), target }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const results: string[] = data.translatedTexts ?? [];
+    const newU: Partial<SItemStrings> = {};
+    for (let i = 0; i < uncached.length; i++) {
+      const [field, key] = uncached[i];
+      const t = results[i]?.trim() || key;
+      newU[field] = t;
+      localStorage.setItem(`si_${field}_${target}`, t);
+    }
+    apply(newU);
+  } catch {}
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -232,10 +257,18 @@ export default function SchoolItemDetailPage() {
   const [translatedName, setTranslatedName] = useState<string>("");
   const [translatedDescription, setTranslatedDescription] = useState<string>("");
   const [translatedLocation, setTranslatedLocation] = useState<string>("");
+  const [translatedKeywords, setTranslatedKeywords] = useState<string[]>([]);
+  const [relatedNameMap, setRelatedNameMap] = useState<Record<number, string>>({});
+  const [relatedCatMap, setRelatedCatMap] = useState<Record<number, string>>({});
 
   // ── translations ──────────────────────────────────────────────────────────
   useEffect(() => {
-    translateSItem(language).then((result) => { setS(result); setIsReady(true); });
+    if (language === "en") { setS(DEFAULT_SITEM); setIsReady(true); return; }
+    const pairs = (Object.keys(DEFAULT_SITEM) as Array<keyof SItemStrings>).map(
+      (k): [keyof SItemStrings, string] => [k, DEFAULT_SITEM[k]]
+    );
+    batchTranslateSItem(pairs, language, (u) => setS((prev) => ({ ...prev, ...u })))
+      .then(() => setIsReady(true));
   }, [language]);
 
   // translate user content (name, description, location, category) when item loads
@@ -275,6 +308,76 @@ export default function SchoolItemDetailPage() {
       setTranslatedCategory(cat);
     });
   }, [item, language]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // translate ai keywords
+  useEffect(() => {
+    if (!item?.aiKeywords) { setTranslatedKeywords([]); return; }
+    const kws: string[] = item.aiKeywords.split(",").map((k: string) => k.trim()).filter(Boolean);
+    if (language === "en") { setTranslatedKeywords(kws); return; }
+    const uncached: string[] = [];
+    const result: string[] = kws.map((kw) => {
+      const hit = localStorage.getItem(`si_kw_${kw.replace(/\s+/g, "_")}_${language}`);
+      return hit ?? (uncached.push(kw), kw);
+    });
+    setTranslatedKeywords(result);
+    if (uncached.length === 0) return;
+    fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texts: uncached, target: language }) })
+      .then((r) => r.json())
+      .then((data) => {
+        const translated: string[] = data.translatedTexts ?? [];
+        setTranslatedKeywords(kws.map((kw) => {
+          const ci = uncached.indexOf(kw);
+          if (ci >= 0 && translated[ci]) {
+            localStorage.setItem(`si_kw_${kw.replace(/\s+/g, "_")}_${language}`, translated[ci]);
+            return translated[ci];
+          }
+          return localStorage.getItem(`si_kw_${kw.replace(/\s+/g, "_")}_${language}`) ?? kw;
+        }));
+      }).catch(() => {});
+  }, [item?.aiKeywords, language]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // translate related item names + categories
+  useEffect(() => {
+    if (relatedItems.length === 0 || language === "en") {
+      setRelatedNameMap({});
+      setRelatedCatMap({});
+      return;
+    }
+    const texts: string[] = [];
+    const keys: Array<{ type: "name" | "cat"; id: number; fallback: string; cacheKey: string }> = [];
+    const nameMap: Record<number, string> = {};
+    const catMap: Record<number, string> = {};
+    for (const ri of relatedItems) {
+      const nameCK = `si_ri_${ri.id}_${language}`;
+      const cachedName = localStorage.getItem(nameCK);
+      if (cachedName) { nameMap[ri.id] = cachedName; }
+      else { texts.push(ri.name); keys.push({ type: "name", id: ri.id, fallback: ri.name, cacheKey: nameCK }); }
+      if (ri.category) {
+        const catCK = `si_rc_${ri.category.replace(/\s+/g, "_")}_${language}`;
+        const cachedCat = localStorage.getItem(catCK);
+        if (cachedCat) { catMap[ri.id] = cachedCat; }
+        else { texts.push(ri.category); keys.push({ type: "cat", id: ri.id, fallback: ri.category, cacheKey: catCK }); }
+      }
+    }
+    if (Object.keys(nameMap).length > 0) setRelatedNameMap((prev) => ({ ...prev, ...nameMap }));
+    if (Object.keys(catMap).length > 0) setRelatedCatMap((prev) => ({ ...prev, ...catMap }));
+    if (texts.length === 0) return;
+    fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texts, target: language }) })
+      .then((r) => r.json())
+      .then((data) => {
+        const results: string[] = data.translatedTexts ?? [];
+        const newNameMap: Record<number, string> = {};
+        const newCatMap: Record<number, string> = {};
+        keys.forEach(({ type, id, fallback, cacheKey }, i) => {
+          const t = results[i]?.trim() || fallback;
+          localStorage.setItem(cacheKey, t);
+          if (type === "name") newNameMap[id] = t;
+          else newCatMap[id] = t;
+        });
+        setRelatedNameMap((prev) => ({ ...prev, ...newNameMap }));
+        setRelatedCatMap((prev) => ({ ...prev, ...newCatMap }));
+      }).catch(() => {});
+  }, [relatedItems, language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── fetch item ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -576,7 +679,7 @@ export default function SchoolItemDetailPage() {
     );
     setClaimActionLoading(false);
     setShowClaimsModal(false);
-    setActionMsg(`Accepted ${claim.claimant_name}'s claim. Coordinate the handoff!`);
+    setActionMsg(`${s.acceptedClaimPre} ${claim.claimant_name}${s.acceptedClaimPost}`);
   };
 
   // ── reject claim (finder) ─────────────────────────────────────────────────
@@ -624,7 +727,7 @@ export default function SchoolItemDetailPage() {
         status: "handed_off",
       }).eq("id", item.id);
       setItem((prev: any) => ({ ...prev, handoff_confirmed_by_poster: true, status: "handed_off" }));
-      setActionMsg("You've confirmed the handoff. The claimant has been notified.");
+      setActionMsg(s.handoffConfirmedMsg);
     }
     setActionLoading(false);
   };
@@ -650,7 +753,7 @@ export default function SchoolItemDetailPage() {
         status: "handed_off",
       }).eq("id", item.id);
       setItem((prev: any) => ({ ...prev, handoff_confirmed_by_claimant: true, status: "handed_off" }));
-      setActionMsg("Receipt confirmed! Waiting for the finder to confirm handoff.");
+      setActionMsg(s.receiptConfirmedMsg);
     }
     setActionLoading(false);
   };
@@ -675,7 +778,7 @@ export default function SchoolItemDetailPage() {
       return;
     }
     await supabase.from("school_items").delete().eq("id", item.id);
-    setActionMsg("Item successfully returned! Redirecting...");
+    setActionMsg(s.itemReturnedMsg);
     setTimeout(() => router.back(), 1800);
   };
 
@@ -696,7 +799,7 @@ export default function SchoolItemDetailPage() {
     setShowDisputeModal(false);
     setDisputeReason("");
     setDisputeSubmitting(false);
-    setActionMsg("Dispute filed. The school admin will review and contact you.");
+    setActionMsg(s.disputeFiledMsg);
   };
 
   // ── report ────────────────────────────────────────────────────────────────
@@ -721,7 +824,7 @@ export default function SchoolItemDetailPage() {
 
   // ── delete ────────────────────────────────────────────────────────────────
   const handleDelete = async () => {
-    if (!item || !confirm("Delete this item permanently?")) return;
+    if (!item || !confirm(s.deleteConfirm)) return;
     setActionLoading(true);
     // Notify pending claimants
     const { data: pendingClaims } = await supabase
@@ -860,7 +963,7 @@ export default function SchoolItemDetailPage() {
           {/* AI keyword chips */}
           {item.aiKeywords && (
             <div className="detail-tags-row">
-              {item.aiKeywords.split(",").map((kw: string) => kw.trim()).filter(Boolean).slice(0, 8).map((kw: string) => (
+              {(translatedKeywords.length > 0 ? translatedKeywords : item.aiKeywords.split(",").map((k: string) => k.trim()).filter(Boolean)).slice(0, 8).map((kw: string) => (
                 <span key={kw} className="detail-tag-chip">{kw}</span>
               ))}
             </div>
@@ -1042,8 +1145,8 @@ export default function SchoolItemDetailPage() {
                       ? <img src={img} alt={ri.name} className="related-card__img" />
                       : <div className="related-card__img-placeholder">{s.noImage}</div>}
                     <div className="related-card__body">
-                      <p className="related-card__name">{ri.name}</p>
-                      {ri.category && <p className="related-card__cat">{ri.category}</p>}
+                      <p className="related-card__name">{relatedNameMap[ri.id] || ri.name}</p>
+                      {ri.category && <p className="related-card__cat">{relatedCatMap[ri.id] || ri.category}</p>}
                     </div>
                   </a>
                 );
@@ -1067,25 +1170,25 @@ export default function SchoolItemDetailPage() {
               {s.submitClaimTitle}
             </p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-              Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible - the finder will use this to verify ownership.
+              {s.claimInstructions}
             </p>
             <textarea
               className="school-claim-textarea"
               value={claimProof}
               onChange={(e) => setClaimProof(e.target.value)}
-              placeholder="e.g. It's a navy blue JanSport with a keychain of a red mushroom on the zipper, and my name 'Jamie' written inside the front pocket..."
+              placeholder={s.claimPlaceholder}
               rows={5}
               style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
             />
             <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: claimProof.trim().length >= 20 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
-              {claimProof.trim().length}/20 min chars
+              {claimProof.trim().length}/20 {s.minChars}
             </p>
             <div>
               <label
                 className="panel-form__label"
                 style={{ display: "block", marginBottom: 6 }}
               >
-                Upload proof (optional)
+                {s.uploadProof}
               </label>
               <label
                 className="panel-form__file-label"
@@ -1093,7 +1196,7 @@ export default function SchoolItemDetailPage() {
               >
                 <span className="panel-form__file-icon">+</span>
                 <span className="panel-form__file-text">
-                  {claimProofFile ? claimProofFile.name : "Choose image"}
+                  {claimProofFile ? claimProofFile.name : s.chooseImage}
                 </span>
               </label>
               <input
@@ -1156,7 +1259,7 @@ export default function SchoolItemDetailPage() {
                         <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{new Date(claim.created_at).toLocaleDateString()}</p>
                       </div>
                       <span style={{ padding: "2px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)", background: claim.status === "accepted" ? "var(--success)" : claim.status === "rejected" ? "var(--bg-input)" : "var(--warning)", color: claim.status === "pending" ? "#fff" : claim.status === "accepted" ? "#fff" : "var(--text-muted)", flexShrink: 0 }}>
-                        {claim.status === "accepted" ? s.accept : claim.status === "rejected" ? s.reject : "Pending"}
+                        {claim.status === "accepted" ? s.accept : claim.status === "rejected" ? s.reject : s.pending}
                       </span>
                     </div>
 
@@ -1178,7 +1281,7 @@ export default function SchoolItemDetailPage() {
                             <textarea
                               value={rejectReasons[claim.id] || ""}
                               onChange={(e) => setRejectReasons((prev) => ({ ...prev, [claim.id]: e.target.value }))}
-                              placeholder="Enter rejection reason (required)"
+                              placeholder={s.rejectPlaceholder}
                               rows={3}
                               style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
                             />
@@ -1187,7 +1290,7 @@ export default function SchoolItemDetailPage() {
                                 onClick={() => { setRejectingId(null); setRejectReasons((prev) => { const n = { ...prev }; delete n[claim.id]; return n; }); }}
                                 style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "transparent", color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
                               >
-                                Cancel
+                                {s.cancel}
                               </button>
                               <button
                                 onClick={() => handleRejectClaim(claim)}
@@ -1277,17 +1380,17 @@ export default function SchoolItemDetailPage() {
               {s.fileDisputeTitle}
             </p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-              Explain what happened. The school admin will review and contact both parties.
+              {s.disputeInstructions}
             </p>
             <textarea
               value={disputeReason}
               onChange={(e) => setDisputeReason(e.target.value)}
-              placeholder="e.g. I arranged to meet the finder but they never showed up. I believe the item hasn't actually been handed off..."
+              placeholder={s.disputePlaceholder}
               rows={5}
               style={{ width: "100%", padding: "10px 13px", borderRadius: 9, border: `1.5px solid ${disputeReason.length > 0 && disputeReason.trim().length < 50 ? "var(--danger)" : "var(--border-input)"}`, background: "var(--bg-input)", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: 13, resize: "vertical", boxSizing: "border-box", outline: "none" }}
             />
             <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: disputeReason.trim().length >= 50 ? "var(--success)" : "var(--text-muted)", margin: "-8px 0 0", textAlign: "right" }}>
-              {disputeReason.trim().length}/50 min chars
+              {disputeReason.trim().length}/50 {s.minChars}
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
@@ -1319,13 +1422,16 @@ export default function SchoolItemDetailPage() {
             ) : (
               <>
                 <p className="detail-modal__title">Report "{item.name}"</p>
-                <p className="detail-modal__subtitle">Why are you reporting this item?</p>
+                <p className="detail-modal__subtitle">{s.whyReporting}</p>
                 <div className="detail-modal__reasons">
-                  {REPORT_REASONS.map((r) => (
-                    <button key={r} className={`detail-modal__reason${reportReason === r ? " detail-modal__reason--selected" : ""}`} onClick={() => setReportReason(r)}>
-                      {r}
-                    </button>
-                  ))}
+                  {REPORT_REASONS.map((r, i) => {
+                    const labels = [s.reasonInappropriate, s.reasonSpam, s.reasonMisleading, s.reasonClaimed, s.reasonOther];
+                    return (
+                      <button key={r} className={`detail-modal__reason${reportReason === r ? " detail-modal__reason--selected" : ""}`} onClick={() => setReportReason(r)}>
+                        {labels[i]}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="detail-modal__actions">
                   <button className="detail-modal__cancel" onClick={() => setShowReport(false)}>{s.cancel}</button>
@@ -1369,7 +1475,7 @@ export default function SchoolItemDetailPage() {
               )}
               {messages.length === 0 && (
                 <div className="chat-modal__empty">
-                  <p>Say hi about <strong>{item.name}</strong></p>
+                  <p>{s.sayHiAbout} <strong>{item.name}</strong></p>
                 </div>
               )}
               {messages.map((msg) => {
@@ -1390,10 +1496,10 @@ export default function SchoolItemDetailPage() {
             {messages.length === 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px", borderTop: "1px solid var(--border-default)" }}>
                 {[
-                  "Hi! I think this might be mine. Can we arrange a pickup?",
-                  "Can you describe it in more detail?",
-                  "Where can we meet to return it?",
-                  "Is this still available?",
+                  s.chatTemplateMine,
+                  s.chatTemplateDescribe,
+                  s.chatTemplateMeet,
+                  s.chatTemplateAvailable,
                 ].map((template) => (
                   <button
                     key={template}
@@ -1413,7 +1519,7 @@ export default function SchoolItemDetailPage() {
                 value={chatText}
                 onChange={(e) => setChatText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
-                placeholder="Type a message..."
+                placeholder={s.typeMessage}
                 className="chat-modal__textarea"
               />
               <button onClick={handleSendChat} disabled={!chatText.trim() || chatSending} className={`chat-modal__send${chatText.trim() ? " chat-modal__send--active" : ""}`}>

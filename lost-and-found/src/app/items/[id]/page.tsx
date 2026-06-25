@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
 import { useItems } from "@/context/ItemsContext";
+import { useSettings } from "@/context/SettingsContext";
 import {
   FaFlag,
   FaMessage,
@@ -47,6 +48,139 @@ interface Message {
   created_at: string;
 }
 
+// ── Translatable UI strings ───────────────────────────────────────────────────
+const DEFAULT_DETAIL = {
+  back: "Back", lostItemsBreadcrumb: "Lost Items", foundItemsBreadcrumb: "Found Items",
+  lostItemPill: "Lost Item", foundItemPill: "Found Item",
+  lostBy: "Lost by", foundBy: "Found by",
+  reported: "Reported", found: "Found",
+  descriptionLabel: "Description", tagsLabel: "Tags",
+  foundLocation: "Found location", lastSeenLocation: "Last seen location",
+  report: "Report", deleteMyPost: "Delete My Post",
+  submitClaim: "This is mine - Submit a Claim",
+  claimSubmittedWaiting: "Claim Submitted - Awaiting Review",
+  claimAlreadyRejected: "You have already submitted a claim for this item that was not accepted.",
+  claimAcceptedMsg: "Your claim has been accepted! Coordinate with the finder for pickup.",
+  handoffMsg: "The finder says they handed this back to you. Please confirm below.",
+  noClaimsYet: "No claims yet",
+  viewClaims: "View Claims",
+  confirmHandoff: "Confirm I Handed It Back",
+  confirmReceipt: "Confirm I Received It",
+  confirming: "Confirming...",
+  disputeBtn: "Dispute",
+  messageFinder: "Message Finder",
+  messageOwner: "I Found This! Message Owner",
+  markAsFound: "✓ Mark as Found",
+  updating: "Updating...",
+  confirmClaimed: "✓ Confirm Item is Claimed",
+  claimPendingConfirmation: "⏳ Claim Pending Confirmation",
+  similarItems: "Similar items",
+  findingSimilar: "Finding similar items...",
+  statusStillLooking: "🔍 Still Looking",
+  statusAvailable: "✓ Available",
+  statusClaimPending: "⏳ Claim Pending",
+  statusClaimAccepted: "✅ Claim Accepted",
+  statusHandoff: "🤝 Handoff in Progress",
+  statusDisputed: "⚠️ Disputed",
+  statusClaimed: "✓ Claimed",
+  whyReporting: "Why are you reporting this item?",
+  reasonInappropriate: "Inappropriate content",
+  reasonSpam: "Spam or duplicate",
+  reasonMisleading: "Misleading information",
+  reasonClaimed: "Already claimed / resolved",
+  reasonOther: "Other",
+  cancel: "Cancel",
+  submitReport: "Submit Report",
+  submitting: "Submitting...",
+  submitAClaim: "Submit a Claim",
+  claimInstructions: "Describe something specific about this item that is NOT visible in the photo. Be as detailed as possible — the finder will use this to verify ownership.",
+  claimPlaceholder: "e.g. There's a small scratch on the bottom-left corner, the brand sticker is peeling, my name is written inside in black marker",
+  minChars: "minimum characters",
+  uploadProof: "Upload proof (optional)",
+  chooseImage: "Choose image",
+  submitClaimBtn: "Submit Claim",
+  loadingClaims: "Loading claims...",
+  noPendingClaims: "No pending claims.",
+  accept: "Accept",
+  reject: "Reject",
+  rejectPlaceholder: "Enter rejection reason (required)",
+  confirmReject: "Confirm Reject",
+  rejecting: "Rejecting...",
+  messageClaimant: "Message Claimant",
+  close: "Close",
+  openDispute: "Open a Dispute",
+  disputeInstructions: "Describe what went wrong. An admin will review your dispute.",
+  disputePlaceholder: "Describe what went wrong (minimum 50 characters)",
+  minCharsShort: "min chars",
+  submitDispute: "Submit Dispute",
+  typeMessage: "Type a message...",
+  viewItem: "View Item",
+  itemNotFound: "Item not found.",
+  backToDashboard: "← Back to Dashboard",
+  msgRequestSent: "Request sent! The owner has been notified.",
+  msgItemReturned: "Item marked as returned!",
+  msgMarkedFound: "Marked as found!",
+  msgHandoffConfirmed: "You've confirmed the handoff. The claimant has been notified.",
+  msgClaimSubmitted: "Your claim has been submitted. The finder will review it and get back to you.",
+  msgReceiptConfirmed: "Thanks for confirming! This listing has been removed.",
+  msgDisputeFiled: "Your dispute has been filed. An admin will review it.",
+  msgClaimFailed: "Failed to submit claim",
+  deleteConfirmLost: "Delete this lost item report permanently?",
+  deleteBlocked: "This item cannot be deleted while a handoff or dispute is in progress. Please wait for the claimant to confirm receipt or for admin to resolve the dispute.",
+  deleteConfirmSimple: "Delete this item permanently?",
+  deleteConfirmClaimsPre: "There are",
+  deleteConfirmClaimsPost: "students who submitted claims for this item. Deleting will notify them it's been removed. Continue?",
+  deleteConfirmAcceptedPre: "You accepted",
+  deleteConfirmAcceptedPost: "'s claim. Deleting now will cancel their accepted claim and notify them. Continue?",
+  claimsForItem: "Claims for",
+  finderHandoffAccepted: "You accepted",
+  finderHandoffClaim: "'s claim.",
+  finderHandoffInstruction: "Once you've physically handed the item back, click below.",
+  deleteAdmin: "Delete (Admin)",
+  reportSubmitted: "Report submitted",
+  sayHiAbout: "Say hi about",
+  chatTemplateLostFound: "Hi! I think I found your item. Is it still missing?",
+  chatTemplateFoundMine: "Hi! I think this might be mine. Can we arrange a pickup?",
+  chatTemplateDescribe: "Can you describe it in more detail?",
+  chatTemplateMeet: "Where can we meet to return it?",
+  chatTemplateAvailable: "Is this still available?",
+  rateLimitTitle: "You already have 2 active claims. Resolve one before claiming another.",
+};
+type DetailStrings = typeof DEFAULT_DETAIL;
+
+async function batchTranslateDetail(
+  entries: Array<[keyof DetailStrings, string]>,
+  target: string,
+  apply: (u: Partial<DetailStrings>) => void,
+) {
+  const updates: Partial<DetailStrings> = {};
+  const uncached: typeof entries = [];
+  for (const [field, key] of entries) {
+    const hit = localStorage.getItem(`detail_${field}_${target}`);
+    if (hit) { updates[field] = hit; } else { uncached.push([field, key]); }
+  }
+  if (Object.keys(updates).length > 0) apply(updates);
+  if (uncached.length === 0) return;
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: uncached.map(([, k]) => k), target }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const results: string[] = data.translatedTexts ?? [];
+    const newU: Partial<DetailStrings> = {};
+    for (let i = 0; i < uncached.length; i++) {
+      const [field, key] = uncached[i];
+      const t = results[i]?.trim() || key;
+      newU[field] = t;
+      localStorage.setItem(`detail_${field}_${target}`, t);
+    }
+    apply(newU);
+  } catch {}
+}
+
 function sendEmail(route: string, body: Record<string, string>) {
   fetch(`/api/emails/${route}`, {
     method: "POST",
@@ -59,6 +193,7 @@ export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user, isLoaded } = useUser();
+  const { language } = useSettings();
   const { items, lostItems, updateItemStatus, removeLostItem, removeItem } =
     useItems();
 
@@ -91,6 +226,14 @@ export default function ItemDetailPage() {
   // Related items
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(false);
+
+  // Translated UI strings
+  const [s, setS] = useState<DetailStrings>(DEFAULT_DETAIL);
+  // Translated dynamic content
+  const [translatedCategory, setTranslatedCategory] = useState("");
+  const [translatedKeywords, setTranslatedKeywords] = useState<string[]>([]);
+  const [relatedNameMap, setRelatedNameMap] = useState<Record<number, string>>({});
+  const [relatedCatMap, setRelatedCatMap] = useState<Record<number, string>>({});
 
   // ── CLAIM FLOW STATE ────────────────────────────────────────────────────────
   const [claimCheckDone, setClaimCheckDone] = useState(false);
@@ -380,7 +523,7 @@ export default function ItemDetailPage() {
         user.primaryEmailAddress?.emailAddress,
       );
       setItem((prev: any) => ({ ...prev, status: "pending" }));
-      setActionMsg("Request sent! The owner has been notified.");
+      setActionMsg(s.msgRequestSent);
     }
     setActionLoading(false);
   };
@@ -395,7 +538,7 @@ export default function ItemDetailPage() {
     });
     if (res.ok) {
       removeItem(item.id);
-      setActionMsg("Item marked as returned!");
+      setActionMsg(s.msgItemReturned);
       setTimeout(() => router.push("/dashboard"), 1200);
     } else {
       const body = await res.json().catch(() => ({}));
@@ -412,7 +555,7 @@ export default function ItemDetailPage() {
 
     // Lost item: simple delete
     if (isLost) {
-      if (!confirm("Delete this lost item report permanently?")) return;
+      if (!confirm(s.deleteConfirmLost)) return;
       setActionLoading(true);
       const { error } = await supabase
         .from("lost_items")
@@ -428,9 +571,7 @@ export default function ItemDetailPage() {
 
     // Case D: cannot delete while handoff or dispute is in progress
     if (currentStatus === "handed_off" || currentStatus === "disputed") {
-      alert(
-        "This item cannot be deleted while a handoff or dispute is in progress. Please wait for the claimant to confirm receipt or for admin to resolve the dispute.",
-      );
+      alert(s.deleteBlocked);
       return;
     }
 
@@ -449,7 +590,7 @@ export default function ItemDetailPage() {
 
     // Case A: no claims or all resolved
     if (!allClaims || allClaims.length === 0 || !hasActiveClaimsOnly) {
-      if (!confirm("Delete this item permanently?")) return;
+      if (!confirm(s.deleteConfirmSimple)) return;
       setActionLoading(true);
       const { error } = await supabase.from("items").delete().eq("id", item.id);
       if (!error) {
@@ -464,7 +605,7 @@ export default function ItemDetailPage() {
     if (currentStatus === "waiting" && pendClaimsArr.length > 0) {
       if (
         !confirm(
-          `There are ${pendClaimsArr.length} students who submitted claims for this item. Deleting will notify them it's been removed. Continue?`,
+          `${s.deleteConfirmClaimsPre} ${pendClaimsArr.length} ${s.deleteConfirmClaimsPost}`,
         )
       )
         return;
@@ -491,7 +632,7 @@ export default function ItemDetailPage() {
       const accName = item.accepted_claimant_name || "the claimant";
       if (
         !confirm(
-          `You accepted ${accName}'s claim. Deleting now will cancel their accepted claim and notify them. Continue?`,
+          `${s.deleteConfirmAcceptedPre} ${accName}${s.deleteConfirmAcceptedPost}`,
         )
       )
         return;
@@ -522,7 +663,7 @@ export default function ItemDetailPage() {
       .eq("id", item.id);
     if (!error) {
       removeLostItem(item.id);
-      setActionMsg("Marked as found!");
+      setActionMsg(s.msgMarkedFound);
       setTimeout(() => router.push("/dashboard"), 1200);
     }
     setActionLoading(false);
@@ -596,9 +737,7 @@ export default function ItemDetailPage() {
         status: "pending",
         description_proof: claimProofText.trim(),
       });
-      setActionMsg(
-        "Your claim has been submitted. The finder will review it and get back to you.",
-      );
+      setActionMsg(s.msgClaimSubmitted);
     } else {
       console.error(
         "[claim submit failed]",
@@ -800,9 +939,7 @@ export default function ItemDetailPage() {
         : prev,
     );
     updateItemStatus(item.id, "handed_off");
-    setActionMsg(
-      "You've confirmed the handoff. The claimant has been notified.",
-    );
+    setActionMsg(s.msgHandoffConfirmed);
     setActionLoading(false);
   };
 
@@ -825,7 +962,7 @@ export default function ItemDetailPage() {
     }
 
     removeItem(item.id);
-    setActionMsg("Thanks for confirming! This listing has been removed.");
+    setActionMsg(s.msgReceiptConfirmed);
     setTimeout(() => router.push("/dashboard"), 1500);
     setActionLoading(false);
   };
@@ -863,7 +1000,7 @@ export default function ItemDetailPage() {
     setItem((prev: any) => (prev ? { ...prev, status: "disputed" } : prev));
     updateItemStatus(item.id, "disputed");
     setShowDisputeModal(false);
-    setActionMsg("Your dispute has been filed. An admin will review it.");
+    setActionMsg(s.msgDisputeFiled);
     setDisputeSubmitting(false);
   };
 
@@ -907,6 +1044,86 @@ export default function ItemDetailPage() {
     setChatSending(false);
   };
 
+  // ── UI string translation ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (language === "en") { setS(DEFAULT_DETAIL); return; }
+    const entries = Object.entries(DEFAULT_DETAIL) as Array<[keyof DetailStrings, string]>;
+    batchTranslateDetail(entries, language, (u) => setS((prev) => ({ ...prev, ...u })));
+  }, [language]);
+
+  // ── Dynamic content translation (category, keywords, related item names) ────
+  useEffect(() => {
+    if (language === "en") {
+      setTranslatedCategory(item?.category || "");
+      setTranslatedKeywords(
+        item?.aiKeywords ? item.aiKeywords.split(",").map((k: string) => k.trim()).filter(Boolean) : [],
+      );
+      return;
+    }
+    if (!item) return;
+
+    const rawKws: string[] = item.aiKeywords
+      ? item.aiKeywords.split(",").map((k: string) => k.trim()).filter(Boolean)
+      : [];
+    const toTranslate = [item.category, ...rawKws].filter(Boolean);
+    if (toTranslate.length === 0) return;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ texts: toTranslate, target: language }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const results: string[] = data.translatedTexts ?? [];
+        setTranslatedCategory(results[0] || item.category || "");
+        setTranslatedKeywords(results.slice(1));
+      } catch {}
+    })();
+  }, [language, item?.id, item?.category, item?.aiKeywords]);
+
+  // ── Translate related item names + categories ────────────────────────────────
+  useEffect(() => {
+    if (language === "en" || relatedItems.length === 0) {
+      setRelatedNameMap({});
+      setRelatedCatMap({});
+      return;
+    }
+    const texts: string[] = [];
+    const keys: Array<{ type: "name" | "cat"; id: number; fallback: string }> = [];
+    for (const ri of relatedItems) {
+      texts.push(ri.name);
+      keys.push({ type: "name", id: ri.id, fallback: ri.name });
+      if (ri.category) {
+        texts.push(ri.category);
+        keys.push({ type: "cat", id: ri.id, fallback: ri.category });
+      }
+    }
+    (async () => {
+      try {
+        const res = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ texts, target: language }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const results: string[] = data.translatedTexts ?? [];
+        const nameMap: Record<number, string> = {};
+        const catMap: Record<number, string> = {};
+        keys.forEach(({ type, id, fallback }, i) => {
+          const t = results[i]?.trim() || fallback;
+          if (type === "name") nameMap[id] = t;
+          else catMap[id] = t;
+        });
+        setRelatedNameMap(nameMap);
+        setRelatedCatMap(catMap);
+      } catch {}
+    })();
+  }, [language, relatedItems]);
+
   // Auto-fetch related items when the item loads
   useEffect(() => {
     if (!item) return;
@@ -934,12 +1151,12 @@ export default function ItemDetailPage() {
   if (!item)
     return (
       <div className="detail-not-found">
-        <p>Item not found.</p>
+        <p>{s.itemNotFound}</p>
         <button
           onClick={() => router.push("/dashboard")}
           className="detail-back-btn"
         >
-          ← Back to Dashboard
+          {s.backToDashboard}
         </button>
       </div>
     );
@@ -992,11 +1209,11 @@ export default function ItemDetailPage() {
       <div className="detail-breadcrumb">
         <button className="detail-back-btn" onClick={() => router.back()}>
           <FaArrowLeft />
-          <span>Back</span>
+          <span>{s.back}</span>
         </button>
         <span className="detail-breadcrumb__sep">/</span>
         <span className="detail-breadcrumb__label">
-          {isLost ? "Lost Items" : "Found Items"}
+          {isLost ? s.lostItemsBreadcrumb : s.foundItemsBreadcrumb}
         </span>
         <span className="detail-breadcrumb__sep">/</span>
         <span className="detail-breadcrumb__current">{item.name}</span>
@@ -1014,18 +1231,18 @@ export default function ItemDetailPage() {
             className={`detail-status-badge detail-status-badge--${currentStatus}`}
           >
             {isLost
-              ? "🔍 Still Looking"
+              ? s.statusStillLooking
               : currentStatus === "waiting"
-                ? "✓ Available"
+                ? s.statusAvailable
                 : currentStatus === "pending"
-                  ? "⏳ Claim Pending"
+                  ? s.statusClaimPending
                   : currentStatus === "claim_accepted"
-                    ? "✅ Claim Accepted"
+                    ? s.statusClaimAccepted
                     : currentStatus === "handed_off"
-                      ? "🤝 Handoff in Progress"
+                      ? s.statusHandoff
                       : currentStatus === "disputed"
-                        ? "⚠️ Disputed"
-                        : "✓ Claimed"}
+                        ? s.statusDisputed
+                        : s.statusClaimed}
           </div>
         </div>
 
@@ -1033,7 +1250,7 @@ export default function ItemDetailPage() {
         <div className="detail-info-col">
           {/* Type pill */}
           <div className="detail-type-pill">
-            {isLost ? "Lost Item" : "Found Item"}
+            {isLost ? s.lostItemPill : s.foundItemPill}
           </div>
 
           {/* Title */}
@@ -1053,7 +1270,7 @@ export default function ItemDetailPage() {
                   style={{ whiteSpace: "nowrap" }}
                 >
                   <FaFlag style={{ marginRight: 6 }} />
-                  Report
+                  {s.report}
                 </button>
               )}
               {isItemOwner &&
@@ -1064,7 +1281,7 @@ export default function ItemDetailPage() {
                     onClick={handleDelete}
                   >
                     <FaTrash style={{ marginRight: 6 }} />
-                    Delete My Post
+                    {s.deleteMyPost}
                   </button>
                 )}
             </div>
@@ -1081,7 +1298,7 @@ export default function ItemDetailPage() {
             )}
             <div className="detail-poster__info">
               <span className="detail-poster__label">
-                {isLost ? "Lost by" : "Found by"}
+                {isLost ? s.lostBy : s.foundBy}
               </span>
               <span className="detail-poster__name">
                 {item.authorName || "Anonymous"}
@@ -1097,7 +1314,7 @@ export default function ItemDetailPage() {
               <div className="detail-meta-chip">
                 <FaCalendar className="detail-meta-chip__icon" />
                 <span>
-                  {isLost ? "Reported" : "Found"} {dateLabel}
+                  {isLost ? s.reported : s.found} {dateLabel}
                 </span>
               </div>
             )}
@@ -1111,32 +1328,29 @@ export default function ItemDetailPage() {
 
           {/* Description */}
           <div className="detail-description-box">
-            <p className="detail-description-label">Description</p>
+            <p className="detail-description-label">{s.descriptionLabel}</p>
             <p className="detail-description-text">{item.description}</p>
           </div>
 
           {/* Tags */}
           {(item.category || item.aiKeywords) && (
             <div className="detail-tags-section">
-              <p className="detail-tags-label">Tags</p>
+              <p className="detail-tags-label">{s.tagsLabel}</p>
               <div className="detail-tags-row">
-                {item.category && (
+                {(translatedCategory || item.category) && (
                   <span className="detail-tag-chip">
                     <FaTag style={{ fontSize: "9px" }} />
-                    {item.category}
+                    {translatedCategory || item.category}
                   </span>
                 )}
-                {item.aiKeywords &&
-                  item.aiKeywords
-                    .split(",")
-                    .map((kw: string) => kw.trim())
-                    .filter(Boolean)
-                    .slice(0, 8)
-                    .map((kw: string) => (
-                      <span key={kw} className="detail-tag-chip">
-                        {kw}
-                      </span>
-                    ))}
+                {(translatedKeywords.length > 0
+                  ? translatedKeywords
+                  : item.aiKeywords
+                    ? item.aiKeywords.split(",").map((k: string) => k.trim()).filter(Boolean)
+                    : []
+                ).filter((kw: string, i: number, arr: string[]) => arr.indexOf(kw) === i).slice(0, 8).map((kw: string) => (
+                  <span key={kw} className="detail-tag-chip">{kw}</span>
+                ))}
               </div>
             </div>
           )}
@@ -1155,7 +1369,7 @@ export default function ItemDetailPage() {
                   margin: "0 0 8px",
                 }}
               >
-                {isLost ? "Last seen location" : "Found location"}
+                {isLost ? s.lastSeenLocation : s.foundLocation}
               </p>
               <LocationMap
                 lat={Number(item.latitude)}
@@ -1191,28 +1405,27 @@ export default function ItemDetailPage() {
                       margin: 0,
                     }}
                   >
-                    You have already submitted a claim for this item that was
-                    not accepted.
+                    {s.claimAlreadyRejected}
                   </p>
                 ) : userExistingClaim?.status === "pending" ||
                   userExistingClaim?.status === "accepted" ? (
                   <button className="detail-btn detail-btn--disabled" disabled>
-                    Claim Submitted - Awaiting Review
+                    {s.claimSubmittedWaiting}
                   </button>
                 ) : rateLimitCount >= 2 ? (
                   <button
                     className="detail-btn detail-btn--disabled"
                     disabled
-                    title="You already have 2 active claims. Resolve one before claiming another."
+                    title={s.rateLimitTitle}
                   >
-                    This is mine - Submit a Claim
+                    {s.submitClaim}
                   </button>
                 ) : (
                   <button
                     className="detail-btn detail-btn--primary"
                     onClick={() => setShowClaimModal(true)}
                   >
-                    This is mine - Submit a Claim
+                    {s.submitClaim}
                   </button>
                 )}
               </>
@@ -1234,8 +1447,7 @@ export default function ItemDetailPage() {
                     color: "var(--success)",
                   }}
                 >
-                  Your claim has been accepted! Coordinate with the finder for
-                  pickup.
+                  {s.claimAcceptedMsg}
                 </div>
               )}
 
@@ -1257,15 +1469,14 @@ export default function ItemDetailPage() {
                       color: "var(--text-primary)",
                     }}
                   >
-                    The finder says they handed this back to you. Please confirm
-                    below.
+                    {s.handoffMsg}
                   </div>
                   <button
                     className="detail-btn detail-btn--success"
                     onClick={handleClaimantConfirmReceipt}
                     disabled={actionLoading}
                   >
-                    {actionLoading ? "Confirming..." : "Confirm I Received It"}
+                    {actionLoading ? s.confirming : s.confirmReceipt}
                   </button>
                   <button
                     className="detail-btn"
@@ -1273,7 +1484,7 @@ export default function ItemDetailPage() {
                     onClick={() => setShowDisputeModal(true)}
                     disabled={actionLoading}
                   >
-                    Dispute
+                    {s.disputeBtn}
                   </button>
                 </>
               )}
@@ -1295,8 +1506,8 @@ export default function ItemDetailPage() {
                   disabled={pendingClaimsCount === 0}
                 >
                   {pendingClaimsCount === 0
-                    ? "No claims yet"
-                    : `View Claims (${pendingClaimsCount})`}
+                    ? s.noClaimsYet
+                    : `${s.viewClaims} (${pendingClaimsCount})`}
                 </button>
               )}
 
@@ -1314,22 +1525,20 @@ export default function ItemDetailPage() {
                     color: "var(--success)",
                   }}
                 >
-                  You accepted <strong>{item.accepted_claimant_name}</strong>'s
-                  claim. Once you've physically handed the item back, click
-                  below.
+                  {s.finderHandoffAccepted} <strong>{item.accepted_claimant_name}</strong>{s.finderHandoffClaim} {s.finderHandoffInstruction}
                 </div>
                 <button
                   className="detail-btn detail-btn--success"
                   onClick={handleFinderHandoff}
                   disabled={actionLoading}
                 >
-                  {actionLoading ? "Confirming..." : "Confirm I Handed It Back"}
+                  {actionLoading ? s.confirming : s.confirmHandoff}
                 </button>
                 <button
                   className="detail-btn detail-btn--secondary"
                   onClick={() => setShowChat(true)}
                 >
-                  Message {item.accepted_claimant_name}
+                  {s.messageClaimant} {item.accepted_claimant_name}
                 </button>
               </>
             )}
@@ -1337,7 +1546,7 @@ export default function ItemDetailPage() {
             {/* ── LEGACY: pending status (old flow) ── */}
             {!isLost && !isItemOwner && currentStatus === "pending" && (
               <button className="detail-btn detail-btn--disabled" disabled>
-                ⏳ Claim Pending Confirmation
+                {s.claimPendingConfirmation}
               </button>
             )}
             {!isLost && isItemOwner && currentStatus === "pending" && (
@@ -1346,7 +1555,7 @@ export default function ItemDetailPage() {
                 onClick={handleConfirmClaimed}
                 disabled={actionLoading}
               >
-                {actionLoading ? "Confirming..." : "✓ Confirm Item is Claimed"}
+                {actionLoading ? s.confirming : s.confirmClaimed}
               </button>
             )}
 
@@ -1357,7 +1566,7 @@ export default function ItemDetailPage() {
                 onClick={() => setShowChat(true)}
                 disabled={actionLoading}
               >
-                I Found This! Message Owner
+                {s.messageOwner}
               </button>
             )}
             {isLost && isItemOwner && (
@@ -1366,7 +1575,7 @@ export default function ItemDetailPage() {
                 onClick={handleMarkFound}
                 disabled={actionLoading}
               >
-                {actionLoading ? "Updating..." : "✓ Mark as Found"}
+                {actionLoading ? s.updating : s.markAsFound}
               </button>
             )}
 
@@ -1381,7 +1590,7 @@ export default function ItemDetailPage() {
                 }}
               >
                 <FaMessage style={{ marginRight: 8 }} />
-                Message Finder
+                {s.messageFinder}
               </button>
             )}
           </div>
@@ -1394,7 +1603,7 @@ export default function ItemDetailPage() {
                 onClick={handleDelete}
               >
                 <FaTrash style={{ marginRight: 6 }} />
-                Delete (Admin)
+                {s.deleteAdmin}
               </button>
             )}
           </div>
@@ -1405,11 +1614,11 @@ export default function ItemDetailPage() {
       {(relatedLoading || relatedItems.length > 0) && (
         <div className="related-section">
           <div className="related-section__header">
-            <p className="related-section__title">Similar items</p>
+            <p className="related-section__title">{s.similarItems}</p>
           </div>
           <div className="related-grid">
             {relatedLoading ? (
-              <p className="related-loading">Finding similar items...</p>
+              <p className="related-loading">{s.findingSimilar}</p>
             ) : (
               relatedItems.map((ri: any) => (
                 <a
@@ -1427,9 +1636,9 @@ export default function ItemDetailPage() {
                     <div className="related-card__img-placeholder">📦</div>
                   )}
                   <div className="related-card__body">
-                    <p className="related-card__name">{ri.name}</p>
+                    <p className="related-card__name">{relatedNameMap[ri.id] || ri.name}</p>
                     {ri.category && (
-                      <p className="related-card__cat">{ri.category}</p>
+                      <p className="related-card__cat">{relatedCatMap[ri.id] || ri.category}</p>
                     )}
                   </div>
                 </a>
@@ -1446,38 +1655,41 @@ export default function ItemDetailPage() {
             {reportDone ? (
               <div className="panel-success">
                 <span className="panel-success__icon">✓</span>
-                <p>Report submitted</p>
+                <p>{s.reportSubmitted}</p>
               </div>
             ) : (
               <>
                 <p className="detail-modal__title">Report "{item.name}"</p>
                 <p className="detail-modal__subtitle">
-                  Why are you reporting this item?
+                  {s.whyReporting}
                 </p>
                 <div className="detail-modal__reasons">
-                  {REPORT_REASONS.map((r) => (
-                    <button
-                      key={r}
-                      className={`detail-modal__reason${reportReason === r ? " detail-modal__reason--selected" : ""}`}
-                      onClick={() => setReportReason(r)}
-                    >
-                      {r}
-                    </button>
-                  ))}
+                  {REPORT_REASONS.map((r, i) => {
+                    const labels = [s.reasonInappropriate, s.reasonSpam, s.reasonMisleading, s.reasonClaimed, s.reasonOther];
+                    return (
+                      <button
+                        key={r}
+                        className={`detail-modal__reason${reportReason === r ? " detail-modal__reason--selected" : ""}`}
+                        onClick={() => setReportReason(r)}
+                      >
+                        {labels[i]}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="detail-modal__actions">
                   <button
                     className="detail-modal__cancel"
                     onClick={() => setShowReport(false)}
                   >
-                    Cancel
+                    {s.cancel}
                   </button>
                   <button
                     className="detail-modal__submit"
                     onClick={handleReportSubmit}
                     disabled={!reportReason || reportSubmitting}
                   >
-                    {reportSubmitting ? "Submitting..." : "Submit Report"}
+                    {reportSubmitting ? s.submitting : s.submitReport}
                   </button>
                 </div>
               </>
@@ -1565,14 +1777,14 @@ export default function ItemDetailPage() {
                       flexShrink: 0,
                     }}
                   >
-                    View Item
+                    {s.viewItem}
                   </a>
                 </div>
               )}
               {messages.length === 0 && (
                 <div className="chat-modal__empty">
                   <p>
-                    Say hi about <strong>{item.name}</strong>
+                    {s.sayHiAbout} <strong>{item.name}</strong>
                   </p>
                 </div>
               )}
@@ -1610,12 +1822,10 @@ export default function ItemDetailPage() {
                 }}
               >
                 {[
-                  isLost
-                    ? "Hi! I think I found your item. Is it still missing?"
-                    : "Hi! I think this might be mine. Can we arrange a pickup?",
-                  "Can you describe it in more detail?",
-                  "Where can we meet to return it?",
-                  "Is this still available?",
+                  isLost ? s.chatTemplateLostFound : s.chatTemplateFoundMine,
+                  s.chatTemplateDescribe,
+                  s.chatTemplateMeet,
+                  s.chatTemplateAvailable,
                 ].map((template) => (
                   <button
                     key={template}
@@ -1662,7 +1872,7 @@ export default function ItemDetailPage() {
                     handleSendChat();
                   }
                 }}
-                placeholder="Type a message..."
+                placeholder={s.typeMessage}
                 className="chat-modal__textarea"
               />
               <button
@@ -1690,7 +1900,7 @@ export default function ItemDetailPage() {
                 margin: 0,
               }}
             >
-              Submit a Claim
+              {s.submitAClaim}
             </p>
             <p
               style={{
@@ -1700,13 +1910,11 @@ export default function ItemDetailPage() {
                 margin: 0,
               }}
             >
-              Describe something specific about this item that is NOT visible in
-              the photo. Be as detailed as possible — the finder will use this
-              to verify ownership.
+              {s.claimInstructions}
             </p>
             <textarea
               className="panel-form__textarea"
-              placeholder="e.g. There's a small scratch on the bottom-left corner, the brand sticker is peeling, my name is written inside in black marker"
+              placeholder={s.claimPlaceholder}
               value={claimProofText}
               onChange={(e) => setClaimProofText(e.target.value)}
               minLength={20}
@@ -1725,14 +1933,14 @@ export default function ItemDetailPage() {
                 textAlign: "right",
               }}
             >
-              {claimProofText.trim().length}/20 minimum characters
+              {claimProofText.trim().length}/20 {s.minChars}
             </p>
             <div>
               <label
                 className="panel-form__label"
                 style={{ display: "block", marginBottom: 6 }}
               >
-                Upload proof (optional)
+                {s.uploadProof}
               </label>
               <label
                 className="panel-form__file-label"
@@ -1740,7 +1948,7 @@ export default function ItemDetailPage() {
               >
                 <span className="panel-form__file-icon">+</span>
                 <span className="panel-form__file-text">
-                  {claimProofFile ? claimProofFile.name : "Choose image"}
+                  {claimProofFile ? claimProofFile.name : s.chooseImage}
                 </span>
               </label>
               <input
@@ -1763,7 +1971,7 @@ export default function ItemDetailPage() {
                   setClaimProofFile(null);
                 }}
               >
-                Cancel
+                {s.cancel}
               </button>
               <button
                 className="panel-form__submit"
@@ -1771,7 +1979,7 @@ export default function ItemDetailPage() {
                 onClick={handleSubmitClaim}
                 disabled={claimSubmitting || claimProofText.trim().length < 20}
               >
-                {claimSubmitting ? "Submitting..." : "Submit Claim"}
+                {claimSubmitting ? s.submitting : s.submitClaimBtn}
               </button>
             </div>
           </div>
@@ -1797,7 +2005,7 @@ export default function ItemDetailPage() {
                 margin: 0,
               }}
             >
-              Claims for "{item.name}"
+              {s.claimsForItem} "{item.name}"
             </p>
             {claimsLoading ? (
               <p
@@ -1807,7 +2015,7 @@ export default function ItemDetailPage() {
                   color: "var(--text-muted)",
                 }}
               >
-                Loading claims...
+                {s.loadingClaims}
               </p>
             ) : pendingClaims.length === 0 ? (
               <p
@@ -1817,7 +2025,7 @@ export default function ItemDetailPage() {
                   color: "var(--text-muted)",
                 }}
               >
-                No pending claims.
+                {s.noPendingClaims}
               </p>
             ) : (
               <div
@@ -1906,7 +2114,7 @@ export default function ItemDetailPage() {
                       >
                         <textarea
                           className="panel-form__textarea"
-                          placeholder="Enter rejection reason (required)"
+                          placeholder={s.rejectPlaceholder}
                           value={rejectReasons[claim.id] || ""}
                           onChange={(e) =>
                             setRejectReasons((prev) => ({
@@ -1940,7 +2148,7 @@ export default function ItemDetailPage() {
                               });
                             }}
                           >
-                            Cancel
+                            {s.cancel}
                           </button>
                           <button
                             style={{
@@ -1961,9 +2169,7 @@ export default function ItemDetailPage() {
                               !(rejectReasons[claim.id] || "").trim()
                             }
                           >
-                            {claimActionLoading
-                              ? "Rejecting..."
-                              : "Confirm Reject"}
+                            {claimActionLoading ? s.rejecting : s.confirmReject}
                           </button>
                         </div>
                       </div>
@@ -1988,7 +2194,7 @@ export default function ItemDetailPage() {
                           onClick={() => handleAcceptClaim(claim)}
                           disabled={claimActionLoading}
                         >
-                          {claimActionLoading ? "..." : "Accept"}
+                          {claimActionLoading ? "..." : s.accept}
                         </button>
                         <button
                           style={{
@@ -2009,7 +2215,7 @@ export default function ItemDetailPage() {
                           onClick={() => setRejectingId(claim.id)}
                           disabled={claimActionLoading}
                         >
-                          Reject
+                          {s.reject}
                         </button>
                       </div>
                     )}
@@ -2043,7 +2249,7 @@ export default function ItemDetailPage() {
                         setShowChat(true);
                       }}
                     >
-                      Message Claimant
+                      {s.messageClaimant}
                     </button>
                   </div>
                 ))}
@@ -2053,7 +2259,7 @@ export default function ItemDetailPage() {
               className="panel-form__cancel"
               onClick={() => setShowClaimsReviewModal(false)}
             >
-              Close
+              {s.close}
             </button>
           </div>
         </div>
@@ -2091,7 +2297,7 @@ export default function ItemDetailPage() {
                 margin: 0,
               }}
             >
-              Open a Dispute
+              {s.openDispute}
             </p>
             <p
               style={{
@@ -2101,10 +2307,10 @@ export default function ItemDetailPage() {
                 margin: 0,
               }}
             >
-              Describe what went wrong. An admin will review your dispute.
+              {s.disputeInstructions}
             </p>
             <textarea
-              placeholder="Describe what went wrong (minimum 50 characters)"
+              placeholder={s.disputePlaceholder}
               value={disputeText}
               onChange={(e) => setDisputeText(e.target.value)}
               style={{
@@ -2134,7 +2340,7 @@ export default function ItemDetailPage() {
                 textAlign: "right",
               }}
             >
-              {disputeText.trim().length}/50 min chars
+              {disputeText.trim().length}/50 {s.minCharsShort}
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
@@ -2155,7 +2361,7 @@ export default function ItemDetailPage() {
                   setDisputeText("");
                 }}
               >
-                Cancel
+                {s.cancel}
               </button>
               <button
                 style={{
@@ -2180,7 +2386,7 @@ export default function ItemDetailPage() {
                 onClick={handleSubmitDispute}
                 disabled={disputeSubmitting || disputeText.trim().length < 50}
               >
-                {disputeSubmitting ? "Submitting..." : "Submit Dispute"}
+                {disputeSubmitting ? s.submitting : s.submitDispute}
               </button>
             </div>
           </div>

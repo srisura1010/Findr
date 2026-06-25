@@ -222,12 +222,19 @@ async function getCroppedImg(
 // ─── CropModal ────────────────────────────────────────────────────────────────
 function CropModal({
   src, queueIndex, queueTotal, onConfirm, onSkip,
+  cropPhotoLabel, cropOfLabel, cropZoomLabel, cropRotateLabel, skipCropLabel, applyCropLabel,
 }: {
   src: string;
   queueIndex: number;
   queueTotal: number;
   onConfirm: (pixels: { x: number; y: number; width: number; height: number }, rotation: number) => void;
   onSkip: () => void;
+  cropPhotoLabel: string;
+  cropOfLabel: string;
+  cropZoomLabel: string;
+  cropRotateLabel: string;
+  skipCropLabel: string;
+  applyCropLabel: string;
 }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -237,13 +244,13 @@ function CropModal({
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 2000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "16px", gap: "14px" }}>
       <p style={{ color: "#fff", fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "15px", margin: 0 }}>
-        Crop Photo{queueTotal > 1 ? ` (${queueIndex + 1} of ${queueTotal})` : ""}
+        {cropPhotoLabel}{queueTotal > 1 ? ` (${queueIndex + 1} ${cropOfLabel} ${queueTotal})` : ""}
       </p>
       <div style={{ position: "relative", width: "min(90vw, 600px)", aspectRatio: "4 / 3", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.12)" }}>
         <Cropper image={src} crop={crop} zoom={zoom} rotation={rotation} aspect={6 / 5} onCropChange={setCrop} onZoomChange={setZoom} onRotationChange={setRotation} onCropComplete={(_area, pixels) => setCroppedAreaPixels(pixels)} />
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "min(90vw, 600px)", background: "rgba(255,255,255,0.06)", borderRadius: "10px", padding: "14px 16px" }}>
-        {[["Zoom", zoom, 1, 3, 0.05, setZoom, `${zoom.toFixed(1)}×`], ["Rotate", rotation, -180, 180, 1, setRotation, `${rotation}°`]].map(([label, val, min, max, step, setter, display]) => (
+        {[[cropZoomLabel, zoom, 1, 3, 0.05, setZoom, `${zoom.toFixed(1)}×`], [cropRotateLabel, rotation, -180, 180, 1, setRotation, `${rotation}°`]].map(([label, val, min, max, step, setter, display]) => (
           <div key={label as string} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <span style={{ color: "rgba(255,255,255,0.55)", fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.6px", minWidth: 44 }}>{label as string}</span>
             <input type="range" min={min as number} max={max as number} step={step as number} value={val as number} onChange={(e) => (setter as any)(Number(e.target.value))} style={{ flex: 1, accentColor: "var(--accent)" }} />
@@ -252,8 +259,8 @@ function CropModal({
         ))}
       </div>
       <div style={{ display: "flex", gap: "10px", width: "min(90vw, 600px)" }}>
-        <button onClick={onSkip} style={{ flex: 1, padding: "13px 0", borderRadius: "9px", border: "1.5px solid rgba(255,255,255,0.2)", background: "transparent", color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>Skip crop</button>
-        <button onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels, rotation)} style={{ flex: 2, padding: "13px 0", borderRadius: "9px", border: "none", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>Apply Crop</button>
+        <button onClick={onSkip} style={{ flex: 1, padding: "13px 0", borderRadius: "9px", border: "1.5px solid rgba(255,255,255,0.2)", background: "transparent", color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>{skipCropLabel}</button>
+        <button onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels, rotation)} style={{ flex: 2, padding: "13px 0", borderRadius: "9px", border: "none", background: "var(--accent)", color: "#fff", fontFamily: "var(--font-body)", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>{applyCropLabel}</button>
       </div>
     </div>
   );
@@ -375,6 +382,70 @@ interface BoardStrings {
   confirmReceipt: string;
   cancelClaim: string;
   review: string;
+  leaderboardTab: string;
+  inboxTab: string;
+  leaderboardDesc: string;
+  leaderboardEmpty: string;
+  leaderboardReturned: string;
+  leaderboardYou: string;
+  reportedItemsTitle: string;
+  reportedItemsDesc: string;
+  disputesTitle: string;
+  disputesDesc: string;
+  inboxTitle: string;
+  inboxDesc: string;
+  noReports: string;
+  noDisputes: string;
+  reportedBy: string;
+  dismiss: string;
+  deleteBtn: string;
+  dismissDispute: string;
+  resolveForClaimant: string;
+  messageParties: string;
+  claimantLabel: string;
+  finderLabel: string;
+  sending: string;
+  sendMessage: string;
+  viewItem: string;
+  disputedBy: string;
+  schoolNotFound: string;
+  backToSchools: string;
+  cropPhoto: string;
+  cropOf: string;
+  cropZoom: string;
+  cropRotate: string;
+  skipCrop: string;
+  applyCrop: string;
+  statusActive: string;
+  statusClaimPending: string;
+  statusClaimInProgress: string;
+  statusAwaiting: string;
+  statusDisputed: string;
+  confirmDeleteReport: string;
+  confirmDismissDispute: string;
+  confirmResolveDispute: string;
+  cannotDeleteHandoff: string;
+  confirmDeleteItem: string;
+  confirmDeleteWithClaimsPre: string;
+  confirmDeleteWithClaimsPost: string;
+  confirmDeleteAcceptedPre: string;
+  confirmDeleteAcceptedPost: string;
+  confirmDeleteLostItem: string;
+  claimCancelledMsg: string;
+  categoryLabel: string;
+  selectCategory: string;
+  whereFound: string;
+  dateFoundLabel: string;
+  whereFoundPlaceholder: string;
+  lastSeenWhere: string;
+  dateLostLabel: string;
+  lastSeenPlaceholder: string;
+  schoolMember: string;
+  pendingClaimSingular: string;
+  pendingClaimPlural: string;
+  finderHandedOff: string;
+  failedToPost: string;
+  failedToRecord: string;
 }
 
 const DEFAULT_BOARD: BoardStrings = {
@@ -464,6 +535,70 @@ const DEFAULT_BOARD: BoardStrings = {
   confirmReceipt: "Confirm Receipt",
   cancelClaim: "Cancel Claim",
   review: "Review",
+  leaderboardTab: "Leaderboard",
+  inboxTab: "Inbox",
+  leaderboardDesc: "Top finders, ranked by items returned",
+  leaderboardEmpty: "No items have been returned yet. Be the first!",
+  leaderboardReturned: "returned",
+  leaderboardYou: "You",
+  reportedItemsTitle: "Reported Items",
+  reportedItemsDesc: "Items flagged by students at this school. Only you can see these.",
+  disputesTitle: "Disputes",
+  disputesDesc: "Handoff disputes raised by claimants at this school.",
+  inboxTitle: "Inbox",
+  inboxDesc: "Messages from students at this school.",
+  noReports: "No reports, all clear!",
+  noDisputes: "No disputes, all clear!",
+  reportedBy: "Reported by",
+  dismiss: "Dismiss",
+  deleteBtn: "Delete",
+  dismissDispute: "Dismiss Dispute",
+  resolveForClaimant: "Resolve for Claimant",
+  messageParties: "Message Parties",
+  claimantLabel: "Claimant",
+  finderLabel: "Finder",
+  sending: "Sending...",
+  sendMessage: "Send Message",
+  viewItem: "View Item",
+  disputedBy: "Disputed by",
+  schoolNotFound: "School not found.",
+  backToSchools: "← Back to Schools",
+  cropPhoto: "Crop Photo",
+  cropOf: "of",
+  cropZoom: "Zoom",
+  cropRotate: "Rotate",
+  skipCrop: "Skip crop",
+  applyCrop: "Apply Crop",
+  statusActive: "Active",
+  statusClaimPending: "Claim pending",
+  statusClaimInProgress: "Claim in progress",
+  statusAwaiting: "Awaiting confirmation",
+  statusDisputed: "Disputed",
+  confirmDeleteReport: "permanently?",
+  confirmDismissDispute: "Dismiss dispute? Item returns to claim_accepted status.",
+  confirmResolveDispute: "Resolve for claimant? Item will be permanently deleted.",
+  cannotDeleteHandoff: "Cannot delete while handoff or dispute is in progress.",
+  confirmDeleteItem: "Delete this item permanently?",
+  confirmDeleteWithClaimsPre: "student(s) have claimed this item. Deleting will notify them. Continue?",
+  confirmDeleteWithClaimsPost: "student(s) have claimed this item. Deleting will notify them. Continue?",
+  confirmDeleteAcceptedPre: "You accepted",
+  confirmDeleteAcceptedPost: "'s claim. Deleting cancels it. Continue?",
+  confirmDeleteLostItem: "Delete this lost item report?",
+  claimCancelledMsg: "This claim can no longer be cancelled.",
+  categoryLabel: "Category",
+  selectCategory: "Select a category",
+  whereFound: "Where was it found?",
+  dateFoundLabel: "Date Found",
+  whereFoundPlaceholder: "e.g. Room 204, near the gym, front office...",
+  lastSeenWhere: "Last seen where?",
+  dateLostLabel: "Date Lost",
+  lastSeenPlaceholder: "e.g. Cafeteria, locker room, room 101...",
+  schoolMember: "member",
+  pendingClaimSingular: "pending claim",
+  pendingClaimPlural: "pending claims",
+  finderHandedOff: "Finder marked as handed off",
+  failedToPost: "Failed to post lost item:",
+  failedToRecord: "Failed to record return:",
 };
 
 const CATEGORIES = [
@@ -475,13 +610,13 @@ const CATEGORIES = [
 ];
 
 // ─── Status badge helper ───────────────────────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, s }: { status: string; s: BoardStrings }) {
   const map: Record<string, { label: string; color: string }> = {
-    waiting:        { label: "Active",                  color: "var(--success)" },
-    pending:        { label: "Claim pending",            color: "var(--accent)" },
-    claim_accepted: { label: "Claim in progress",        color: "var(--warning)" },
-    handed_off:     { label: "Awaiting confirmation",    color: "var(--text-muted)" },
-    disputed:       { label: "Disputed",                 color: "var(--danger)" },
+    waiting:        { label: s.statusActive,          color: "var(--success)" },
+    pending:        { label: s.statusClaimPending,    color: "var(--accent)" },
+    claim_accepted: { label: s.statusClaimInProgress, color: "var(--warning)" },
+    handed_off:     { label: s.statusAwaiting,        color: "var(--text-muted)" },
+    disputed:       { label: s.statusDisputed,        color: "var(--danger)" },
   };
   const info = map[status] ?? { label: status, color: "var(--text-muted)" };
   return (
@@ -492,7 +627,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 // ─── SchoolReportsPanel ────────────────────────────────────────────────────────
-function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDeleteItem: (itemId: number) => void; color: string }) {
+function SchoolReportsPanel({ school, onDeleteItem, s }: { school: School; onDeleteItem: (itemId: number) => void; color: string; s: BoardStrings }) {
   const [reports, setReports] = useState<SchoolReport[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -507,15 +642,15 @@ function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDelete
   };
 
   const handleDeleteItem = async (report: SchoolReport) => {
-    if (!confirm(`Delete "${report.item_name}" permanently?`)) return;
+    if (!confirm(`Delete "${report.item_name}" ${s.confirmDeleteReport}`)) return;
     await supabase.from("school_items").delete().eq("id", report.item_id);
     await supabase.from("school_reports").delete().eq("item_id", report.item_id);
     onDeleteItem(report.item_id);
     setReports((prev) => prev.filter((r) => r.item_id !== report.item_id));
   };
 
-  if (loading) return <div className="sc-empty" style={{ padding: "32px 0" }}>Loading...</div>;
-  if (reports.length === 0) return <div className="sc-empty" style={{ padding: "32px 0" }}>No reports, all clear!</div>;
+  if (loading) return <div className="sc-empty" style={{ padding: "32px 0" }}>{s.loadingText}</div>;
+  if (reports.length === 0) return <div className="sc-empty" style={{ padding: "32px 0" }}>{s.noReports}</div>;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 0" }}>
@@ -526,12 +661,12 @@ function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDelete
             <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{report.item_name}</p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--danger)", margin: "0 0 4px", fontWeight: 600 }}>{report.reason}</p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: "0.74rem", color: "var(--text-muted)", margin: 0 }}>
-              Reported by {report.reporter_name}{report.reporter_email ? ` · ${report.reporter_email}` : ""} · {new Date(report.created_at).toLocaleDateString()}
+              {s.reportedBy} {report.reporter_name}{report.reporter_email ? ` · ${report.reporter_email}` : ""} · {new Date(report.created_at).toLocaleDateString()}
             </p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
-            <button onClick={() => handleDismiss(report.id)} className="sc-btn sc-btn--ghost sc-btn--sm">Dismiss</button>
-            <button onClick={() => handleDeleteItem(report)} className="sc-btn sc-btn--danger sc-btn--sm">Delete</button>
+            <button onClick={() => handleDismiss(report.id)} className="sc-btn sc-btn--ghost sc-btn--sm">{s.dismiss}</button>
+            <button onClick={() => handleDeleteItem(report)} className="sc-btn sc-btn--danger sc-btn--sm">{s.deleteBtn}</button>
           </div>
         </div>
       ))}
@@ -541,12 +676,13 @@ function SchoolReportsPanel({ school, onDeleteItem }: { school: School; onDelete
 
 // ─── SchoolDisputesPanel ───────────────────────────────────────────────────────
 function SchoolDisputesPanel({
-  school, adminId, adminName, onRestoreItem,
+  school, adminId, adminName, onRestoreItem, s,
 }: {
   school: School;
   adminId: string;
   adminName: string;
   onRestoreItem: (itemId: number, status: string) => void;
+  s: BoardStrings;
 }) {
   const [disputes, setDisputes] = useState<SchoolDispute[]>([]);
   const [loading, setLoading] = useState(true);
@@ -561,7 +697,7 @@ function SchoolDisputesPanel({
   }, [school.id]);
 
   const handleDismiss = async (dispute: SchoolDispute) => {
-    if (!confirm("Dismiss dispute? Item returns to claim_accepted status.")) return;
+    if (!confirm(s.confirmDismissDispute)) return;
     await supabase.from("school_items").update({
       status: "claim_accepted",
       handoff_confirmed_by_poster: false,
@@ -573,7 +709,7 @@ function SchoolDisputesPanel({
   };
 
   const handleResolveForClaimant = async (dispute: SchoolDispute) => {
-    if (!confirm("Resolve for claimant? Item will be permanently deleted.")) return;
+    if (!confirm(s.confirmResolveDispute)) return;
     await supabase.from("school_items").delete().eq("id", dispute.item_id);
     await supabase.from("school_disputes").delete().eq("id", dispute.id);
     onRestoreItem(dispute.item_id, "claimed");
@@ -610,8 +746,8 @@ function SchoolDisputesPanel({
     setMessagingId(null);
   };
 
-  if (loading) return <div className="sc-empty">Loading...</div>;
-  if (disputes.length === 0) return <div className="sc-empty">No disputes, all clear!</div>;
+  if (loading) return <div className="sc-empty">{s.loadingText}</div>;
+  if (disputes.length === 0) return <div className="sc-empty">{s.noDisputes}</div>;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -622,21 +758,21 @@ function SchoolDisputesPanel({
               <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 4px" }}>{dispute.item_name}</p>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-secondary)", margin: "0 0 4px" }}>{dispute.reason}</p>
               <p style={{ fontFamily: "var(--font-body)", fontSize: "0.74rem", color: "var(--text-muted)", margin: "0 0 6px" }}>
-                Disputed by {dispute.claimant_email} · {new Date(dispute.created_at).toLocaleDateString()}
+                {s.disputedBy} {dispute.claimant_email} · {new Date(dispute.created_at).toLocaleDateString()}
               </p>
               <a href={`/school-items/${dispute.item_id}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 100, background: school.color, color: textOnColor(school.color), fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)", textDecoration: "none" }}>
-                View Item →
+                {s.viewItem} →
               </a>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, width: 170 }}>
-              <button className="sc-btn sc-btn--ghost sc-btn--sm" style={{ width: "100%" }} onClick={() => handleDismiss(dispute)}>Dismiss Dispute</button>
-              <button className="sc-btn sc-btn--danger sc-btn--sm" style={{ width: "100%" }} onClick={() => handleResolveForClaimant(dispute)}>Resolve for Claimant</button>
+              <button className="sc-btn sc-btn--ghost sc-btn--sm" style={{ width: "100%" }} onClick={() => handleDismiss(dispute)}>{s.dismissDispute}</button>
+              <button className="sc-btn sc-btn--danger sc-btn--sm" style={{ width: "100%" }} onClick={() => handleResolveForClaimant(dispute)}>{s.resolveForClaimant}</button>
               <button
                 className="sc-btn sc-btn--sm"
                 style={{ width: "100%", background: school.color, color: textOnColor(school.color), border: "none" }}
                 onClick={() => setMessagingId(messagingId === dispute.id ? null : dispute.id)}
               >
-                {messagingId === dispute.id ? "Cancel" : "Message Parties"}
+                {messagingId === dispute.id ? s.cancelBtn : s.messageParties}
               </button>
             </div>
           </div>
@@ -645,13 +781,13 @@ function SchoolDisputesPanel({
               <div style={{ display: "flex", gap: 6 }}>
                 {(["claimant", "finder"] as const).map((t) => (
                   <button key={t} onClick={() => setMsgTarget(t)} style={{ padding: "7px 16px", borderRadius: 100, border: "none", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, cursor: "pointer", background: msgTarget === t ? school.color : "var(--bg-input)", color: msgTarget === t ? textOnColor(school.color) : "var(--text-muted)" }}>
-                    {t === "claimant" ? "Claimant" : "Finder"}
+                    {t === "claimant" ? s.claimantLabel : s.finderLabel}
                   </button>
                 ))}
               </div>
-              <textarea className="sc-form__textarea" style={{ width: "100%", minHeight: 80, boxSizing: "border-box" }} placeholder={`Message to ${msgTarget}...`} value={msgText} onChange={(e) => setMsgText(e.target.value)} />
+              <textarea className="sc-form__textarea" style={{ width: "100%", minHeight: 80, boxSizing: "border-box" }} placeholder={`${s.sendMessage}...`} value={msgText} onChange={(e) => setMsgText(e.target.value)} />
               <button className="sc-btn sc-btn--primary" style={{ width: "100%", background: school.color, borderColor: school.color }} disabled={msgSending || !msgText.trim()} onClick={() => handleSendMsg(dispute)}>
-                {msgSending ? "Sending..." : "Send Message"}
+                {msgSending ? s.sending : s.sendMessage}
               </button>
             </div>
           )}
@@ -662,9 +798,10 @@ function SchoolDisputesPanel({
 }
 
 // ─── SchoolCharts ──────────────────────────────────────────────────────────────
-function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, returnedByMonth, totalFound, totalLost, totalReturned, clrFound, clrLost, clrReturned }: {
+function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, returnedByMonth, totalFound, totalLost, totalReturned, clrFound, clrLost, clrReturned, labelFound, labelLost, labelReturned, labelFoundPosted, labelLostReported }: {
   chartKey: string; monthLabels: string[]; foundByMonth: number[]; lostByMonth: number[]; returnedByMonth: number[];
   totalFound: number; totalLost: number; totalReturned: number; clrFound: string; clrLost: string; clrReturned: string;
+  labelFound: string; labelLost: string; labelReturned: string; labelFoundPosted: string; labelLostReported: string;
 }) {
   useEffect(() => {
     const load = () => new Promise<void>((resolve) => {
@@ -684,15 +821,15 @@ function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, return
       if (barEl) {
         const ex = C.getChart(barEl); if (ex) ex.destroy();
         new C(barEl, { type: "bar", data: { labels: monthLabels, datasets: [
-          { label: "Found", data: foundByMonth, backgroundColor: clrFound, borderRadius: 5, borderSkipped: false },
-          { label: "Lost", data: lostByMonth, backgroundColor: clrLost, borderRadius: 5, borderSkipped: false },
-          { label: "Returned", data: returnedByMonth, backgroundColor: clrReturned, borderRadius: 5, borderSkipped: false },
+          { label: labelFound, data: foundByMonth, backgroundColor: clrFound, borderRadius: 5, borderSkipped: false },
+          { label: labelLost, data: lostByMonth, backgroundColor: clrLost, borderRadius: 5, borderSkipped: false },
+          { label: labelReturned, data: returnedByMonth, backgroundColor: clrReturned, borderRadius: 5, borderSkipped: false },
         ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false, padding: 10, cornerRadius: 8, bodyFont: { family: chartFont, size: 12 }, titleFont: { family: chartFont, size: 12 } } }, scales: { x: { stacked: true, grid: { color: gridColor }, ticks: { color: tickColor, font: { family: chartFont, size: 11 }, autoSkip: false } }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, color: tickColor, font: { family: chartFont, size: 11 } }, grid: { color: gridColor } } } } });
       }
       const pieEl = document.getElementById(`schoolPieChart-${chartKey}`) as HTMLCanvasElement | null;
       if (pieEl && totalFound + totalLost + totalReturned > 0) {
         const ex = C.getChart(pieEl); if (ex) ex.destroy();
-        new C(pieEl, { type: "doughnut", data: { labels: ["Found posted", "Lost reported", "Returned"], datasets: [{ data: [totalFound, totalLost, totalReturned], backgroundColor: [clrFound, clrLost, clrReturned], borderWidth: 0, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8, callbacks: { label: (ctx: any) => { const tot = totalFound + totalLost + totalReturned; return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / tot) * 100)}%)`; } }, bodyFont: { family: chartFont, size: 12 }, titleFont: { family: chartFont, size: 12 } } } } });
+        new C(pieEl, { type: "doughnut", data: { labels: [labelFoundPosted, labelLostReported, labelReturned], datasets: [{ data: [totalFound, totalLost, totalReturned], backgroundColor: [clrFound, clrLost, clrReturned], borderWidth: 0, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8, callbacks: { label: (ctx: any) => { const tot = totalFound + totalLost + totalReturned; return ` ${ctx.label}: ${ctx.parsed} (${Math.round((ctx.parsed / tot) * 100)}%)`; } }, bodyFont: { family: chartFont, size: 12 }, titleFont: { family: chartFont, size: 12 } } } } });
       }
     });
   }, [chartKey]);
@@ -806,6 +943,70 @@ export default function SchoolBoardPage() {
       ["confirmReceipt", "Confirm Receipt", "sc_board_confirmReceipt"],
       ["cancelClaim", "Cancel Claim", "sc_board_cancelClaim"],
       ["review", "Review", "sc_board_review"],
+      ["leaderboardTab", "Leaderboard", "sc_board_leaderboardTab"],
+      ["inboxTab", "Inbox", "sc_board_inboxTab"],
+      ["leaderboardDesc", "Top finders, ranked by items returned", "sc_board_leaderboardDesc"],
+      ["leaderboardEmpty", "No items have been returned yet. Be the first!", "sc_board_leaderboardEmpty"],
+      ["leaderboardReturned", "returned", "sc_board_leaderboardReturned"],
+      ["leaderboardYou", "You", "sc_board_leaderboardYou"],
+      ["reportedItemsTitle", "Reported Items", "sc_board_reportedItemsTitle"],
+      ["reportedItemsDesc", "Items flagged by students at this school. Only you can see these.", "sc_board_reportedItemsDesc"],
+      ["disputesTitle", "Disputes", "sc_board_disputesTitle"],
+      ["disputesDesc", "Handoff disputes raised by claimants at this school.", "sc_board_disputesDesc"],
+      ["inboxTitle", "Inbox", "sc_board_inboxTitle"],
+      ["inboxDesc", "Messages from students at this school.", "sc_board_inboxDesc"],
+      ["noReports", "No reports, all clear!", "sc_board_noReports"],
+      ["noDisputes", "No disputes, all clear!", "sc_board_noDisputes"],
+      ["reportedBy", "Reported by", "sc_board_reportedBy"],
+      ["dismiss", "Dismiss", "sc_board_dismiss"],
+      ["deleteBtn", "Delete", "sc_board_deleteBtn"],
+      ["dismissDispute", "Dismiss Dispute", "sc_board_dismissDispute"],
+      ["resolveForClaimant", "Resolve for Claimant", "sc_board_resolveForClaimant"],
+      ["messageParties", "Message Parties", "sc_board_messageParties"],
+      ["claimantLabel", "Claimant", "sc_board_claimantLabel"],
+      ["finderLabel", "Finder", "sc_board_finderLabel"],
+      ["sending", "Sending...", "sc_board_sending"],
+      ["sendMessage", "Send Message", "sc_board_sendMessage"],
+      ["viewItem", "View Item", "sc_board_viewItem"],
+      ["disputedBy", "Disputed by", "sc_board_disputedBy"],
+      ["schoolNotFound", "School not found.", "sc_board_schoolNotFound"],
+      ["backToSchools", "← Back to Schools", "sc_board_backToSchools"],
+      ["cropPhoto", "Crop Photo", "sc_board_cropPhoto"],
+      ["cropOf", "of", "sc_board_cropOf"],
+      ["cropZoom", "Zoom", "sc_board_cropZoom"],
+      ["cropRotate", "Rotate", "sc_board_cropRotate"],
+      ["skipCrop", "Skip crop", "sc_board_skipCrop"],
+      ["applyCrop", "Apply Crop", "sc_board_applyCrop"],
+      ["statusActive", "Active", "sc_board_statusActive"],
+      ["statusClaimPending", "Claim pending", "sc_board_statusClaimPending"],
+      ["statusClaimInProgress", "Claim in progress", "sc_board_statusClaimInProgress"],
+      ["statusAwaiting", "Awaiting confirmation", "sc_board_statusAwaiting"],
+      ["statusDisputed", "Disputed", "sc_board_statusDisputed"],
+      ["confirmDeleteReport", "permanently?", "sc_board_confirmDeleteReport"],
+      ["confirmDismissDispute", "Dismiss dispute? Item returns to claim_accepted status.", "sc_board_confirmDismissDispute"],
+      ["confirmResolveDispute", "Resolve for claimant? Item will be permanently deleted.", "sc_board_confirmResolveDispute"],
+      ["cannotDeleteHandoff", "Cannot delete while handoff or dispute is in progress.", "sc_board_cannotDeleteHandoff"],
+      ["confirmDeleteItem", "Delete this item permanently?", "sc_board_confirmDeleteItem"],
+      ["confirmDeleteWithClaimsPre", "student(s) have claimed this item. Deleting will notify them. Continue?", "sc_board_confirmDeleteWithClaimsPre"],
+      ["confirmDeleteWithClaimsPost", "student(s) have claimed this item. Deleting will notify them. Continue?", "sc_board_confirmDeleteWithClaimsPost"],
+      ["confirmDeleteAcceptedPre", "You accepted", "sc_board_confirmDeleteAcceptedPre"],
+      ["confirmDeleteAcceptedPost", "'s claim. Deleting cancels it. Continue?", "sc_board_confirmDeleteAcceptedPost"],
+      ["confirmDeleteLostItem", "Delete this lost item report?", "sc_board_confirmDeleteLostItem"],
+      ["claimCancelledMsg", "This claim can no longer be cancelled.", "sc_board_claimCancelledMsg"],
+      ["categoryLabel", "Category", "sc_board_categoryLabel"],
+      ["selectCategory", "Select a category", "sc_board_selectCategory"],
+      ["whereFound", "Where was it found?", "sc_board_whereFound"],
+      ["dateFoundLabel", "Date Found", "sc_board_dateFoundLabel"],
+      ["whereFoundPlaceholder", "e.g. Room 204, near the gym, front office...", "sc_board_whereFoundPlaceholder"],
+      ["lastSeenWhere", "Last seen where?", "sc_board_lastSeenWhere"],
+      ["dateLostLabel", "Date Lost", "sc_board_dateLostLabel"],
+      ["lastSeenPlaceholder", "e.g. Cafeteria, locker room, room 101...", "sc_board_lastSeenPlaceholder"],
+      ["schoolMember", "member", "sc_board_schoolMember"],
+      ["pendingClaimSingular", "pending claim", "sc_board_pendingClaimSingular"],
+      ["pendingClaimPlural", "pending claims", "sc_board_pendingClaimPlural"],
+      ["finderHandedOff", "Finder marked as handed off", "sc_board_finderHandedOff"],
+      ["failedToPost", "Failed to post lost item:", "sc_board_failedToPost"],
+      ["failedToRecord", "Failed to record return:", "sc_board_failedToRecord"],
     ];
     Promise.all(pairs.map(([field, key, cacheKey]) =>
       fetchTranslation(key, language, cacheKey, (val) => setS((prev) => ({ ...prev, [field]: val })))
@@ -815,8 +1016,8 @@ export default function SchoolBoardPage() {
   if (!isLoaded || loadingSchool || !stringsReady) return <LoadingSpinner />;
   if (!school) return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, fontFamily: "var(--font-body)" }}>
-      <p style={{ color: "var(--text-secondary)" }}>School not found.</p>
-      <button onClick={() => router.push("/schools")} style={{ padding: "8px 18px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-card)", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 600, color: "var(--text-secondary)" }}>← Back to Schools</button>
+      <p style={{ color: "var(--text-secondary)" }}>{s.schoolNotFound}</p>
+      <button onClick={() => router.push("/schools")} style={{ padding: "8px 18px", borderRadius: 8, border: "1.5px solid var(--border-input)", background: "var(--bg-card)", cursor: "pointer", fontFamily: "var(--font-body)", fontWeight: 600, color: "var(--text-secondary)" }}>{s.backToSchools}</button>
     </div>
   );
 
@@ -1062,11 +1263,11 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     { id: "items",      label: s.itemsTab,    icon: <HiOutlineMagnifyingGlass style={{ fontSize: 20 }} /> },
     { id: "add-item",   label: s.addItemTab,  icon: <FaPlus style={{ fontSize: 11 }} /> },
     { id: "my-dash",     label: s.myDashTab,    icon: <FaClipboard style={{ fontSize: 13 }} /> },
-    { id: "leaderboard", label: "Leaderboard", icon: <FaTrophy style={{ fontSize: 14 }} /> },
-    { id: "admin-login", label: s.adminTab,    icon: <CiLogin style={{ fontSize: 20 }} /> },
+    { id: "leaderboard", label: s.leaderboardTab, icon: <FaTrophy style={{ fontSize: 14 }} /> },
+    { id: "admin-login", label: s.adminTab,       icon: <CiLogin style={{ fontSize: 20 }} /> },
     ...(isSchoolAdmin ? [
-      { id: "reports" as BoardTab, label: s.reportsTab, icon: <MdFlagCircle style={{ fontSize: 20 }} /> },
-      { id: "inbox" as BoardTab,   label: "Inbox",      icon: <MdOutlineMessage style={{ fontSize: 20 }} /> },
+      { id: "reports" as BoardTab, label: s.reportsTab,  icon: <MdFlagCircle style={{ fontSize: 20 }} /> },
+      { id: "inbox" as BoardTab,   label: s.inboxTab,    icon: <MdOutlineMessage style={{ fontSize: 20 }} /> },
     ] : []),
   ];
 
@@ -1187,7 +1388,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     }).select().single();
     if (insertError) {
       console.error("Lost item insert error:", insertError.message);
-      alert(`Failed to post lost item: ${insertError.message}`);
+      alert(`${s.failedToPost} ${insertError.message}`);
       setLostUploading(false);
       return;
     }
@@ -1227,21 +1428,21 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const handleDeleteFound = async (e: React.MouseEvent, item: SchoolItem) => {
     e.stopPropagation();
     if (item.status === "handed_off" || item.status === "disputed") {
-      alert("Cannot delete while handoff or dispute is in progress."); return;
+      alert(s.cannotDeleteHandoff); return;
     }
     const { data: allClaims } = await supabase.from("school_claim_requests").select("*").eq("item_id", item.id);
     const pendingClaims = (allClaims || []).filter((c: any) => c.status === "pending");
     const hasActive = (allClaims || []).some((c: any) => c.status === "pending" || c.status === "accepted");
 
     if (!hasActive) {
-      if (!confirm("Delete this item permanently?")) return;
+      if (!confirm(s.confirmDeleteItem)) return;
     } else if (item.status === "waiting" && pendingClaims.length > 0) {
-      if (!confirm(`${pendingClaims.length} student(s) have claimed this item. Deleting will notify them. Continue?`)) return;
+      if (!confirm(`${pendingClaims.length} ${s.confirmDeleteWithClaimsPre}`)) return;
       for (const c of pendingClaims) {
         sendEmail("claim-rejected", { claimant_email: c.claimant_email, claimant_name: c.claimant_name, item_name: item.name, rejection_reason: "The item was removed by the finder." });
       }
     } else if (item.status === "claim_accepted") {
-      if (!confirm(`You accepted ${item.accepted_claimant_name}'s claim. Deleting cancels it. Continue?`)) return;
+      if (!confirm(`${s.confirmDeleteAcceptedPre} ${item.accepted_claimant_name}${s.confirmDeleteAcceptedPost}`)) return;
       if (item.accepted_claimant_email) {
         sendEmail("claim-rejected", { claimant_email: item.accepted_claimant_email, claimant_name: item.accepted_claimant_name ?? "", item_name: item.name, rejection_reason: "The item listing was removed by the finder after your claim was accepted." });
       }
@@ -1274,7 +1475,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       });
       if (insertError) {
         console.error("school_returned_items insert failed:", insertError);
-        alert(`Failed to record return: ${insertError.message}`);
+        alert(`${s.failedToRecord} ${insertError.message}`);
         return;
       }
       await supabase.from("school_items").delete().eq("id", itemId);
@@ -1293,7 +1494,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
   const handleDeleteLost = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    if (!confirm("Delete this lost item report?")) return;
+    if (!confirm(s.confirmDeleteLostItem)) return;
     await supabase.from("school_lost_items").delete().eq("id", id);
     setLostItems((prev) => prev.filter((i) => i.id !== id));
   };
@@ -1306,7 +1507,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
 
   const handleCancelClaim = async (claimId: string, itemId: number) => {
     const { data: freshItem } = await supabase.from("school_items").select("status").eq("id", itemId).maybeSingle();
-    if (!freshItem || freshItem.status !== "waiting") { alert("This claim can no longer be cancelled."); return; }
+    if (!freshItem || freshItem.status !== "waiting") { alert(s.claimCancelledMsg); return; }
     await supabase.from("school_claim_requests").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", claimId);
     setMyActiveClaims((prev) => prev.filter((c) => c.id !== claimId));
   };
@@ -1376,7 +1577,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   );
 
   return (
-    <div className="sc-board" style={{ "--sc-color": color, "--sc-color-2": color2, "--sc-text-on-color": textOn, ...(hasBg ? { backgroundImage: `url(${school.bg_image_url})` } : {}) } as React.CSSProperties}>
+    <div className="sc-board" style={{ "--sc-color": color, "--sc-color-2": color2, "--sc-text-on-color": textOn, ...(hasBg ? { backgroundImage: `url("${school.bg_image_url}")` } : {}) } as React.CSSProperties}>
 
       {/* ── Header ── */}
       <div className="sc-board__header">
@@ -1414,7 +1615,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           ))}
         </aside>
 
-        <main className="sc-board__main" style={hasBg ? { backgroundImage: `${gradOverlay}, url(${school.bg_image_url})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}>
+        <main className="sc-board__main" style={hasBg ? { backgroundImage: `${gradOverlay}, url("${school.bg_image_url}")`, backgroundSize: "cover", backgroundPosition: "center" } : {}}>
 
           {/* ══════════════════════════════════════════════════════════════════
               ITEMS TAB
@@ -1476,9 +1677,9 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                           <span>{s.foundBy} {item.author_name}</span>
                         </div>
                         {item.status === "pending" && <span className="sc-item-card__status sc-item-card__status--pending">{s.claimPending}</span>}
-                        {item.status === "claim_accepted" && <span className="sc-item-card__status" style={{ color: "var(--warning)", fontWeight: 700 }}>Claim in progress</span>}
-                        {item.status === "handed_off" && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 700 }}>Awaiting confirmation</span>}
-                        {item.status === "disputed" && <span className="sc-item-card__status" style={{ color: "var(--danger)", fontWeight: 700 }}>Disputed</span>}
+                        {item.status === "claim_accepted" && <span className="sc-item-card__status" style={{ color: "var(--warning)", fontWeight: 700 }}>{s.statusClaimInProgress}</span>}
+                        {item.status === "handed_off" && <span className="sc-item-card__status" style={{ color: "var(--text-muted)", fontWeight: 700 }}>{s.statusAwaiting}</span>}
+                        {item.status === "disputed" && <span className="sc-item-card__status" style={{ color: "var(--danger)", fontWeight: 700 }}>{s.statusDisputed}</span>}
                       </div>
                     </div>
                   ))}
@@ -1524,16 +1725,16 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <form className="sc-form" onSubmit={handleAddFound}>
                     <label className="sc-form__label">{s.itemNameLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <input className="sc-form__input" type="text" placeholder={s.itemNamePlaceholder} required value={foundName} onChange={(e) => setFoundName(e.target.value)} />
-                    <label className="sc-form__label">Category <span style={{ color: "var(--danger)" }}>*</span></label>
+                    <label className="sc-form__label">{s.categoryLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <select className="sc-form__input" value={foundCategory} onChange={(e) => setFoundCategory(e.target.value)} style={{ color: foundCategory ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }}>
-                      <option value="">Select a category</option>
+                      <option value="">{s.selectCategory}</option>
                       {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                     <label className="sc-form__label">{s.descLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <textarea className="sc-form__textarea" placeholder={s.descFoundPlaceholder} required value={foundDesc} onChange={(e) => setFoundDesc(e.target.value)} />
-                    <label className="sc-form__label">Where was it found?</label>
-                    <input className="sc-form__input" type="text" placeholder="e.g. Room 204, near the gym, front office..." value={foundLocation} onChange={(e) => setFoundLocation(e.target.value)} />
-                    <label className="sc-form__label">Date Found</label>
+                    <label className="sc-form__label">{s.whereFound}</label>
+                    <input className="sc-form__input" type="text" placeholder={s.whereFoundPlaceholder} value={foundLocation} onChange={(e) => setFoundLocation(e.target.value)} />
+                    <label className="sc-form__label">{s.dateFoundLabel}</label>
                     <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} style={{ color: foundDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-found-upload" style={{ color: foundFiles.length > 0 ? "var(--text-primary)" : "var(--text-muted)", fontWeight: 400 }}>
@@ -1568,16 +1769,16 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                   <form className="sc-form" onSubmit={handleAddLost}>
                     <label className="sc-form__label">{s.whatLostLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <input className="sc-form__input" type="text" placeholder={s.lostItemPlaceholder} required value={lostName} onChange={(e) => setLostName(e.target.value)} />
-                    <label className="sc-form__label">Category <span style={{ color: "var(--danger)" }}>*</span></label>
+                    <label className="sc-form__label">{s.categoryLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <select className="sc-form__input" value={lostCategory} onChange={(e) => setLostCategory(e.target.value)} style={{ color: lostCategory ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }}>
-                      <option value="">Select a category</option>
+                      <option value="">{s.selectCategory}</option>
                       {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                     <label className="sc-form__label">{s.descLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <textarea className="sc-form__textarea" placeholder={s.descLostPlaceholder} required value={lostDesc} onChange={(e) => setLostDesc(e.target.value)} />
-                    <label className="sc-form__label">Last seen where?</label>
-                    <input className="sc-form__input" type="text" placeholder="e.g. Cafeteria, locker room, room 101..." value={lostLocation} onChange={(e) => setLostLocation(e.target.value)} />
-                    <label className="sc-form__label">Date Lost</label>
+                    <label className="sc-form__label">{s.lastSeenWhere}</label>
+                    <input className="sc-form__input" type="text" placeholder={s.lastSeenPlaceholder} value={lostLocation} onChange={(e) => setLostLocation(e.target.value)} />
+                    <label className="sc-form__label">{s.dateLostLabel}</label>
                     <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} style={{ color: lostDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosOptionalLabel}</label>
                     <label className="sc-form__file-label" htmlFor="sc-lost-upload" style={{ color: lostFiles.length > 0 ? "var(--text-primary)" : "var(--text-muted)", fontWeight: 400 }}>
@@ -1625,7 +1826,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ margin: "0 0 2px", fontFamily: "var(--font-body)", fontSize: 17, fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName || user.username || "Anonymous"}</p>
                         <p style={{ margin: "0 0 8px", fontFamily: "var(--font-body)", fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.primaryEmailAddress?.emailAddress || ""}</p>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>{school.name} member</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: `${color}22`, color, fontFamily: "var(--font-body)" }}>{school.name} {s.schoolMember}</span>
                       </div>
                     </div>
                     <div className="sc-my-dash-stats" style={{ display: "flex", gap: 20, flexShrink: 0 }}>
@@ -1691,7 +1892,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       )}
                     </div>
                   </div>
-                  <SchoolCharts chartKey={chartKey} monthLabels={monthLabels} foundByMonth={foundByMonth} lostByMonth={lostByMonth} returnedByMonth={returnedByMonth} totalFound={totalFound} totalLost={totalLost} totalReturned={totalReturnedByMe} clrFound={clrFound} clrLost={clrLost} clrReturned={clrReturned} />
+                  <SchoolCharts chartKey={chartKey} monthLabels={monthLabels} foundByMonth={foundByMonth} lostByMonth={lostByMonth} returnedByMonth={returnedByMonth} totalFound={totalFound} totalLost={totalLost} totalReturned={totalReturnedByMe} clrFound={clrFound} clrLost={clrLost} clrReturned={clrReturned} labelFound={s.chartFound} labelLost={s.chartLost} labelReturned={s.chartReturned} labelFoundPosted={s.chartFoundPosted} labelLostReported={s.chartLostReported} />
 
                   {/* Pending claims on my items */}
                   {Object.values(myItemClaims).some((n) => n > 0) && (
@@ -1702,7 +1903,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                           {item.image_url && <img src={item.image_url} alt={item.name} style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />}
                           <p style={{ fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", margin: 0, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</p>
                           <span style={{ background: "var(--warning)", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, fontFamily: "var(--font-body)", whiteSpace: "nowrap", flexShrink: 0 }}>
-                            {myItemClaims[item.id]} pending claim{myItemClaims[item.id] !== 1 ? "s" : ""}
+                            {myItemClaims[item.id]} {myItemClaims[item.id] !== 1 ? s.pendingClaimPlural : s.pendingClaimSingular}
                           </span>
                           <button style={{ background: color, color: textOn, fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "var(--font-body)", flexShrink: 0 }} onClick={() => router.push(`/school-items/${item.id}`)}>
                             {s.review}
@@ -1729,7 +1930,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               <p className="sc-item-card__desc">{contentMap[`f_${item.id}`]?.description || item.description}</p>
                               {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{catMap[item.category] || item.category}</span>}
                               {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`f_${item.id}`]?.location || item.location}</p>}
-                              <StatusBadge status={item.status} />
+                              <StatusBadge status={item.status} s={s} />
                             </div>
                             <div className="sc-item-card__actions">
                               {/* Finder confirm handoff */}
@@ -1801,7 +2002,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                               </span>
                               {/* Claimant confirm handoff */}
                               {claim.item_status === "handed_off" && (
-                                <span style={{ display: "block", marginTop: 4, fontSize: "0.72rem", fontFamily: "var(--font-body)", color: "var(--text-muted)", fontWeight: 600 }}>Finder marked as handed off</span>
+                                <span style={{ display: "block", marginTop: 4, fontSize: "0.72rem", fontFamily: "var(--font-body)", color: "var(--text-muted)", fontWeight: 600 }}>{s.finderHandedOff}</span>
                               )}
                             </div>
                             <div className="sc-item-card__actions">
@@ -1867,12 +2068,12 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           {activeTab === "leaderboard" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 600, margin: "0 auto", width: "100%" }}>
               <div style={{ padding: "18px 20px", background: "var(--bg-card)", border: "1px solid var(--border-default)", borderRadius: 16, boxShadow: "var(--card-shadow)" }}>
-                <p style={{ margin: "0 0 4px", fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Leaderboard</p>
-                <p style={{ margin: "0 0 20px", fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)" }}>Top finders at {school.name}, ranked by items returned</p>
+                <p style={{ margin: "0 0 4px", fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>{s.leaderboardTab}</p>
+                <p style={{ margin: "0 0 20px", fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)" }}>{s.leaderboardDesc}</p>
                 {leaderboardLoading ? (
                   <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}><LoadingSpinner /></div>
                 ) : leaderboard.length === 0 ? (
-                  <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>No items have been returned yet. Be the first!</p>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>{s.leaderboardEmpty}</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {leaderboard.map((entry, idx) => {
@@ -1884,11 +2085,11 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             {idx + 1}
                           </div>
                           <p style={{ flex: 1, margin: 0, fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {entry.author_name}{isMe && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color, background: `${color}22`, padding: "2px 8px", borderRadius: 20 }}>You</span>}
+                            {entry.author_name}{isMe && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color, background: `${color}22`, padding: "2px 8px", borderRadius: 20 }}>{s.leaderboardYou}</span>}
                           </p>
                           <div style={{ textAlign: "right", flexShrink: 0 }}>
                             <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 16, fontWeight: 700, color }}>{entry.count}</p>
-                            <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>returned</p>
+                            <p style={{ margin: 0, fontFamily: "var(--font-body)", fontSize: 9, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>{s.leaderboardReturned}</p>
                           </div>
                         </div>
                       );
@@ -1908,23 +2109,23 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
               <div style={{ display: "flex", gap: 8, marginBottom: 20, justifyContent: "flex-start" }}>
                 {(["reports", "disputes"] as const).map((t) => (
                   <button key={t} onClick={() => setReportsSubTab(t)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", fontFamily: "var(--font-body)", background: reportsSubTab === t ? "var(--danger)" : "var(--bg-input)", color: reportsSubTab === t ? "#fff" : "var(--text-muted)", transition: "all 0.15s ease" }}>
-                    {t === "reports" ? "Reported Items" : "Disputes"}
+                    {t === "reports" ? s.reportedItemsTitle : s.disputesTitle}
                   </button>
                 ))}
               </div>
 
               {reportsSubTab === "reports" && (
                 <>
-                  <div className="sc-section-title">Reported Items</div>
-                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Items flagged by students at this school. Only you can see these.</p>
-                  <SchoolReportsPanel school={school} onDeleteItem={handleReportDeleteItem} color={color} />
+                  <div className="sc-section-title">{s.reportedItemsTitle}</div>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>{s.reportedItemsDesc}</p>
+                  <SchoolReportsPanel school={school} onDeleteItem={handleReportDeleteItem} color={color} s={s} />
                 </>
               )}
               {reportsSubTab === "disputes" && (
                 <>
-                  <div className="sc-section-title">Disputes</div>
-                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Handoff disputes raised by claimants at this school.</p>
-                  <SchoolDisputesPanel school={school} adminId={adminId} adminName={adminName} onRestoreItem={handleDisputeRestoreItem} />
+                  <div className="sc-section-title">{s.disputesTitle}</div>
+                  <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>{s.disputesDesc}</p>
+                  <SchoolDisputesPanel school={school} adminId={adminId} adminName={adminName} onRestoreItem={handleDisputeRestoreItem} s={s} />
                 </>
               )}
             </div>
@@ -1935,8 +2136,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           ══════════════════════════════════════════════════════════════════ */}
           {activeTab === "inbox" && isSchoolAdmin && user && (
             <div className="sc-panel-content">
-              <div className="sc-section-title">Inbox</div>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>Messages from students at this school.</p>
+              <div className="sc-section-title">{s.inboxTitle}</div>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--text-muted)", margin: "0 0 16px" }}>{s.inboxDesc}</p>
               <AdminInboxPanel adminId={user.id} adminName={user.fullName || user.username || "Admin"} adminEmail={user.primaryEmailAddress?.emailAddress || ""} />
             </div>
           )}
@@ -1945,8 +2146,8 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
       </div>
 
       {/* Crop modals */}
-      {foundCropSrc && <CropModal src={foundCropSrc} queueIndex={foundCropIndex} queueTotal={foundCropQueue.length} onConfirm={handleFoundCropConfirm} onSkip={handleFoundCropSkip} />}
-      {lostCropSrc && <CropModal src={lostCropSrc} queueIndex={lostCropIndex} queueTotal={lostCropQueue.length} onConfirm={handleLostCropConfirm} onSkip={handleLostCropSkip} />}
+      {foundCropSrc && <CropModal src={foundCropSrc} queueIndex={foundCropIndex} queueTotal={foundCropQueue.length} onConfirm={handleFoundCropConfirm} onSkip={handleFoundCropSkip} cropPhotoLabel={s.cropPhoto} cropOfLabel={s.cropOf} cropZoomLabel={s.cropZoom} cropRotateLabel={s.cropRotate} skipCropLabel={s.skipCrop} applyCropLabel={s.applyCrop} />}
+      {lostCropSrc && <CropModal src={lostCropSrc} queueIndex={lostCropIndex} queueTotal={lostCropQueue.length} onConfirm={handleLostCropConfirm} onSkip={handleLostCropSkip} cropPhotoLabel={s.cropPhoto} cropOfLabel={s.cropOf} cropZoomLabel={s.cropZoom} cropRotateLabel={s.cropRotate} skipCropLabel={s.skipCrop} applyCropLabel={s.applyCrop} />}
     </div>
   );
 }
