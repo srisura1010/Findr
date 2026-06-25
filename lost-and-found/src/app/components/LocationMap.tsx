@@ -1,5 +1,6 @@
 "use client";
 
+import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -172,11 +173,6 @@ export default function LocationMap({
         background: "var(--bg-card)",
       }}
     >
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      />
-
       {address && (
         <div
           style={{

@@ -71,11 +71,11 @@ body.light {
   display: flex;
   flex-direction: column;
   box-shadow: var(--sidebar-shadow);
-  position: sticky;
+  position: fixed;
   top: 54px;
+  left: 68px;
   height: calc(100vh - 54px);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   transition: background 0.2s ease, border-color 0.2s ease;
   z-index: 10;
 }
@@ -204,6 +204,7 @@ body.light {
 .dashboard-main {
   flex: 1;
   min-width: 0;
+  margin-left: 256px;
   padding: 28px 24px;
   background: var(--bg-page);
   transition: background 0.2s ease;
@@ -1388,7 +1389,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
 @media (max-width: 768px) {
   .dashboard-layout { flex-direction: column; }
 
-  .dashboard-main { padding: 12px; overflow-x: hidden; }
+  .dashboard-main { padding: 12px; overflow-x: hidden; margin-left: 0; }
   .dashboard-layout { overflow-x: hidden; }
 
   .dashboard-sidebar {
@@ -1397,6 +1398,7 @@ body.dark .report-flag { background: rgba(15,23,42,0.88); }
     height: auto;
     position: relative;
     top: 0;
+    left: 0;
     border-right: none;
     border-bottom: 1px solid var(--border-default);
     overflow: visible;

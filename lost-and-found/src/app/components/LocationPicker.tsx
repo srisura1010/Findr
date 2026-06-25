@@ -1,5 +1,6 @@
 "use client";
 
+import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -392,11 +393,6 @@ export default function LocationPicker({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      />
-
       {/* Search row */}
       <div style={{ position: "relative" }}>
         <div
@@ -721,6 +717,7 @@ export default function LocationPicker({
           overflow: "hidden",
           border: showDropdown ? "none" : "1.5px solid var(--border-default)",
           position: "relative",
+          transform: "translateZ(0)",
           transition: "height 0.2s ease, border 0.2s ease",
         }}
       >

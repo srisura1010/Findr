@@ -4210,7 +4210,7 @@ export default function DashboardPage() {
               }}
             >
               {/* Search row */}
-              <div className="panel-search" style={{ margin: 0 }}>
+              <div className="panel-search" style={{ margin: 0, paddingLeft: "10px" }}>
                 <input
                   className="panel-search__input"
                   placeholder={s.searchPlaceholder}

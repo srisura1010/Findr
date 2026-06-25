@@ -123,6 +123,90 @@ export default function AISearchPage() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [transitionPhase, setTransitionPhase] = useState<"idle" | "exit" | "spawning">("idle");
   const [, forceRender] = useState(0); // used to trigger re-renders during spawn animation
+  const [translatedCats, setTranslatedCats] = useState<Record<string, string>>({});
+  const [translatedItems, setTranslatedItems] = useState<Record<number, { name: string; description: string }>>({});
+
+  // ── translate categories + item names/descriptions when items or language changes ─────
+  useEffect(() => {
+    if (!hydrated || language === "en") {
+      setTranslatedCats({});
+      setTranslatedItems({});
+      return;
+    }
+    const allItems = [...items, ...masterRef.current];
+
+    // deduplicate by id
+    const seen = new Set<number>();
+    const uniqueItems = allItems.filter((it) => { if (seen.has(it.id)) return false; seen.add(it.id); return true; });
+
+    const uniqueCats = [...new Set(uniqueItems.map((it) => it.category).filter(Boolean) as string[])];
+
+    (async () => {
+      // categories
+      const catMap: Record<string, string> = {};
+      for (const cat of uniqueCats) {
+        const cacheKey = `t:${language}:cat:${cat}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) { catMap[cat] = cached; continue; }
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: cat, target: language }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const t = data.translatedText || cat;
+            catMap[cat] = t;
+            localStorage.setItem(cacheKey, t);
+          }
+        } catch { catMap[cat] = cat; }
+      }
+      setTranslatedCats(catMap);
+
+      // item names + descriptions
+      const itemMap: Record<number, { name: string; description: string }> = {};
+      for (const item of uniqueItems) {
+        const nameCacheKey = `t:${language}:item:${item.id}:name`;
+        const descCacheKey = `t:${language}:item:${item.id}:desc`;
+        let tName = localStorage.getItem(nameCacheKey) ?? "";
+        let tDesc = localStorage.getItem(descCacheKey) ?? "";
+        if (!tName && item.name) {
+          try {
+            const res = await fetch("/api/translate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: item.name, target: language }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              tName = data.translatedText || item.name;
+              localStorage.setItem(nameCacheKey, tName);
+            }
+          } catch { tName = item.name; }
+        }
+        if (!tDesc && item.description) {
+          try {
+            const res = await fetch("/api/translate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: item.description, target: language }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              tDesc = data.translatedText || item.description;
+              localStorage.setItem(descCacheKey, tDesc);
+            }
+          } catch { tDesc = item.description ?? ""; }
+        }
+        itemMap[item.id] = {
+          name: tName || item.name,
+          description: tDesc || item.description || "",
+        };
+      }
+      setTranslatedItems(itemMap);
+    })();
+  }, [items, language, hydrated]);
 
   // ── animation loop ───────────────────────────────────────────────
   const tick = useCallback((ts: number) => {
@@ -773,10 +857,14 @@ export default function AISearchPage() {
                   <div
                     className={`aisp-popup aisp-popup--${below ? "below" : "above"}`}
                   >
-                    <p className="aisp-popup-name">{item.name}</p>
+                    <p className="aisp-popup-name">
+                      {translatedItems[item.id]?.name ?? item.name}
+                    </p>
                     <div className="aisp-popup-tags">
                       {item.category && (
-                        <span className="aisp-popup-cat">{item.category}</span>
+                        <span className="aisp-popup-cat">
+                          {translatedCats[item.category] ?? item.category}
+                        </span>
                       )}
                       {item.location && (
                         <span className="aisp-popup-loc">
@@ -785,7 +873,9 @@ export default function AISearchPage() {
                       )}
                     </div>
                     {item.description && (
-                      <p className="aisp-popup-desc">{item.description}</p>
+                      <p className="aisp-popup-desc">
+                        {translatedItems[item.id]?.description || item.description}
+                      </p>
                     )}
                     <span className="aisp-popup-cta">{clickToViewText}</span>
                   </div>
