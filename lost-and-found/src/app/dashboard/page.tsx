@@ -414,7 +414,7 @@ const DEFAULT_STRINGS: DashStrings = {
   lostItemsTab: "Lost Items",
   foundBy: "Found by:",
   lostBy: "Lost by:",
-  claimPending: "⏳ Claim pending",
+  claimPending: "Claim pending",
   noFoundItems: "No found items posted yet.",
   noFoundItemsSearch: "No items found for",
   tryKeywords: "Try different keywords like color, type, or brand",
@@ -451,7 +451,7 @@ const DEFAULT_STRINGS: DashStrings = {
   noItemsYet: "You haven't posted any items yet.",
   foundItemsPosted: "Found Items I Posted",
   lostItemsReported: "Lost Items I Reported",
-  claimPendingStatus: "⏳ Claim pending",
+  claimPendingStatus: "Claim pending",
   activeStatus: "✓ Active",
   confirmClaimed: "Confirm Claimed",
   markAsFound: "Mark as Found",
@@ -485,8 +485,8 @@ const DEFAULT_STRINGS: DashStrings = {
   reportedItemsTitle: "Reported Items",
   reportedUsersTitle: "Reported Users",
   loadingText: "Loading...",
-  noItemReports: "No item reports — all clear!",
-  noUserReports: "No user reports — all clear!",
+  noItemReports: "No item reports. All clear!",
+  noUserReports: "No user reports. All clear!",
   reportedBy: "Reported by",
   postedBy: "Posted by",
   unknown: "Unknown",
@@ -546,7 +546,7 @@ const DEFAULT_STRINGS: DashStrings = {
   levelNewcomer: "Newcomer",
   brandTitle: "Findr Dashboard",
   brandSub: "Your Lost & Found",
-  noDisputes: "No disputes — all clear!",
+  noDisputes: "No disputes. All clear!",
   disputesTab: "Disputes",
   disputedBy: "Disputed by",
   viewItemArrow: "View Item →",
@@ -581,7 +581,7 @@ const DEFAULT_STRINGS: DashStrings = {
   deleteLostConfirm: "Delete this lost item report permanently?",
   myActiveClaimsTitle: "My Active Claims",
   noActiveClaims: "You have no active claims.",
-  claimAcceptedStatus: "Accepted — Coordinate Now",
+  claimAcceptedStatus: "Accepted: Coordinate Now",
   pendingReviewStatus: "Pending Review",
   goToItemBtn: "Go to Item",
   cancelClaimBtn: "Cancel Claim",
@@ -2011,7 +2011,7 @@ export default function DashboardPage() {
       ["lostItemsTab", "Lost Items", "dash_lostItemsTab"],
       ["foundBy", "Found by:", "dash_foundBy"],
       ["lostBy", "Lost by:", "dash_lostBy"],
-      ["claimPending", "⏳ Claim pending", "dash_claimPending"],
+      ["claimPending", "Claim pending", "dash_claimPending"],
       ["noFoundItems", "No found items posted yet.", "dash_noFoundItems"],
       ["noFoundItemsSearch", "No items found for", "dash_noFoundItemsSearch"],
       ["tryKeywords", DEFAULT_STRINGS.tryKeywords, "dash_tryKeywords"],
@@ -2067,7 +2067,7 @@ export default function DashboardPage() {
       ["noItemsYet", "You haven't posted any items yet.", "dash_noItemsYet"],
       ["foundItemsPosted", "Found Items I Posted", "dash_foundItemsPosted"],
       ["lostItemsReported", "Lost Items I Reported", "dash_lostItemsReported"],
-      ["claimPendingStatus", "⏳ Claim pending", "dash_claimPendingStatus"],
+      ["claimPendingStatus", "Claim pending", "dash_claimPendingStatus"],
       ["activeStatus", "✓ Active", "dash_activeStatus"],
       ["confirmClaimed", "Confirm Claimed", "dash_confirmClaimed"],
       ["markAsFound", "Mark as Found", "dash_markAsFound"],
@@ -2121,8 +2121,8 @@ export default function DashboardPage() {
       ["reportedItemsTitle", "Reported Items", "dash_reportedItemsTitle"],
       ["reportedUsersTitle", "Reported Users", "dash_reportedUsersTitle"],
       ["loadingText", "Loading...", "dash_loadingText"],
-      ["noItemReports", "No item reports — all clear!", "dash_noItemReports"],
-      ["noUserReports", "No user reports — all clear!", "dash_noUserReports"],
+      ["noItemReports", "No item reports. All clear!", "dash_noItemReports"],
+      ["noUserReports", "No user reports. All clear!", "dash_noUserReports"],
       ["reportedBy", "Reported by", "dash_reportedBy"],
       ["postedBy", "Posted by", "dash_postedBy"],
       ["unknown", "Unknown", "dash_unknown"],
@@ -2190,7 +2190,7 @@ export default function DashboardPage() {
       ["levelNewcomer", "Newcomer", "dash_levelNewcomer"],
       ["brandTitle", "Findr Dashboard", "dash_brandTitle"],
       ["brandSub", "Your Lost & Found", "dash_brandSub"],
-      ["noDisputes", "No disputes — all clear!", "dash_noDisputes"],
+      ["noDisputes", "No disputes. All clear!", "dash_noDisputes"],
       ["disputesTab", "Disputes", "dash_disputesTab"],
       ["disputedBy", "Disputed by", "dash_disputedBy"],
       ["viewItemArrow", "View Item →", "dash_viewItemArrow"],
@@ -2225,7 +2225,7 @@ export default function DashboardPage() {
       ["deleteLostConfirm", "Delete this lost item report permanently?", "dash_deleteLostConfirm"],
       ["myActiveClaimsTitle", "My Active Claims", "dash_myActiveClaimsTitle"],
       ["noActiveClaims", "You have no active claims.", "dash_noActiveClaims"],
-      ["claimAcceptedStatus", "Accepted — Coordinate Now", "dash_claimAcceptedStatus"],
+      ["claimAcceptedStatus", "Accepted: Coordinate Now", "dash_claimAcceptedStatus"],
       ["pendingReviewStatus", "Pending Review", "dash_pendingReviewStatus"],
       ["goToItemBtn", "Go to Item", "dash_goToItemBtn"],
       ["cancelClaimBtn", "Cancel Claim", "dash_cancelClaimBtn"],
@@ -4589,7 +4589,7 @@ export default function DashboardPage() {
                               display: "block",
                             }}
                           >
-                            ⏳ {s.claimInProgressStatus}
+                            {s.claimInProgressStatus}
                           </span>
                         )}
                         {item.status === "handed_off" && (
@@ -4603,7 +4603,7 @@ export default function DashboardPage() {
                               display: "block",
                             }}
                           >
-                            🤝 {s.awaitingConfirmStatus}
+                            {s.awaitingConfirmStatus}
                           </span>
                         )}
                         {item.status === "disputed" && (
@@ -4617,7 +4617,7 @@ export default function DashboardPage() {
                               display: "block",
                             }}
                           >
-                            ⚠️ {s.disputedStatus}
+                            {s.disputedStatus}
                           </span>
                         )}
                       </div>

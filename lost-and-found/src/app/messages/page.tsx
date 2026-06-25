@@ -311,7 +311,7 @@ export default function MessagesPage() {
   const [uiContactSchoolAdmin, setUiContactSchoolAdmin] = useState("Contact a School Admin");
   const [uiViewItem, setUiViewItem] = useState("View Item →");
   const [uiReportUser, setUiReportUser] = useState("Report User");
-  const [uiAdminChatEmpty, setUiAdminChatEmpty] = useState("You're chatting with an admin. Ask anything — they're here to help.");
+  const [uiAdminChatEmpty, setUiAdminChatEmpty] = useState("You're chatting with an admin. Ask anything; they're here to help.");
 
   useEffect(() => {
     if (!hydrated) return;
@@ -342,7 +342,7 @@ export default function MessagesPage() {
         t("Contact a School Admin", language),
         t("View Item →", language),
         t("Report User", language),
-        t("You're chatting with an admin. Ask anything — they're here to help.", language),
+        t("You're chatting with an admin. Ask anything; they're here to help.", language),
       ]);
       setUiMessagesTitle(messagesTitle);
       setUiYourConversations(yourConversations);
@@ -647,7 +647,7 @@ export default function MessagesPage() {
       setConversations((prev) => [
         {
           conversation_id: data.conversationId,
-          item_title: `${data.schoolName} — School Admin`,
+          item_title: `${data.schoolName}: School Admin`,
           otherUserId: data.adminUserId,
           otherUserName: data.adminName,
           otherUserEmail: data.adminEmail,
@@ -849,7 +849,6 @@ export default function MessagesPage() {
                     </>
                   ) : (
                     <>
-                      <span style={{ fontSize: 32 }}>👋</span>
                       <p>{uiStartConversation}</p>
                     </>
                   )}

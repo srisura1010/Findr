@@ -263,7 +263,7 @@ export default function SuperAdminPage() {
       });
 
       setAdminRequests((prev) => prev.filter((r) => r.id !== request.id));
-      alert(`✅ Approved! Password sent to ${request.email}`);
+      alert(`Approved! Password sent to ${request.email}`);
     } catch (err) {
       console.error(err);
       alert("Something went wrong. Check the console.");
@@ -320,7 +320,7 @@ export default function SuperAdminPage() {
           r.id === requestId ? { ...r, status: "removed" } : r
         )
       );
-      alert(`✅ Admin access removed for ${email}`);
+      alert(`Admin access removed for ${email}`);
     } catch (err) {
       console.error(err);
       alert("Something went wrong removing admin.");
@@ -396,7 +396,7 @@ CREATE POLICY "update school_requests" ON school_requests FOR UPDATE USING (true
           r.id === request.id ? { ...r, status: "approved" } : r
         )
       );
-      alert(`✅ School approved!
+      alert(`School approved!
 
 School Code (for all members to join): ${code}
 Admin Password (for rep to unlock admin panel): ${password}

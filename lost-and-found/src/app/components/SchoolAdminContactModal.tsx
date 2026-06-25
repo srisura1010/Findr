@@ -231,7 +231,7 @@ export function SchoolAdminContactModal({
         {step === "pick-admin" && (
           <>
             <p className="report-modal__subtitle">
-              {selectedSchool?.name ?? "School"} — {selectWhoText}
+              {selectedSchool?.name ?? "School"}: {selectWhoText}
             </p>
             {!prefilledSchoolId && (
               <button

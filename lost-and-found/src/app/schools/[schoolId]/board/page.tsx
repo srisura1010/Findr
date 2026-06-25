@@ -1672,9 +1672,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       </div>
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{contentMap[`f_${item.id}`]?.name || item.name}</p>
-                        <p className="sc-item-card__desc">{contentMap[`f_${item.id}`]?.description || item.description}</p>
-                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{catMap[item.category] || item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`f_${item.id}`]?.location || item.location}</p>}
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {catMap[item.category] || item.category}</span>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.foundBy} {item.author_name}</span>
@@ -1697,9 +1695,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                       </div>
                       <div className="sc-item-card__info">
                         <p className="sc-item-card__name">{contentMap[`l_${item.id}`]?.name || item.name}</p>
-                        <p className="sc-item-card__desc">{contentMap[`l_${item.id}`]?.description || item.description}</p>
-                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>{catMap[item.category] || item.category}</span>}
-                        {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`l_${item.id}`]?.location || item.location}</p>}
+                        {item.category && <span style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 500 }}>🏷️ {catMap[item.category] || item.category}</span>}
                         <div className="sc-item-card__by">
                           {item.author_avatar && <img src={item.author_avatar} className="sc-item-card__by-avatar" alt="" />}
                           <span>{s.lostBy} {item.author_name}</span>
@@ -1735,8 +1731,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     </select>
                     <label className="sc-form__label">{s.descLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <textarea className="sc-form__textarea" placeholder={s.descFoundPlaceholder} required value={foundDesc} onChange={(e) => setFoundDesc(e.target.value)} />
-                    <label className="sc-form__label">{s.whereFound}</label>
-                    <input className="sc-form__input" type="text" placeholder={s.whereFoundPlaceholder} value={foundLocation} onChange={(e) => setFoundLocation(e.target.value)} />
                     <label className="sc-form__label">{s.dateFoundLabel}</label>
                     <input className="sc-form__input" type="date" value={foundDate} onChange={(e) => setFoundDate(e.target.value)} style={{ color: foundDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosLabel}</label>
@@ -1779,8 +1773,6 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                     </select>
                     <label className="sc-form__label">{s.descLabel} <span style={{ color: "var(--danger)" }}>*</span></label>
                     <textarea className="sc-form__textarea" placeholder={s.descLostPlaceholder} required value={lostDesc} onChange={(e) => setLostDesc(e.target.value)} />
-                    <label className="sc-form__label">{s.lastSeenWhere}</label>
-                    <input className="sc-form__input" type="text" placeholder={s.lastSeenPlaceholder} value={lostLocation} onChange={(e) => setLostLocation(e.target.value)} />
                     <label className="sc-form__label">{s.dateLostLabel}</label>
                     <input className="sc-form__input" type="date" value={lostDate} onChange={(e) => setLostDate(e.target.value)} style={{ color: lostDate ? "var(--text-primary)" : "var(--text-muted)", fontSize: "13px", fontWeight: 400 }} />
                     <label className="sc-form__label">{s.photosOptionalLabel}</label>
@@ -1930,9 +1922,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             </div>
                             <div className="sc-item-card__info">
                               <p className="sc-item-card__name">{contentMap[`f_${item.id}`]?.name || item.name}</p>
-                              <p className="sc-item-card__desc">{contentMap[`f_${item.id}`]?.description || item.description}</p>
-                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{catMap[item.category] || item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`f_${item.id}`]?.location || item.location}</p>}
+                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>🏷️ {catMap[item.category] || item.category}</span>}
                               <StatusBadge status={item.status} s={s} />
                             </div>
                             <div className="sc-item-card__actions">
@@ -1970,9 +1960,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
                             </div>
                             <div className="sc-item-card__info">
                               <p className="sc-item-card__name">{contentMap[`l_${item.id}`]?.name || item.name}</p>
-                              <p className="sc-item-card__desc">{contentMap[`l_${item.id}`]?.description || item.description}</p>
-                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>{catMap[item.category] || item.category}</span>}
-                              {item.location && <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: 2, fontFamily: "var(--font-body)" }}>{contentMap[`l_${item.id}`]?.location || item.location}</p>}
+                              {item.category && <span style={{ display: "inline-block", fontSize: "0.68rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: color, color: textOn, fontFamily: "var(--font-body)", marginTop: 4, marginBottom: 2 }}>🏷️ {catMap[item.category] || item.category}</span>}
                             </div>
                             <div className="sc-item-card__actions">
                               <button className="sc-btn sc-btn--success sc-btn--sm" style={{ width: "100%" }} onClick={(e) => handleMarkLostFound(e, item.id)}>{s.markFound}</button>

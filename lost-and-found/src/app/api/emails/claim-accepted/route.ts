@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px">
           <h2 style="margin:0 0 16px">Hi ${claimant_name},</h2>
           <p style="margin:0 0 12px">
-            Great news — your claim for <strong>"${item_name}"</strong> has been accepted
+            Great news! Your claim for <strong>"${item_name}"</strong> has been accepted
             by the finder.
           </p>
           <p style="margin:0 0 24px">
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           >
             Go to Dashboard →
           </a>
-          <p style="color:#888;font-size:13px;margin-top:32px">— The Findr Team</p>
+          <p style="color:#888;font-size:13px;margin-top:32px">The Findr Team</p>
         </div>
       `,
     })

@@ -67,7 +67,7 @@ function buildHtml(
           Go to Admin Dashboard →
         </a>
       </div>
-      <p style="color:#888;font-size:13px;margin-top:32px">— The Findr Team</p>
+      <p style="color:#888;font-size:13px;margin-top:32px">The Findr Team</p>
     </div>
   `;
 }
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
         .send({
           from: "Findr <noreply@findrapp.me>",
           to: email,
-          subject: `Dispute opened for "${item_name}" — action required`,
+          subject: `Dispute opened for "${item_name}": action required`,
           html: buildHtml(
             name,
             item_name,

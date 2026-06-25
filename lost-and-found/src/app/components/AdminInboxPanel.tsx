@@ -58,7 +58,7 @@ export function AdminInboxPanel({
   const [noMessagesText, setNoMessagesText] = useState("No messages yet");
   const [selectConvText, setSelectConvText] = useState("Select a conversation to reply");
   const [replyPlaceholder, setReplyPlaceholder] = useState("Reply as admin…");
-  const [noMessagesLiveText, setNoMessagesLiveText] = useState("No messages yet — they'll appear here in real time");
+  const [noMessagesLiveText, setNoMessagesLiveText] = useState("No messages yet. They'll appear here in real time");
   const [userSupportLabel, setUserSupportLabel] = useState("User · Admin Support");
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export function AdminInboxPanel({
       { key: "No messages yet", setter: setNoMessagesText },
       { key: "Select a conversation to reply", setter: setSelectConvText },
       { key: "Reply as admin…", setter: setReplyPlaceholder },
-      { key: "No messages yet — they'll appear here in real time", setter: setNoMessagesLiveText },
+      { key: "No messages yet. They'll appear here in real time", setter: setNoMessagesLiveText },
       { key: "User · Admin Support", setter: setUserSupportLabel },
     ];
     if (language === "en") {

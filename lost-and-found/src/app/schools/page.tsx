@@ -1227,7 +1227,7 @@ const DEFAULT_REGISTER: RegisterStrings = {
   secondaryColorLabel: "Secondary / Accent Color",
   bgPhotoLabel: "Campus Background Photo",
   bgPhotoHint:
-    "Upload a campus photo — your primary color gradient will be overlaid on the board header automatically.",
+    "Upload a campus photo; your primary color gradient will be overlaid on the board header automatically.",
   bgUpload: "Upload campus photo",
   gradientLabel: "Gradient Style",
   gradientHint: "Pick how your primary color fades over the campus photo.",

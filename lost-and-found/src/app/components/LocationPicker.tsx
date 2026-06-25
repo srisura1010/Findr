@@ -89,7 +89,7 @@ export default function LocationPicker({
   const [placeholderText, setPlaceholderText] = useState("Search address, place, or landmark…");
   const [useLocationTitle, setUseLocationTitle] = useState("Use my location");
   const [loadingMapText, setLoadingMapText] = useState("Loading map…");
-  const [noResultsText, setNoResultsText] = useState("No results found — try a more specific address");
+  const [noResultsText, setNoResultsText] = useState("No results found. Try a more specific address");
   const [attributionText, setAttributionText] = useState("Results from OpenStreetMap");
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function LocationPicker({
       { key: "Search address, place, or landmark…", setter: setPlaceholderText },
       { key: "Use my location", setter: setUseLocationTitle },
       { key: "Loading map…", setter: setLoadingMapText },
-      { key: "No results found — try a more specific address", setter: setNoResultsText },
+      { key: "No results found. Try a more specific address", setter: setNoResultsText },
       { key: "Results from OpenStreetMap", setter: setAttributionText },
     ];
     if (language === "en") {

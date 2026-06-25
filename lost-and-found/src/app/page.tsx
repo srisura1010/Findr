@@ -77,7 +77,7 @@ const CAROUSEL_CARDS = [
   {
     icon: <FaComment />,
     title: "Built-In Messaging",
-    body: "Connect finders and owners directly inside the platform — no sharing personal info.",
+    body: "Connect finders and owners directly inside the platform, with no sharing of personal info.",
   },
 ];
 
@@ -221,7 +221,7 @@ export default function Home() {
   const [eyebrowText, setEyebrowText] = useState("Built for students, by students");
   const [featLabelText, setFeatLabelText] = useState("Why Findr");
   const [featTitleText, setFeatTitleText] = useState("Everything you need to find it");
-  const [featSubText, setFeatSubText] = useState("One platform for your entire campus — no bulletin boards, no missed pickups.");
+  const [featSubText, setFeatSubText] = useState("One platform for your entire campus: no bulletin boards, no missed pickups.");
   const [hiwLabelText, setHiwLabelText] = useState("How it works");
   const [hiwTitleText, setHiwTitleText] = useState("Just 3 Steps to Finding Your Items");
   const [hiwSubText, setHiwSubText] = useState("Simple enough for anyone on campus, powerful enough for every item.");
@@ -235,7 +235,7 @@ export default function Home() {
   const [card7TitleText, setCard7TitleText] = useState("Real-Time Notifications");
   const [card7BodyText, setCard7BodyText] = useState("Get alerted the moment something matching your item shows up on the board.");
   const [card8TitleText, setCard8TitleText] = useState("Built-In Messaging");
-  const [card8BodyText, setCard8BodyText] = useState("Connect finders and owners directly inside the platform — no sharing personal info.");
+  const [card8BodyText, setCard8BodyText] = useState("Connect finders and owners directly inside the platform, with no sharing of personal info.");
   const [stat1LabelText, setStat1LabelText] = useState("Recoveries Made");
   const [stat2LabelText, setStat2LabelText] = useState("School-Private");
   const [stat3LabelText, setStat3LabelText] = useState("Schools Connected");
@@ -352,7 +352,7 @@ export default function Home() {
       setEyebrowText("Built for students, by students");
       setFeatLabelText("Why Findr");
       setFeatTitleText("Everything you need to find it");
-      setFeatSubText("One platform for your entire campus — no bulletin boards, no missed pickups.");
+      setFeatSubText("One platform for your entire campus: no bulletin boards, no missed pickups.");
       setHiwLabelText("How it works");
       setHiwTitleText("Just 3 Steps to Finding Your Items");
       setHiwSubText("Simple enough for anyone on campus, powerful enough for every item.");
@@ -366,7 +366,7 @@ export default function Home() {
       setCard7TitleText("Real-Time Notifications");
       setCard7BodyText("Get alerted the moment something matching your item shows up on the board.");
       setCard8TitleText("Built-In Messaging");
-      setCard8BodyText("Connect finders and owners directly inside the platform — no sharing personal info.");
+      setCard8BodyText("Connect finders and owners directly inside the platform, with no sharing of personal info.");
       setStat1LabelText("Recoveries Made");
       setStat2LabelText("School-Private");
       setStat3LabelText("Schools Connected");
@@ -485,7 +485,7 @@ export default function Home() {
         { key: "Built for students, by students", setter: setEyebrowText, cacheKey: "home_eyebrow" },
         { key: "Why Findr", setter: setFeatLabelText, cacheKey: "home_featLabel" },
         { key: "Everything you need to find it", setter: setFeatTitleText, cacheKey: "home_featTitle" },
-        { key: "One platform for your entire campus — no bulletin boards, no missed pickups.", setter: setFeatSubText, cacheKey: "home_featSub" },
+        { key: "One platform for your entire campus: no bulletin boards, no missed pickups.", setter: setFeatSubText, cacheKey: "home_featSub" },
         { key: "How it works", setter: setHiwLabelText, cacheKey: "home_hiwLabel" },
         { key: "Just 3 Steps to Finding Your Items", setter: setHiwTitleText, cacheKey: "home_hiwTitle" },
         { key: "Simple enough for anyone on campus, powerful enough for every item.", setter: setHiwSubText, cacheKey: "home_hiwSub" },
@@ -499,7 +499,7 @@ export default function Home() {
         { key: "Real-Time Notifications", setter: setCard7TitleText, cacheKey: "home_card7Title" },
         { key: "Get alerted the moment something matching your item shows up on the board.", setter: setCard7BodyText, cacheKey: "home_card7Body" },
         { key: "Built-In Messaging", setter: setCard8TitleText, cacheKey: "home_card8Title" },
-        { key: "Connect finders and owners directly inside the platform — no sharing personal info.", setter: setCard8BodyText, cacheKey: "home_card8Body" },
+        { key: "Connect finders and owners directly inside the platform, with no sharing of personal info.", setter: setCard8BodyText, cacheKey: "home_card8Body" },
         { key: "Recoveries Made", setter: setStat1LabelText, cacheKey: "home_stat1" },
         { key: "School-Private", setter: setStat2LabelText, cacheKey: "home_stat2" },
         { key: "Schools Connected", setter: setStat3LabelText, cacheKey: "home_stat3" },
