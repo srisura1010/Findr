@@ -137,10 +137,12 @@ async function batchTranslate(
     const newUpdates: Partial<DashStrings> = {};
 
     for (let i = 0; i < uncached.length; i++) {
-      const [field, key, cacheKey] = uncached[i];
-      const translated = results[i]?.trim() || key;
-      newUpdates[field] = translated;
-      localStorage.setItem(`${cacheKey}_${target}`, translated);
+      const [field, , cacheKey] = uncached[i];
+      const translated = results[i]?.trim();
+      if (translated) {
+        newUpdates[field] = translated;
+        localStorage.setItem(`${cacheKey}_${target}`, translated);
+      }
     }
 
     apply(newUpdates);
@@ -349,6 +351,51 @@ interface DashStrings {
   levelNewcomer: string;
   brandTitle: string;
   brandSub: string;
+  noDisputes: string;
+  disputesTab: string;
+  disputedBy: string;
+  viewItemArrow: string;
+  dismissDispute: string;
+  resolveForClaimant: string;
+  messageParties: string;
+  claimantLabel: string;
+  finderLabel: string;
+  msgToClaimantPre: string;
+  msgToClaimantPost: string;
+  msgToFinder: string;
+  sendingBtn: string;
+  sendMessageBtn: string;
+  resolveForClaimantConfirm: string;
+  dismissDisputeConfirm: string;
+  deleteItemConfirmPre: string;
+  deleteItemConfirmPost: string;
+  banConfirmPre: string;
+  unbanConfirmPre: string;
+  failedPrefix: string;
+  bannedSuccessPost: string;
+  suspendedSuccessMid: string;
+  suspendedSuccessDays: string;
+  unbannedSuccessPost: string;
+  deleteBlockedAlert: string;
+  deleteSimpleConfirm: string;
+  deletePendingConfirmPre: string;
+  deletePendingConfirmPost: string;
+  deleteAcceptedConfirmPre: string;
+  deleteAcceptedConfirmPost: string;
+  claimCancelAlert: string;
+  deleteLostConfirm: string;
+  myActiveClaimsTitle: string;
+  noActiveClaims: string;
+  claimAcceptedStatus: string;
+  pendingReviewStatus: string;
+  goToItemBtn: string;
+  cancelClaimBtn: string;
+  pendingClaimSingular: string;
+  pendingClaimsPlural: string;
+  reviewItemBtn: string;
+  claimInProgressStatus: string;
+  awaitingConfirmStatus: string;
+  disputedStatus: string;
 }
 
 const DEFAULT_STRINGS: DashStrings = {
@@ -499,6 +546,51 @@ const DEFAULT_STRINGS: DashStrings = {
   levelNewcomer: "Newcomer",
   brandTitle: "Findr Dashboard",
   brandSub: "Your Lost & Found",
+  noDisputes: "No disputes — all clear!",
+  disputesTab: "Disputes",
+  disputedBy: "Disputed by",
+  viewItemArrow: "View Item →",
+  dismissDispute: "Dismiss Dispute",
+  resolveForClaimant: "Resolve for Claimant",
+  messageParties: "Message Parties",
+  claimantLabel: "Claimant",
+  finderLabel: "Finder",
+  msgToClaimantPre: "Message to claimant (",
+  msgToClaimantPost: ")...",
+  msgToFinder: "Message to finder...",
+  sendingBtn: "Sending...",
+  sendMessageBtn: "Send Message",
+  resolveForClaimantConfirm: "Resolve in claimant's favor? This will permanently delete the item listing.",
+  dismissDisputeConfirm: "Dismiss this dispute? The item will return to claim_accepted status so the finder can re-confirm handoff.",
+  deleteItemConfirmPre: "Delete \"",
+  deleteItemConfirmPost: "\" permanently?",
+  banConfirmPre: "Permanently ban",
+  unbanConfirmPre: "Unban",
+  failedPrefix: "Failed:",
+  bannedSuccessPost: "has been permanently banned.",
+  suspendedSuccessMid: "has been suspended for",
+  suspendedSuccessDays: "days.",
+  unbannedSuccessPost: "has been unbanned.",
+  deleteBlockedAlert: "This item cannot be deleted while a handoff or dispute is in progress. Please wait for the claimant to confirm receipt or for admin to resolve the dispute.",
+  deleteSimpleConfirm: "Delete this item permanently?",
+  deletePendingConfirmPre: "There are",
+  deletePendingConfirmPost: "students who submitted claims for this item. Deleting will notify them it's been removed. Continue?",
+  deleteAcceptedConfirmPre: "You accepted",
+  deleteAcceptedConfirmPost: "'s claim. Deleting now will cancel their accepted claim and notify them. Continue?",
+  claimCancelAlert: "This claim can no longer be cancelled.",
+  deleteLostConfirm: "Delete this lost item report permanently?",
+  myActiveClaimsTitle: "My Active Claims",
+  noActiveClaims: "You have no active claims.",
+  claimAcceptedStatus: "Accepted — Coordinate Now",
+  pendingReviewStatus: "Pending Review",
+  goToItemBtn: "Go to Item",
+  cancelClaimBtn: "Cancel Claim",
+  pendingClaimSingular: "pending claim",
+  pendingClaimsPlural: "pending claims",
+  reviewItemBtn: "Review",
+  claimInProgressStatus: "Claim in progress",
+  awaitingConfirmStatus: "Awaiting confirmation",
+  disputedStatus: "Disputed",
 };
 
 // ── Sub-panels ────────────────────────────────────────────────────────────────
@@ -776,7 +868,7 @@ function ReportedItemsPanel({
   };
 
   const handleDeleteItem = async (report: Report) => {
-    if (!confirm(`Delete "${report.item_name}" permanently?`)) return;
+    if (!confirm(`${s.deleteItemConfirmPre}${report.item_name}${s.deleteItemConfirmPost}`)) return;
     await supabase.from("items").delete().eq("id", report.item_id);
     await supabase.from("reports").delete().eq("item_id", report.item_id);
     updateItemStatus(report.item_id, "claimed");
@@ -863,7 +955,7 @@ function ReportedUsersPanel({
   };
 
   const handleBanUser = async (report: UserReport) => {
-    if (!confirm(`Permanently ban ${report.reported_user_name}?`)) return;
+    if (!confirm(`${s.banConfirmPre} ${report.reported_user_name}?`)) return;
     await supabase.from("banned_users").upsert({
       email: report.reported_user_email,
       reason: report.reason,
@@ -1005,12 +1097,12 @@ function BanManagementPanel({
       banned_at: new Date().toISOString(),
     });
     if (error) {
-      setErrorMsg(`Failed: ${error.message}`);
+      setErrorMsg(`${s.failedPrefix} ${error.message}`);
     } else {
       setSuccessMsg(
         banType === "permanent"
-          ? `${email} has been permanently banned.`
-          : `${email} has been suspended for ${suspendDays} days.`,
+          ? `${email} ${s.bannedSuccessPost}`
+          : `${email} ${s.suspendedSuccessMid} ${suspendDays} ${s.suspendedSuccessDays}`,
       );
       setEmail("");
       setReason("");
@@ -1020,13 +1112,13 @@ function BanManagementPanel({
   };
 
   const handleUnban = async (emailToUnban: string) => {
-    if (!confirm(`Unban ${emailToUnban}?`)) return;
+    if (!confirm(`${s.unbanConfirmPre} ${emailToUnban}?`)) return;
     const { error } = await supabase
       .from("banned_users")
       .delete()
       .eq("email", emailToUnban);
     if (!error) {
-      setSuccessMsg(`${emailToUnban} has been unbanned.`);
+      setSuccessMsg(`${emailToUnban} ${s.unbannedSuccessPost}`);
       fetchBannedUsers();
     }
   };
@@ -1312,24 +1404,14 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
   }, []);
 
   const handleResolveForClaimant = async (dispute: Dispute) => {
-    if (
-      !confirm(
-        "Resolve in claimant's favor? This will permanently delete the item listing.",
-      )
-    )
-      return;
+    if (!confirm(s.resolveForClaimantConfirm)) return;
     await supabase.from("items").delete().eq("id", dispute.item_id);
     await supabase.from("disputes").delete().eq("id", dispute.id);
     setDisputes((prev) => prev.filter((d) => d.id !== dispute.id));
   };
 
   const handleDismiss = async (dispute: Dispute) => {
-    if (
-      !confirm(
-        "Dismiss this dispute? The item will return to claim_accepted status so the finder can re-confirm handoff.",
-      )
-    )
-      return;
+    if (!confirm(s.dismissDisputeConfirm)) return;
     await supabase
       .from("items")
       .update({ status: "claim_accepted" })
@@ -1381,7 +1463,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
 
   if (loading) return <p className="panel-empty">{s.loadingText}</p>;
   if (disputes.length === 0)
-    return <p className="panel-empty">No disputes — all clear!</p>;
+    return <p className="panel-empty">{s.noDisputes}</p>;
 
   return (
     <div className="panel-item-list">
@@ -1410,7 +1492,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                 {dispute.reason}
               </p>
               <p className="reported-card__meta">
-                Disputed by {dispute.claimant_email} ·{" "}
+                {s.disputedBy} {dispute.claimant_email} ·{" "}
                 {new Date(dispute.created_at).toLocaleDateString()}
               </p>
               <a
@@ -1433,7 +1515,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                   alignSelf: "flex-start",
                 }}
               >
-                View Item →
+                {s.viewItemArrow}
               </a>
             </div>
             <div
@@ -1452,14 +1534,14 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                 style={{ width: "100%", padding: "10px 0", textAlign: "center", boxSizing: "border-box" }}
                 onClick={() => handleDismiss(dispute)}
               >
-                Dismiss Dispute
+                {s.dismissDispute}
               </button>
               <button
                 className="reported-card__delete"
                 style={{ width: "100%", padding: "10px 0", textAlign: "center", boxSizing: "border-box" }}
                 onClick={() => handleResolveForClaimant(dispute)}
               >
-                Resolve for Claimant
+                {s.resolveForClaimant}
               </button>
               <button
                 style={{
@@ -1484,7 +1566,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                   )
                 }
               >
-                {messagingDispute === String(dispute.id) ? "Cancel" : "Message Parties"}
+                {messagingDispute === String(dispute.id) ? s.cancelBtn : s.messageParties}
               </button>
             </div>
           </div>
@@ -1520,7 +1602,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                     }}
                     onClick={() => setAdminMsgTarget(target)}
                   >
-                    {target === "claimant" ? "Claimant" : "Finder"}
+                    {target === "claimant" ? s.claimantLabel : s.finderLabel}
                   </button>
                 ))}
               </div>
@@ -1529,8 +1611,8 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                 style={{ width: "100%", minHeight: 80, boxSizing: "border-box" }}
                 placeholder={
                   adminMsgTarget === "claimant"
-                    ? `Message to claimant (${dispute.claimant_email})...`
-                    : `Message to finder...`
+                    ? `${s.msgToClaimantPre}${dispute.claimant_email}${s.msgToClaimantPost}`
+                    : s.msgToFinder
                 }
                 value={adminMsgText}
                 onChange={(e) => setAdminMsgText(e.target.value)}
@@ -1541,7 +1623,7 @@ function DisputesPanel({ s, adminId, adminName }: { s: DashStrings; adminId: str
                 disabled={adminMsgSending || !adminMsgText.trim()}
                 onClick={() => handleSendAdminMsg(dispute)}
               >
-                {adminMsgSending ? "Sending..." : "Send Message"}
+                {adminMsgSending ? s.sendingBtn : s.sendMessageBtn}
               </button>
             </div>
           )}
@@ -1889,6 +1971,29 @@ export default function DashboardPage() {
       return;
     }
 
+    // Clear confirmed-stale My Dashboard entries (English stored under non-English key).
+    const myDashStaleChecks: Array<[string, string]> = [
+      ["dash_activeMember", "Active member"],
+      ["dash_statPosted", "Posted"],
+      ["dash_statReturned", "Returned"],
+      ["dash_statLost", "Lost"],
+      ["dash_xpBreakdown", "XP breakdown"],
+      ["dash_xpReturn", "Return: +100 XP each"],
+      ["dash_xpPost", "Post: +20 XP each"],
+      ["dash_xpReportLost", "Report lost: +5 XP each"],
+      ["dash_monthlyActivity", "Monthly activity"],
+      ["dash_chartFound", "Found"],
+      ["dash_chartLost", "Lost"],
+      ["dash_chartReturned", "Returned"],
+      ["dash_actionBreakdown", "Action breakdown"],
+      ["dash_chartFoundPosted", "Found posted"],
+      ["dash_chartLostReported", "Lost reported"],
+    ];
+    for (const [prefix, englishVal] of myDashStaleChecks) {
+      const k = `${prefix}_${language}`;
+      if (localStorage.getItem(k) === englishVal) localStorage.removeItem(k);
+    }
+
     const translations: [keyof DashStrings, string, string][] = [
       ["tabItems", "Items", "dash_tabItems"],
       ["tabMyItems", "My Items", "dash_tabMyItems"],
@@ -2084,6 +2189,51 @@ export default function DashboardPage() {
       ["levelNewcomer", "Newcomer", "dash_levelNewcomer"],
       ["brandTitle", "Findr Dashboard", "dash_brandTitle"],
       ["brandSub", "Your Lost & Found", "dash_brandSub"],
+      ["noDisputes", "No disputes — all clear!", "dash_noDisputes"],
+      ["disputesTab", "Disputes", "dash_disputesTab"],
+      ["disputedBy", "Disputed by", "dash_disputedBy"],
+      ["viewItemArrow", "View Item →", "dash_viewItemArrow"],
+      ["dismissDispute", "Dismiss Dispute", "dash_dismissDispute"],
+      ["resolveForClaimant", "Resolve for Claimant", "dash_resolveForClaimant"],
+      ["messageParties", "Message Parties", "dash_messageParties"],
+      ["claimantLabel", "Claimant", "dash_claimantLabel"],
+      ["finderLabel", "Finder", "dash_finderLabel"],
+      ["msgToClaimantPre", "Message to claimant (", "dash_msgToClaimantPre"],
+      ["msgToClaimantPost", ")...", "dash_msgToClaimantPost"],
+      ["msgToFinder", "Message to finder...", "dash_msgToFinder"],
+      ["sendingBtn", "Sending...", "dash_sendingBtn"],
+      ["sendMessageBtn", "Send Message", "dash_sendMessageBtn"],
+      ["resolveForClaimantConfirm", DEFAULT_STRINGS.resolveForClaimantConfirm, "dash_resolveForClaimantConfirm"],
+      ["dismissDisputeConfirm", DEFAULT_STRINGS.dismissDisputeConfirm, "dash_dismissDisputeConfirm"],
+      ["deleteItemConfirmPre", "Delete \"", "dash_deleteItemConfirmPre"],
+      ["deleteItemConfirmPost", "\" permanently?", "dash_deleteItemConfirmPost"],
+      ["banConfirmPre", "Permanently ban", "dash_banConfirmPre"],
+      ["unbanConfirmPre", "Unban", "dash_unbanConfirmPre"],
+      ["failedPrefix", "Failed:", "dash_failedPrefix"],
+      ["bannedSuccessPost", "has been permanently banned.", "dash_bannedSuccessPost"],
+      ["suspendedSuccessMid", "has been suspended for", "dash_suspendedSuccessMid"],
+      ["suspendedSuccessDays", "days.", "dash_suspendedSuccessDays"],
+      ["unbannedSuccessPost", "has been unbanned.", "dash_unbannedSuccessPost"],
+      ["deleteBlockedAlert", DEFAULT_STRINGS.deleteBlockedAlert, "dash_deleteBlockedAlert"],
+      ["deleteSimpleConfirm", "Delete this item permanently?", "dash_deleteSimpleConfirm"],
+      ["deletePendingConfirmPre", "There are", "dash_deletePendingConfirmPre"],
+      ["deletePendingConfirmPost", DEFAULT_STRINGS.deletePendingConfirmPost, "dash_deletePendingConfirmPost"],
+      ["deleteAcceptedConfirmPre", "You accepted", "dash_deleteAcceptedConfirmPre"],
+      ["deleteAcceptedConfirmPost", DEFAULT_STRINGS.deleteAcceptedConfirmPost, "dash_deleteAcceptedConfirmPost"],
+      ["claimCancelAlert", "This claim can no longer be cancelled.", "dash_claimCancelAlert"],
+      ["deleteLostConfirm", "Delete this lost item report permanently?", "dash_deleteLostConfirm"],
+      ["myActiveClaimsTitle", "My Active Claims", "dash_myActiveClaimsTitle"],
+      ["noActiveClaims", "You have no active claims.", "dash_noActiveClaims"],
+      ["claimAcceptedStatus", "Accepted — Coordinate Now", "dash_claimAcceptedStatus"],
+      ["pendingReviewStatus", "Pending Review", "dash_pendingReviewStatus"],
+      ["goToItemBtn", "Go to Item", "dash_goToItemBtn"],
+      ["cancelClaimBtn", "Cancel Claim", "dash_cancelClaimBtn"],
+      ["pendingClaimSingular", "pending claim", "dash_pendingClaimSingular"],
+      ["pendingClaimsPlural", "pending claims", "dash_pendingClaimsPlural"],
+      ["reviewItemBtn", "Review", "dash_reviewItemBtn"],
+      ["claimInProgressStatus", "Claim in progress", "dash_claimInProgressStatus"],
+      ["awaitingConfirmStatus", "Awaiting confirmation", "dash_awaitingConfirmStatus"],
+      ["disputedStatus", "Disputed", "dash_disputedStatus"],
     ];
 
     const translateAll = async () => {
@@ -2299,9 +2449,7 @@ export default function DashboardPage() {
 
     // Case D: cannot delete while handoff or dispute in progress
     if (itemStatus === "handed_off" || itemStatus === "disputed") {
-      alert(
-        "This item cannot be deleted while a handoff or dispute is in progress. Please wait for the claimant to confirm receipt or for admin to resolve the dispute.",
-      );
+      alert(s.deleteBlockedAlert);
       return;
     }
 
@@ -2318,7 +2466,7 @@ export default function DashboardPage() {
 
     // Case A: no claims or all resolved
     if (!allClaims || allClaims.length === 0 || !hasActiveClaims) {
-      if (!confirm("Delete this item permanently?")) return;
+      if (!confirm(s.deleteSimpleConfirm)) return;
       const { error } = await supabase.from("items").delete().eq("id", itemId);
       if (!error) updateItemStatus(itemId, "claimed");
       return;
@@ -2326,12 +2474,7 @@ export default function DashboardPage() {
 
     // Case B: waiting with pending claims
     if (itemStatus === "waiting" && pendClaimsArr.length > 0) {
-      if (
-        !confirm(
-          `There are ${pendClaimsArr.length} students who submitted claims for this item. Deleting will notify them it's been removed. Continue?`,
-        )
-      )
-        return;
+      if (!confirm(`${s.deletePendingConfirmPre} ${pendClaimsArr.length} ${s.deletePendingConfirmPost}`)) return;
       for (const c of pendClaimsArr) {
         sendEmail("claim-rejected", {
           claimant_email: c.claimant_email,
@@ -2349,12 +2492,7 @@ export default function DashboardPage() {
     if (itemStatus === "claim_accepted") {
       const accName = foundItem?.accepted_claimant_name || "the claimant";
       const accEmail = foundItem?.accepted_claimant_email || "";
-      if (
-        !confirm(
-          `You accepted ${accName}'s claim. Deleting now will cancel their accepted claim and notify them. Continue?`,
-        )
-      )
-        return;
+      if (!confirm(`${s.deleteAcceptedConfirmPre} ${accName}${s.deleteAcceptedConfirmPost}`)) return;
       if (accEmail) {
         sendEmail("claim-rejected", {
           claimant_email: accEmail,
@@ -2377,7 +2515,7 @@ export default function DashboardPage() {
       .eq("id", itemId)
       .maybeSingle();
     if (!freshItem || freshItem.status !== "waiting") {
-      alert("This claim can no longer be cancelled.");
+      alert(s.claimCancelAlert);
       return;
     }
     await supabase
@@ -2388,7 +2526,7 @@ export default function DashboardPage() {
   };
 
   const handleDeleteLostItem = async (itemId: number) => {
-    if (!confirm("Delete this lost item report permanently?")) return;
+    if (!confirm(s.deleteLostConfirm)) return;
     const { error } = await supabase
       .from("lost_items")
       .delete()
@@ -3135,7 +3273,7 @@ export default function DashboardPage() {
                   transition: "all 0.15s ease",
                 }}
               >
-                Disputes
+                {s.disputesTab}
               </button>
             </div>
             <div className="main-panel-content" style={{ maxWidth: "720px" }}>
@@ -3144,7 +3282,7 @@ export default function DashboardPage() {
                   ? s.reportedItemsTitle
                   : reportsTab === "users"
                     ? s.reportedUsersTitle
-                    : "Disputes"}
+                    : s.disputesTab}
               </div>
               {reportsTab === "items" && (
                 <ReportedItemsPanel updateItemStatus={updateItemStatus} s={s} />
@@ -3248,7 +3386,7 @@ export default function DashboardPage() {
         const clrLost = "#ef4444";
         const clrClaimed = dashStyle?.getPropertyValue("--success").trim() || "#10b981";
 
-        const chartKey = `${user?.id}-${totalActions}-${theme}-${totalReturnedByMe}`;
+        const chartKey = `${user?.id}-${totalActions}-${theme}-${totalReturnedByMe}-${language}`;
 
         return (
           <div
@@ -3672,8 +3810,7 @@ export default function DashboardPage() {
                         }}
                       >
                         {myItemClaims[item.id]}{" "}
-                        pending claim
-                        {myItemClaims[item.id] !== 1 ? "s" : ""}
+                        {myItemClaims[item.id] !== 1 ? s.pendingClaimsPlural : s.pendingClaimSingular}
                       </span>
                       <button
                         style={{
@@ -3690,7 +3827,7 @@ export default function DashboardPage() {
                         }}
                         onClick={() => router.push(`/items/${item.id}`)}
                       >
-                        Review
+                        {s.reviewItemBtn}
                       </button>
                     </div>
                   ))}
@@ -3771,11 +3908,11 @@ export default function DashboardPage() {
                           {item.status === "pending"
                             ? s.claimPendingStatus
                             : item.status === "claim_accepted"
-                              ? "Claim in progress"
+                              ? s.claimInProgressStatus
                               : item.status === "handed_off"
-                                ? "Awaiting confirmation"
+                                ? s.awaitingConfirmStatus
                                 : item.status === "disputed"
-                                  ? "Disputed"
+                                  ? s.disputedStatus
                                   : s.activeStatus}
                         </p>
                       </div>
@@ -3918,12 +4055,12 @@ export default function DashboardPage() {
                   letterSpacing: "0.8px",
                 }}
               >
-                My Active Claims
+                {s.myActiveClaimsTitle}
               </p>
               {activeClaimsLoading ? (
-                <p className="panel-empty">Loading...</p>
+                <p className="panel-empty">{s.loadingText}</p>
               ) : myActiveClaims.length === 0 ? (
-                <p className="panel-empty">You have no active claims.</p>
+                <p className="panel-empty">{s.noActiveClaims}</p>
               ) : (
                 <div className="items-container" style={{ margin: 0 }}>
                   {myActiveClaims.map((claim: any) => (
@@ -3951,8 +4088,8 @@ export default function DashboardPage() {
                           }}
                         >
                           {claim.status === "accepted"
-                            ? "Accepted — Coordinate Now"
-                            : "Pending Review"}
+                            ? s.claimAcceptedStatus
+                            : s.pendingReviewStatus}
                         </span>
                       </div>
                       <div className="button-group">
@@ -3961,7 +4098,7 @@ export default function DashboardPage() {
                             className="confirm-button"
                             onClick={() => router.push(`/items/${claim.item_id}`)}
                           >
-                            Go to Item
+                            {s.goToItemBtn}
                           </button>
                         ) : (
                           <button
@@ -3979,7 +4116,7 @@ export default function DashboardPage() {
                             }}
                             onClick={() => handleCancelClaim(claim.id, claim.item_id)}
                           >
-                            Cancel Claim
+                            {s.cancelClaimBtn}
                           </button>
                         )}
                       </div>
@@ -4449,7 +4586,7 @@ export default function DashboardPage() {
                               display: "block",
                             }}
                           >
-                            ⏳ Claim in progress
+                            ⏳ {s.claimInProgressStatus}
                           </span>
                         )}
                         {item.status === "handed_off" && (
@@ -4463,7 +4600,7 @@ export default function DashboardPage() {
                               display: "block",
                             }}
                           >
-                            🤝 Awaiting confirmation
+                            🤝 {s.awaitingConfirmStatus}
                           </span>
                         )}
                         {item.status === "disputed" && (
@@ -4477,7 +4614,7 @@ export default function DashboardPage() {
                               display: "block",
                             }}
                           >
-                            ⚠️ Disputed
+                            ⚠️ {s.disputedStatus}
                           </span>
                         )}
                       </div>

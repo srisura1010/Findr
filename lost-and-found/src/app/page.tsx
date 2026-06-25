@@ -185,6 +185,7 @@ export default function Home() {
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [translatedPhrases, setTranslatedPhrases] = useState<string[]>(TYPING_PHRASES);
+  const [floatingLabels, setFloatingLabels] = useState<string[]>(FLOATING_ITEMS.map((item) => item.label));
 
   // translatable strings
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
@@ -278,6 +279,14 @@ export default function Home() {
     );
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, phraseIndex, translatedPhrases]);
+
+  // Reset animation state when translated phrases change (language switch)
+  useEffect(() => {
+    setPhraseIndex(0);
+    setCharIndex(0);
+    setIsDeleting(false);
+    setDisplayText("");
+  }, [translatedPhrases]);
 
   // ban check
   useEffect(() => {
@@ -376,10 +385,21 @@ export default function Home() {
       setFooterContactText("Contact");
       setFooterCopyText("Built for students, by students.");
       setTranslatedPhrases(TYPING_PHRASES);
+      setFloatingLabels(FLOATING_ITEMS.map((item) => item.label));
       setIsReady(true);
       return;
     }
     const translateAndCache = async () => {
+      // Clear confirmed-stale entries: English values stored under non-English keys.
+      const eyebrowKey = `home_eyebrow_${language}`;
+      if (localStorage.getItem(eyebrowKey) === "Built for students, by students") {
+        localStorage.removeItem(eyebrowKey);
+      }
+      TYPING_PHRASES.forEach((phrase, i) => {
+        const phraseKey = `home_phrase${i}_${language}`;
+        if (localStorage.getItem(phraseKey) === phrase) localStorage.removeItem(phraseKey);
+      });
+
       const translations = [
         {
           key: "Don't Panic.",
@@ -512,9 +532,10 @@ export default function Home() {
           });
           if (res.ok) {
             const data = await res.json();
-            const translated = data.translatedText || key;
-            setter(translated);
-            localStorage.setItem(`${cacheKey}_${language}`, translated);
+            if (data.translatedText) {
+              setter(data.translatedText);
+              localStorage.setItem(`${cacheKey}_${language}`, data.translatedText);
+            }
           }
         } catch {
           /* keep defaults */
@@ -539,9 +560,12 @@ export default function Home() {
           });
           if (res.ok) {
             const data = await res.json();
-            const t = data.translatedText || TYPING_PHRASES[i];
-            translated.push(t);
-            localStorage.setItem(`${cacheKey}_${language}`, t);
+            if (data.translatedText) {
+              translated.push(data.translatedText);
+              localStorage.setItem(`${cacheKey}_${language}`, data.translatedText);
+            } else {
+              translated.push(TYPING_PHRASES[i]);
+            }
           } else {
             translated.push(TYPING_PHRASES[i]);
           }
@@ -550,6 +574,39 @@ export default function Home() {
         }
       }
       setTranslatedPhrases(translated);
+
+      // translate floating item labels
+      const floatingCacheKeys = FLOATING_ITEMS.map((_, i) => `home_float${i}`);
+      const translatedLabels: string[] = [];
+      for (let i = 0; i < FLOATING_ITEMS.length; i++) {
+        const cacheKey = floatingCacheKeys[i];
+        const cached = localStorage.getItem(`${cacheKey}_${language}`);
+        if (cached) {
+          translatedLabels.push(cached);
+          continue;
+        }
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: FLOATING_ITEMS[i].label, target: language }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.translatedText) {
+              translatedLabels.push(data.translatedText);
+              localStorage.setItem(`${cacheKey}_${language}`, data.translatedText);
+            } else {
+              translatedLabels.push(FLOATING_ITEMS[i].label);
+            }
+          } else {
+            translatedLabels.push(FLOATING_ITEMS[i].label);
+          }
+        } catch {
+          translatedLabels.push(FLOATING_ITEMS[i].label);
+        }
+      }
+      setFloatingLabels(translatedLabels);
 
       setIsReady(true);
     };
@@ -720,13 +777,13 @@ export default function Home() {
                 <div className="floating-item-bob">
                   <Image
                     src={item.src}
-                    alt={item.label}
+                    alt={floatingLabels[i] ?? item.label}
                     width={item.size}
                     height={item.size}
                     className="floating-item-img"
                     draggable={false}
                   />
-                  <span className="floating-item-label">{item.label}</span>
+                  <span className="floating-item-label">{floatingLabels[i] ?? item.label}</span>
                 </div>
               </div>
             ))}

@@ -65,10 +65,12 @@ async function batchTranslateSLost(
     const results: string[] = data.translatedTexts ?? [];
     const newU: Partial<SLostStrings> = {};
     for (let i = 0; i < uncached.length; i++) {
-      const [field, key] = uncached[i];
-      const t = results[i]?.trim() || key;
-      newU[field] = t;
-      localStorage.setItem(`sl_${field}_${target}`, t);
+      const [field] = uncached[i];
+      const t = results[i]?.trim();
+      if (t) {
+        newU[field] = t;
+        localStorage.setItem(`sl_${field}_${target}`, t);
+      }
     }
     apply(newU);
   } catch {}
@@ -115,6 +117,19 @@ export default function SchoolLostItemDetailPage() {
   // translations
   useEffect(() => {
     if (language === "en") { setS(DEFAULT_SLOST); setIsReady(true); return; }
+    // Clear confirmed-stale English values cached under non-English keys.
+    const staleChecks: Array<[keyof SLostStrings, string]> = [
+      ["schoolLostItem", DEFAULT_SLOST.schoolLostItem],
+      ["deleteBtn", DEFAULT_SLOST.deleteBtn],
+      ["description", DEFAULT_SLOST.description],
+      ["stillLooking", DEFAULT_SLOST.stillLooking],
+      ["lostDate", DEFAULT_SLOST.lostDate],
+      ["markFoundBtn", DEFAULT_SLOST.markFoundBtn],
+    ];
+    for (const [field, englishVal] of staleChecks) {
+      const k = `sl_${field}_${language}`;
+      if (localStorage.getItem(k) === englishVal) localStorage.removeItem(k);
+    }
     const pairs = (Object.keys(DEFAULT_SLOST) as Array<keyof SLostStrings>).map(
       (k): [keyof SLostStrings, string] => [k, DEFAULT_SLOST[k]]
     );

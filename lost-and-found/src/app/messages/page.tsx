@@ -89,9 +89,39 @@ function ReportUserModal({
   currentUser: { id: string; fullName: string | null; email: string };
   onClose: () => void;
 }) {
+  const { language } = useSettings();
   const [selectedReason, setSelectedReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [translatedReasons, setTranslatedReasons] = useState<string[]>(USER_REPORT_REASONS);
+  const [uiReportSubmitted, setUiReportSubmitted] = useState("Report submitted");
+  const [uiReportWord, setUiReportWord] = useState("Report");
+  const [uiReportSubtitle, setUiReportSubtitle] = useState("Why are you reporting this user?");
+  const [uiCancel, setUiCancel] = useState("Cancel");
+  const [uiSubmitting, setUiSubmitting] = useState("Submitting...");
+  const [uiSubmitReport, setUiSubmitReport] = useState("Submit Report");
+
+  useEffect(() => {
+    const run = async () => {
+      const results = await Promise.all([
+        t("Report submitted", language),
+        t("Report", language),
+        t("Why are you reporting this user?", language),
+        t("Cancel", language),
+        t("Submitting...", language),
+        t("Submit Report", language),
+        ...USER_REPORT_REASONS.map((r) => t(r, language)),
+      ]);
+      setUiReportSubmitted(results[0]);
+      setUiReportWord(results[1]);
+      setUiReportSubtitle(results[2]);
+      setUiCancel(results[3]);
+      setUiSubmitting(results[4]);
+      setUiSubmitReport(results[5]);
+      setTranslatedReasons(results.slice(6));
+    };
+    run();
+  }, [language]);
 
   const handleSubmit = async () => {
     if (!selectedReason || submitting) return;
@@ -116,35 +146,35 @@ function ReportUserModal({
         {done ? (
           <div className="panel-success">
             <span className="panel-success__icon">✓</span>
-            <p>Report submitted</p>
+            <p>{uiReportSubmitted}</p>
           </div>
         ) : (
           <>
-            <p className="report-modal__title">Report {reportedUserName}</p>
+            <p className="report-modal__title">{uiReportWord} {reportedUserName}</p>
             <p className="report-modal__subtitle">
-              Why are you reporting this user?
+              {uiReportSubtitle}
             </p>
             <div className="report-modal__reasons">
-              {USER_REPORT_REASONS.map((reason) => (
+              {USER_REPORT_REASONS.map((reason, i) => (
                 <button
                   key={reason}
                   className={`report-modal__reason${selectedReason === reason ? " report-modal__reason--selected" : ""}`}
                   onClick={() => setSelectedReason(reason)}
                 >
-                  {reason}
+                  {translatedReasons[i]}
                 </button>
               ))}
             </div>
             <div className="report-modal__actions">
               <button className="report-modal__cancel" onClick={onClose}>
-                Cancel
+                {uiCancel}
               </button>
               <button
                 className="report-modal__submit"
                 onClick={handleSubmit}
                 disabled={!selectedReason || submitting}
               >
-                {submitting ? "Submitting..." : "Submit Report"}
+                {submitting ? uiSubmitting : uiSubmitReport}
               </button>
             </div>
           </>
@@ -165,22 +195,50 @@ function ContactAdminModal({
   onSelect: (admin: Admin) => void;
   onClose: () => void;
 }) {
+  const { language } = useSettings();
+  const [uiTitle, setUiTitle] = useState("Contact an Admin");
+  const [uiSubtitle, setUiSubtitle] = useState("Select an admin to start a conversation.");
+  const [uiLoading, setUiLoading] = useState("Loading admins…");
+  const [uiNoAdmins, setUiNoAdmins] = useState("No admins available right now.");
+  const [uiAdminBadge, setUiAdminBadge] = useState("Admin");
+  const [uiCancel, setUiCancel] = useState("Cancel");
+
+  useEffect(() => {
+    const run = async () => {
+      const results = await Promise.all([
+        t("Contact an Admin", language),
+        t("Select an admin to start a conversation.", language),
+        t("Loading admins…", language),
+        t("No admins available right now.", language),
+        t("Admin", language),
+        t("Cancel", language),
+      ]);
+      setUiTitle(results[0]);
+      setUiSubtitle(results[1]);
+      setUiLoading(results[2]);
+      setUiNoAdmins(results[3]);
+      setUiAdminBadge(results[4]);
+      setUiCancel(results[5]);
+    };
+    run();
+  }, [language]);
+
   return (
     <div className="report-modal-overlay" onClick={onClose}>
       <div className="report-modal" onClick={(e) => e.stopPropagation()}>
         <p className="report-modal__title">
           <FaShieldHalved className="messages-sidebar__admin-icon" />
-          Contact an Admin
+          {uiTitle}
         </p>
         <p className="report-modal__subtitle">
-          Select an admin to start a conversation.
+          {uiSubtitle}
         </p>
 
         {loading ? (
-          <div className="admin-modal-loading">Loading admins…</div>
+          <div className="admin-modal-loading">{uiLoading}</div>
         ) : admins.length === 0 ? (
           <div className="admin-modal-loading">
-            No admins available right now.
+            {uiNoAdmins}
           </div>
         ) : (
           <div style={{ margin: "12px 0" }}>
@@ -195,11 +253,11 @@ function ContactAdminModal({
                 </div>
                 <div>
                   <div className="admin-select-name">
-                    {admin.name || "Admin"}
+                    {admin.name || uiAdminBadge}
                   </div>
                   <div className="admin-select-email">{admin.email}</div>
                 </div>
-                <div className="admin-select-tag">Admin</div>
+                <div className="admin-select-tag">{uiAdminBadge}</div>
               </button>
             ))}
           </div>
@@ -207,7 +265,7 @@ function ContactAdminModal({
 
         <div className="report-modal__actions" style={{ marginTop: 4 }}>
           <button className="report-modal__cancel" onClick={onClose}>
-            Cancel
+            {uiCancel}
           </button>
         </div>
       </div>
@@ -235,6 +293,7 @@ export default function MessagesPage() {
 
   const [isReady, setIsReady] = useState(false);
   const [uiMessagesTitle, setUiMessagesTitle] = useState("Findr Messages");
+  const [uiYourConversations, setUiYourConversations] = useState("Your conversations");
   const [uiNoConversations, setUiNoConversations] = useState(
     "No conversations yet.",
   );
@@ -244,29 +303,56 @@ export default function MessagesPage() {
   const [uiStartConversation, setUiStartConversation] = useState(
     "Start the conversation!",
   );
+  const [uiStartConversationShort, setUiStartConversationShort] = useState("Start the conversation");
   const [uiTypePlaceholder, setUiTypePlaceholder] = useState("Type a message…");
+  const [uiContactAdmin, setUiContactAdmin] = useState("Contact an Admin");
+  const [uiContactSchoolAdmin, setUiContactSchoolAdmin] = useState("Contact a School Admin");
+  const [uiViewItem, setUiViewItem] = useState("View Item →");
+  const [uiReportUser, setUiReportUser] = useState("Report User");
+  const [uiAdminChatEmpty, setUiAdminChatEmpty] = useState("You're chatting with an admin. Ask anything — they're here to help.");
 
   useEffect(() => {
     const translateUI = async () => {
       setIsReady(false);
       const [
         messagesTitle,
+        yourConversations,
         noConversations,
         selectConversation,
         startConversation,
+        startConversationShort,
         typePlaceholder,
+        contactAdmin,
+        contactSchoolAdmin,
+        viewItem,
+        reportUser,
+        adminChatEmpty,
       ] = await Promise.all([
         t("Findr Messages", language),
+        t("Your conversations", language),
         t("No conversations yet.", language),
         t("Select a conversation to start chatting", language),
         t("Start the conversation!", language),
+        t("Start the conversation", language),
         t("Type a message…", language),
+        t("Contact an Admin", language),
+        t("Contact a School Admin", language),
+        t("View Item →", language),
+        t("Report User", language),
+        t("You're chatting with an admin. Ask anything — they're here to help.", language),
       ]);
       setUiMessagesTitle(messagesTitle);
+      setUiYourConversations(yourConversations);
       setUiNoConversations(noConversations);
       setUiSelectConversation(selectConversation);
       setUiStartConversation(startConversation);
+      setUiStartConversationShort(startConversationShort);
       setUiTypePlaceholder(typePlaceholder);
+      setUiContactAdmin(contactAdmin);
+      setUiContactSchoolAdmin(contactSchoolAdmin);
+      setUiViewItem(viewItem);
+      setUiReportUser(reportUser);
+      setUiAdminChatEmpty(adminChatEmpty);
       setIsReady(true);
     };
     translateUI();
@@ -592,8 +678,8 @@ export default function MessagesPage() {
             <MdOutlineMessage size={22} />
           </span>
           <div>
-            <p className="messages-sidebar__brand-title">Findr Messages</p>
-            <p className="messages-sidebar__brand-sub">Your conversations</p>
+            <p className="messages-sidebar__brand-title">{uiMessagesTitle}</p>
+            <p className="messages-sidebar__brand-sub">{uiYourConversations}</p>
           </div>
         </div>
 
@@ -604,7 +690,7 @@ export default function MessagesPage() {
             onClick={handleOpenAdminModal}
           >
             <FaShieldHalved className="messages-sidebar__admin-icon" />
-            Contact an Admin
+            {uiContactAdmin}
           </button>
           <button
             className="messages-sidebar__admin-btn messages-sidebar__admin-btn--school"
@@ -612,7 +698,7 @@ export default function MessagesPage() {
             onClick={() => setShowSchoolAdminModal(true)}
           >
             <MdOutlineSchool className="messages-sidebar__admin-icon messages-sidebar__admin-icon--school" />
-            Contact a School Admin
+            {uiContactSchoolAdmin}
           </button>
         </div>
 
@@ -662,7 +748,7 @@ export default function MessagesPage() {
                 <div
                   className={`messages-conv-preview${conv.unread ? " messages-conv-preview--unread" : ""}`}
                 >
-                  {conv.lastMessage || "Start the conversation"}
+                  {conv.lastMessage || uiStartConversationShort}
                 </div>
               </div>
             </button>
@@ -735,7 +821,7 @@ export default function MessagesPage() {
                     flexShrink: 0,
                   }}
                 >
-                  View Item →
+                  {uiViewItem}
                 </a>
               )}
               {!activeConv?.isAdminConv && (
@@ -744,7 +830,7 @@ export default function MessagesPage() {
                   onClick={() => setReportingUser(true)}
                 >
                   <FaFlag style={{ fontSize: 11 }} />
-                  Report User
+                  {uiReportUser}
                 </button>
               )}
             </div>
@@ -756,10 +842,7 @@ export default function MessagesPage() {
                   {activeConv?.isAdminConv ? (
                     <>
                       <FaShieldHalved className="messages-chat__admin-empty-icon" />
-                      <p>
-                        You're chatting with an admin. Ask anything — they're
-                        here to help.
-                      </p>
+                      <p>{uiAdminChatEmpty}</p>
                     </>
                   ) : (
                     <>

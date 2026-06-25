@@ -324,6 +324,13 @@ const SettingsPage = () => {
   const [mediumText, setMediumText] = useState("Medium");
   const [largeText, setLargeText] = useState("Large");
   const [extraLargeText, setExtraLargeText] = useState("Extra Large");
+  const [customGroupText, setCustomGroupText] = useState("Custom");
+  const [cteNameLabel, setCteNameLabel] = useState("Name");
+  const [cteBaseLabel, setCteBaseLabel] = useState("Base");
+  const [cteAccentLabel, setCteAccentLabel] = useState("Accent");
+  const [cteSaveBtn, setCteSaveBtn] = useState("Save & Apply");
+  const [cteRemoveBtn, setCteRemoveBtn] = useState("Remove");
+  const [cteCancelBtn, setCteCancelBtn] = useState("Cancel");
 
   const sizeLabels: Record<string, string> = {
     small: smallText,
@@ -440,6 +447,13 @@ const SettingsPage = () => {
       setMediumText("Medium");
       setLargeText("Large");
       setExtraLargeText("Extra Large");
+      setCustomGroupText("Custom");
+      setCteNameLabel("Name");
+      setCteBaseLabel("Base");
+      setCteAccentLabel("Accent");
+      setCteSaveBtn("Save & Apply");
+      setCteRemoveBtn("Remove");
+      setCteCancelBtn("Cancel");
       setIsReady(true);
       return;
     }
@@ -544,6 +558,13 @@ const SettingsPage = () => {
           setter: setExtraLargeText,
           cacheKey: "settings_extraLarge",
         },
+        { key: "Custom", setter: setCustomGroupText, cacheKey: "settings_custom" },
+        { key: "Name", setter: setCteNameLabel, cacheKey: "settings_cteName" },
+        { key: "Base", setter: setCteBaseLabel, cacheKey: "settings_cteBase" },
+        { key: "Accent", setter: setCteAccentLabel, cacheKey: "settings_cteAccent" },
+        { key: "Save & Apply", setter: setCteSaveBtn, cacheKey: "settings_cteSave" },
+        { key: "Remove", setter: setCteRemoveBtn, cacheKey: "settings_cteRemove" },
+        { key: "Cancel", setter: setCteCancelBtn, cacheKey: "settings_cteCancel" },
       ];
       for (const { key, setter, cacheKey } of translations) {
         const cached = localStorage.getItem(`${cacheKey}_${language}`);
@@ -624,7 +645,7 @@ const SettingsPage = () => {
           <p className="settings-description"><i>{accessibilityGroupText}</i></p>
           <div className="theme-grid" style={{ marginBottom: "18px" }}>{renderThemeGroup(A11Y_THEMES)}</div>
 
-          <p className="settings-description"><i>Custom</i></p>
+          <p className="settings-description"><i>{customGroupText}</i></p>
           <div className="theme-grid" style={{ marginBottom: "14px" }}>
             {CUSTOM_SLOTS.map((id, i) => {
               const config = customThemes[id];
@@ -647,7 +668,7 @@ const SettingsPage = () => {
                         openEditor(id, null);
                       }
                     }}
-                    aria-label={config ? config.name : `Custom ${i + 1}`}
+                    aria-label={config ? config.name : `${customGroupText} ${i + 1}`}
                   >
                     {preview ? (
                       <ThemePreviewSVG
@@ -663,7 +684,7 @@ const SettingsPage = () => {
                   </button>
                   <div className="custom-slot-footer">
                     <span className="theme-card-label">
-                      {config ? config.name : `Custom ${i + 1}`}
+                      {config ? config.name : `${customGroupText} ${i + 1}`}
                     </span>
                     <button
                       className="custom-slot-edit-btn"
@@ -681,7 +702,7 @@ const SettingsPage = () => {
           {editingSlot && (
             <div className="custom-theme-editor">
               <div className="cte-row">
-                <span className="cte-label">Name</span>
+                <span className="cte-label">{cteNameLabel}</span>
                 <input
                   className="cte-name-input"
                   type="text"
@@ -692,7 +713,7 @@ const SettingsPage = () => {
                 />
               </div>
               <div className="cte-row cte-base-row">
-                <span className="cte-label">Base</span>
+                <span className="cte-label">{cteBaseLabel}</span>
                 <div className="cte-base-grid">
                   {ALL_PRESET_THEMES.map((id) => {
                     const p = THEME_PREVIEWS[id];
@@ -716,7 +737,7 @@ const SettingsPage = () => {
                 </div>
               </div>
               <div className="cte-row">
-                <span className="cte-label">Accent</span>
+                <span className="cte-label">{cteAccentLabel}</span>
                 <div className="cte-color-row">
                   <input
                     className="cte-color-input"
@@ -734,11 +755,11 @@ const SettingsPage = () => {
                   />
                 </div>
                 <div className="cte-actions">
-                  <button className="cte-save" onClick={handleSaveCustom}>Save & Apply</button>
+                  <button className="cte-save" onClick={handleSaveCustom}>{cteSaveBtn}</button>
                   {customThemes[editingSlot] && (
-                    <button className="cte-delete" onClick={handleDeleteCustom}>Remove</button>
+                    <button className="cte-delete" onClick={handleDeleteCustom}>{cteRemoveBtn}</button>
                   )}
-                  <button className="cte-cancel" onClick={() => setEditingSlot(null)}>Cancel</button>
+                  <button className="cte-cancel" onClick={() => setEditingSlot(null)}>{cteCancelBtn}</button>
                 </div>
               </div>
             </div>

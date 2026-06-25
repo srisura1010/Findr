@@ -747,7 +747,7 @@ export default function ItemDetailPage() {
         error?.hint,
       );
       setActionMsg(
-        "Failed to submit claim: " + (error?.message || "Unknown error"),
+        s.msgClaimFailed + ": " + (error?.message || "Unknown error"),
       );
     }
     setClaimSubmitting(false);
