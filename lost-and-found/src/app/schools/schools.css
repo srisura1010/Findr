@@ -2353,6 +2353,7 @@ body.high-contrast .sc-board__main .sc-form {
 .sc-board__main select,
 .sc-form select,
 select.sc-form__select {
+  color-scheme: light;
   border: 1.5px solid var(--border-input) !important;
   border-radius: 9px !important;
   padding: 10px 32px 10px 13px !important;
@@ -2373,6 +2374,7 @@ select.sc-form__select {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
   cursor: pointer !important;
+  color-scheme: light;
 }
 
 .sc-board__main select:focus,
@@ -2381,6 +2383,26 @@ select.sc-form__select:focus {
   border-color: var(--border-focus) !important;
   background-color: var(--bg-card) !important;
   outline: none !important;
+}
+
+.sc-board__main select option,
+.sc-form select option,
+select.sc-form__select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.sc-board__main select option:hover,
+.sc-board__main select option:checked,
+.sc-form select option:hover,
+.sc-form select option:checked,
+select.sc-form__select option:hover,
+select.sc-form__select option:checked {
+  background-color: #2f80ed !important;
+  color: #ffffff !important;
 }
 
 .sc-board__main .sc-form select {
