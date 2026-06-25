@@ -898,21 +898,28 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   useEffect(() => {
     if (language === "en") { setCatMap({}); return; }
     const unique = [...new Set([...CATEGORIES, ...items.map((i) => i.category), ...lostItems.map((i) => i.category)].filter(Boolean))] as string[];
-    Promise.all(unique.map(async (cat) => {
-      const cacheKey = `sc_cat_${cat.replace(/\s+/g, "_")}_${language}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) return [cat, cached] as [string, string];
+    // Apply cached translations immediately.
+    const initial: Record<string, string> = {};
+    for (const cat of unique) {
+      const cached = localStorage.getItem(`t:${language}:${cat}`);
+      if (cached) initial[cat] = cached;
+    }
+    setCatMap(initial);
+    const missing = unique.filter((cat) => !initial[cat]);
+    if (missing.length === 0) return;
+    Promise.all(missing.map(async (cat) => {
+      const lsKey = `t:${language}:${cat}`;
       try {
         const res = await fetch("/api/translate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: cat, target: language }) });
         if (res.ok) {
           const data = await res.json();
           const t = (data.translatedText as string | undefined)?.trim() || cat;
-          localStorage.setItem(cacheKey, t);
+          localStorage.setItem(lsKey, t);
           return [cat, t] as [string, string];
         }
       } catch {}
       return [cat, cat] as [string, string];
-    })).then((pairs) => setCatMap(Object.fromEntries(pairs)));
+    })).then((pairs) => setCatMap((prev) => ({ ...prev, ...Object.fromEntries(pairs) })));
   }, [language, items.length, lostItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Translate item content (name, description, location) ────────────────────
