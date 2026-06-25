@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { ThemeId } from "@/lib/themes";
 import { applyTheme } from "@/lib/applyTheme";
+import { useUser } from "@clerk/nextjs";
 type FontSize = "sm" | "md" | "lg" | "xl";
 type FontFamily =
   | "sans"
@@ -59,17 +60,26 @@ function getInitial<T extends string>(key: string, fallback: T): T {
 }
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
+  const { user, isLoaded } = useUser();
   const [theme, setTheme] = useState<ThemeId>("light");
   const [fontSize, setFontSize] = useState<FontSize>("md");
   const [fontFamily, setFontFamily] = useState<FontFamily>("sans");
   const [language, setLanguage] = useState<Language>("en");
+  // Prevents the persist effect from writing defaults before settings are loaded.
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setTheme(getInitial<ThemeId>("theme", "light"));
-    setFontSize(getInitial("fontSize", "md"));
-    setFontFamily(getInitial("fontFamily", "sans"));
-    setLanguage(getInitial("language", "en"));
-  }, []);
+    if (!isLoaded) return;
+    // Clerk metadata travels with the account across devices; localStorage is the fallback.
+    const meta = (user?.unsafeMetadata ?? {}) as Record<string, string>;
+    const get = <T extends string>(k: string, fallback: T): T =>
+      (meta[k] as T) ?? getInitial(k, fallback);
+    setTheme(get<ThemeId>("theme", "light"));
+    setFontSize(get("fontSize", "md"));
+    setFontFamily(get("fontFamily", "sans"));
+    setLanguage(get("language", "en"));
+    setHydrated(true);
+  }, [isLoaded, user?.id]);
 
   const fontMap: Record<string, string> = {
     sans: '"DM Sans", sans-serif',
@@ -94,13 +104,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     );
   }, [theme, fontSize, fontFamily]);
 
-  // Persist changes.
+  // Persist changes to localStorage and (when signed in) to Clerk metadata so
+  // settings follow the user across devices and browsers.
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("theme", theme);
     localStorage.setItem("fontSize", fontSize);
     localStorage.setItem("fontFamily", fontFamily);
     localStorage.setItem("language", language);
-  }, [theme, fontSize, fontFamily, language]);
+    if (user) {
+      user.update({ unsafeMetadata: { theme, fontSize, fontFamily, language } }).catch(() => {});
+    }
+  }, [theme, fontSize, fontFamily, language, hydrated]);
 
   return (
     <SettingsContext.Provider

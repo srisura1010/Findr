@@ -101,34 +101,51 @@ type TabId =
   | "inbox";
 
 // ── Translation helper ────────────────────────────────────────────────────────
-async function fetchTranslation(
-  key: string,
+// Translates a batch of [field, englishKey, cacheKey] tuples in one request.
+async function batchTranslate(
+  entries: Array<[keyof DashStrings, string, string]>,
   target: string,
-  cacheKey: string,
-  setter: (val: string) => void,
+  apply: (updates: Partial<DashStrings>) => void,
 ) {
-  const cached = localStorage.getItem(`${cacheKey}_${target}`);
-  if (cached) {
-    setter(cached);
-    return;
+  // Apply cache hits synchronously first (zero flicker).
+  const updates: Partial<DashStrings> = {};
+  const uncached: typeof entries = [];
+
+  for (const [field, key, cacheKey] of entries) {
+    const hit = localStorage.getItem(`${cacheKey}_${target}`);
+    if (hit) {
+      updates[field] = hit;
+    } else {
+      uncached.push([field, key, cacheKey]);
+    }
   }
+
+  if (Object.keys(updates).length > 0) apply(updates);
+
+  if (uncached.length === 0) return;
+
   try {
     const res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: key, target }),
+      body: JSON.stringify({ texts: uncached.map(([, k]) => k), target }),
     });
-    if (res.ok) {
-      const data = await res.json();
-      const translated =
-        (data.translatedText as string | undefined)?.trim() || key;
-      setter(translated);
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const results: string[] = data.translatedTexts ?? [];
+    const newUpdates: Partial<DashStrings> = {};
+
+    for (let i = 0; i < uncached.length; i++) {
+      const [field, key, cacheKey] = uncached[i];
+      const translated = results[i]?.trim() || key;
+      newUpdates[field] = translated;
       localStorage.setItem(`${cacheKey}_${target}`, translated);
-    } else {
-      setter(key);
     }
+
+    apply(newUpdates);
   } catch {
-    setter(key);
+    // Uncached strings stay at their DEFAULT_STRINGS (English) values.
   }
 }
 
@@ -2070,14 +2087,11 @@ export default function DashboardPage() {
     ];
 
     const translateAll = async () => {
-      await Promise.all(
-        translations.map(([field, key, cacheKey]) =>
-          fetchTranslation(key, language, cacheKey, (val) =>
-            setS((prev) => ({ ...prev, [field]: val })),
-          ),
-        ),
+      await batchTranslate(
+        translations,
+        language,
+        (updates) => setS((prev) => ({ ...prev, ...updates })),
       );
-
       setIsReady(true);
     };
 
