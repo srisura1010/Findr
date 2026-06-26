@@ -1011,11 +1011,11 @@ export default function Home() {
             </div>
             <div className="footer-col">
               <span className="footer-col-heading">{footerContactText}</span>
-              <a className="footer-link" href="mailto:finder.support@gmail.com">
+              <a className="footer-link" href="mailto:fbla.finder.support@gmail.com">
                 <FaEnvelope
                   style={{ display: "inline", marginRight: 6, fontSize: 12 }}
                 />
-                finder.support@gmail.com
+                fbla.finder.support@gmail.com
               </a>
             </div>
           </div>
