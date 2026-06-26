@@ -1076,6 +1076,16 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     }
   }, [school.id, user]);
 
+  // ── Lock page scroll while the board is open ─────────────────────────────────
+  // The board is a full-viewport view: the sidebar stays fixed and only
+  // .sc-board__main scrolls. Locking body overflow stops the whole page (and the
+  // sidebar with it) from scrolling when the wheel is over the sidebar.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   // ── Fetch items ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const cached = readSchoolBoardCache(school.id);
