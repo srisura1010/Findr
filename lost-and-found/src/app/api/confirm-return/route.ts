@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Pull the full item row so we can snapshot it before deleting.
+  // get full item row before we delete it
   const { data: item, error: fetchError } = await supabase
     .from("items")
     .select("*")
@@ -27,8 +27,9 @@ export async function POST(req: Request) {
   const isAuthor = item.author_id === user_id;
   const isClaimant = item.accepted_claimant_id === user_id;
 
-  // Flow 1: poster confirms informal retrieval (status pending/waiting/claim_accepted)
-  // Flow 2: accepted claimant confirms formal handoff (status handed_off)
+  // two ways to confirm a return:
+  // flow 1: finder confirms informal handback, no claim needed
+  // flow 2: claimant confirms a formal handoff happened
   const isFlow1 = isAuthor && ["pending", "waiting", "claim_accepted"].includes(item.status);
   const isFlow2 = isClaimant && item.status === "handed_off";
 
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Move the item into returned_items (credited to the finder/poster).
+  // save a copy before deleting, so return history isn't lost
   const { error: insertError } = await supabase.from("returned_items").insert({
     original_item_id: item.id,
     author_id: item.author_id,
@@ -54,15 +55,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
-  // Mark claim_requests resolved (FK is ON DELETE CASCADE, but we set status
-  // first so nothing lingers if the row is read before cascade completes).
+  // close out the claim before the item row is gone
   await supabase
     .from("claim_requests")
     .update({ status: "completed" })
     .eq("item_id", item_id)
     .in("status", ["pending", "accepted"]);
 
-  // Remove the item from the live items table.
+  // now safe to remove the live item
   const { error: deleteError } = await supabase
     .from("items")
     .delete()
