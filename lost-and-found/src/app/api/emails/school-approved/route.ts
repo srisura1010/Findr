@@ -24,8 +24,8 @@ export async function POST(req: Request) {
             <td style="padding:10px 16px;font-family:monospace;border-top:1px solid #eee">${school_password}</td>
           </tr>
         </table>
-        <p style="font-size:13px;color:#888">Keep your admin password private — it unlocks the admin panel on your school board.</p>
-        <p style="color:#888;font-size:13px;margin-top:24px">Best regards,<br/>The Findr Team</p>
+        <p style="font-size:13px;color:#888">Keep your admin password private: it unlocks the admin panel on your school board.</p>
+        <p style="color:#888;font-size:13px;margin-top:24px">Best regards,<br/>-The Findr Team</p>
       </div>
     `,
   });

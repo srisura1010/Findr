@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           >
             Review Claims →
           </a>
-          <p style="color:#888;font-size:13px;margin-top:32px">— The Findr Team</p>
+          <p style="color:#888;font-size:13px;margin-top:32px">-The Findr Team</p>
         </div>
       `,
     })
