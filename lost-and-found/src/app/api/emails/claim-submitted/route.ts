@@ -9,9 +9,9 @@ export async function POST(req: Request) {
 
   await resend.emails
     .send({
-      from: "Findr <noreply@findrapp.me>",
+      from: "Finder <noreply@findrapp.me>",
       to: finder_email,
-      subject: `Someone claimed your item on Findr`,
+      subject: `Someone claimed your item on Finder`,
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px">
           <h2 style="margin:0 0 16px">Hi ${finder_name},</h2>
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             <strong>"${item_name}"</strong>.
           </p>
           <p style="margin:0 0 24px">
-            They've provided proof of ownership. Log in to your Findr dashboard to review
+            They've provided proof of ownership. Log in to your Finder dashboard to review
             their claim and decide whether to accept or reject it.
           </p>
           <a
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           >
             Review Claims →
           </a>
-          <p style="color:#888;font-size:13px;margin-top:32px">-The Findr Team</p>
+          <p style="color:#888;font-size:13px;margin-top:32px">-The Finder Team</p>
         </div>
       `,
     })

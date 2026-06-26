@@ -1,4 +1,4 @@
-# Findr — Claim & Retrieval Flow
+# Finder — Claim & Retrieval Flow
 
 Complete reference for the lost-and-found item lifecycle from posting through return.
 Last updated to reflect Batch 2 feature additions.
@@ -68,7 +68,7 @@ Additional transitions:
 - Item status is NOT changed at this step.
 
 **Emails sent:**
-- → Finder (`claim-submitted` route): "Someone claimed your item on Findr"
+- → Finder (`claim-submitted` route): "Someone claimed your item on Finder"
 
 **What the admin sees:**
 - Nothing at this step.

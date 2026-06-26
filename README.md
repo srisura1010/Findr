@@ -1,4 +1,4 @@
-# Findr (need to update)
+# Finder
 
 A school lost-and-found web platform that connects students with their missing items through a searchable catalog, direct messaging, and AI-powered item matching.
 
@@ -6,7 +6,7 @@ A school lost-and-found web platform that connects students with their missing i
 
 ## The Problem
 
-Most school lost and founds are a cardboard box in the front office that nobody checks. Items pile up with no visibility, students have no way to know if their belongings were turned in, and staff have no efficient way to manage the volume. Findr digitizes and streamlines the entire process.
+Most school lost and founds are a cardboard box in the front office that nobody checks. Items pile up with no visibility, students have no way to know if their belongings were turned in, and staff have no efficient way to manage the volume. Finder digitizes and streamlines the entire process.
 
 ---
 
@@ -74,8 +74,8 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/findr.git
-cd findr
+git clone https://github.com/your-username/finder.git
+cd finder
 
 # Install dependencies
 npm install
@@ -98,7 +98,7 @@ npm start
 ## Project Structure
 
 ```
-findr/
+finder/
 ├── app/
 │   ├── api/          # Server-side API routes
 │   ├── (pages)/      # App Router pages, each with paired .tsx and .css

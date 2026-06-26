@@ -59,7 +59,7 @@ interface School {
 const SCHOOLS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function getMySchoolsCacheKey(userId: string) {
-  return `findr_my_schools_${userId}`;
+  return `finder_my_schools_${userId}`;
 }
 
 function readMySchoolsCache(userId: string) {
@@ -1014,7 +1014,7 @@ function RegisterSchoolPanel({
                   color: "#fff",
                 }}
               >
-                Findr Campus
+                Finder Campus
               </div>
               <p className="sc-register__preview-name">
                 {form.name || "Your School Name"}
@@ -1160,7 +1160,7 @@ function MySchoolsPanel({
 // ─── Default English string objects ──────────────────────────────────────────
 const DEFAULT_ABOUT: AboutStrings = {
   eyebrow: "Campus lost & found",
-  title: "Findr for Schools",
+  title: "Finder for Schools",
   subtitle:
     "A private school board for lost items, announcements, and matching. Students and staff only see what belongs to their campus.",
   joinBtn: "Join Your School",
@@ -1183,9 +1183,9 @@ const DEFAULT_ABOUT: AboutStrings = {
   feature3Desc: "Members only see the board that belongs to their campus.",
   feature4Title: "Admin controls",
   feature4Desc: "Trusted staff manage their own board without affecting others.",
-  registerCtaTitle: "Is your school not on Findr yet?",
+  registerCtaTitle: "Is your school not on Finder yet?",
   registerCtaDesc:
-    "Submit a registration request and a Findr super-admin will review it within 48 hours.",
+    "Submit a registration request and a Finder super-admin will review it within 48 hours.",
   registerCtaBtn: "Register Your School",
   heroCardLabel: "Featured campus board",
   heroCardBody:
@@ -1243,7 +1243,7 @@ const DEFAULT_REGISTER: RegisterStrings = {
   signInRequired: "Sign in to submit a registration.",
   successTitle: "Registration submitted!",
   successSub:
-    "A Findr super-admin will review within 48 hours and email you the school code.",
+    "A Finder super-admin will review within 48 hours and email you the school code.",
 };
 
 const DEFAULT_MY_SCHOOLS: MySchoolsStrings = {
@@ -1396,7 +1396,7 @@ export default function SchoolsPage() {
 
       const aboutSetters: [keyof AboutStrings, string, string][] = [
         ["eyebrow", "Campus lost & found", "sc_about_eyebrow"],
-        ["title", "Findr for Schools", "sc_about_title"],
+        ["title", "Finder for Schools", "sc_about_title"],
         ["subtitle", DEFAULT_ABOUT.subtitle, "sc_about_subtitle"],
         ["joinBtn", "Join Your School", "sc_about_joinBtn"],
         ["registerBtn", "Register a School", "sc_about_registerBtn"],
@@ -1537,7 +1537,7 @@ export default function SchoolsPage() {
       if (user?.id) writeMySchoolsCache(user.id, nextSchools);
       return nextSchools;
     });
-    localStorage.removeItem(`findr_school_admin_${school.id}`);
+    localStorage.removeItem(`finder_school_admin_${school.id}`);
   };
 
   const TOP_TABS: { id: TopTab; label: string; icon: ReactNode }[] = [
@@ -1560,7 +1560,7 @@ export default function SchoolsPage() {
                 <FaGraduationCap />
               </span>
               <div>
-                <p className="sc-sidebar__title">Findr Campus</p>
+                <p className="sc-sidebar__title">Finder Campus</p>
                 <p className="sc-sidebar__sub">{schoolBoardsText}</p>
               </div>
             </div>

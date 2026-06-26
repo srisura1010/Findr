@@ -53,8 +53,8 @@ const FAQ_CATEGORIES = [
   label: "Getting Started",
   icon: "",
   questions: [
-  { q: "What is Findr?", a: "Findr is a lost & found platform for schools and institutions. Finders post items they've found, and claimants submit proof-based claims to retrieve themall in one place with a full verification workflow." },
-  { q: "Do I need an account to use Findr?", a: "You can browse posted items without an account, but you'll need to sign in to post a found item, submit a claim, or message a finder." },
+  { q: "What is Finder?", a: "Finder is a lost & found platform for schools and institutions. Finders post items they've found, and claimants submit proof-based claims to retrieve themall in one place with a full verification workflow." },
+  { q: "Do I need an account to use Finder?", a: "You can browse posted items without an account, but you'll need to sign in to post a found item, submit a claim, or message a finder." },
   { q: "How do I sign in?", a: "Click 'Sign In' in the top navigation. We use Clerk for authentication, so you can sign in with your email or a social account. Your profile info is automatically filled in when you post items." }]
 },
 {
@@ -106,9 +106,9 @@ const FAQ_CATEGORIES = [
   label: "School Boards",
   icon: "",
   questions: [
-  { q: "What is a School Board?", a: "School Boards are private lost & found boards for specific schools or institutions. Each school has its own themed board with its own found items and lost item reports, separate from the main Findr board." },
+  { q: "What is a School Board?", a: "School Boards are private lost & found boards for specific schools or institutions. Each school has its own themed board with its own found items and lost item reports, separate from the main Finder board." },
   { q: "How do I join a school board?", a: "Go to the Schools page in the navigation and enter your school's code. Once joined, the school's board appears in your schools list and you can post and browse items specific to that school." },
-  { q: "How do I become a school admin?", a: "On your school's board page, click the Admin tab and enter the school admin password from your Findr approval email. Once unlocked, you can delete items, view school-specific reports, and access the school inbox." },
+  { q: "How do I become a school admin?", a: "On your school's board page, click the Admin tab and enter the school admin password from your Finder approval email. Once unlocked, you can delete items, view school-specific reports, and access the school inbox." },
   { q: "Can I message a school admin?", a: "Yeson the Messages page, click 'Contact a School Admin' to select your school and choose who to message. School admin conversations are separate from regular item chats." }]
 },
 {
@@ -116,8 +116,8 @@ const FAQ_CATEGORIES = [
   label: "Admin",
   icon: "",
   questions: [
-  { q: "How do I become a Findr admin?", a: "Click 'Become an Admin' in the dashboard sidebar. Fill out the form with your school, staff number, and optionally upload your ID badge. Requests are reviewed manually and you'll receive an approval email with your admin password." },
-  { q: "What can Findr admins do?", a: "Admins can delete any item, ban or suspend users, view reported items and users, manage disputes (resolve in claimant's favor or dismiss back to claim_accepted), and message any party in a dispute directly through the in-app chat." },
+  { q: "How do I become a Finder admin?", a: "Click 'Become an Admin' in the dashboard sidebar. Fill out the form with your school, staff number, and optionally upload your ID badge. Requests are reviewed manually and you'll receive an approval email with your admin password." },
+  { q: "What can Finder admins do?", a: "Admins can delete any item, ban or suspend users, view reported items and users, manage disputes (resolve in claimant's favor or dismiss back to claim_accepted), and message any party in a dispute directly through the in-app chat." },
   { q: "How does dispute resolution work for admins?", a: "In the dashboard under Reports → Disputes, each dispute card shows the item name, the claimant's reason, a 'View Item' link, and a 'Message Parties' button. Admins can message either the finder or the claimant directly. 'Resolve for Claimant' permanently deletes the item listing. 'Dismiss Dispute' returns the item to claim_accepted status so the finder can re-confirm the handoff." },
   { q: "I forgot my admin password. What do I do?", a: "Reach out to a super-admin. Admin passwords are issued per-account and can be reset through the super-admin panel." }]
 },
@@ -126,9 +126,9 @@ const FAQ_CATEGORIES = [
   label: "Settings & Accessibility",
   icon: "",
   questions: [
-  { q: "Can I change the language?", a: "Yesgo to Settings and pick your preferred language. Findr uses AI-powered translation to localize the entire interface including item descriptions." },
-  { q: "Does Findr have text-to-speech?", a: "Yesgo to the Settings page to enable TTS, which will read item descriptions aloud." },
-  { q: "Does Findr have accessibility modes?", a: "YesSettings includes a high-contrast mode and a colorblind-friendly mode in addition to the standard light and dark themes." }]
+  { q: "Can I change the language?", a: "Yesgo to Settings and pick your preferred language. Finder uses AI-powered translation to localize the entire interface including item descriptions." },
+  { q: "Does Finder have text-to-speech?", a: "Yesgo to the Settings page to enable TTS, which will read item descriptions aloud." },
+  { q: "Does Finder have accessibility modes?", a: "YesSettings includes a high-contrast mode and a colorblind-friendly mode in addition to the standard light and dark themes." }]
 }];
 
 
@@ -174,8 +174,8 @@ function FAQAccordion({ language }: {language: string;}) {
 
 }
 
-const SYSTEM_PROMPT = `You are the helpful support assistant for Findr, a school lost & found web app.
-Keep answers short, friendly, and focused on Findr. Here's what you know:
+const SYSTEM_PROMPT = `You are the helpful support assistant for Finder, a school lost & found web app.
+Keep answers short, friendly, and focused on Finder. Here's what you know:
 
 POSTING FOUND ITEMS:
 - Finders post items via Dashboard → Lost/Found Item → Found an Item
@@ -235,11 +235,11 @@ SETTINGS:
 
 Built with Next.js, Clerk auth, Supabase, Groq AI, Resend email.
 
-If you don't know something, say so and suggest contacting a Findr admin.`;
+If you don't know something, say so and suggest contacting a Finder admin.`;
 
 function GroqChatbot({ language }: {language: string;}) {
-  const initialMessage = useTranslated("Hey! I'm Findr's support assistant. Ask me anything about how to use the app", language);
-  const placeholderText = useTranslated("Ask anything about Findr...", language);
+  const initialMessage = useTranslated("Hey! I'm Finder's support assistant. Ask me anything about how to use the app", language);
+  const placeholderText = useTranslated("Ask anything about Finder...", language);
   const poweredByText = useTranslated("Powered by", language);
   const askAnythingText = useTranslated("Ask anything about how the app works.", language);
 
@@ -294,7 +294,7 @@ function GroqChatbot({ language }: {language: string;}) {
       <div className="chatbot">
         <div className="chatbot__header">
           <div className="chatbot__header-dot" />
-          <span className="chatbot__header-title"><TranslatedText text="Findr AI Support" language={language} /></span>
+          <span className="chatbot__header-title"><TranslatedText text="Finder AI Support" language={language} /></span>
         </div>
         <div className="chatbot__messages">
           {messages.map((msg, i) =>
@@ -355,7 +355,7 @@ export default function HelpPage() {
   const [faqLabel, setFaqLabel] = useState("FAQs");
   const [aiSupportLabel, setAiSupportLabel] = useState("AI Support");
   const [helpTitle, setHelpTitle] = useState("Help & Support");
-  const [helpSubtitle, setHelpSubtitle] = useState("Everything you need to use Findr: guides, FAQs, and live AI support.");
+  const [helpSubtitle, setHelpSubtitle] = useState("Everything you need to use Finder: guides, FAQs, and live AI support.");
   const [howItWorksText, setHowItWorksText] = useState("How it works");
   const [proTipsText, setProTipsText] = useState("Pro Tips");
   const [faqHeading, setFaqHeading] = useState("Frequently Asked Questions");
@@ -368,7 +368,7 @@ export default function HelpPage() {
       setFaqLabel("FAQs");
       setAiSupportLabel("AI Support");
       setHelpTitle("Help & Support");
-      setHelpSubtitle("Everything you need to use Findr: guides, FAQs, and live AI support.");
+      setHelpSubtitle("Everything you need to use Finder: guides, FAQs, and live AI support.");
       setHowItWorksText("How it works");
       setProTipsText("Pro Tips");
       setFaqHeading("Frequently Asked Questions");
@@ -382,7 +382,7 @@ export default function HelpPage() {
         { key: "FAQs", setter: setFaqLabel, cacheKey: "help_faq" },
         { key: "AI Support", setter: setAiSupportLabel, cacheKey: "help_aiSupport" },
         { key: "Help & Support", setter: setHelpTitle, cacheKey: "help_title" },
-        { key: "Everything you need to use Findr: guides, FAQs, and live AI support.", setter: setHelpSubtitle, cacheKey: "help_subtitle" },
+        { key: "Everything you need to use Finder: guides, FAQs, and live AI support.", setter: setHelpSubtitle, cacheKey: "help_subtitle" },
         { key: "How it works", setter: setHowItWorksText, cacheKey: "help_howItWorks" },
         { key: "Pro Tips", setter: setProTipsText, cacheKey: "help_proTips" },
         { key: "Frequently Asked Questions", setter: setFaqHeading, cacheKey: "help_faqHeading" },

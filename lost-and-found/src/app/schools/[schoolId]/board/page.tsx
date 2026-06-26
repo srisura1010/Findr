@@ -121,7 +121,7 @@ interface SchoolReport {
 const SCHOOL_BOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function getSchoolBoardCacheKey(schoolId: string) {
-  return `findr_school_board_${schoolId}`;
+  return `finder_school_board_${schoolId}`;
 }
 
 function readSchoolBoardCache(schoolId: string) {
@@ -492,7 +492,7 @@ const DEFAULT_BOARD: BoardStrings = {
   postingLostBtn: "Posting...",
   lostPostedMsg: "Lost item reported!",
   adminLoginTitle: "School Admin Access",
-  adminLoginHint: "Enter the password from your Findr approval email.",
+  adminLoginHint: "Enter the password from your Finder approval email.",
   adminPasswordLabel: "Admin Password",
   adminPasswordPlaceholder: "e.g. FINDR-JANE-X4K2",
   unlockBtn: "Unlock Admin View",
@@ -1068,7 +1068,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
   const [reportsSubTab, setReportsSubTab] = useState<"reports" | "disputes">("reports");
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem(`findr_school_admin_${school.id}`) === "true";
+    const isAdmin = localStorage.getItem(`finder_school_admin_${school.id}`) === "true";
     setIsSchoolAdmin(isAdmin);
     if (isAdmin) {
       setAdminId(user?.id ?? "");
@@ -1420,7 +1420,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
     if (!schoolRow?.password || schoolRow.password !== adminPassword) {
       setAdminError(s.adminIncorrect);
     } else {
-      localStorage.setItem(`findr_school_admin_${school.id}`, "true");
+      localStorage.setItem(`finder_school_admin_${school.id}`, "true");
       setIsSchoolAdmin(true); setAdminUnlocked(true);
       setAdminId(user?.id ?? "");
       setAdminName(user?.fullName || user?.username || "Admin");
@@ -1608,7 +1608,7 @@ function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; o
           <div className="sc-admin-badge" style={{ background: hexToRgba(color2, 0.2), borderColor: color2 }}>
             {s.adminBadge}
             <button className="sc-admin-badge__exit" onClick={() => {
-              localStorage.removeItem(`findr_school_admin_${school.id}`);
+              localStorage.removeItem(`finder_school_admin_${school.id}`);
               setIsSchoolAdmin(false);
               if (activeTab === "reports" || activeTab === "inbox") setActiveTab("items");
             }}>{s.exitAdmin}</button>

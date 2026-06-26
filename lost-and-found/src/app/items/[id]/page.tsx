@@ -202,7 +202,7 @@ export default function ItemDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin] = useState(() =>
     typeof window !== "undefined"
-      ? localStorage.getItem("findr_is_admin") === "true"
+      ? localStorage.getItem("finder_is_admin") === "true"
       : false,
   );
 
@@ -867,7 +867,7 @@ export default function ItemDetailPage() {
         item_id: item.id,
         item_name: item.name,
         reporter_name: "System",
-        reporter_email: "system@findr.com",
+        reporter_email: "system@finder.com",
         reason:
           "This item has had 5 or more claims rejected. Possible finder misconduct.",
       });

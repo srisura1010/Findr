@@ -544,7 +544,7 @@ const DEFAULT_STRINGS: DashStrings = {
   levelFinder: "Finder",
   levelHelper: "Helper",
   levelNewcomer: "Newcomer",
-  brandTitle: "Findr Dashboard",
+  brandTitle: "Finder Dashboard",
   brandSub: "Your Lost & Found",
   noDisputes: "No disputes. All clear!",
   disputesTab: "Disputes",
@@ -790,9 +790,9 @@ function AdminLoginPanel({
     if (dbError || !data) {
       setError(s.adminIncorrect);
     } else {
-      localStorage.setItem("findr_is_admin", "true");
-      localStorage.setItem("findr_admin_id", data.id);
-      localStorage.setItem("findr_admin_name", data.name || "Admin");
+      localStorage.setItem("finder_is_admin", "true");
+      localStorage.setItem("finder_admin_id", data.id);
+      localStorage.setItem("finder_admin_name", data.name || "Admin");
       setUnlocked(true);
       onUnlock();
     }
@@ -1848,22 +1848,22 @@ export default function DashboardPage() {
   const [banChecked, setBanChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window !== "undefined")
-      return localStorage.getItem("findr_is_admin") === "true";
+      return localStorage.getItem("finder_is_admin") === "true";
     return false;
   });
   const [adminId] = useState(() => {
     if (typeof window !== "undefined")
-      return localStorage.getItem("findr_admin_id") ?? "";
+      return localStorage.getItem("finder_admin_id") ?? "";
     return "";
   });
   const [adminName] = useState(() => {
     if (typeof window !== "undefined")
-      return localStorage.getItem("findr_admin_name") ?? "Admin";
+      return localStorage.getItem("finder_admin_name") ?? "Admin";
     return "Admin";
   });
 
   useEffect(() => {
-    localStorage.setItem("findr_is_admin", String(isAdmin));
+    localStorage.setItem("finder_is_admin", String(isAdmin));
   }, [isAdmin]);
 
   useEffect(() => {
@@ -2188,7 +2188,7 @@ export default function DashboardPage() {
       ["levelFinder", "Finder", "dash_levelFinder"],
       ["levelHelper", "Helper", "dash_levelHelper"],
       ["levelNewcomer", "Newcomer", "dash_levelNewcomer"],
-      ["brandTitle", "Findr Dashboard", "dash_brandTitle"],
+      ["brandTitle", "Finder Dashboard", "dash_brandTitle"],
       ["brandSub", "Your Lost & Found", "dash_brandSub"],
       ["noDisputes", "No disputes. All clear!", "dash_noDisputes"],
       ["disputesTab", "Disputes", "dash_disputesTab"],
@@ -4182,9 +4182,9 @@ export default function DashboardPage() {
               className="admin-banner__exit"
               onClick={() => {
                 setIsAdmin(false);
-                localStorage.removeItem("findr_is_admin");
-                localStorage.removeItem("findr_admin_id");
-                localStorage.removeItem("findr_admin_name");
+                localStorage.removeItem("finder_is_admin");
+                localStorage.removeItem("finder_admin_id");
+                localStorage.removeItem("finder_admin_name");
               }}
             >
               {s.adminBannerExit}

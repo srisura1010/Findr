@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
   await resend.emails
     .send({
-      from: "Findr <noreply@findrapp.me>",
+      from: "Finder <noreply@findrapp.me>",
       to: claimant_email,
       subject: `Your claim for "${item_name}" was accepted!`,
       html: `
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
             by the finder.
           </p>
           <p style="margin:0 0 24px">
-            Log in to your Findr dashboard to coordinate pickup. Once the finder physically
+            Log in to your Finder dashboard to coordinate pickup. Once the finder physically
             hands the item back, they'll confirm the handoff and you'll get another email
             to confirm receipt.
           </p>
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           >
             Go to Dashboard →
           </a>
-          <p style="color:#888;font-size:13px;margin-top:32px">The Findr Team</p>
+          <p style="color:#888;font-size:13px;margin-top:32px">The Finder Team</p>
         </div>
       `,
     })

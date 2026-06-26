@@ -422,7 +422,7 @@ export default function SchoolItemDetailPage() {
           });
           if (typeof window !== "undefined") {
             setIsSchoolAdmin(
-              localStorage.getItem(`findr_school_admin_${data.school_id}`) === "true"
+              localStorage.getItem(`finder_school_admin_${data.school_id}`) === "true"
             );
           }
         }

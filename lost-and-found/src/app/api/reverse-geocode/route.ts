@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=17&addressdetails=1`;
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Findr-LostAndFound/1.0 (contact@findr.app)",
+      "User-Agent": "Finder-LostAndFound/1.0 (contact@finder.app)",
       "Accept-Language": "en",
     },
   });

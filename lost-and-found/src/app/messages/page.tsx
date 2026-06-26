@@ -294,7 +294,7 @@ export default function MessagesPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [isReady, setIsReady] = useState(false);
-  const [uiMessagesTitle, setUiMessagesTitle] = useState("Findr Messages");
+  const [uiMessagesTitle, setUiMessagesTitle] = useState("Finder Messages");
   const [uiYourConversations, setUiYourConversations] = useState("Your conversations");
   const [uiNoConversations, setUiNoConversations] = useState(
     "No conversations yet.",
@@ -331,7 +331,7 @@ export default function MessagesPage() {
         reportUser,
         adminChatEmpty,
       ] = await Promise.all([
-        t("Findr Messages", language),
+        t("Finder Messages", language),
         t("Your conversations", language),
         t("No conversations yet.", language),
         t("Select a conversation to start chatting", language),
