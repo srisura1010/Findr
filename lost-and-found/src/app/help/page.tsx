@@ -355,7 +355,7 @@ export default function HelpPage() {
   const [faqLabel, setFaqLabel] = useState("FAQs");
   const [aiSupportLabel, setAiSupportLabel] = useState("AI Support");
   const [helpTitle, setHelpTitle] = useState("Help & Support");
-  const [helpSubtitle, setHelpSubtitle] = useState("Everything you need to use Findrguides, FAQs, and live AI support.");
+  const [helpSubtitle, setHelpSubtitle] = useState("Everything you need to use Findr: guides, FAQs, and live AI support.");
   const [howItWorksText, setHowItWorksText] = useState("How it works");
   const [proTipsText, setProTipsText] = useState("Pro Tips");
   const [faqHeading, setFaqHeading] = useState("Frequently Asked Questions");
@@ -368,7 +368,7 @@ export default function HelpPage() {
       setFaqLabel("FAQs");
       setAiSupportLabel("AI Support");
       setHelpTitle("Help & Support");
-      setHelpSubtitle("Everything you need to use Findrguides, FAQs, and live AI support.");
+      setHelpSubtitle("Everything you need to use Findr: guides, FAQs, and live AI support.");
       setHowItWorksText("How it works");
       setProTipsText("Pro Tips");
       setFaqHeading("Frequently Asked Questions");
@@ -382,7 +382,7 @@ export default function HelpPage() {
         { key: "FAQs", setter: setFaqLabel, cacheKey: "help_faq" },
         { key: "AI Support", setter: setAiSupportLabel, cacheKey: "help_aiSupport" },
         { key: "Help & Support", setter: setHelpTitle, cacheKey: "help_title" },
-        { key: "Everything you need to use Findrguides, FAQs, and live AI support.", setter: setHelpSubtitle, cacheKey: "help_subtitle" },
+        { key: "Everything you need to use Findr: guides, FAQs, and live AI support.", setter: setHelpSubtitle, cacheKey: "help_subtitle" },
         { key: "How it works", setter: setHowItWorksText, cacheKey: "help_howItWorks" },
         { key: "Pro Tips", setter: setProTipsText, cacheKey: "help_proTips" },
         { key: "Frequently Asked Questions", setter: setFaqHeading, cacheKey: "help_faqHeading" },
