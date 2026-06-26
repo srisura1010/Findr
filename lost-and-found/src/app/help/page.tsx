@@ -290,7 +290,7 @@ function GroqChatbot({ language }: {language: string;}) {
 
   return (
     <>
-      <p className="chatbot-intro">{poweredByText} <strong>Groq</strong>{askAnythingText}</p>
+      <p className="chatbot-intro">{poweredByText} <strong>Groq</strong>: {askAnythingText}</p>
       <div className="chatbot">
         <div className="chatbot__header">
           <div className="chatbot__header-dot" />
