@@ -153,7 +153,7 @@ export default function GlobalChatbot() {
   return (
     <>
       <button
-        className="global-cat-fab"
+        className="global-chat-fab"
         onClick={() => setIsOpen((v) => !v)}
         aria-label="Toggle support chat"
       >
