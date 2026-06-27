@@ -1690,8 +1690,7 @@ body.colorblind .footer-bottom {
     font-size: 2rem;
   }
   .floating-items-stage {
-    width: 300px;
-    height: 260px;
+    display: none;
   }
   .features-section,
   .hiw-section,
@@ -1747,9 +1746,5 @@ body.colorblind .footer-bottom {
   }
   .stat-number {
     font-size: 2rem;
-  }
-  .floating-items-stage {
-    width: 260px;
-    height: 220px;
   }
 }
