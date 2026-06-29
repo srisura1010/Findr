@@ -333,16 +333,6 @@ export default function SuperAdminPage() {
   const handleApproveSchool = async (request: SchoolRequest) => {
     setSchoolApprovingId(request.id);
     try {
-      const { data: existing } = await supabase
-        .from("schools")
-        .select("id")
-        .eq("rep_email", request.rep_email)
-        .maybeSingle();
-      if (existing) {
-        alert("A school for this rep email already exists.");
-        return;
-      }
-
       const code = generateSchoolCode(request.name);
       const password = generatePassword();
 
