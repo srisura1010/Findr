@@ -2,12 +2,14 @@ import { themes, ThemeId } from "./themes";
 
 export type PresetThemeId = Exclude<ThemeId, "custom-1" | "custom-2" | "custom-3" | "custom-4">;
 
+//shape of a user-created custom theme stored in localStorage
 export interface CustomThemeConfig {
   name: string;
   accent: string;
   base: PresetThemeId;
 }
 
+//reads a custom theme config from localStorage, returns null on SSR or missing
 export function loadCustomConfig(id: string): CustomThemeConfig | null {
   if (typeof window === "undefined") return null;
   try {
@@ -18,6 +20,7 @@ export function loadCustomConfig(id: string): CustomThemeConfig | null {
   }
 }
 
+//writes or removes a custom theme config in localStorage
 export function saveCustomConfig(id: string, config: CustomThemeConfig | null): void {
   if (config === null) {
     localStorage.removeItem(`customTheme_${id}`);
@@ -26,6 +29,7 @@ export function saveCustomConfig(id: string, config: CustomThemeConfig | null): 
   }
 }
 
+//converts a hex color string to [h, s, l] degrees/percent
 function hexToHSL(hex: string): [number, number, number] {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -47,19 +51,23 @@ function hexToHSL(hex: string): [number, number, number] {
   return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
 }
 
+//returns a clamped hsl() string
 function hsl(h: number, s: number, l: number): string {
   return `hsl(${Math.round(h)},${Math.round(Math.max(0, Math.min(100, s)))}%,${Math.round(Math.max(0, Math.min(100, l)))}%)`;
 }
 
+//returns a clamped hsla() string with alpha
 function hsla(h: number, s: number, l: number, a: number): string {
   return `hsla(${Math.round(h)},${Math.round(Math.max(0, Math.min(100, s)))}%,${Math.round(Math.max(0, Math.min(100, l)))}%,${a})`;
 }
 
+//returns true if the preset theme id belongs to a dark group
 function isDarkBase(id: PresetThemeId): boolean {
   const group = themes[id].group;
   return group === "dark-variants" || id === "dark" || id === "high-contrast";
 }
 
+//returns simplified colors used to render the theme preview swatch
 export function getPreviewColors(config: CustomThemeConfig) {
   const baseVars = themes[config.base]?.vars ?? {};
   const [h, s, l] = hexToHSL(config.accent);
@@ -76,6 +84,7 @@ export function getPreviewColors(config: CustomThemeConfig) {
   };
 }
 
+//generates the full set of CSS variable overrides for a custom theme based on its accent color and base preset
 export function generateThemeVars(config: CustomThemeConfig): Record<string, string> {
   const { accent, base } = config;
   const [h, s, l] = hexToHSL(accent);

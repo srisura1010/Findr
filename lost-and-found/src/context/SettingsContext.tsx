@@ -60,15 +60,17 @@ function getInitial<T extends string>(key: string, fallback: T): T {
   return (localStorage.getItem(key) as T) ?? fallback;
 }
 
+//provides theme, font, and language settings to the entire app
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
-  const [theme, setTheme] = useState<ThemeId>("light");
-  const [fontSize, setFontSize] = useState<FontSize>("md");
-  const [fontFamily, setFontFamily] = useState<FontFamily>("sans");
-  const [language, setLanguage] = useState<Language>("en");
+  const [theme, setTheme] = useState<ThemeId>("light"); //active color theme
+  const [fontSize, setFontSize] = useState<FontSize>("md"); //global font size scale
+  const [fontFamily, setFontFamily] = useState<FontFamily>("sans"); //active font family
+  const [language, setLanguage] = useState<Language>("en"); //UI language for translations
   // Prevents the persist effect from writing defaults before settings are loaded.
   const [hydrated, setHydrated] = useState(false);
 
+  //loads settings from Clerk metadata (cross-device) or localStorage on first mount
   useEffect(() => {
     if (!isLoaded) return;
     // Clerk metadata travels with the account across devices; localStorage is the fallback.
@@ -82,6 +84,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setHydrated(true);
   }, [isLoaded, user?.id]);
 
+  //maps font family keys to actual CSS font-family strings
   const fontMap: Record<string, string> = {
     sans: '"DM Sans", sans-serif',
     inter: '"Inter", sans-serif',
@@ -95,6 +98,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     roboto: '"Roboto Slab", serif',
   };
 
+  //applies theme CSS vars and font attributes to the document whenever settings change
   useEffect(() => {
     applyTheme(theme);
     document.documentElement.dataset.fontSize = fontSize;
@@ -137,6 +141,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+//hook to access settings from any component inside SettingsProvider
 export const useSettings = () => {
   const ctx = useContext(SettingsContext);
   // Guard against using the hook outside of the provider (common React error).

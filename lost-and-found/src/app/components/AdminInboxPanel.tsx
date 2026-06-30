@@ -48,6 +48,7 @@ interface ConvSummary {
   unread: boolean;
 }
 
+//admin messaging inbox that shows all user conversations and supports replying in real time
 export function AdminInboxPanel({
   adminId,
   adminName,

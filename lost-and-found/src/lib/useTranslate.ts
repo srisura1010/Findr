@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useSettings } from "@/context/SettingsContext";
 
+//hook that translates a string to the current UI language, with localStorage caching
 export function useTranslate() {
   const { language } = useSettings();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); //true while a translation request is in flight
 
   const translate = async (text: string) => {
     if (language === "en") return text;

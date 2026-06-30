@@ -19,17 +19,19 @@ import { useSettings } from "@/context/SettingsContext";
 import { SUPER_ADMINS } from "@/lib/superAdmin";
 import AISearchButton from "./AISearchButton";
 
+//top bar and left sidebar navigation, with unread badge and mobile drawer
 export default function Navbar() {
   const { isSignedIn, user, isLoaded } = useUser();
   const { language, hydrated } = useSettings();
   const router = useRouter();
 
-  const [mounted, setMounted] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false); //prevents SSR/client mismatch on auth state
+  const [unreadCount, setUnreadCount] = useState(0); //number of unread chat messages
+  const [mobileOpen, setMobileOpen] = useState(false); //whether the mobile nav drawer is visible
 
   const pathname = usePathname();
 
+  //only check super-admin after mount to avoid SSR hydration issues
   const isSuperAdmin =
     mounted &&
     isLoaded &&
@@ -41,11 +43,13 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
+  //closes the mobile drawer then navigates to the given path
   const navigate = (path: string) => {
     setMobileOpen(false);
     router.push(path);
   };
 
+  //locks body scroll while the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -53,6 +57,7 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
+  //fetches the initial unread count and subscribes to new incoming messages via realtime
   useEffect(() => {
     if (!user) return;
     const fetchUnread = async () => {
@@ -93,6 +98,7 @@ export default function Navbar() {
   const [settingsText, setSettingsText] = useState("Settings");
   const [aiSearchText, setAiSearchText] = useState("AI Search");
 
+  //translates all nav labels when the UI language changes, using localStorage as cache
   useEffect(() => {
     if (!hydrated) return;
     const strings = [

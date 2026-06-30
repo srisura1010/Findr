@@ -6,10 +6,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+//POST /api/circle-search - semantic AI search over all active found items, returns ranked matches
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
   if (!query?.trim()) return NextResponse.json({ items: [] });
 
+  //load candidate items to pass to the LLM
   const { data: allItems, error } = await supabase
     .from("items")
     .select(

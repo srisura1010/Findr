@@ -6,6 +6,7 @@ import { MdOutlineSchool } from "react-icons/md";
 import { getSchoolAdminConversationId } from "./MessagingSystem";
 import { useSettings } from "@/context/SettingsContext";
 
+//data returned to the caller when a school admin conversation is started
 export interface SchoolAdminConvData {
   conversationId: string;
   schoolId: string;
@@ -15,6 +16,7 @@ export interface SchoolAdminConvData {
   adminEmail: string;
 }
 
+//a school the current user belongs to, with rep info
 interface SchoolOption {
   id: string;
   name: string;
@@ -24,6 +26,7 @@ interface SchoolOption {
   rep_email: string;
 }
 
+//a school administrator or representative available to message
 interface AdminOption {
   userId: string;
   name: string;
@@ -31,6 +34,7 @@ interface AdminOption {
   role: "Representative" | "Staff";
 }
 
+//modal for selecting a school and admin to start a support conversation with
 export function SchoolAdminContactModal({
   schoolId: prefilledSchoolId,
   userId,
@@ -98,12 +102,13 @@ export function SchoolAdminContactModal({
 
   const [step, setStep] = useState<"pick-school" | "pick-admin">(
     prefilledSchoolId ? "pick-admin" : "pick-school",
-  );
-  const [schools, setSchools] = useState<SchoolOption[]>([]);
-  const [selectedSchool, setSelectedSchool] = useState<SchoolOption | null>(null);
-  const [admins, setAdmins] = useState<AdminOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  ); //which step of the modal is showing
+  const [schools, setSchools] = useState<SchoolOption[]>([]); //schools the user belongs to
+  const [selectedSchool, setSelectedSchool] = useState<SchoolOption | null>(null); //school chosen in step 1
+  const [admins, setAdmins] = useState<AdminOption[]>([]); //admins available for the chosen school
+  const [loading, setLoading] = useState(true); //true while fetching schools or admins
 
+  //loads schools the user belongs to; skipped when a school is pre-selected
   useEffect(() => {
     if (prefilledSchoolId) return;
     const load = async () => {
@@ -123,6 +128,7 @@ export function SchoolAdminContactModal({
     load();
   }, [userId, prefilledSchoolId]);
 
+  //loads the rep and staff admins for the selected school
   useEffect(() => {
     const idToLoad = prefilledSchoolId ?? selectedSchool?.id;
     if (!idToLoad) return;
@@ -170,11 +176,13 @@ export function SchoolAdminContactModal({
     load();
   }, [prefilledSchoolId, selectedSchool?.id]);
 
+  //advances to the admin-selection step after the user picks a school
   const handleSelectSchool = (school: SchoolOption) => {
     setSelectedSchool(school);
     setStep("pick-admin");
   };
 
+  //builds the conversation id and invokes the caller's onConversationStart callback
   const handleSelectAdmin = (admin: AdminOption) => {
     const school = selectedSchool;
     if (!school) return;

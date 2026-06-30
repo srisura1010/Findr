@@ -27,6 +27,7 @@ import {
   PiNumberCircleThreeFill,
 } from "react-icons/pi";
 
+//phrases cycled by the hero typewriter animation
 const TYPING_PHRASES = [
   "Lost Your Keys?",
   "Lost a Wallet?",
@@ -127,12 +128,13 @@ const FLOATING_ITEMS = [
   },
 ];
 
-// ── COUNT-UP HOOK ──
+//animates a number from 0 to target once the element scrolls into view
 function useCountUp(target: number, duration = 1500) {
   const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState(false); //true once the element enters the viewport
   const ref = useRef<HTMLSpanElement>(null);
 
+  //starts the animation when the element intersects the viewport
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -146,6 +148,7 @@ function useCountUp(target: number, duration = 1500) {
     return () => observer.disconnect();
   }, [started]);
 
+  //runs the ease-out cubic counter animation once started
   useEffect(() => {
     if (!started) return;
     let startTime: number;
@@ -162,7 +165,7 @@ function useCountUp(target: number, duration = 1500) {
   return { count, ref };
 }
 
-// ── STAT NUMBER COMPONENT ──
+//displays an animated count-up number with an optional suffix
 function StatNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
   const { count, ref } = useCountUp(value);
   return (
@@ -172,20 +175,21 @@ function StatNumber({ value, suffix = "" }: { value: number; suffix?: string }) 
   );
 }
 
+//landing page with hero, feature cards, how-it-works section, stats, and footer
 export default function Home() {
   const { language, hydrated } = useSettings();
   const router = useRouter();
   const { isSignedIn, user, isLoaded } = useUser();
-  const [isReady, setIsReady] = useState(false);
-  const [banChecked, setBanChecked] = useState(false);
+  const [isReady, setIsReady] = useState(false); //true after translations finish loading
+  const [banChecked, setBanChecked] = useState(false); //true after ban check resolves
 
-  // typing effect
-  const [displayText, setDisplayText] = useState("");
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [translatedPhrases, setTranslatedPhrases] = useState<string[]>(TYPING_PHRASES);
-  const [floatingLabels, setFloatingLabels] = useState<string[]>(FLOATING_ITEMS.map((item) => item.label));
+  //typewriter effect state
+  const [displayText, setDisplayText] = useState(""); //current visible text in the hero
+  const [phraseIndex, setPhraseIndex] = useState(0); //index into TYPING_PHRASES
+  const [charIndex, setCharIndex] = useState(0); //current character position
+  const [isDeleting, setIsDeleting] = useState(false); //whether the animation is backspacing
+  const [translatedPhrases, setTranslatedPhrases] = useState<string[]>(TYPING_PHRASES); //phrases in the active language
+  const [floatingLabels, setFloatingLabels] = useState<string[]>(FLOATING_ITEMS.map((item) => item.label)); //translated labels for floating item images
 
   // translatable strings
   const [dontPanicText, setDontPanicText] = useState("Don't Panic.");
@@ -288,7 +292,7 @@ export default function Home() {
     setDisplayText("");
   }, [translatedPhrases]);
 
-  // ban check
+  //checks if the signed-in user is banned or suspended, redirects to /banned if so
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) {
@@ -614,10 +618,11 @@ export default function Home() {
     translateAndCache();
   }, [language, hydrated]);
 
+  //tracks drag offset per floating item index (used to allow interactive dragging)
   const [positions, setPositions] = useState<
     Record<number, { x: number; y: number }>
   >({});
-  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null); //which floating item is being dragged
   const dragState = useRef<{
     index: number;
     startPX: number;
@@ -626,6 +631,7 @@ export default function Home() {
     startIY: number;
   } | null>(null);
 
+  //starts tracking a drag on a floating hero item
   const onPointerDown = (e: React.PointerEvent, i: number) => {
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);

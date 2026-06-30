@@ -16,7 +16,7 @@ import { AdminInboxPanel } from "@/app/components/AdminInboxPanel";
 import { FaClipboard } from "react-icons/fa";
 import Cropper from "react-easy-crop";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+//a school record including theming and rep information
 interface School {
   id: string;
   name: string;
@@ -34,6 +34,7 @@ interface School {
   rep_user_id: string | null;
 }
 
+//a found item posted on a school-specific board
 interface SchoolItem {
   id: number;
   school_id: string;
@@ -59,6 +60,7 @@ interface SchoolItem {
   rejection_count?: number;
 }
 
+//a lost item report posted on a school-specific board
 interface SchoolLostItem {
   id: number;
   school_id: string;
@@ -76,6 +78,7 @@ interface SchoolLostItem {
   location?: string | null;
 }
 
+//a claim submitted by a user on a school board item
 interface SchoolClaimRequest {
   id: string;
   school_id: string;
@@ -93,6 +96,7 @@ interface SchoolClaimRequest {
   updated_at: string | null;
 }
 
+//a dispute filed by a claimant on a school board item
 interface SchoolDispute {
   id: string;
   school_id: string;
@@ -104,6 +108,7 @@ interface SchoolDispute {
   created_at: string;
 }
 
+//a report filed against a school board item
 interface SchoolReport {
   id: number;
   school_id: string;
@@ -117,13 +122,14 @@ interface SchoolReport {
   created_at: string;
 }
 
-// ─── Cache helpers ─────────────────────────────────────────────────────────────
-const SCHOOL_BOARD_CACHE_TTL_MS = 5 * 60 * 1000;
+const SCHOOL_BOARD_CACHE_TTL_MS = 5 * 60 * 1000; //5-minute TTL for the school board item cache
 
+//returns the localStorage key for a school's cached found and lost items
 function getSchoolBoardCacheKey(schoolId: string) {
   return `finder_school_board_${schoolId}`;
 }
 
+//reads and validates the cached board data; returns null if missing or expired
 function readSchoolBoardCache(schoolId: string) {
   if (typeof window === "undefined") return null;
   try {
@@ -140,6 +146,7 @@ function readSchoolBoardCache(schoolId: string) {
   } catch { return null; }
 }
 
+//writes the school's found and lost items to localStorage with a timestamp
 function writeSchoolBoardCache(schoolId: string, found: SchoolItem[], lost: SchoolLostItem[]) {
   if (typeof window === "undefined") return;
   try {
@@ -150,7 +157,7 @@ function writeSchoolBoardCache(schoolId: string, found: SchoolItem[], lost: Scho
   } catch {}
 }
 
-// ─── Gradient helpers ──────────────────────────────────────────────────────────
+//converts a hex color to an rgba string with the given alpha
 function hexToRgba(hex: string, a: number): string {
   const h = hex.replace("#", "");
   const r = parseInt(h.slice(0, 2), 16);
@@ -159,6 +166,7 @@ function hexToRgba(hex: string, a: number): string {
   return `rgba(${r},${g},${b},${a})`;
 }
 
+//returns the relative luminance of a hex color (0=black, 1=white)
 function getLuminance(hex: string): number {
   const h = hex.replace("#", "");
   const r = parseInt(h.slice(0, 2), 16) / 255;
@@ -167,10 +175,12 @@ function getLuminance(hex: string): number {
   const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
+//returns a legible text color (dark or light) for the given background hex
 function textOnColor(hex: string): string {
   return getLuminance(hex) > 0.35 ? "#1e293b" : "#ffffff";
 }
 
+//generates the 4 gradient preset strings used to overlay a school header background
 function gradStyles(hex: string): string[] {
   return [
     `linear-gradient(to top, ${hexToRgba(hex, 0.97)} 0%, ${hexToRgba(hex, 0.72)} 40%, ${hexToRgba(hex, 0.2)} 75%, transparent 100%)`,
@@ -180,7 +190,7 @@ function gradStyles(hex: string): string[] {
   ];
 }
 
-// ─── Crop helper ──────────────────────────────────────────────────────────────
+//renders a cropped region of an image onto a canvas and returns it as a JPEG File
 async function getCroppedImg(
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },
@@ -601,6 +611,7 @@ const DEFAULT_BOARD: BoardStrings = {
   failedToRecord: "Failed to record return:",
 };
 
+//item categories shown in the school board post and filter dropdowns
 const CATEGORIES = [
   "Electronics", "Clothing & Accessories", "Bags & Backpacks", "Books & Stationery",
   "Keys", "Wallet & Cards", "Jewelry", "Water Bottle", "Sports Equipment",
@@ -610,6 +621,7 @@ const CATEGORIES = [
 ];
 
 // ─── Status badge helper ───────────────────────────────────────────────────────
+//renders a colored status pill for a school board item
 function StatusBadge({ status, s }: { status: string; s: BoardStrings }) {
   const map: Record<string, { label: string; color: string }> = {
     waiting:        { label: s.statusActive,          color: "var(--success)" },
@@ -627,6 +639,7 @@ function StatusBadge({ status, s }: { status: string; s: BoardStrings }) {
 }
 
 // ─── SchoolReportsPanel ────────────────────────────────────────────────────────
+//admin panel listing reported items for a school with dismiss/delete actions
 function SchoolReportsPanel({ school, onDeleteItem, s }: { school: School; onDeleteItem: (itemId: number) => void; color: string; s: BoardStrings }) {
   const [reports, setReports] = useState<SchoolReport[]>([]);
   const [loading, setLoading] = useState(true);
@@ -675,6 +688,7 @@ function SchoolReportsPanel({ school, onDeleteItem, s }: { school: School; onDel
 }
 
 // ─── SchoolDisputesPanel ───────────────────────────────────────────────────────
+//admin panel listing open disputes for a school with resolve/dismiss actions
 function SchoolDisputesPanel({
   school, adminId, adminName, onRestoreItem, s,
 }: {
@@ -798,6 +812,7 @@ function SchoolDisputesPanel({
 }
 
 // ─── SchoolCharts ──────────────────────────────────────────────────────────────
+//bar chart panel showing monthly found, lost, and returned activity for the school
 function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, returnedByMonth, totalFound, totalLost, totalReturned, clrFound, clrLost, clrReturned, labelFound, labelLost, labelReturned, labelFoundPosted, labelLostReported }: {
   chartKey: string; monthLabels: string[]; foundByMonth: number[]; lostByMonth: number[]; returnedByMonth: number[];
   totalFound: number; totalLost: number; totalReturned: number; clrFound: string; clrLost: string; clrReturned: string;
@@ -837,6 +852,7 @@ function SchoolCharts({ chartKey, monthLabels, foundByMonth, lostByMonth, return
 }
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
+//school-specific board with found/lost items, post forms, leaderboard, admin tools, and inbox
 export default function SchoolBoardPage() {
   const { schoolId } = useParams<{ schoolId: string }>();
   const router = useRouter();
@@ -1026,6 +1042,7 @@ export default function SchoolBoardPage() {
 }
 
 // ─── SchoolBoard ───────────────────────────────────────────────────────────────
+//main board view for a specific school: items, post form, leaderboard, admin tabs, and inbox
 function SchoolBoard({ school, user, onBack, s }: { school: School; user: any; onBack: () => void; s: BoardStrings }) {
   type BoardTab = "items" | "add-item" | "my-dash" | "leaderboard" | "admin-login" | "reports" | "inbox";
 

@@ -1,3 +1,4 @@
+/*base body styles and data-attribute font size/family overrides applied globally*/
 body {
   background-color: var(--bg);
   color: var(--fg);

@@ -1,3 +1,4 @@
+//returns a deterministic conversation id for two users on a specific item
 export function getConversationId(
   item: { id: string; title: string },
   currentUser: { uid: string; displayName: string },
@@ -7,6 +8,7 @@ export function getConversationId(
   return `conv_${participants.join("_")}`;
 }
 
+//returns a deterministic conversation id for a user contacting a school admin
 export function getSchoolAdminConversationId(
   schoolId: string,
   userId: string,
@@ -15,6 +17,7 @@ export function getSchoolAdminConversationId(
   return `school_${schoolId}_${[userId, adminUserId].sort().join("_")}`;
 }
 
+//returns true if the conversation id belongs to a school admin thread
 export function isSchoolAdminConversation(conversationId: string): boolean {
   return conversationId.startsWith("school_");
 }

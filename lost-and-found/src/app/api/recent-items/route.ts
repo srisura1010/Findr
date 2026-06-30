@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+//service-role client so this route can bypass RLS
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+//GET /api/recent-items - returns up to 15 most recently found unclaimed items
 export async function GET() {
+  //fetch the 15 newest non-claimed items sorted by find date
   const { data, error } = await supabase
     .from("items")
     .select("id, name, description, image_url, image_urls, category, location, status")
@@ -17,6 +20,7 @@ export async function GET() {
   if (error || !data) return NextResponse.json({ items: [] });
 
   const items = data.map((row) => {
+    //prefer the first url from image_urls array; fall back to image_url
     let image = row.image_url as string | null;
     if (row.image_urls) {
       const urls = Array.isArray(row.image_urls)

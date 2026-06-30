@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//POST /api/emails/item-retrieval - sends retrieval request email to the item finder
 export async function POST(req: Request) {
   const {
     author_name,

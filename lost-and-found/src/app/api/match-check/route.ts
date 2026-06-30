@@ -6,6 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+//POST /api/match-check - cross-matches a new report against the opposite table, returns top 3 potential matches
 export async function POST(req: NextRequest) {
   const { query, mode } = await req.json();
   if (!query?.trim()) return NextResponse.json({ items: [] });

@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 import { useSettings } from "@/context/SettingsContext";
 import Cropper from "react-easy-crop";
 
+//feature cards cycling in the schools marketing carousel
 const ABOUT_CAROUSEL_ITEMS: { icon: ReactNode; title: string; body: string }[] =
   [
     {
@@ -38,7 +39,7 @@ const ABOUT_CAROUSEL_ITEMS: { icon: ReactNode; title: string; body: string }[] =
     },
   ];
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+//a school record from the database
 interface School {
   id: string;
   name: string;
@@ -55,13 +56,14 @@ interface School {
   status: string;
 }
 
-// ─── Cache helpers ────────────────────────────────────────────────────────────
-const SCHOOLS_CACHE_TTL_MS = 5 * 60 * 1000;
+const SCHOOLS_CACHE_TTL_MS = 5 * 60 * 1000; //5-minute TTL for the user's joined-schools cache
 
+//returns the localStorage key for a user's joined schools list
 function getMySchoolsCacheKey(userId: string) {
   return `finder_my_schools_${userId}`;
 }
 
+//reads and validates the cached schools list; returns null if missing or expired
 function readMySchoolsCache(userId: string) {
   if (typeof window === "undefined") return null;
   try {
@@ -76,6 +78,7 @@ function readMySchoolsCache(userId: string) {
   }
 }
 
+//writes the user's joined schools list to localStorage with a timestamp
 function writeMySchoolsCache(userId: string, schools: School[]) {
   if (typeof window === "undefined") return;
   try {
@@ -86,7 +89,7 @@ function writeMySchoolsCache(userId: string, schools: School[]) {
   } catch {}
 }
 
-// ─── Translation helper ───────────────────────────────────────────────────────
+//translates a single string via the API with localStorage caching; calls setter with the result
 async function fetchTranslation(
   key: string,
   target: string,
@@ -118,7 +121,7 @@ async function fetchTranslation(
   }
 }
 
-// ─── i18n string types ────────────────────────────────────────────────────────
+//UI strings for the schools marketing/about section
 interface AboutStrings {
   eyebrow: string;
   title: string;
@@ -151,6 +154,7 @@ interface AboutStrings {
   heroTag3: string;
 }
 
+//UI strings for the school code entry panel
 interface EnterCodeStrings {
   title: string;
   hint: string;
@@ -165,6 +169,7 @@ interface EnterCodeStrings {
   signInFirst: string;
 }
 
+//UI strings for the school registration form
 interface RegisterStrings {
   title: string;
   hint: string;
@@ -198,6 +203,7 @@ interface RegisterStrings {
   successSub: string;
 }
 
+//UI strings for the user's joined schools list
 interface MySchoolsStrings {
   title: string;
   signInMsg: string;
@@ -206,7 +212,7 @@ interface MySchoolsStrings {
   leaveBtn: string;
 }
 
-// ─── Gradient helpers ─────────────────────────────────────────────────────────
+//converts a hex color to an rgba string with the given alpha
 function hexToRgba(hex: string, a: number): string {
   const h = hex.replace("#", "");
   const r = parseInt(h.slice(0, 2), 16);
@@ -215,6 +221,7 @@ function hexToRgba(hex: string, a: number): string {
   return `rgba(${r},${g},${b},${a})`;
 }
 
+//generates the 4 gradient overlay presets for a school header background image
 function gradStyles(hex: string): string[] {
   return [
     `linear-gradient(to top, ${hexToRgba(hex, 0.97)} 0%, ${hexToRgba(hex, 0.72)} 40%, ${hexToRgba(hex, 0.2)} 75%, transparent 100%)`,
@@ -224,7 +231,7 @@ function gradStyles(hex: string): string[] {
   ];
 }
 
-// ─── Crop helper ──────────────────────────────────────────────────────────────
+//renders a cropped region of an image onto a canvas and returns it as a JPEG File
 async function getCroppedImg(
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },
@@ -267,7 +274,7 @@ async function getCroppedImg(
   });
 }
 
-// ─── CropModal ────────────────────────────────────────────────────────────────
+//modal that lets users crop and confirm an image before upload
 function CropModal({
   src,
   aspect,
@@ -465,6 +472,7 @@ function CropModal({
 }
 
 // ─── About / Landing Panel ────────────────────────────────────────────────────
+//marketing section with feature carousel and CTA for users who haven't joined a school
 function AboutPanel({
   onEnterCode,
   onRegister,
@@ -598,6 +606,7 @@ function AboutPanel({
 }
 
 // ─── Enter Code Panel ─────────────────────────────────────────────────────────
+//form for entering a school code to join a school
 function EnterCodePanel({
   user,
   mySchools,
@@ -724,6 +733,7 @@ function EnterCodePanel({
 }
 
 // ─── Register School Panel ────────────────────────────────────────────────────
+//form for submitting a new school registration request with branding options
 function RegisterSchoolPanel({
   user,
   s,
@@ -1063,6 +1073,7 @@ function RegisterSchoolPanel({
 }
 
 // ─── My Schools Panel ─────────────────────────────────────────────────────────
+//list of schools the user has joined with links to their boards and leave buttons
 function MySchoolsPanel({
   mySchools,
   user,
@@ -1256,6 +1267,7 @@ const DEFAULT_MY_SCHOOLS: MySchoolsStrings = {
 };
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+//schools page where users join schools, view their boards, and register new schools
 export default function SchoolsPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();

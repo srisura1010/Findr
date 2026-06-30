@@ -1,3 +1,4 @@
+/*styles for the image carousel: main view, thumbnail strip, arrow buttons, and counter*/
 .image-gallery {
   display: flex;
   flex-direction: column;

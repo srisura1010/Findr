@@ -53,6 +53,7 @@ export interface LostItem {
   category?: string;
 }
 
+//coerces image_url or image_urls (array or JSON string) to a clean string array
 function normalizeImages(imageData: any): string[] {
   if (Array.isArray(imageData))
     return imageData.filter((url) => url && typeof url === "string");
@@ -85,6 +86,7 @@ const ItemsContext = createContext<ItemsContextType | undefined>(undefined);
 
 // ─── Translation helpers ───────────────────────────────────────────────────────
 
+//translates a single string with localStorage caching to avoid repeat API calls
 async function translateText(text: string, target: string): Promise<string> {
   const cacheKey = `item_text_${target}_${btoa(encodeURIComponent(text)).slice(0, 40)}`;
   const cached = localStorage.getItem(cacheKey);
@@ -105,6 +107,7 @@ async function translateText(text: string, target: string): Promise<string> {
   return text;
 }
 
+//translates name and description on all items in parallel
 async function translateItems(
   rawItems: RawItem[],
   language: string,
@@ -123,10 +126,11 @@ async function translateItems(
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
+//provides found items, lost items, and mutation helpers to the entire app
 export const ItemsProvider = ({ children }: { children: ReactNode }) => {
-  const [rawItems, setRawItems] = useState<RawItem[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
-  const [lostItems, setLostItems] = useState<LostItem[]>([]);
+  const [rawItems, setRawItems] = useState<RawItem[]>([]); //untranslated found items from supabase
+  const [items, setItems] = useState<Item[]>([]); //translated found items shown to users
+  const [lostItems, setLostItems] = useState<LostItem[]>([]); //items users have reported as lost
   const { language } = useSettings();
 
   // schoolId drives which subset of items we fetch.
@@ -282,23 +286,28 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
 
   // ── Public mutations ───────────────────────────────────────────────────────
 
+  //optimistically prepends a new found item to the local list
   const addItem = (item: Item) => {
     setRawItems((prev) => [item, ...prev]);
   };
 
+  //optimistically prepends a new lost item to the local list
   const addLostItem = (item: LostItem) => {
     setLostItems((prev) => [item, ...prev]);
   };
 
+  //removes a lost item from local state (e.g. after it has been found)
   const removeLostItem = (id: number) => {
     setLostItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  //removes a found item from both raw and translated lists
   const removeItem = (id: number) => {
     setRawItems((prev) => prev.filter((item) => item.id !== id));
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  //updates the status and optional claimer email on a found item in both lists
   const updateItemStatus = (
     id: number,
     newStatus: string,
@@ -346,6 +355,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+//hook to access items context from any component inside ItemsProvider
 export const useItems = () => {
   const ctx = useContext(ItemsContext);
   if (!ctx) throw new Error("useItems must be used inside ItemsProvider");

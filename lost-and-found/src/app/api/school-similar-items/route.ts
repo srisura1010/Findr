@@ -6,10 +6,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+//POST /api/school-similar-items - returns up to 6 semantically similar items within a specific school
 export async function POST(req: NextRequest) {
   const { query, school_id, exclude_id } = await req.json();
   if (!query?.trim() || !school_id) return NextResponse.json({ items: [] });
 
+  //fetch school-scoped items only
   const { data: allItems, error } = await supabase
     .from("school_items")
     .select("id, name, description, image_url, image_urls, ai_keywords, category, location, status")
@@ -22,6 +24,7 @@ export async function POST(req: NextRequest) {
   if (error || !allItems || allItems.length === 0)
     return NextResponse.json({ items: [] });
 
+  //exclude the item the user is currently viewing from suggestions
   const candidates = allItems.filter((i) => i.id !== exclude_id);
   if (candidates.length === 0) return NextResponse.json({ items: [] });
 

@@ -18,6 +18,7 @@ import {
 import { applyTheme } from "@/lib/applyTheme";
 import { ThemeId } from "@/lib/themes";
 
+//language options shown in the language picker
 const LANGUAGES = [
   { code: "en", label: "English" },
   { code: "es", label: "Español" },
@@ -41,6 +42,7 @@ const LANGUAGES = [
   { code: "sw", label: "Kiswahili" },
 ] as const;
 
+//color values used to render the theme preview SVG in the theme picker
 const THEME_PREVIEWS: Record<
   string,
   {
@@ -166,6 +168,7 @@ const THEME_PREVIEWS: Record<
   },
 };
 
+//miniature landscape SVG that gives each theme card a visual color preview
 const ThemePreviewSVG = ({
   sky,
   ground,
@@ -230,6 +233,7 @@ const ALL_PRESET_THEMES = [
   ...STANDARD_THEMES, ...LIGHT_THEMES, ...DARK_THEMES, ...A11Y_THEMES,
 ];
 
+//font face options for the font family picker
 const FONT_OPTIONS = [
   { value: "sans", name: "Sans Serif", fontFamily: "sans-serif" },
   { value: "inter", name: "Inter", fontFamily: '"Inter", sans-serif' },
@@ -251,6 +255,7 @@ const FONT_OPTIONS = [
   { value: "roboto", name: "Roboto Slab", fontFamily: '"Roboto Slab", serif' },
 ];
 
+//font size options for the size picker
 const SIZE_OPTIONS = [
   { value: "sm", labelKey: "small", sizeClass: "size-btn-sm" },
   { value: "md", labelKey: "medium", sizeClass: "size-btn-md" },
@@ -258,6 +263,7 @@ const SIZE_OPTIONS = [
   { value: "xl", labelKey: "extraLarge", sizeClass: "size-btn-xl" },
 ];
 
+//settings page for theme, font, language, accessibility, and custom theme editor
 const SettingsPage = () => {
   const {
     theme,

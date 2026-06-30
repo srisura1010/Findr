@@ -9,7 +9,7 @@ import { FaArrowLeft, FaCalendar, FaMapPin, FaTag, FaMessage, FaTrash } from "re
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import "@/app/school-items/[id]/school-item-detail.css";
 
-// ── strings ────────────────────────────────────────────────────────────────────
+//all translatable UI strings for the school lost item detail page
 interface SLostStrings {
   itemNotFound: string; backBtn: string; back: string; schoolItems: string;
   schoolLostItem: string; lostBy: string; lostDate: string; lostLocation: string;
@@ -24,6 +24,7 @@ interface SLostStrings {
   chatTemplateMissing: string;
 }
 
+//English default strings shown before translations load
 const DEFAULT_SLOST: SLostStrings = {
   itemNotFound: "Item not found.", backBtn: "← Back", back: "Back",
   schoolItems: "School Items", schoolLostItem: "School Lost Item",
@@ -42,6 +43,7 @@ const DEFAULT_SLOST: SLostStrings = {
   chatTemplateMissing: "Is this still missing?",
 };
 
+//translates a batch of SLostStrings fields, hitting the cache first then the API
 async function batchTranslateSLost(
   entries: Array<[keyof SLostStrings, string]>,
   target: string,
@@ -89,6 +91,7 @@ interface ChatMessage {
 }
 
 // ── page ───────────────────────────────────────────────────────────────────────
+//detail page for a school-scoped lost item report with messaging and similar item suggestions
 export default function SchoolLostItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();

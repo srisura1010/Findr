@@ -11,6 +11,7 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { MdOutlineMessage, MdOutlineSchool } from "react-icons/md";
 import { SchoolAdminContactModal, type SchoolAdminConvData } from "@/app/components/SchoolAdminContactModal";
 
+//a single chat message row from the database
 interface Message {
   id: number;
   conversation_id: string;
@@ -25,6 +26,7 @@ interface Message {
   read: boolean;
 }
 
+//summary of a conversation thread shown in the left sidebar
 interface Conversation {
   conversation_id: string;
   item_title: string;
@@ -39,6 +41,7 @@ interface Conversation {
   isAdminConv?: boolean;
 }
 
+//a registered admin available to contact
 interface Admin {
   id: string;
   email: string;
@@ -53,6 +56,7 @@ const USER_REPORT_REASONS = [
   "Other",
 ];
 
+//translates a UI string with localStorage caching, falls back to original on error
 async function t(text: string, language: string): Promise<string> {
   if (language === "en") return text;
   const cacheKey = `msg_ui_${language}_${text.slice(0, 40)}`;
@@ -76,6 +80,7 @@ async function t(text: string, language: string): Promise<string> {
   return text;
 }
 
+//modal that lets a user report another user in a conversation
 function ReportUserModal({
   reportedUserId,
   reportedUserName,
@@ -275,25 +280,26 @@ function ContactAdminModal({
   );
 }
 
+//two-panel messaging page: conversation list on the left, active chat thread on the right
 export default function MessagesPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const { language, hydrated } = useSettings();
 
-  const [banChecked, setBanChecked] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConvId, setActiveConvId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [reportingUser, setReportingUser] = useState(false);
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [showSchoolAdminModal, setShowSchoolAdminModal] = useState(false);
-  const [admins, setAdmins] = useState<Admin[]>([]);
-  const [adminsLoading, setAdminsLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [banChecked, setBanChecked] = useState(false); //true once the ban check resolves
+  const [conversations, setConversations] = useState<Conversation[]>([]); //all conversation summaries for the left sidebar
+  const [activeConvId, setActiveConvId] = useState<string | null>(null); //id of the currently open conversation
+  const [messages, setMessages] = useState<Message[]>([]); //messages in the active conversation thread
+  const [text, setText] = useState(""); //draft text in the message compose box
+  const [sending, setSending] = useState(false); //true while a message send is in flight
+  const [reportingUser, setReportingUser] = useState(false); //whether the report-user modal is open
+  const [showAdminModal, setShowAdminModal] = useState(false); //whether the contact-an-admin modal is open
+  const [showSchoolAdminModal, setShowSchoolAdminModal] = useState(false); //whether the contact-a-school-admin modal is open
+  const [admins, setAdmins] = useState<Admin[]>([]); //list of admins fetched for the contact-admin modal
+  const [adminsLoading, setAdminsLoading] = useState(false); //true while fetching admin list
+  const bottomRef = useRef<HTMLDivElement>(null); //scroll anchor at the bottom of the message list
 
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(false); //true after translations finish loading
   const [uiMessagesTitle, setUiMessagesTitle] = useState("Finder Messages");
   const [uiYourConversations, setUiYourConversations] = useState("Your conversations");
   const [uiNoConversations, setUiNoConversations] = useState(

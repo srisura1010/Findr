@@ -9,6 +9,7 @@ import { SUPER_ADMINS } from "@/lib/superAdmin";
 import { useSettings } from "@/context/SettingsContext";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 
+//a pending admin approval request from a staff member
 interface AdminRequest {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ interface AdminRequest {
   submitted_at: string;
 }
 
+//a pending school registration request
 interface SchoolRequest {
   id: string;
   name: string;
@@ -41,6 +43,7 @@ interface SchoolRequest {
   created_at: string;
 }
 
+//generates a random 10-character alphanumeric admin password
 function generatePassword(): string {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -49,6 +52,7 @@ function generatePassword(): string {
     .join("");
 }
 
+//generates a unique school code from the school name, current year, and a random suffix
 function generateSchoolCode(name: string): string {
   const slug = name
     .toUpperCase()
@@ -62,7 +66,7 @@ function generateSchoolCode(name: string): string {
   return `${slug}-${suffix}-${rand}`;
 }
 
-// ── Resend helpers ────────────────────────────────────────────────────────────
+//sends a transactional email via an API route; logs failures but never throws
 async function sendEmail(route: string, body: Record<string, string>) {
   try {
     await fetch(`/api/emails/${route}`, {
@@ -75,6 +79,7 @@ async function sendEmail(route: string, body: Record<string, string>) {
   }
 }
 
+//super-admin panel for approving admin requests, managing schools, and reviewing all items
 export default function SuperAdminPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();

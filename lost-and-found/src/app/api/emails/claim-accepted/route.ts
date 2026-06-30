@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//POST /api/emails/claim-accepted - notifies the claimant that the finder accepted their claim
 export async function POST(req: Request) {
   const { claimant_email, claimant_name, item_name } = await req.json();
 

@@ -11,19 +11,21 @@ interface LocationMapProps {
   zoom?: number;
 }
 
+//renders a Leaflet map centered on the given coordinates with a custom marker
 export default function LocationMap({
   lat,
   lng,
   address,
   zoom = 15,
 }: LocationMapProps) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const [mapReady, setMapReady] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null); //DOM node Leaflet attaches to
+  const mapRef = useRef<any>(null); //holds the Leaflet map instance for cleanup
+  const [mapReady, setMapReady] = useState(false); //true after Leaflet finishes initializing
   const { language, hydrated } = useSettings();
   const [loadingText, setLoadingText] = useState("Loading map…");
   const [openText, setOpenText] = useState("Open ↗");
 
+  //translates the map UI strings when the language changes
   useEffect(() => {
     if (!hydrated) return;
     if (language === "en") { setLoadingText("Loading map…"); setOpenText("Open ↗"); return; }
@@ -154,6 +156,7 @@ export default function LocationMap({
     };
   }, [lat, lng, address, zoom]);
 
+  //opens the location in OpenStreetMap in a new tab
   const handleOpenInMaps = () => {
     window.open(
       `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`,

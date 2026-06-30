@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//POST /api/emails/school-approved - notifies a school admin that their school is live, includes school code and password
 export async function POST(req: Request) {
   const { name, email, school_name, school_code, school_password } =
     await req.json();

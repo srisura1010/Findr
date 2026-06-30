@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//POST /api/emails/claim-rejected - notifies the claimant that their claim was not accepted
 export async function POST(req: Request) {
   const { claimant_email, claimant_name, item_name, rejection_reason } =
     await req.json();

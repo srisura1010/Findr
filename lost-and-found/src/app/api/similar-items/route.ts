@@ -6,10 +6,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+//POST /api/similar-items - returns up to 10 semantically similar found items for a given query string
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
   if (!query?.trim()) return NextResponse.json({ items: [] });
 
+  //load up to 200 active items to feed into the LLM catalogue
   const { data: allItems, error } = await supabase
     .from("items")
     .select(
@@ -23,6 +25,7 @@ export async function POST(req: NextRequest) {
   if (error || !allItems || allItems.length === 0)
     return NextResponse.json({ items: [] });
 
+  //build a pipe-delimited catalogue string the LLM will rank
   const catalogue = allItems
     .map((item) => {
       const desc = (item.description ?? "").slice(0, 80);
@@ -72,6 +75,7 @@ Instructions:
 
     const data = await res.json();
     const textContent = data.choices?.[0]?.message?.content ?? "[]";
+    //strip potential markdown code fences the model might add
     const raw = textContent.replace(/```json|```/g, "").trim();
     const matchedIds: number[] = JSON.parse(raw);
 
@@ -83,6 +87,7 @@ Instructions:
         const item = idToItem.get(id);
         if (!item) return null;
 
+        //resolve to first available image url
         let imageUrl = item.image_url;
         if (item.image_urls) {
           const urls = Array.isArray(item.image_urls)

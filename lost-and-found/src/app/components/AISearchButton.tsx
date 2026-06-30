@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { HiSparkles } from "react-icons/hi2";
 import { useSettings } from "@/context/SettingsContext";
 
+//button in the top bar that navigates to the AI semantic search page
 export default function AISearchButton() {
   const router = useRouter();
   const { language, hydrated } = useSettings();
-  const [label, setLabel] = useState("AI Search");
+  const [label, setLabel] = useState("AI Search"); //translated button label
 
+  //translates the button label when the UI language changes
   useEffect(() => {
     if (!hydrated) return;
     if (language === "en") { setLabel("AI Search"); return; }

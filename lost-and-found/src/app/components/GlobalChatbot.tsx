@@ -6,6 +6,7 @@ import { useGlobalChat } from "@/context/GlobalChatContext";
 import { useSettings } from "@/context/SettingsContext";
 import "./GlobalChatbot.css";
 
+//system prompt injected into every Groq request to keep the bot focused on Finder
 const BASE_SYSTEM_PROMPT = `You are the helpful support assistant for Finder, a school lost & found web app.
 Keep answers short, friendly, and focused on Finder. Here's what you know:
 
@@ -22,6 +23,7 @@ Keep answers short, friendly, and focused on Finder. Here's what you know:
 If you don't know something, say so and suggest contacting the school admin.
 Always reply in the user's preferred language.`;
 
+//maps language codes to their English names for injecting into the system prompt
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", de: "German", zh: "Chinese",
   hi: "Hindi", ar: "Arabic", pt: "Portuguese", bn: "Bengali", ru: "Russian",
@@ -29,8 +31,10 @@ const LANGUAGE_NAMES: Record<string, string> = {
   pl: "Polish", nl: "Dutch", uk: "Ukrainian", fa: "Persian", sw: "Swahili",
 };
 
+//routes where the chatbot widget should not be rendered
 const HIDDEN_PREFIXES = ["/help", "/banned", "/sign-in", "/sign-up", "/messages"];
 
+//translates a UI string to the given language, using localStorage as a cache
 async function t(text: string, language: string): Promise<string> {
   if (language === "en") return text;
   const cacheKey = `chatbot_ui_${language}_${text.slice(0, 40)}`;
@@ -52,20 +56,23 @@ async function t(text: string, language: string): Promise<string> {
   return text;
 }
 
+//floating chatbot panel powered by Groq; hidden on certain routes
 export default function GlobalChatbot() {
   const pathname = usePathname();
   const { messages, setMessages, isOpen, setIsOpen } = useGlobalChat();
   const { language, hydrated } = useSettings();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const loadingRef = useRef(false);
+  const loadingRef = useRef(false); //prevents sending duplicate requests
 
+  //translated UI strings for the chatbot panel
   const [uiTitle, setUiTitle] = useState("Finder AI Support");
   const [uiPlaceholder, setUiPlaceholder] = useState("Ask anything about Finder...");
   const [uiGreeting, setUiGreeting] = useState(
     "Hey! I'm Finder's support assistant. Ask me anything about how to use the app",
   );
 
+  //translates chatbot UI strings when the language changes
   useEffect(() => {
     if (!hydrated) return;
     const translate = async () => {

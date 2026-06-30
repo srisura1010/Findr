@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//POST /api/emails/admin-approved - sends approval email with credentials to a newly approved admin
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
   await resend.emails.send({

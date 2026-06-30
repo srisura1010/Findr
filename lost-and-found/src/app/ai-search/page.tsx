@@ -8,6 +8,7 @@ import { useSettings } from "@/context/SettingsContext";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 // ── types ────────────────────────────────────────────────────────────
+//a found item displayed as an orbiting chip in the AI search visualization
 interface CircleItem {
   id: number;
   name: string;
@@ -19,6 +20,7 @@ interface CircleItem {
   score: number;
 }
 
+//an item currently animating from center toward its orbit position
 interface SpawningChip {
   item: CircleItem;
   index: number;
@@ -27,7 +29,7 @@ interface SpawningChip {
 }
 
 // ── constants ─────────────────────────────────────────────────────────
-const STAGE = 620;
+const STAGE = 620; //diameter in px of the SVG stage holding the orbit
 const CX = STAGE / 2;
 const CY = STAGE / 2;
 const ORBIT_R = 248;
@@ -36,12 +38,13 @@ const EXIT_SPIN_SPEED = 0.00048;  // rad/ms — slightly faster during exit
 const SPAWN_DURATION = 700;       // ms per chip to travel center → orbit
 const SPAWN_STAGGER = 90;         // ms between each chip spawning
 
+//interactive AI semantic search page with an orbiting chip animation
 export default function AISearchPage() {
   const router = useRouter();
   const { user } = useUser();
   const { language, hydrated } = useSettings();
 
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(false); //true after translations finish loading
   const [loadingItemsText, setLoadingItemsText] = useState("Loading items…");
   const [aiThinkingText, setAiThinkingText] = useState("AI is thinking…");
   const [noMatchesText, setNoMatchesText] = useState("No matches found");
@@ -104,29 +107,29 @@ export default function AISearchPage() {
     translateAndCache();
   }, [language, hydrated]);
 
-  const rafRef = useRef<number | null>(null);
-  const lastTsRef = useRef<number>(0);
-  const anglesRef = useRef<number[]>([]);
-  const masterRef = useRef<CircleItem[]>([]);
-  const transitionPhaseRef = useRef<"idle" | "exit" | "spawning">("idle");
+  const rafRef = useRef<number | null>(null); //requestAnimationFrame handle
+  const lastTsRef = useRef<number>(0); //timestamp of the previous RAF tick
+  const anglesRef = useRef<number[]>([]); //current angle in radians for each orbiting chip
+  const masterRef = useRef<CircleItem[]>([]); //full set of recently found items for reset
+  const transitionPhaseRef = useRef<"idle" | "exit" | "spawning">("idle"); //ref copy so the RAF closure reads current phase
   const nowRef = useRef<number>(0); // updated every RAF tick
 
-  const [items, setItems] = useState<CircleItem[]>([]);
-  const [exitItems, setExitItems] = useState<CircleItem[]>([]);
-  const [exitAngles, setExitAngles] = useState<number[]>([]);
-  const [spawningChips, setSpawningChips] = useState<SpawningChip[]>([]);
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [searched, setSearched] = useState(false);
-  const [chipPositions, setChipPositions] = useState<{ x: number; y: number }[]>([]);
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [transitionPhase, setTransitionPhase] = useState<"idle" | "exit" | "spawning">("idle");
+  const [items, setItems] = useState<CircleItem[]>([]); //chips currently in orbit
+  const [exitItems, setExitItems] = useState<CircleItem[]>([]); //chips playing the exit animation
+  const [exitAngles, setExitAngles] = useState<number[]>([]); //angles captured at the start of the exit animation
+  const [spawningChips, setSpawningChips] = useState<SpawningChip[]>([]); //chips traveling from center to orbit
+  const [query, setQuery] = useState(""); //current search input value
+  const [loading, setLoading] = useState(false); //true while waiting for the AI search API
+  const [initialLoad, setInitialLoad] = useState(true); //true during the first fetch of recent items
+  const [searched, setSearched] = useState(false); //true once the user has submitted at least one search
+  const [chipPositions, setChipPositions] = useState<{ x: number; y: number }[]>([]); //pixel coords for each orbiting chip
+  const [hoveredId, setHoveredId] = useState<number | null>(null); //id of the chip currently hovered
+  const [transitionPhase, setTransitionPhase] = useState<"idle" | "exit" | "spawning">("idle"); //drives animation state on the stage element
   const [, forceRender] = useState(0); // used to trigger re-renders during spawn animation
-  const [translatedCats, setTranslatedCats] = useState<Record<string, string>>({});
-  const [translatedItems, setTranslatedItems] = useState<Record<number, { name: string; description: string }>>({});
+  const [translatedCats, setTranslatedCats] = useState<Record<string, string>>({}); //category label translations keyed by English value
+  const [translatedItems, setTranslatedItems] = useState<Record<number, { name: string; description: string }>>({}); //item name/description translations keyed by item id
 
-  // ── translate categories + item names/descriptions when items or language changes ─────
+  //translates item names, descriptions, and category labels when items or language changes
   useEffect(() => {
     if (!hydrated || language === "en") {
       setTranslatedCats({});
@@ -208,7 +211,7 @@ export default function AISearchPage() {
     })();
   }, [items, language, hydrated]);
 
-  // ── animation loop ───────────────────────────────────────────────
+  //RAF loop that rotates chip angles and keeps coords in sync each frame
   const tick = useCallback((ts: number) => {
     const dt = lastTsRef.current ? Math.min(ts - lastTsRef.current, 50) : 16;
     lastTsRef.current = ts;
@@ -246,7 +249,7 @@ export default function AISearchPage() {
     };
   }, [tick]);
 
-  // ── helpers ──────────────────────────────────────────────────────
+  //places items evenly around the orbit and initializes their angles
   const startItems = (newItems: CircleItem[]) => {
     anglesRef.current = newItems.map(
       (_, i) => (2 * Math.PI * i) / newItems.length - Math.PI / 2,
@@ -260,7 +263,7 @@ export default function AISearchPage() {
     );
   };
 
-  // ── initial load ─────────────────────────────────────────────────
+  //fetches the 15 most recent items on first render and puts them in orbit
   useEffect(() => {
     (async () => {
       try {
@@ -274,7 +277,7 @@ export default function AISearchPage() {
     })();
   }, []);
 
-  // ── spawn new items from center outward ───────────────────────────
+  //animates new search results flying from the center hub out to their orbit positions
   const spawnItems = useCallback((newItems: CircleItem[]) => {
     if (newItems.length === 0) {
       startItems([]);
@@ -318,7 +321,7 @@ export default function AISearchPage() {
     }, totalDuration);
   }, []);
 
-  // ── search ───────────────────────────────────────────────────────
+  //runs the AI semantic search and replaces orbiting chips with the results
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
@@ -361,6 +364,7 @@ export default function AISearchPage() {
     setLoading(false);
   };
 
+  //clears search results and restores the original recently found items
   const handleReset = () => {
     const currentItems = [...items];
     const currentAngles = [...anglesRef.current];
@@ -385,6 +389,7 @@ export default function AISearchPage() {
     router.push(`/items/${item.id}`);
   };
 
+  //returns true if the hover popup should appear below the chip (chip is in the top half of the orbit)
   const popupBelow = (angle: number) => {
     const a = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
     return a < Math.PI;
@@ -396,8 +401,8 @@ export default function AISearchPage() {
 
   const profileImage = user?.imageUrl;
 
-  // Scale the fixed-size stage down on small viewports
-  const [stageScale, setStageScale] = useState(1);
+  const [stageScale, setStageScale] = useState(1); //ratio used to shrink the stage on narrow screens
+  //recalculates the scale whenever the viewport width changes
   useEffect(() => {
     const update = () => {
       const avail = window.innerWidth - 24; // 12px padding each side

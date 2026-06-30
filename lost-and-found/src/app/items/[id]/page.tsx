@@ -21,6 +21,7 @@ import LocationMap from "@/app/components/LocationMap";
 import { getConversationId } from "@/app/components/MessagingSystem";
 import "./item-detail.css";
 
+//reasons a user can select when reporting an item
 const REPORT_REASONS = [
   "Inappropriate content",
   "Spam or duplicate",
@@ -29,6 +30,7 @@ const REPORT_REASONS = [
   "Other",
 ];
 
+//coerces image_url or image_urls (string or array) to a clean string array
 function normalizeImages(imageData: any): string[] {
   if (Array.isArray(imageData))
     return imageData.filter((url) => url && typeof url === "string");
@@ -36,6 +38,7 @@ function normalizeImages(imageData: any): string[] {
   return [];
 }
 
+//a single chat message on this item's conversation thread
 interface Message {
   id: number;
   conversation_id: string;
@@ -48,7 +51,7 @@ interface Message {
   created_at: string;
 }
 
-// ── Translatable UI strings ───────────────────────────────────────────────────
+//English default strings for the item detail page shown before translations load
 const DEFAULT_DETAIL = {
   back: "Back", lostItemsBreadcrumb: "Lost Items", foundItemsBreadcrumb: "Found Items",
   lostItemPill: "Lost Item", foundItemPill: "Found Item",
@@ -189,6 +192,7 @@ function sendEmail(route: string, body: Record<string, string>) {
   }).catch(console.error);
 }
 
+//item detail page showing description, claims, chat, map, and action buttons
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();

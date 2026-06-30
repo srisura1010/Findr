@@ -17,6 +17,7 @@ const ThemeContext = createContext<ThemeContextProps>({
   setTheme: () => {},
 });
 
+//spinner and track colors for the themed loading indicator per theme
 const THEME_STYLES: Record<ThemeId, { spinner: string; track: string }> = {
   light:          { spinner: "#2f80ed", track: "#e8eaf0" },
   dark:           { spinner: "#7c3aed", track: "#1e2d45" },
@@ -38,11 +39,13 @@ const THEME_STYLES: Record<ThemeId, { spinner: string; track: string }> = {
   "custom-4":     { spinner: "#2f80ed", track: "#e8eaf0" },
 };
 
+//reads the saved theme from localStorage; returns "light" on SSR
 function getInitialTheme(): ThemeId {
   if (typeof window === "undefined") return "light";
   return (localStorage.getItem("theme") as ThemeId) || "light";
 }
 
+//context provider that exposes the active theme id for components that need it directly
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<ThemeId>(getInitialTheme);
 
@@ -54,6 +57,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+//full-screen themed spinner shown during suspense/loading states
 function ThemedLoader({ theme }: { theme: ThemeId }) {
   const { spinner, track } = THEME_STYLES[theme] ?? THEME_STYLES["light"];
 

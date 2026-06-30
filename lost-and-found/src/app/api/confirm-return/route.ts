@@ -6,6 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+//POST /api/confirm-return - archives a returned item and deletes the live listing
 export async function POST(req: Request) {
   const { item_id, user_id } = await req.json();
 

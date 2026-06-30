@@ -8,6 +8,7 @@ const supabase = createClient(
 );
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//sends a simple text email via Resend
 async function sendEmail(to: string, subject: string, body: string) {
   await resend.emails
     .send({
@@ -19,6 +20,7 @@ async function sendEmail(to: string, subject: string, body: string) {
     .catch(console.error);
 }
 
+//GET /api/expire-claims - cron job that expires stale accepted claims and auto-completes unconfirmed handoffs
 export async function GET(request: Request) {
   const secret = request.headers.get("x-cron-secret");
   if (secret !== process.env.CRON_SECRET) {

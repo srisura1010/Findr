@@ -20,7 +20,7 @@ import LocationMap from "@/app/components/LocationMap";
 import { getConversationId } from "@/app/components/MessagingSystem";
 import "./school-item-detail.css";
 
-// ── translation strings ────────────────────────────────────────────────────────
+//all translatable UI strings for the school item detail page
 interface SItemStrings {
   itemNotFound: string; backBtn: string; back: string; schoolItems: string;
   schoolFoundItem: string; foundBy: string; foundDate: string; foundLocation: string;
@@ -58,6 +58,7 @@ interface SItemStrings {
   acceptedClaimPre: string;
   acceptedClaimPost: string;
 }
+//English default strings shown before translations load
 const DEFAULT_SITEM: SItemStrings = {
   itemNotFound: "Item not found.", backBtn: "← Back", back: "Back", schoolItems: "School Items",
   schoolFoundItem: "School Found Item", foundBy: "Found by", foundDate: "Found",
@@ -200,6 +201,7 @@ interface ChatMessage {
 }
 
 // ── component ─────────────────────────────────────────────────────────────────
+//school-scoped item detail page with claims, chat, and school admin tools
 export default function SchoolItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();

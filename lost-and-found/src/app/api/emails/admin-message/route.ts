@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//POST /api/emails/admin-message - sends a custom admin-to-user message email about a specific item
 export async function POST(req: Request) {
   const { to_email, to_name, admin_name, item_name, message } =
     await req.json();

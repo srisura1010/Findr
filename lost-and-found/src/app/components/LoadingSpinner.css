@@ -1,3 +1,4 @@
+/*full-screen loading overlay with themed spinner gif*/
 .spinner-overlay {
   position: fixed;
   inset: 0;
@@ -13,7 +14,7 @@
   width: 300px;
   height: 300px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  mix-blend-mode: multiply; /*blends the gif naturally with light backgrounds*/
 }
 
 body.high-contrast .spinner-gif {

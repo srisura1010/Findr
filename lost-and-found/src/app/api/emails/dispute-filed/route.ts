@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+//builds the HTML email body for a dispute notification sent to all admins
 function buildHtml(
   adminName: string,
   item_name: string,
@@ -72,6 +73,7 @@ function buildHtml(
   `;
 }
 
+//POST /api/emails/dispute-filed - sends dispute alert email to all registered admins
 export async function POST(req: Request) {
   const {
     item_name,
@@ -89,6 +91,7 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
+  //fetch all admin recipients; fall back to the env-configured address if none are registered
   const { data: admins } = await supabase
     .from("admins")
     .select("email, name");

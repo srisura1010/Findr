@@ -26,6 +26,7 @@ import Cropper from "react-easy-crop";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import LocationPicker, { LocationData } from "@/app/components/LocationPicker";
 
+//fire-and-forget email sender used by dashboard actions
 function sendEmail(route: string, body: Record<string, string>) {
   fetch(`/api/emails/${route}`, {
     method: "POST",
@@ -34,7 +35,7 @@ function sendEmail(route: string, body: Record<string, string>) {
   }).catch(console.error);
 }
 
-// ── Categories ────────────────────────────────────────────────────────────────
+//item categories shown in the post-item and filter dropdowns
 const CATEGORIES = [
   "Electronics",
   "Clothing & Accessories",
@@ -57,6 +58,7 @@ const CATEGORIES = [
   "Other",
 ];
 
+//a report filed against a posted item
 interface Report {
   id: number;
   item_id: number;
@@ -72,6 +74,7 @@ interface Report {
     author_id: string;
   } | null;
 }
+//a report filed against a user
 interface UserReport {
   id: number;
   reporter_name: string;
@@ -82,6 +85,7 @@ interface UserReport {
   reason: string;
   created_at: string;
 }
+//a user who has been banned or suspended
 interface BannedUser {
   email: string;
   reason: string;
@@ -100,8 +104,7 @@ type TabId =
   | "ban-management"
   | "inbox";
 
-// ── Translation helper ────────────────────────────────────────────────────────
-// Translates a batch of [field, englishKey, cacheKey] tuples in one request.
+//translates a batch of [field, englishKey, cacheKey] tuples, hitting cache first then the API
 async function batchTranslate(
   entries: Array<[keyof DashStrings, string, string]>,
   target: string,
@@ -151,7 +154,7 @@ async function batchTranslate(
   }
 }
 
-// ── Crop helper ───────────────────────────────────────────────────────────────
+//renders a cropped region of an image onto a canvas and returns it as a JPEG File
 async function getCroppedImg(
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },
@@ -203,7 +206,7 @@ async function getCroppedImg(
   });
 }
 
-// ── String bundle types ───────────────────────────────────────────────────────
+//all translatable UI strings used across the dashboard page
 interface DashStrings {
   tabItems: string;
   tabMyItems: string;
@@ -398,6 +401,7 @@ interface DashStrings {
   disputedStatus: string;
 }
 
+//English defaults shown before translations load
 const DEFAULT_STRINGS: DashStrings = {
   tabItems: "Items",
   tabMyItems: "My Items",
@@ -1798,6 +1802,7 @@ function MyDashboardCharts({
   return null;
 }
 
+//main dashboard: found/lost item boards, post forms, admin tools, user stats, and inbox
 export default function DashboardPage() {
   const {
     items,
@@ -1812,28 +1817,26 @@ export default function DashboardPage() {
   const { language, theme, hydrated } = useSettings();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<TabId>("items");
-  const [isReady, setIsReady] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [boardTab, setBoardTab] = useState<"found" | "lost">("found");
+  const [activeTab, setActiveTab] = useState<TabId>("items"); //which sidebar tab is selected
+  const [isReady, setIsReady] = useState(false); //true after translations finish loading
+  const [searchQuery, setSearchQuery] = useState(""); //text in the item search bar
+  const [boardTab, setBoardTab] = useState<"found" | "lost">("found"); //found vs lost toggle on the items board
 
-  // My Active Claims (claimant section)
-  const [myActiveClaims, setMyActiveClaims] = useState<any[]>([]);
-  const [activeClaimsLoading, setActiveClaimsLoading] = useState(false);
-  const [totalReturnedByMe, setTotalReturnedByMe] = useState(0);
-  const [myReturnedItems, setMyReturnedItems] = useState<any[]>([]);
-  const [myItemClaims, setMyItemClaims] = useState<Record<number, number>>({});
-  const [reportsTab, setReportsTab] = useState<"items" | "users" | "disputes">("items");
-  const [reportMode, setReportMode] = useState<"found" | "lost">("found");
-  const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS);
-  const [catMap, setCatMap] = useState<Record<string, string>>({});
-  const [nameMap, setNameMap] = useState<Record<number, string>>({});
+  const [myActiveClaims, setMyActiveClaims] = useState<any[]>([]); //claims the current user has submitted as a claimant
+  const [activeClaimsLoading, setActiveClaimsLoading] = useState(false); //true while fetching claimant claims
+  const [totalReturnedByMe, setTotalReturnedByMe] = useState(0); //count of items this user has successfully returned as finder
+  const [myReturnedItems, setMyReturnedItems] = useState<any[]>([]); //history of items this user returned
+  const [myItemClaims, setMyItemClaims] = useState<Record<number, number>>({}); //maps item id to pending claim count for the finder's items
+  const [reportsTab, setReportsTab] = useState<"items" | "users" | "disputes">("items"); //active sub-tab in the admin reports panel
+  const [reportMode, setReportMode] = useState<"found" | "lost">("found"); //whether the post form is in found or lost mode
+  const [s, setS] = useState<DashStrings>(DEFAULT_STRINGS); //translated UI string bundle for the dashboard
+  const [catMap, setCatMap] = useState<Record<string, string>>({}); //category label translations keyed by English value
+  const [nameMap, setNameMap] = useState<Record<number, string>>({}); //item name translations keyed by item id
 
-  // ── Filter state ────────────────────────────────────────────────────────────
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterLocation, setFilterLocation] = useState("");
-  const [filterDateFrom, setFilterDateFrom] = useState("");
-  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterCategory, setFilterCategory] = useState(""); //active category filter value
+  const [filterLocation, setFilterLocation] = useState(""); //active location keyword filter
+  const [filterDateFrom, setFilterDateFrom] = useState(""); //earliest find date filter
+  const [filterDateTo, setFilterDateTo] = useState(""); //latest find date filter
 
   const hasActiveFilters =
     !!filterCategory || !!filterLocation || !!filterDateFrom || !!filterDateTo;
@@ -1845,7 +1848,7 @@ export default function DashboardPage() {
     setFilterDateTo("");
   };
 
-  const [banChecked, setBanChecked] = useState(false);
+  const [banChecked, setBanChecked] = useState(false); //true once the ban check resolves
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window !== "undefined")
       return localStorage.getItem("finder_is_admin") === "true";
@@ -1862,10 +1865,12 @@ export default function DashboardPage() {
     return "Admin";
   });
 
+  //syncs admin status to localStorage so it persists across page reloads
   useEffect(() => {
     localStorage.setItem("finder_is_admin", String(isAdmin));
   }, [isAdmin]);
 
+  //checks if the signed-in user is banned or suspended and redirects to /banned if so
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) {

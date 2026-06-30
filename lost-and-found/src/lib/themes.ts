@@ -1,3 +1,4 @@
+//all valid theme ids, including user-customizable slots
 export type ThemeId =
   | "light"
   | "dark"
@@ -18,12 +19,14 @@ export type ThemeId =
   | "custom-3"
   | "custom-4";
 
+//shape of a single theme: display label, group for settings UI, and CSS variable map
 export interface ThemeDefinition {
   label: string;
   group: "standard" | "dark-variants" | "light-variants" | "accessibility" | "custom";
   vars: Record<string, string>;
 }
 
+//registry of all built-in themes keyed by ThemeId
 export const themes: Record<ThemeId, ThemeDefinition> = {
 
   // ── STANDARD ─────────────────────────────────────────────────────────────

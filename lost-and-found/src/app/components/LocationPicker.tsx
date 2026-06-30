@@ -4,12 +4,14 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSettings } from "@/context/SettingsContext";
 
+//the resolved coordinates and display address for a picked location
 export interface LocationData {
   lat: number;
   lng: number;
   address: string;
 }
 
+//a single result returned by Nominatim geocoding
 interface GeoResult {
   lat: number;
   lng: number;
@@ -29,6 +31,7 @@ interface LocationPickerProps {
   required?: boolean;
 }
 
+//delays calling fn until ms have passed since the last call
 function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): T {
   let timer: ReturnType<typeof setTimeout>;
   return ((...args: any[]) => {
@@ -76,16 +79,17 @@ function placeIcon(type: string): string {
   return map[type] ?? "📍";
 }
 
+//interactive Leaflet map with address autocomplete backed by Nominatim geocoding
 export default function LocationPicker({
   value,
   onChange,
   required = false,
 }: LocationPickerProps) {
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const mapRef = useRef<any>(null); //holds the Leaflet map instance for cleanup
+  const markerRef = useRef<any>(null); //holds the current map marker
+  const mapContainerRef = useRef<HTMLDivElement>(null); //DOM node Leaflet attaches to
+  const dropdownRef = useRef<HTMLDivElement>(null); //ref to the autocomplete results dropdown
+  const inputRef = useRef<HTMLInputElement>(null); //ref to the address search input
   const { language, hydrated } = useSettings();
   const [placeholderText, setPlaceholderText] = useState("Search address, place, or landmark…");
   const [useLocationTitle, setUseLocationTitle] = useState("Use my location");
@@ -128,13 +132,13 @@ export default function LocationPicker({
     })();
   }, [language, hydrated]);
 
-  const [searchQuery, setSearchQuery] = useState(value?.address ?? "");
-  const [searchResults, setSearchResults] = useState<GeoResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
-  const [isLocating, setIsLocating] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [searchQuery, setSearchQuery] = useState(value?.address ?? ""); //current text in the address search field
+  const [searchResults, setSearchResults] = useState<GeoResult[]>([]); //Nominatim results to show in the dropdown
+  const [isSearching, setIsSearching] = useState(false); //true while a geocoding request is in flight
+  const [showDropdown, setShowDropdown] = useState(false); //whether the results dropdown is visible
+  const [mapReady, setMapReady] = useState(false); //true after Leaflet finishes initializing
+  const [isLocating, setIsLocating] = useState(false); //true while requesting the browser geolocation
+  const [activeIndex, setActiveIndex] = useState(-1); //keyboard-highlighted result index in the dropdown
 
   // Keep input in sync when value cleared externally
   useEffect(() => {
@@ -157,7 +161,7 @@ export default function LocationPicker({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Init map ─────────────────────────────────────────────────────────────
+  //initializes the Leaflet map and places a draggable marker at the current value
   useEffect(() => {
     let cancelled = false;
     if (!mapContainerRef.current) return;
@@ -276,6 +280,7 @@ export default function LocationPicker({
     });
   }
 
+  //places or moves the draggable map marker; wires up a dragend reverse-geocode on first placement
   function placeMarker(
     L: any,
     map: any,
@@ -299,7 +304,7 @@ export default function LocationPicker({
     }
   }
 
-  // ── Geo helpers ───────────────────────────────────────────────────────────
+  //converts coordinates to a human-readable address via the reverse-geocode API
   async function reverseGeocode(lat: number, lng: number): Promise<string> {
     try {
       const res = await fetch("/api/reverse-geocode", {
@@ -319,6 +324,7 @@ export default function LocationPicker({
     return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
   }
 
+  //debounced geocode search: fires 400ms after the user stops typing
   const doSearch = useCallback(
     debounce(async (q: string) => {
       if (!q.trim() || q.trim().length < 2) {

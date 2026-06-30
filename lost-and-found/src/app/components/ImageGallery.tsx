@@ -10,9 +10,11 @@ interface ImageGalleryProps {
   title?: string;
 }
 
+//image carousel with thumbnail strip, arrow nav, and keyboard support
 export default function ImageGallery({ images, title = "" }: ImageGalleryProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0); //index of the currently displayed image
   const { language, hydrated } = useSettings();
+  //translated aria labels and fallback text for the gallery controls
   const [noImageText, setNoImageText] = useState("No image available");
   const [prevLabel, setPrevLabel] = useState("Previous image");
   const [nextLabel, setNextLabel] = useState("Next image");
@@ -21,6 +23,7 @@ export default function ImageGallery({ images, title = "" }: ImageGalleryProps) 
   const [viewImageText, setViewImageText] = useState("View image");
   const [thumbnailText, setThumbnailText] = useState("Thumbnail");
 
+  //filter out empty or non-string entries from the images prop
   const validImages = images.filter(img => img && typeof img === 'string');
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function ImageGallery({ images, title = "" }: ImageGalleryProps) 
     })();
   }, [language, hydrated]);
 
+  //allows left/right arrow keys to navigate the gallery
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") setCurrentIndex((prev) => (prev === 0 ? validImages.length - 1 : prev - 1));

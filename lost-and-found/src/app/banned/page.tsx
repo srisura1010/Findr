@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/context/SettingsContext";
 
+//translates a string with localStorage caching, falls back to original on error
 async function tx(text: string, language: string): Promise<string> {
   const key = `t:${language}:${text}`;
   const cached = localStorage.getItem(key);
@@ -23,6 +24,7 @@ async function tx(text: string, language: string): Promise<string> {
   }
 }
 
+//full-page suspended/banned account message with translated text
 export default function BannedPage() {
   const router = useRouter();
   const { language, hydrated } = useSettings();

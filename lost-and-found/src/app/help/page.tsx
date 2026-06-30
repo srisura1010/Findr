@@ -9,11 +9,13 @@ import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 
+//a single turn in the help page chatbot
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
+//hook that returns the translated form of a static string, using localStorage as a cache
 function useTranslated(text: string, language: string): string {
   const [translated, setTranslated] = useState(text);
 
@@ -42,6 +44,7 @@ function useTranslated(text: string, language: string): string {
   return translated;
 }
 
+//renders a single translated string inline
 function TranslatedText({ text, language }: {text: string;language: string;}) {
   const translated = useTranslated(text, language);
   return <>{translated}</>;
@@ -132,6 +135,7 @@ const FAQ_CATEGORIES = [
 }];
 
 
+//expandable FAQ list grouped by category; question text is translated inline
 function FAQAccordion({ language }: {language: string;}) {
   const [activeCategory, setActiveCategory] = useState("getting-started");
   const [openQuestion, setOpenQuestion] = useState<string | null>(null);
@@ -237,6 +241,7 @@ Built with Next.js, Clerk auth, Supabase, Groq AI, Resend email.
 
 If you don't know something, say so and suggest contacting a Finder admin.`;
 
+//in-page chatbot for the help page, backed by the Groq API
 function GroqChatbot({ language }: {language: string;}) {
   const initialMessage = useTranslated("Hey! I'm Finder's support assistant. Ask me anything about how to use the app", language);
   const placeholderText = useTranslated("Ask anything about Finder...", language);
@@ -343,14 +348,15 @@ const PRO_TIPS = [
 "Switch languages in Settings if English isn't your first languagethe whole interface translates"];
 
 
+//help page with a quick-start guide, FAQ accordion, and embedded AI chatbot
 export default function HelpPage() {
   const { language, hydrated } = useSettings();
   const { user } = useUser();
   const router = useRouter();
-  const [banChecked, setBanChecked] = useState(false);
-  const [activeSection, setActiveSection] = useState<"guide" | "faq" | "chat">("guide");
+  const [banChecked, setBanChecked] = useState(false); //true once the ban check resolves
+  const [activeSection, setActiveSection] = useState<"guide" | "faq" | "chat">("guide"); //which top-level section is displayed
 
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(false); //true after translations finish loading
   const [quickStartLabel, setQuickStartLabel] = useState("Quick Start");
   const [faqLabel, setFaqLabel] = useState("FAQs");
   const [aiSupportLabel, setAiSupportLabel] = useState("AI Support");
