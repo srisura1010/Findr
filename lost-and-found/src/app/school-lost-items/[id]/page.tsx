@@ -112,6 +112,7 @@ export default function SchoolLostItemDetailPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [actionLoading, setActionLoading] = useState(false);
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false); //true when the signed-in user is a school admin for this item's school
   const [translatedCategory, setTranslatedCategory] = useState<string>("");
   const [translatedName, setTranslatedName] = useState<string>("");
   const [translatedDescription, setTranslatedDescription] = useState<string>("");
@@ -201,6 +202,12 @@ export default function SchoolLostItemDetailPage() {
         setLoading(false);
       });
   }, [id, isLoaded]);
+
+  //reads school admin status from localStorage once the item's school_id is known
+  useEffect(() => {
+    if (!item?.school_id) return;
+    setIsSchoolAdmin(localStorage.getItem(`finder_school_admin_${item.school_id}`) === "true");
+  }, [item?.school_id]);
 
   // chat subscription
   const conversationId = item && user && activeChatPartnerId
@@ -367,6 +374,21 @@ export default function SchoolLostItemDetailPage() {
             ) : (
               <button className="detail-btn detail-btn--secondary" onClick={() => openChatWith(item.authorId, item.authorName || "Owner")}>
                 <FaMessage style={{ marginRight: 8 }} />{s.messageOwner}
+              </button>
+            )}
+            {isSchoolAdmin && (
+              <button
+                className="detail-btn"
+                style={{ background: "var(--danger)", color: "#fff" }}
+                disabled={actionLoading}
+                onClick={async () => {
+                  if (!confirm("Delete this lost item report?")) return;
+                  setActionLoading(true);
+                  await supabase.from("school_lost_items").delete().eq("id", item.id);
+                  router.push(`/schools/${item.school_id}/board`);
+                }}
+              >
+                <FaTrash style={{ marginRight: 6 }} />{s.deleteBtn}
               </button>
             )}
           </div>
