@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabaseClient";
 import { useSettings } from "@/context/SettingsContext";
-import { FaArrowLeft, FaCalendar, FaMapPin, FaTag, FaMessage, FaTrash } from "react-icons/fa6";
+import { FaArrowLeft, FaCalendar, FaMapPin, FaTag, FaMessage, FaTrash, FaFlag } from "react-icons/fa6";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import "@/app/school-items/[id]/school-item-detail.css";
 
@@ -13,10 +13,13 @@ import "@/app/school-items/[id]/school-item-detail.css";
 interface SLostStrings {
   itemNotFound: string; backBtn: string; back: string; schoolItems: string;
   schoolLostItem: string; lostBy: string; lostDate: string; lostLocation: string;
-  description: string; deleteBtn: string; markFoundBtn: string; messageOwner: string;
+  description: string; deleteBtn: string; deleteAdmin: string; markFoundBtn: string; messageOwner: string;
   stillLooking: string; noImage: string; similarItems: string; noSimilarItems: string;
   cancel: string; viewItem: string; loading: string; typeMessage: string;
   deleteConfirm: string;
+  report: string; reportSubmitted: string; submitReport: string; submittingReport: string;
+  whyReporting: string; reasonInappropriate: string; reasonSpam: string;
+  reasonMisleading: string; reasonClaimed: string; reasonOther: string;
   sayHiAbout: string;
   chatTemplateFound: string;
   chatTemplateDescribe: string;
@@ -30,12 +33,19 @@ const DEFAULT_SLOST: SLostStrings = {
   schoolItems: "School Items", schoolLostItem: "School Lost Item",
   lostBy: "Lost by", lostDate: "Lost", lostLocation: "Last seen",
   description: "Description", deleteBtn: "Delete Report",
+  deleteAdmin: "Delete (School Admin)",
   markFoundBtn: "Mark as Found", messageOwner: "Message Owner",
   stillLooking: "Still Looking", noImage: "No image",
   similarItems: "Similar items", noSimilarItems: "No similar items",
   cancel: "Cancel", viewItem: "View Item", loading: "Loading...",
   typeMessage: "Type a message...",
   deleteConfirm: "Delete this lost item report?",
+  report: "Report", reportSubmitted: "Report submitted",
+  submitReport: "Submit Report", submittingReport: "Submitting...",
+  whyReporting: "Why are you reporting this item?",
+  reasonInappropriate: "Inappropriate content", reasonSpam: "Spam or duplicate",
+  reasonMisleading: "Misleading information", reasonClaimed: "Already claimed / resolved",
+  reasonOther: "Other",
   sayHiAbout: "Say hi about",
   chatTemplateFound: "Hi! I think I may have found your item!",
   chatTemplateDescribe: "Can you describe it in more detail?",
@@ -79,6 +89,14 @@ async function batchTranslateSLost(
 }
 
 // ── helpers ────────────────────────────────────────────────────────────────────
+const REPORT_REASONS = [
+  "Inappropriate content",
+  "Spam or duplicate",
+  "Misleading information",
+  "Already claimed / resolved",
+  "Other",
+];
+
 function normalizeImages(imageData: any): string[] {
   if (Array.isArray(imageData)) return imageData.filter((u) => u && typeof u === "string");
   if (typeof imageData === "string" && imageData) return [imageData];
@@ -117,6 +135,12 @@ export default function SchoolLostItemDetailPage() {
   const [translatedName, setTranslatedName] = useState<string>("");
   const [translatedDescription, setTranslatedDescription] = useState<string>("");
   const [translatedLocation, setTranslatedLocation] = useState<string>("");
+
+  // report modal state
+  const [showReport, setShowReport] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportDone, setReportDone] = useState(false);
 
   // translations
   useEffect(() => {
@@ -260,6 +284,25 @@ export default function SchoolLostItemDetailPage() {
     setActionLoading(false);
   };
 
+  const handleReportSubmit = async () => {
+    if (!reportReason || !user || !item) return;
+    setReportSubmitting(true);
+    await supabase.from("school_reports").insert({
+      school_id: item.school_id,
+      item_id: item.id,
+      item_name: item.name,
+      item_image: item.image || null,
+      item_type: "lost",
+      reporter_id: user.id,
+      reporter_name: user.fullName || "Me",
+      reporter_email: user.primaryEmailAddress?.emailAddress || "",
+      reason: reportReason,
+    });
+    setReportDone(true);
+    setReportSubmitting(false);
+    setTimeout(() => { setShowReport(false); setReportDone(false); setReportReason(""); }, 1500);
+  };
+
   const handleMarkFound = async () => {
     if (!item) return;
     setActionLoading(true);
@@ -317,11 +360,19 @@ export default function SchoolLostItemDetailPage() {
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <h1 className="detail-title">{translatedName || item.name}</h1>
-            {isOwner && (
-              <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete} disabled={actionLoading}>
-                <FaTrash style={{ marginRight: 6 }} />{s.deleteBtn}
-              </button>
-            )}
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {!isOwner && (
+                <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={() => setShowReport(true)}>
+                  <FaFlag style={{ marginRight: 6 }} />{s.report}
+                </button>
+              )}
+              {(isOwner || isSchoolAdmin) && (
+                <button className="detail-secondary-btn detail-secondary-btn--danger" onClick={handleDelete} disabled={actionLoading}>
+                  <FaTrash style={{ marginRight: 6 }} />
+                  {isSchoolAdmin && !isOwner ? s.deleteAdmin : s.deleteBtn}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Lost by */}
@@ -376,24 +427,43 @@ export default function SchoolLostItemDetailPage() {
                 <FaMessage style={{ marginRight: 8 }} />{s.messageOwner}
               </button>
             )}
-            {isSchoolAdmin && (
-              <button
-                className="detail-btn"
-                style={{ background: "var(--danger)", color: "#fff" }}
-                disabled={actionLoading}
-                onClick={async () => {
-                  if (!confirm("Delete this lost item report?")) return;
-                  setActionLoading(true);
-                  await supabase.from("school_lost_items").delete().eq("id", item.id);
-                  router.push(`/schools/${item.school_id}/board`);
-                }}
-              >
-                <FaTrash style={{ marginRight: 6 }} />{s.deleteBtn}
-              </button>
-            )}
           </div>
         </div>
       </div>
+
+      {/* ── REPORT MODAL ── */}
+      {showReport && (
+        <div className="detail-overlay" onClick={() => setShowReport(false)}>
+          <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
+            {reportDone ? (
+              <div className="panel-success">
+                <p>{s.reportSubmitted}</p>
+              </div>
+            ) : (
+              <>
+                <p className="detail-modal__title">Report "{item.name}"</p>
+                <p className="detail-modal__subtitle">{s.whyReporting}</p>
+                <div className="detail-modal__reasons">
+                  {REPORT_REASONS.map((r, i) => {
+                    const labels = [s.reasonInappropriate, s.reasonSpam, s.reasonMisleading, s.reasonClaimed, s.reasonOther];
+                    return (
+                      <button key={r} className={`detail-modal__reason${reportReason === r ? " detail-modal__reason--selected" : ""}`} onClick={() => setReportReason(r)}>
+                        {labels[i]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="detail-modal__actions">
+                  <button className="detail-modal__cancel" onClick={() => setShowReport(false)}>{s.cancel}</button>
+                  <button className="detail-modal__submit" onClick={handleReportSubmit} disabled={!reportReason || reportSubmitting}>
+                    {reportSubmitting ? s.submittingReport : s.submitReport}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── CHAT PANEL ── */}
       {activeChatPartnerId && user && (

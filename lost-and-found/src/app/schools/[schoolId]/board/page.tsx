@@ -115,6 +115,7 @@ interface SchoolReport {
   item_id: number;
   item_name: string;
   item_image: string | null;
+  item_type?: "found" | "lost";
   reporter_id: string;
   reporter_name: string;
   reporter_email: string | null;
@@ -656,7 +657,8 @@ function SchoolReportsPanel({ school, onDeleteItem, s }: { school: School; onDel
 
   const handleDeleteItem = async (report: SchoolReport) => {
     if (!confirm(`Delete "${report.item_name}" ${s.confirmDeleteReport}`)) return;
-    await supabase.from("school_items").delete().eq("id", report.item_id);
+    const table = report.item_type === "lost" ? "school_lost_items" : "school_items";
+    await supabase.from(table).delete().eq("id", report.item_id);
     await supabase.from("school_reports").delete().eq("item_id", report.item_id);
     onDeleteItem(report.item_id);
     setReports((prev) => prev.filter((r) => r.item_id !== report.item_id));
@@ -671,7 +673,12 @@ function SchoolReportsPanel({ school, onDeleteItem, s }: { school: School; onDel
         <div key={report.id} style={{ background: "var(--bg-card)", border: "1.5px solid var(--border-default)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
           {report.item_image && <img src={report.item_image} alt={report.item_name} style={{ width: 60, height: 60, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{report.item_name}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+              <p style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: "0.9rem", color: "var(--text-primary)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{report.item_name}</p>
+              <span style={{ fontFamily: "var(--font-body)", fontSize: "0.68rem", fontWeight: 700, padding: "1px 7px", borderRadius: 100, background: report.item_type === "lost" ? "rgba(239,68,68,0.12)" : "rgba(16,185,129,0.12)", color: report.item_type === "lost" ? "var(--danger)" : "var(--success)", flexShrink: 0 }}>
+                {report.item_type === "lost" ? "Lost" : "Found"}
+              </span>
+            </div>
             <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", color: "var(--danger)", margin: "0 0 4px", fontWeight: 600 }}>{report.reason}</p>
             <p style={{ fontFamily: "var(--font-body)", fontSize: "0.74rem", color: "var(--text-muted)", margin: 0 }}>
               {s.reportedBy} {report.reporter_name}{report.reporter_email ? ` · ${report.reporter_email}` : ""} · {new Date(report.created_at).toLocaleDateString()}
