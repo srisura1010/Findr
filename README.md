@@ -137,4 +137,4 @@ Full technical documentation — including database schema, API route reference,
 
 Built by Srivatsav Sura and Srinath Ramakrishnan — Hillcrest High School, Midvale, Utah, USA.
 
-Questions, bugs, or interested in bringing Finder to your school? Reach us at fbla.finder.support@gmail.com.<img width="6000" height="3375" alt="Findr NLC Tech Stack (2)" src="https://github.com/user-attachments/assets/ed3568d3-6462-4783-b625-cc4f37f44b32" />
+Questions, bugs, or interested in bringing Finder to your school? Reach us at fbla.finder.support@gmail.com.
