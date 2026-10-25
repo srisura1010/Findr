@@ -1,4 +1,4 @@
-# Finder
+# Findr
 
 A school lost-and-found web platform that connects students with their missing items through a searchable catalog, direct messaging, AI-powered matching, and a multi-school system.
 
@@ -8,7 +8,7 @@ Live at [finderfbla.com](https://finderfbla.com)
 
 ## The Problem
 
-Most school lost and founds are a cardboard box in the front office that nobody checks. Items pile up with no visibility, students have no way to know if their belongings were turned in, and staff have no efficient way to manage the volume or resolve disputes. Finder digitizes and streamlines the entire process, from reporting to claim to handoff.
+Most school lost and founds are a cardboard box in the front office that nobody checks. Items pile up with no visibility, students have no way to know if their belongings were turned in, and staff have no efficient way to manage the volume or resolve disputes. Findr digitizes and streamlines the entire process, from reporting to claim to handoff.
 
 ---
 
@@ -89,8 +89,8 @@ NEXT_PUBLIC_SUPER_ADMINS=comma_separated_admin_emails
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/finder.git
-cd lost-and-found
+git clone https://github.com/Srixath/Finder.git
+cd Finder/lost-and-found
 
 # Install dependencies
 npm install
@@ -137,4 +137,4 @@ Full technical documentation — including database schema, API route reference,
 
 Built by Srivatsav Sura and Srinath Ramakrishnan — Hillcrest High School, Midvale, Utah, USA.
 
-Questions, bugs, or interested in bringing Finder to your school? Reach us at fbla.finder.support@gmail.com.
+Questions, bugs, or interested in bringing Findr to your school? Reach us at fbla.finder.support@gmail.com.

@@ -24,7 +24,7 @@ function buildHtml(
     <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px">
       <h2 style="margin:0 0 16px">Hi ${adminName},</h2>
       <p style="margin:0 0 16px">
-        A dispute has been filed on Finder and requires your review.
+        A dispute has been filed on Findr and requires your review.
       </p>
       ${item_image_url ? `<img src="${item_image_url}" style="width:100%;max-width:480px;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;display:block" />` : ""}
       <table style="border-collapse:collapse;width:100%;margin:16px 0;background:#f9f9f9;border-radius:8px">
@@ -56,19 +56,19 @@ function buildHtml(
       </p>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <a
-          href="https://findrapp.me/items/${item_id}"
+          href="https://finderfbla.com/items/${item_id}"
           style="display:inline-block;background:#444;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;font-size:14px"
         >
-          View Item on Finder →
+          View Item on Findr →
         </a>
         <a
-          href="https://findrapp.me/dashboard"
+          href="https://finderfbla.com/dashboard"
           style="display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;font-size:14px"
         >
           Go to Admin Dashboard →
         </a>
       </div>
-      <p style="color:#888;font-size:13px;margin-top:32px">The Finder Team</p>
+      <p style="color:#888;font-size:13px;margin-top:32px">The Findr Team</p>
     </div>
   `;
 }
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     recipients.map(({ email, name }) =>
       resend.emails
         .send({
-          from: "Finder <noreply@findrapp.me>",
+          from: "Findr <noreply@findrapp.me>",
           to: email,
           subject: `Dispute opened for "${item_name}": action required`,
           html: buildHtml(

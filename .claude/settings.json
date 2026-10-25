@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git diff *)",
+      "PowerShell($f = \"$env:TEMP\\\\claude\\\\c--Users-surap-OneDrive-Documents-GitHub-Website-Coding-And-Development-FBLA\\\\39273130-94be-4e0a-8c9c-98a3b9c40820\\\\scratchpad\\\\lint.txt\"; Get-Content $f | Select-Object -Last 15; \\(Select-String -Path $f -Pattern '^\\\\s+\\\\d+:\\\\d+\\\\s+error' \\).Count)"
+    ]
+  }
+}

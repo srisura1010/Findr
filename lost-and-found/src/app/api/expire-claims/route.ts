@@ -12,10 +12,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 async function sendEmail(to: string, subject: string, body: string) {
   await resend.emails
     .send({
-      from: "Finder <noreply@findrapp.me>",
+      from: "Findr <noreply@findrapp.me>",
       to,
       subject,
-      html: `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px"><p>${body}</p><p style="color:#888;font-size:13px;margin-top:24px">The Finder Team</p></div>`,
+      html: `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px"><p>${body}</p><p style="color:#888;font-size:13px;margin-top:24px">The Findr Team</p></div>`,
     })
     .catch(console.error);
 }

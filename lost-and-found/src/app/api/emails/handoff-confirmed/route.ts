@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
   await resend.emails
     .send({
-      from: "Finder <noreply@findrapp.me>",
+      from: "Findr <noreply@findrapp.me>",
       to: claimant_email,
       subject: `Please confirm you received "${item_name}"`,
       html: `
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             <strong>"${item_name}"</strong> back to you.
           </p>
           <p style="margin:0 0 24px">
-            Please log in to your Finder dashboard and confirm receipt. This completes the
+            Please log in to your Findr dashboard and confirm receipt. This completes the
             return and removes the listing. If something went wrong, you can open a
             dispute.
           </p>
@@ -28,12 +28,12 @@ export async function POST(req: Request) {
             You have 48 hours to confirm before the return is auto-completed.
           </p>
           <a
-            href="https://findrapp.me/dashboard"
+            href="https://finderfbla.com/dashboard"
             style="display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:15px"
           >
             Confirm Receipt →
           </a>
-          <p style="color:#888;font-size:13px;margin-top:32px">-The Finder Team</p>
+          <p style="color:#888;font-size:13px;margin-top:32px">-The Findr Team</p>
         </div>
       `,
     })

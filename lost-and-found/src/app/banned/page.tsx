@@ -30,7 +30,7 @@ export default function BannedPage() {
   const { language, hydrated } = useSettings();
   const [titleText, setTitleText] = useState("Account Suspended");
   const [bodyText, setBodyText] = useState(
-    "Your account has been banned or suspended from Finder. If you believe this is a mistake, please contact your school administrator."
+    "Your account has been banned or suspended from Findr. If you believe this is a mistake, please contact your school administrator."
   );
   const [btnText, setBtnText] = useState("Go Home");
 
@@ -38,13 +38,13 @@ export default function BannedPage() {
     if (!hydrated) return;
     if (language === "en") {
       setTitleText("Account Suspended");
-      setBodyText("Your account has been banned or suspended from Finder. If you believe this is a mistake, please contact your school administrator.");
+      setBodyText("Your account has been banned or suspended from Findr. If you believe this is a mistake, please contact your school administrator.");
       setBtnText("Go Home");
       return;
     }
     Promise.all([
       tx("Account Suspended", language),
-      tx("Your account has been banned or suspended from Finder. If you believe this is a mistake, please contact your school administrator.", language),
+      tx("Your account has been banned or suspended from Findr. If you believe this is a mistake, please contact your school administrator.", language),
       tx("Go Home", language),
     ]).then(([t1, t2, t3]) => {
       setTitleText(t1);

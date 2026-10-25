@@ -90,7 +90,7 @@ export default function SuperAdminPage() {
 
   const [isReady, setIsReady] = useState(false);
   const [pageTitleText, setPageTitleText] = useState("Super Admin");
-  const [pageSubtitleText, setPageSubtitleText] = useState("Manage admin requests for Finder");
+  const [pageSubtitleText, setPageSubtitleText] = useState("Manage admin requests for Findr");
   const [adminRequestsTabText, setAdminRequestsTabText] = useState("Admin Requests");
   const [schoolRequestsTabText, setSchoolRequestsTabText] = useState("School Requests");
   const [pendingText, setPendingText] = useState("Pending");
@@ -120,7 +120,7 @@ export default function SuperAdminPage() {
     if (!hydrated) return;
     if (language === "en") {
       setPageTitleText("Super Admin");
-      setPageSubtitleText("Manage admin requests for Finder");
+      setPageSubtitleText("Manage admin requests for Findr");
       setAdminRequestsTabText("Admin Requests");
       setSchoolRequestsTabText("School Requests");
       setPendingText("Pending");
@@ -151,7 +151,7 @@ export default function SuperAdminPage() {
     const translateAndCache = async () => {
       const translations = [
         { key: "Super Admin", setter: setPageTitleText, cacheKey: "sa_title" },
-        { key: "Manage admin requests for Finder", setter: setPageSubtitleText, cacheKey: "sa_subtitle" },
+        { key: "Manage admin requests for Findr", setter: setPageSubtitleText, cacheKey: "sa_subtitle" },
         { key: "Admin Requests", setter: setAdminRequestsTabText, cacheKey: "sa_adminTab" },
         { key: "School Requests", setter: setSchoolRequestsTabText, cacheKey: "sa_schoolTab" },
         { key: "Pending", setter: setPendingText, cacheKey: "sa_pending" },

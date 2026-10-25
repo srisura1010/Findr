@@ -871,7 +871,7 @@ export default function ItemDetailPage() {
         item_id: item.id,
         item_name: item.name,
         reporter_name: "System",
-        reporter_email: "system@finder.com",
+        reporter_email: "fbla.finder.support@gmail.com",
         reason:
           "This item has had 5 or more claims rejected. Possible finder misconduct.",
       });

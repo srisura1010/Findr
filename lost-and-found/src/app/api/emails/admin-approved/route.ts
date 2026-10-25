@@ -6,9 +6,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
   await resend.emails.send({
-    from: "Finder <noreply@findrapp.me>",
+    from: "Findr <noreply@findrapp.me>",
     to: email,
-    subject: "Your Finder admin account has been approved",
+    subject: "Your Findr admin account has been approved",
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px 24px">
         <h2>Hi ${name},</h2>
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
           </tr>
         </table>
         <p>Please log in using that password to unlock admin features.</p>
-        <p style="color:#888;font-size:13px;margin-top:24px">Best regards,<br/>The Finder Team</p>
+        <p style="color:#888;font-size:13px;margin-top:24px">Best regards,<br/>The Findr Team</p>
       </div>
     `,
   });

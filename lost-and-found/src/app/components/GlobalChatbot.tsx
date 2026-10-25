@@ -6,9 +6,9 @@ import { useGlobalChat } from "@/context/GlobalChatContext";
 import { useSettings } from "@/context/SettingsContext";
 import "./GlobalChatbot.css";
 
-//system prompt injected into every Groq request to keep the bot focused on Finder
-const BASE_SYSTEM_PROMPT = `You are the helpful support assistant for Finder, a school lost & found web app.
-Keep answers short, friendly, and focused on Finder. Here's what you know:
+//system prompt injected into every Groq request to keep the bot focused on Findr
+const BASE_SYSTEM_PROMPT = `You are the helpful support assistant for Findr, a school lost & found web app.
+Keep answers short, friendly, and focused on Findr. Here's what you know:
 
 - Users post found items (name, description, photo) on the dashboard
 - AI reads item photos and auto-tags them with keywords for better search
@@ -66,10 +66,10 @@ export default function GlobalChatbot() {
   const loadingRef = useRef(false); //prevents sending duplicate requests
 
   //translated UI strings for the chatbot panel
-  const [uiTitle, setUiTitle] = useState("Finder AI Support");
-  const [uiPlaceholder, setUiPlaceholder] = useState("Ask anything about Finder...");
+  const [uiTitle, setUiTitle] = useState("Findr AI Support");
+  const [uiPlaceholder, setUiPlaceholder] = useState("Ask anything about Findr...");
   const [uiGreeting, setUiGreeting] = useState(
-    "Hey! I'm Finder's support assistant. Ask me anything about how to use the app",
+    "Hey! I'm Findr's support assistant. Ask me anything about how to use the app",
   );
 
   //translates chatbot UI strings when the language changes
@@ -77,9 +77,9 @@ export default function GlobalChatbot() {
     if (!hydrated) return;
     const translate = async () => {
       const [title, placeholder, greeting] = await Promise.all([
-        t("Finder AI Support", language),
-        t("Ask anything about Finder...", language),
-        t("Hey! I'm Finder's support assistant. Ask me anything about how to use the app", language),
+        t("Findr AI Support", language),
+        t("Ask anything about Findr...", language),
+        t("Hey! I'm Findr's support assistant. Ask me anything about how to use the app", language),
       ]);
       setUiTitle(title);
       setUiPlaceholder(placeholder);
@@ -164,7 +164,7 @@ export default function GlobalChatbot() {
         onClick={() => setIsOpen((v) => !v)}
         aria-label="Toggle support chat"
       >
-        <img src="/logo/Findr_logo.png" alt="Finder" style={{ width: "50px", height: "50px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+        <img src="/logo/Findr_logo.png" alt="Findr" style={{ width: "50px", height: "50px", objectFit: "contain", display: "block", margin: "0 auto" }} />
       </button>
 
       {isOpen && (
@@ -186,7 +186,7 @@ export default function GlobalChatbot() {
                 className={`global-chat-bubble-wrap${msg.role === "user" ? " global-chat-bubble-wrap--user" : ""}`}
               >
                 {msg.role === "assistant" && (
-                  <div className="global-chat-avatar"><img src="/logo/Findr_logo.png" alt="Finder" style={{ width: "16px", height: "16px", objectFit: "contain", display: "block" }} /></div>
+                  <div className="global-chat-avatar"><img src="/logo/Findr_logo.png" alt="Findr" style={{ width: "16px", height: "16px", objectFit: "contain", display: "block" }} /></div>
                 )}
                 <div
                   className={`global-chat-bubble global-chat-bubble--${msg.role}`}

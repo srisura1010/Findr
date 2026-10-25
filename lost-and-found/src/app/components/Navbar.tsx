@@ -185,7 +185,7 @@ export default function Navbar() {
       <header className="topbar">
         {/* Logo */}
         <Link href="/" className="topbar__logo">
-          Finder
+          Findr
         </Link>
 
         {/* Right cluster */}
@@ -338,7 +338,7 @@ export default function Navbar() {
         className={`mobile-sidebar${mobileOpen ? " mobile-sidebar--open" : ""}`}
       >
         <div className="mobile-sidebar__header">
-          <span className="mobile-sidebar__logo">Finder</span>
+          <span className="mobile-sidebar__logo">Findr</span>
           <button
             className="mobile-sidebar__close"
             onClick={() => setMobileOpen(false)}

@@ -300,7 +300,7 @@ export default function MessagesPage() {
   const bottomRef = useRef<HTMLDivElement>(null); //scroll anchor at the bottom of the message list
 
   const [isReady, setIsReady] = useState(false); //true after translations finish loading
-  const [uiMessagesTitle, setUiMessagesTitle] = useState("Finder Messages");
+  const [uiMessagesTitle, setUiMessagesTitle] = useState("Findr Messages");
   const [uiYourConversations, setUiYourConversations] = useState("Your conversations");
   const [uiNoConversations, setUiNoConversations] = useState(
     "No conversations yet.",
@@ -337,7 +337,7 @@ export default function MessagesPage() {
         reportUser,
         adminChatEmpty,
       ] = await Promise.all([
-        t("Finder Messages", language),
+        t("Findr Messages", language),
         t("Your conversations", language),
         t("No conversations yet.", language),
         t("Select a conversation to start chatting", language),

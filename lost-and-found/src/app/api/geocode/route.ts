@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       {
         headers: {
           // Nominatim requires a descriptive User-Agent
-          "User-Agent": "Finder-LostAndFound-App/1.0 (contact@yourapp.com)",
+          "User-Agent": "Findr-LostAndFound-App/1.0 (fbla.finder.support@gmail.com)",
         },
       },
     );

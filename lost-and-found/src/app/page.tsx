@@ -208,7 +208,7 @@ export default function Home() {
     "Stop checking multiple offices or cardboard boxes throughout your school. All lost and found items live in one clean, searchable place.",
   );
   const [card2Body, setCard2Body] = useState(
-    "Finder is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
+    "Findr is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
   );
   const [card3Body, setCard3Body] = useState(
     "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
@@ -223,7 +223,7 @@ export default function Home() {
     "Only your school community sees your items, keeping reports private and protected.",
   );
   const [eyebrowText, setEyebrowText] = useState("Built for students, by students");
-  const [featLabelText, setFeatLabelText] = useState("Why Finder");
+  const [featLabelText, setFeatLabelText] = useState("Why Findr");
   const [featTitleText, setFeatTitleText] = useState("Everything you need to find it");
   const [featSubText, setFeatSubText] = useState("One platform for your entire campus: no bulletin boards, no missed pickups.");
   const [hiwLabelText, setHiwLabelText] = useState("How it works");
@@ -234,7 +234,7 @@ export default function Home() {
   const [step2TitleText, setStep2TitleText] = useState("Search & Match");
   const [step2BodyText, setStep2BodyText] = useState("Browse the dashboard with item listings, filter by type and location, or get notified when a match appears.");
   const [step3TitleText, setStep3TitleText] = useState("Get It Back");
-  const [step3BodyText, setStep3BodyText] = useState("Message the finder directly through Finder, confirm it's yours, and arrange a pickup.");
+  const [step3BodyText, setStep3BodyText] = useState("Message the finder directly through Findr, confirm it's yours, and arrange a pickup.");
   const [carouselLabelText, setCarouselLabelText] = useState("Features at a glance");
   const [card7TitleText, setCard7TitleText] = useState("Real-Time Notifications");
   const [card7BodyText, setCard7BodyText] = useState("Get alerted the moment something matching your item shows up on the board.");
@@ -245,7 +245,7 @@ export default function Home() {
   const [stat3LabelText, setStat3LabelText] = useState("Schools Connected");
   const [stat4LabelText, setStat4LabelText] = useState("Items Supported");
   const [ctaTitleText, setCtaTitleText] = useState("Ready to find what you lost?");
-  const [ctaSubText, setCtaSubText] = useState("Join your school community on Finder today or browse the general dashboard. It only takes a moment to sign up.");
+  const [ctaSubText, setCtaSubText] = useState("Join your school community on Findr today or browse the general dashboard. It only takes a moment to sign up.");
   const [goDashboardText, setGoDashboardText] = useState("Go to Dashboard →");
   const [getStartedText, setGetStartedText] = useState("Get Started →");
   const [footerTaglineText, setFooterTaglineText] = useState("Lost & found, built for schools.");
@@ -339,7 +339,7 @@ export default function Home() {
         "Stop checking multiple offices or cardboard boxes throughout your school. All lost and found items live in one clean, searchable place.",
       );
       setCard2Body(
-        "Finder is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
+        "Findr is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
       );
       setCard3Body(
         "Quickly match lost items with found ones and get belongings back to students in days, not weeks.",
@@ -354,7 +354,7 @@ export default function Home() {
         "Only your school community sees your items, keeping reports private and protected.",
       );
       setEyebrowText("Built for students, by students");
-      setFeatLabelText("Why Finder");
+      setFeatLabelText("Why Findr");
       setFeatTitleText("Everything you need to find it");
       setFeatSubText("One platform for your entire campus: no bulletin boards, no missed pickups.");
       setHiwLabelText("How it works");
@@ -365,7 +365,7 @@ export default function Home() {
       setStep2TitleText("Search & Match");
       setStep2BodyText("Browse the dashboard with item listings, filter by type and location, or get notified when a match appears.");
       setStep3TitleText("Get It Back");
-      setStep3BodyText("Message the finder directly through Finder, confirm it's yours, and arrange a pickup.");
+      setStep3BodyText("Message the finder directly through Findr, confirm it's yours, and arrange a pickup.");
       setCarouselLabelText("Features at a glance");
       setCard7TitleText("Real-Time Notifications");
       setCard7BodyText("Get alerted the moment something matching your item shows up on the board.");
@@ -376,7 +376,7 @@ export default function Home() {
       setStat3LabelText("Schools Connected");
       setStat4LabelText("Items Supported");
       setCtaTitleText("Ready to find what you lost?");
-      setCtaSubText("Join your school community on Finder today or browse the general dashboard. It only takes a moment to sign up.");
+      setCtaSubText("Join your school community on Findr today or browse the general dashboard. It only takes a moment to sign up.");
       setGoDashboardText("Go to Dashboard →");
       setGetStartedText("Get Started →");
       setFooterTaglineText("Lost & found, built for schools.");
@@ -462,7 +462,7 @@ export default function Home() {
           cacheKey: "home_card1Body",
         },
         {
-          key: "Finder is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
+          key: "Findr is made specifically for schools, from hallways to gyms to libraries. Nothing slips through our system.",
           setter: setCard2Body,
           cacheKey: "home_card2Body",
         },
@@ -487,7 +487,7 @@ export default function Home() {
           cacheKey: "home_card6Body",
         },
         { key: "Built for students, by students", setter: setEyebrowText, cacheKey: "home_eyebrow" },
-        { key: "Why Finder", setter: setFeatLabelText, cacheKey: "home_featLabel" },
+        { key: "Why Findr", setter: setFeatLabelText, cacheKey: "home_featLabel" },
         { key: "Everything you need to find it", setter: setFeatTitleText, cacheKey: "home_featTitle" },
         { key: "One platform for your entire campus: no bulletin boards, no missed pickups.", setter: setFeatSubText, cacheKey: "home_featSub" },
         { key: "How it works", setter: setHiwLabelText, cacheKey: "home_hiwLabel" },
@@ -498,7 +498,7 @@ export default function Home() {
         { key: "Search & Match", setter: setStep2TitleText, cacheKey: "home_step2Title" },
         { key: "Browse the dashboard with item listings, filter by type and location, or get notified when a match appears.", setter: setStep2BodyText, cacheKey: "home_step2Body" },
         { key: "Get It Back", setter: setStep3TitleText, cacheKey: "home_step3Title" },
-        { key: "Message the finder directly through Finder, confirm it's yours, and arrange a pickup.", setter: setStep3BodyText, cacheKey: "home_step3Body" },
+        { key: "Message the finder directly through Findr, confirm it's yours, and arrange a pickup.", setter: setStep3BodyText, cacheKey: "home_step3Body" },
         { key: "Features at a glance", setter: setCarouselLabelText, cacheKey: "home_carouselLabel" },
         { key: "Real-Time Notifications", setter: setCard7TitleText, cacheKey: "home_card7Title" },
         { key: "Get alerted the moment something matching your item shows up on the board.", setter: setCard7BodyText, cacheKey: "home_card7Body" },
@@ -509,7 +509,7 @@ export default function Home() {
         { key: "Schools Connected", setter: setStat3LabelText, cacheKey: "home_stat3" },
         { key: "Items Supported", setter: setStat4LabelText, cacheKey: "home_stat4" },
         { key: "Ready to find what you lost?", setter: setCtaTitleText, cacheKey: "home_ctaTitle" },
-        { key: "Join your school community on Finder today or browse the general dashboard. It only takes a moment to sign up.", setter: setCtaSubText, cacheKey: "home_ctaSub" },
+        { key: "Join your school community on Findr today or browse the general dashboard. It only takes a moment to sign up.", setter: setCtaSubText, cacheKey: "home_ctaSub" },
         { key: "Go to Dashboard →", setter: setGoDashboardText, cacheKey: "home_goDash" },
         { key: "Get Started →", setter: setGetStartedText, cacheKey: "home_getStarted" },
         { key: "Lost & found, built for schools.", setter: setFooterTaglineText, cacheKey: "home_footerTagline" },
@@ -964,7 +964,7 @@ export default function Home() {
       <footer className="site-footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <span className="footer-logo">Finder</span>
+            <span className="footer-logo">Findr</span>
             <p className="footer-tagline">{footerTaglineText}</p>
           </div>
           <div className="footer-links">
@@ -1028,7 +1028,7 @@ export default function Home() {
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Finder. {footerCopyText}
+            © {new Date().getFullYear()} Findr. {footerCopyText}
           </span>
         </div>
       </footer>

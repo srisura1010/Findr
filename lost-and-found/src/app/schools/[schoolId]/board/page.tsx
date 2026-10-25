@@ -503,7 +503,7 @@ const DEFAULT_BOARD: BoardStrings = {
   postingLostBtn: "Posting...",
   lostPostedMsg: "Lost item reported!",
   adminLoginTitle: "School Admin Access",
-  adminLoginHint: "Enter the password from your Finder approval email.",
+  adminLoginHint: "Enter the password from your Findr approval email.",
   adminPasswordLabel: "Admin Password",
   adminPasswordPlaceholder: "e.g. FINDR-JANE-X4K2",
   unlockBtn: "Unlock Admin View",

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
   await resend.emails
     .send({
-      from: "Finder <noreply@findrapp.me>",
+      from: "Findr <noreply@findrapp.me>",
       to: claimant_email,
       subject: `Update on your claim for "${item_name}"`,
       html: `
@@ -28,10 +28,10 @@ export async function POST(req: Request) {
           </table>
           <p style="margin:0 0 12px;color:#555;font-size:14px">
             If you believe this item is yours, please contact your school administrator.
-            You can also report the item from the Finder dashboard if you feel the
+            You can also report the item from the Findr dashboard if you feel the
             rejection was in error.
           </p>
-          <p style="color:#888;font-size:13px;margin-top:32px">-The Finder Team</p>
+          <p style="color:#888;font-size:13px;margin-top:32px">-The Findr Team</p>
         </div>
       `,
     })
