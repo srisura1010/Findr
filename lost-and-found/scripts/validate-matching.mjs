@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { buildSimilarItemsPrompt, buildMatchCheckPrompt } from "../src/lib/aiPrompts.ts";
+import { GROQ_TEXT_MODEL, buildSimilarItemsPrompt, buildMatchCheckPrompt } from "../src/lib/aiPrompts.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = path.join(ROOT, "test", "validation");
@@ -15,14 +15,18 @@ const CACHE_PATH = path.join(DIR, "cache.json");
 const RESULTS_PATH = path.join(DIR, "results.csv");
 const DOC_PATH = path.join(ROOT, "docs", "VALIDATION.md");
 
-const MODEL = "llama-3.3-70b-versatile";
-const THROTTLE_MS = 3000;
-const TYPES = ["direct", "indirect", "vague", "brand", "typo", "absent"];
+const MODEL = GROQ_TEXT_MODEL;
+const REASONING_EFFORT = "low";
+//output tokens per ranking call (reasoning + answer) measured on gpt-oss-120b test calls: 88-154; used for the dry-run estimate
+const EST_OUTPUT_TOKENS = 150;
+const THROTTLE_MS = 10000;
+const TYPES = ["minimal", "rambler", "brand", "typo", "misremember", "absent"];
 
-//settings copied from the routes: similar-items uses max_tokens 200, match-check uses 100, both temperature 0
+//settings copied from the routes: model, max_tokens 1024, temperature 0, reasoning_effort low
+//keys: search calls alternate by row (odd rows key 3, even rows key 4) to spread rate limits; match-check uses key 2 like its route
 const PROMPTS = {
-  similar: { maxTokens: 200, build: (q, items) => buildSimilarItemsPrompt(q, items) },
-  match_lost: { maxTokens: 100, build: (q, items) => buildMatchCheckPrompt(q, "lost", items) },
+  similar: { envKey: (rowNum) => (rowNum % 2 === 1 ? "GROQ_API_KEY_3" : "GROQ_API_KEY_4"), maxTokens: 1024, build: (q, items) => buildSimilarItemsPrompt(q, items) },
+  match_lost: { envKey: () => "GROQ_API_KEY_2", maxTokens: 1024, build: (q, items) => buildMatchCheckPrompt(q, "lost", items) },
 };
 
 // ── inputs ───────────────────────────────────────────────────────────────────
@@ -70,7 +74,8 @@ const rows = body.map((r, i) => {
     line: i + 2,
     query: get("query"),
     type: get("type").toLowerCase(),
-    expectedId: get("expected_id") === "" ? null : Number(get("expected_id")),
+    expectedRaw: get("expected_id"),
+    expectedIds: [],
     matchCheck: get("match_check").toLowerCase() === "yes",
   };
 });
@@ -80,17 +85,42 @@ if (rows.length === 0) {
   process.exit(0);
 }
 
+//expected_id is "|"-separated; each part is a numeric id or DB:<exact name> of a database (tag_source "groq") item
+const resolved = new Map();
+function resolveExpected(part, line, problems) {
+  if (!part.startsWith("DB:")) {
+    const id = Number(part);
+    if (!idToItem.has(id)) problems.push(`line ${line}: expected id "${part}" is not in catalog.json`);
+    return id;
+  }
+  const name = part.slice(3);
+  const hits = catalog.filter((i) => i.tag_source === "groq" && i.name === name);
+  if (hits.length !== 1) {
+    const found = hits.length ? ` (ids ${hits.map((i) => i.id).join(", ")})` : "";
+    problems.push(`line ${line}: ${part} matches ${hits.length} database items${found}; it must match exactly 1`);
+    return null;
+  }
+  resolved.set(part, hits[0].id);
+  return hits[0].id;
+}
+
 const problems = [];
 for (const r of rows) {
   if (!r.query) problems.push(`line ${r.line}: empty query`);
   if (!TYPES.includes(r.type)) problems.push(`line ${r.line}: type "${r.type}" is not one of ${TYPES.join(", ")}`);
-  if (r.type === "absent" && r.expectedId !== null) problems.push(`line ${r.line}: absent rows must leave expected_id blank`);
-  if (r.type !== "absent" && r.expectedId === null) problems.push(`line ${r.line}: expected_id is required for type "${r.type}"`);
-  if (r.expectedId !== null && !idToItem.has(r.expectedId)) problems.push(`line ${r.line}: expected_id ${r.expectedId} is not in catalog.json`);
+  if (r.type === "absent" && r.expectedRaw !== "") problems.push(`line ${r.line}: absent rows must leave expected_id blank`);
+  if (r.type !== "absent" && r.expectedRaw === "") problems.push(`line ${r.line}: expected_id is required for type "${r.type}"`);
+  if (r.expectedRaw !== "") {
+    r.expectedIds = r.expectedRaw.split("|").map((p) => resolveExpected(p.trim(), r.line, problems));
+  }
 }
 if (problems.length) {
   console.error("queries.csv has problems:\n  " + problems.join("\n  "));
   process.exit(1);
+}
+if (resolved.size) {
+  console.log("Resolved DB: names:");
+  for (const [part, id] of [...resolved].sort((a, b) => a[0].localeCompare(b[0]))) console.log(`  ${part.padEnd(26)} -> ${id}`);
 }
 
 // ── groq calls (cached) ──────────────────────────────────────────────────────
@@ -100,80 +130,81 @@ const saveCache = () => writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2)
 const cacheKey = (kind, query) => `${kind}::${query}`;
 
 const tasks = new Map();
-for (const r of rows) {
+rows.forEach((r, i) => {
   for (const kind of r.matchCheck ? ["similar", "match_lost"] : ["similar"]) {
     const key = cacheKey(kind, r.query);
-    if (!tasks.has(key)) tasks.set(key, { key, kind, query: r.query, prompt: PROMPTS[kind].build(r.query, catalog) });
+    if (!tasks.has(key)) {
+      tasks.set(key, { key, kind, query: r.query, envKey: PROMPTS[kind].envKey(i + 1), prompt: PROMPTS[kind].build(r.query, catalog) });
+    }
   }
-}
+});
 const pending = [...tasks.values()].filter((t) => !(t.key in cache));
 const estTokens = Math.round(pending.reduce((sum, t) => sum + t.prompt.length, 0) / 4);
 
 console.log(`Catalog: ${catalog.length} items (hash ${catalogHash}). Queries: ${rows.length}.`);
 console.log(`Groq calls needed: ${pending.length} of ${tasks.size} (${tasks.size - pending.length} cached).`);
 console.log(`Estimated input tokens for those calls: ~${estTokens.toLocaleString()} (chars / 4).`);
+console.log(`Expected output tokens (reasoning + answer): ~${(pending.length * EST_OUTPUT_TOKENS).toLocaleString()} (~${EST_OUTPUT_TOKENS}/call), at most ${(pending.length * PROMPTS.similar.maxTokens).toLocaleString()} (max_tokens cap).`);
 
 const stale = [...tasks.values()].filter((t) => cache[t.key] && cache[t.key].catalogHash !== catalogHash);
 if (stale.length) {
   console.warn(`Warning: ${stale.length} cached responses were made against a different catalog. Delete test/validation/cache.json to re-run them.`);
 }
 
-if (pending.length > 0) {
-  if (!process.argv.includes("--yes")) {
-    console.log("Dry run. Re-run with --yes to make these calls:  npm run validate:matching -- --yes");
-    process.exit(0);
-  }
-  if (!process.env.GROQ_API_KEY_3) {
-    console.error("Missing GROQ_API_KEY_3 (expected in .env.local).");
-    process.exit(1);
-  }
-
+//never process.exit() after a fetch: on Windows that can crash Node while the keep-alive socket closes.
+//returns null when every call succeeded, otherwise the exit code to stop with (progress is already saved)
+async function runCalls(pending) {
   for (let i = 0; i < pending.length; i++) {
     const t = pending[i];
     if (i > 0) await new Promise((r) => setTimeout(r, THROTTLE_MS));
-    process.stdout.write(`[${i + 1}/${pending.length}] ${t.kind} "${t.query}" ... `);
+    process.stdout.write(`[${i + 1}/${pending.length}] ${t.kind} (${t.envKey}) "${t.query}" ... `);
 
     let res;
     try {
       res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.GROQ_API_KEY_3}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env[t.envKey]}` },
         body: JSON.stringify({
           model: MODEL,
           max_tokens: PROMPTS[t.kind].maxTokens,
           temperature: 0,
+          reasoning_effort: REASONING_EFFORT,
           messages: [{ role: "user", content: t.prompt }],
         }),
       });
     } catch (err) {
       saveCache();
       console.error(`network error: ${err.message}. Progress saved; re-run to resume.`);
-      process.exit(1);
+      return 1;
     }
 
     if (res.status === 429) {
       saveCache();
       const retry = res.headers.get("retry-after");
+      await res.text().catch(() => ""); //drain the body so the socket can close and Node exits on its own
       console.log(`rate limited (HTTP 429). Progress saved (${i} new responses cached).`);
       console.log(`Retry after: ${retry ? `${retry} seconds` : "not given by Groq"}. Re-run the same command to resume.`);
-      process.exit(0);
+      return 0;
     }
     if (!res.ok) {
       saveCache();
       console.error(`HTTP ${res.status}: ${await res.text()}\nProgress saved; re-run to resume.`);
-      process.exit(1);
+      return 1;
     }
 
     const data = await res.json();
     cache[t.key] = {
       content: data.choices?.[0]?.message?.content ?? "[]",
       model: data.model ?? MODEL,
+      keyName: t.envKey,
+      usage: data.usage ?? null,
       catalogHash,
       at: new Date().toISOString(),
     };
     saveCache();
     console.log("ok");
   }
+  return null;
 }
 
 // ── scoring ──────────────────────────────────────────────────────────────────
@@ -203,96 +234,107 @@ function baselineRanking(query) {
     .map((x) => x.id);
 }
 
-const rankOf = (ids, id) => (id === null ? null : ids.indexOf(id) + 1 || null);
-
-const results = rows.map((r) => {
-  const sim = parseIds(cache[cacheKey("similar", r.query)].content);
-  const out = {
-    query: r.query,
-    type: r.type,
-    expected_id: r.expectedId,
-    findr_rank: rankOf(sim.ids, r.expectedId),
-    baseline_rank: rankOf(baselineRanking(r.query), r.expectedId),
-    findr_ids: sim.ids,
-    findr_parse_error: sim.parseError,
-    findr_returned_any: sim.ids.length > 0,
-    match_check: r.matchCheck,
-    match_rank: null,
-    match_ids: [],
-    match_parse_error: false,
-  };
-  if (r.matchCheck) {
-    const mc = parseIds(cache[cacheKey("match_lost", r.query)].content);
-    out.match_rank = rankOf(mc.ids, r.expectedId);
-    out.match_ids = mc.ids;
-    out.match_parse_error = mc.parseError;
-  }
-  return out;
-});
-
-// ── outputs ──────────────────────────────────────────────────────────────────
-
-const csvCell = (v) => {
-  const s = v === null || v === undefined ? "" : String(v);
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+//best (lowest) 1-based rank of any accepted id, or null if none were returned
+const rankOf = (ids, expected) => {
+  const ranks = expected.map((id) => ids.indexOf(id) + 1).filter((r) => r > 0);
+  return ranks.length ? Math.min(...ranks) : null;
 };
-const rankCell = (res, rank) => (res.type === "absent" ? "" : rank ?? "not found");
-const csvHeader = [
-  "query", "type", "expected_id", "findr_rank", "baseline_rank", "findr_ids", "findr_parse_error",
-  "absent_findr_returned_any", "match_check", "match_check_rank", "match_check_ids",
-];
-const csvRows = results.map((x) => [
-  x.query, x.type, x.expected_id ?? "", rankCell(x, x.findr_rank), rankCell(x, x.baseline_rank),
-  x.findr_ids.join(" "), x.findr_parse_error ? "yes" : "",
-  x.type === "absent" ? (x.findr_returned_any ? "yes" : "no") : "",
-  x.match_check ? "yes" : "", x.match_check ? rankCell(x, x.match_rank) : "", x.match_ids.join(" "),
-].map(csvCell).join(","));
-writeFileSync(RESULTS_PATH, [csvHeader.join(","), ...csvRows].join("\n") + "\n", "utf8");
 
-const pct = (n, d) => (d === 0 ? "n/a" : `${Math.round((100 * n) / d)}%`);
-const within = (rank, k) => rank !== null && rank <= k;
+function writeOutputs() {
+  const results = rows.map((r) => {
+    const sim = parseIds(cache[cacheKey("similar", r.query)].content);
+    const out = {
+      query: r.query,
+      type: r.type,
+      expected_id: r.expectedRaw,
+      expected_ids: r.expectedIds,
+      findr_rank: rankOf(sim.ids, r.expectedIds),
+      baseline_rank: rankOf(baselineRanking(r.query), r.expectedIds),
+      findr_ids: sim.ids,
+      findr_parse_error: sim.parseError,
+      findr_returned_any: sim.ids.length > 0,
+      match_check: r.matchCheck,
+      match_rank: null,
+      match_ids: [],
+      match_parse_error: false,
+    };
+    if (r.matchCheck) {
+      const mc = parseIds(cache[cacheKey("match_lost", r.query)].content);
+      out.match_rank = rankOf(mc.ids, r.expectedIds);
+      out.match_ids = mc.ids;
+      out.match_parse_error = mc.parseError;
+    }
+    return out;
+  });
 
-const typeRows = TYPES.filter((t) => t !== "absent").map((t) => {
-  const rs = results.filter((x) => x.type === t);
-  return [t, rs.length,
-    pct(rs.filter((x) => within(x.findr_rank, 1)).length, rs.length),
-    pct(rs.filter((x) => within(x.findr_rank, 3)).length, rs.length),
-    pct(rs.filter((x) => within(x.baseline_rank, 3)).length, rs.length)];
-});
-const present = results.filter((x) => x.type !== "absent");
-typeRows.push(["**all (excl. absent)**", present.length,
-  pct(present.filter((x) => within(x.findr_rank, 1)).length, present.length),
-  pct(present.filter((x) => within(x.findr_rank, 3)).length, present.length),
-  pct(present.filter((x) => within(x.baseline_rank, 3)).length, present.length)]);
+  // ── outputs ──────────────────────────────────────────────────────────────────
 
-const absent = results.filter((x) => x.type === "absent");
-const absentHits = absent.filter((x) => x.findr_returned_any).length;
+  const csvCell = (v) => {
+    const s = v === null || v === undefined ? "" : String(v);
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const rankCell = (res, rank) => (res.type === "absent" ? "" : rank ?? "not found");
+  const csvHeader = [
+    "query", "type", "expected_id", "expected_ids", "findr_rank", "baseline_rank", "findr_ids", "findr_parse_error",
+    "absent_findr_returned_any", "match_check", "match_check_rank", "match_check_ids", "search_key", "match_check_key",
+  ];
+  const csvRows = results.map((x) => [
+    x.query, x.type, x.expected_id, x.expected_ids.join(" "), rankCell(x, x.findr_rank), rankCell(x, x.baseline_rank),
+    x.findr_ids.join(" "), x.findr_parse_error ? "yes" : "",
+    x.type === "absent" ? (x.findr_returned_any ? "yes" : "no") : "",
+    x.match_check ? "yes" : "", x.match_check ? rankCell(x, x.match_rank) : "", x.match_ids.join(" "),
+    cache[cacheKey("similar", x.query)].keyName ?? "",
+    x.match_check ? cache[cacheKey("match_lost", x.query)].keyName ?? "" : "",
+  ].map(csvCell).join(","));
+  writeFileSync(RESULTS_PATH, [csvHeader.join(","), ...csvRows].join("\n") + "\n", "utf8");
 
-const mcRows = results.filter((x) => x.match_check);
-const mcPresent = mcRows.filter((x) => x.type !== "absent");
-const mcAbsent = mcRows.filter((x) => x.type === "absent");
+  const pct = (n, d) => (d === 0 ? "n/a" : `${Math.round((100 * n) / d)}%`);
+  const within = (rank, k) => rank !== null && rank <= k;
 
-const dbCount = catalog.filter((i) => i.tag_source === "groq").length;
-const testCount = catalog.filter((i) => i.tag_source === "claude").length;
-const catCounts = catalog.reduce((m, i) => m.set(i.category, (m.get(i.category) ?? 0) + 1), new Map());
-const sharedCat = catalog.filter((i) => catCounts.get(i.category) > 1).length;
-const catSummary = [...catCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c, n]) => `${c} ${n}`).join(", ");
-const parseErrors = results.filter((x) => x.findr_parse_error || x.match_parse_error).length;
-const models = [...new Set([...tasks.keys()].map((k) => cache[k].model ?? MODEL))].join(", ");
+  const typeRows = TYPES.filter((t) => t !== "absent").map((t) => {
+    const rs = results.filter((x) => x.type === t);
+    return [t, rs.length,
+      pct(rs.filter((x) => within(x.findr_rank, 1)).length, rs.length),
+      pct(rs.filter((x) => within(x.findr_rank, 3)).length, rs.length),
+      pct(rs.filter((x) => within(x.baseline_rank, 3)).length, rs.length)];
+  });
+  const present = results.filter((x) => x.type !== "absent");
+  typeRows.push(["**all (excl. absent)**", present.length,
+    pct(present.filter((x) => within(x.findr_rank, 1)).length, present.length),
+    pct(present.filter((x) => within(x.findr_rank, 3)).length, present.length),
+    pct(present.filter((x) => within(x.baseline_rank, 3)).length, present.length)]);
 
-const table = (head, body) =>
-  [`| ${head.join(" | ")} |`, `| ${head.map(() => "---").join(" | ")} |`, ...body.map((r) => `| ${r.join(" | ")} |`)].join("\n");
+  const absent = results.filter((x) => x.type === "absent");
+  const absentHits = absent.filter((x) => x.findr_returned_any).length;
 
-const doc = `# Findr AI Search Validation
+  const mcRows = results.filter((x) => x.match_check);
+  const mcPresent = mcRows.filter((x) => x.type !== "absent");
+  const mcAbsent = mcRows.filter((x) => x.type === "absent");
+
+  const dbCount = catalog.filter((i) => i.tag_source === "groq").length;
+  const testCount = catalog.filter((i) => i.tag_source === "claude").length;
+  const catCounts = catalog.reduce((m, i) => m.set(i.category, (m.get(i.category) ?? 0) + 1), new Map());
+  const sharedCat = catalog.filter((i) => catCounts.get(i.category) > 1).length;
+  const catSummary = [...catCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c, n]) => `${c} ${n}`).join(", ");
+  const parseErrors = results.filter((x) => x.findr_parse_error || x.match_parse_error).length;
+  const models = [...new Set([...tasks.keys()].map((k) => cache[k].model ?? MODEL))].join(", ");
+
+  const QUERY_SOURCE =
+    "Queries were simulated by an AI model (ChatGPT) using five student writing-style personas (minimal, rambler, brand-only, typo, misremembers) and only the owner's memory of each item; it never saw the listings or tags. Queries for indistinguishable listings (three phone posts, two calculators for the generic 'calculator' query) accept any matching listing. One near-duplicate 'absent' query was removed because the item was in the catalog. AI-written queries may be cleaner than real student searches.";
+
+  const table = (head, body) =>
+    [`| ${head.join(" | ")} |`, `| ${head.map(() => "---").join(" | ")} |`, ...body.map((r) => `| ${r.join(" | ")} |`)].join("\n");
+
+  const doc = `# Findr AI Search Validation
 
 _Generated by \`npm run validate:matching\` on ${new Date().toISOString().slice(0, 10)}. Raw per-query results: \`test/validation/results.csv\`._
 
 ## Method
 
-- **What was tested:** the existing AI search (\`/api/similar-items\`) and, for selected rows, the lost-report match check (\`/api/match-check\`, mode \`lost\`). Prompts come from the same \`src/lib/aiPrompts.ts\` builders the live routes use, sent to Groq with the routes' settings (model \`${MODEL}\`, temperature 0, max_tokens 200 / 100). Responses are parsed the way the routes parse them: unparseable output counts as "no results", and ids not in the catalog are dropped.
+- **What was tested:** the existing AI search (\`/api/similar-items\`) and, for selected rows, the lost-report match check (\`/api/match-check\`, mode \`lost\`). Prompts come from the same \`src/lib/aiPrompts.ts\` builders the live routes use, sent to Groq with the routes' settings (model \`${MODEL}\`, temperature 0, reasoning_effort ${REASONING_EFFORT}, max_tokens ${PROMPTS.similar.maxTokens}). Responses are parsed the way the routes parse them: unparseable output counts as "no results", and ids not in the catalog are dropped.
 - **Catalog:** ${catalog.length} found items (catalog hash \`${catalogHash}\`): ${dbCount} live items read from the database with the route's own filter (not claimed/returned, newest first), plus ${testCount} test items with photos (ids 9001-9017) appended after them. ${sharedCat} of ${catalog.length} items share a category with at least one other item, so the right answer usually has look-alike distractors (items per category: ${catSummary}).
-- **Queries:** ${rows.length} queries (${present.length} for items in the catalog, ${absent.length} for items that are not), written by students who had not seen the listings, and labeled by type: direct, indirect, vague, brand, typo, absent.
-- **Scoring:** "rank" is the 1-based position of the expected item in the returned list. Top-1 = the right item came first; top-3 = it was in the first three.
+- **Queries:** ${rows.length} queries (${present.length} for items in the catalog, ${absent.length} for items that are not), labeled by type: ${TYPES.join(", ")}. ${QUERY_SOURCE}
+- **Scoring:** "rank" is the 1-based position of the expected item in the returned list; when a row accepts several listings, the best rank among them counts. Top-1 = the right item came first; top-3 = it was in the first three.
 - **Keyword baseline (no AI):** lowercase both sides, strip punctuation, count distinct words shared between the query and each item's name + category + description + keywords; rank by that count, ties by id. No stemming or stop-word removal.
 - **Model reported by Groq:** ${models}. ${parseErrors ? `${parseErrors} response(s) could not be parsed and were scored as "no results", as the live route would.` : "Every response parsed as a JSON id array."}
 
@@ -316,18 +358,37 @@ ${mcRows.length
 ## Limits
 
 - **Test-item tags were not made by the production vision model.** The ${testCount} test items' \`ai_keywords\` were written by Claude in the production tag format. The ${dbCount} database items use real Groq tags.
-- **Queries were written by students, not by real users** searching for something they actually lost.
+- **Query source.** ${QUERY_SOURCE}
 - **One small catalog** of ${catalog.length} items. Results on a full school's catalog may differ.
 - **One run per query.** Temperature is 0, but repeated runs are not guaranteed to return identical lists.
 - **The search route only looks at the newest 200 found items**, and the match-check route only at the newest 100 (it shows the top 3). Older items are never candidates in the live app.
 - **Dates and locations are not used in ranking.** The prompt contains only id, name, category, keywords and the first 80 characters of the description.
 `;
 
-mkdirSync(path.dirname(DOC_PATH), { recursive: true });
-writeFileSync(DOC_PATH, doc, "utf8");
+  mkdirSync(path.dirname(DOC_PATH), { recursive: true });
+  writeFileSync(DOC_PATH, doc, "utf8");
 
-console.log("\nResults by type (Findr top-1 / top-3 / keyword top-3):");
-for (const [t, n, a, b, c] of typeRows) console.log(`  ${String(t).replace(/\*/g, "").padEnd(22)} n=${String(n).padEnd(3)} ${a.padEnd(5)} ${b.padEnd(5)} ${c}`);
-if (absent.length) console.log(`  absent: Findr returned a match for ${absentHits}/${absent.length} (${pct(absentHits, absent.length)})`);
-if (mcRows.length) console.log(`  match check: ${mcPresent.filter((x) => within(x.match_rank, 3)).length}/${mcPresent.length} present rows in top 3`);
-console.log(`\nWrote ${path.relative(ROOT, RESULTS_PATH)} and ${path.relative(ROOT, DOC_PATH)}`);
+  console.log("\nResults by type (Findr top-1 / top-3 / keyword top-3):");
+  for (const [t, n, a, b, c] of typeRows) console.log(`  ${String(t).replace(/\*/g, "").padEnd(22)} n=${String(n).padEnd(3)} ${a.padEnd(5)} ${b.padEnd(5)} ${c}`);
+  if (absent.length) console.log(`  absent: Findr returned a match for ${absentHits}/${absent.length} (${pct(absentHits, absent.length)})`);
+  if (mcRows.length) console.log(`  match check: ${mcPresent.filter((x) => within(x.match_rank, 3)).length}/${mcPresent.length} present rows in top 3`);
+  console.log(`\nWrote ${path.relative(ROOT, RESULTS_PATH)} and ${path.relative(ROOT, DOC_PATH)}`);
+}
+
+// ── run ──────────────────────────────────────────────────────────────────────
+
+if (pending.length === 0) {
+  writeOutputs();
+} else if (!process.argv.includes("--yes")) {
+  console.log("Dry run. Re-run with --yes to make these calls:  npm run validate:matching -- --yes");
+} else {
+  const missing = [...new Set(pending.map((t) => t.envKey))].filter((k) => !process.env[k]);
+  if (missing.length) {
+    console.error(`Missing ${missing.join(", ")} (expected in .env.local).`);
+    process.exitCode = 1;
+  } else {
+    const stopCode = await runCalls(pending);
+    if (stopCode === null) writeOutputs();
+    else process.exitCode = stopCode;
+  }
+}

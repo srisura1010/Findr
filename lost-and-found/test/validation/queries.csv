@@ -1,1 +1,53 @@
 query,type,expected_id,match_check
+blue bottle,minimal,9001,yes
+i had my iphone before lunch and now its gone,rambler,DB:iPhone|DB:IPhone|DB:Phone,
+jansport,brand,9004,yes
+boook,typo,DB:Book,
+my airpods max,misremember,9008,yes
+black wallet,minimal,DB:Black Wallet,
+im missing my keys its just my house key and car key,rambler,9017,yes
+hoodie,brand,DB:Gray Hoodie,
+owala botle,typo,9002,yes
+my little calculator,misremember,DB:Graphing Calculator,
+gold sunglasses,minimal,9016,
+i was reading my little brothers hamster book and cant find it now,rambler,9014,yes
+car keys,brand,DB:Car Keys,
+whte usb c charger,typo,9006,yes
+my brown leather jacket,misremember,9011,
+glasses,minimal,DB:Glasses,
+i had this dark blue bottle with a bunch of stickers including bigfoot on it,rambler,9003,yes
+chromebook,brand,9013,
+skullcandy earbud case,typo,9009,yes
+my pencil bag,misremember,DB:Pencil Pouch,
+black leather backpack,minimal,9005,yes
+i have like a ton of keys on one ring and i cant find them,rambler,9015,yes
+nike hoodie,brand,9010,yes
+iphone cube and cabel,typo,9007,yes
+my ti calculator,misremember,9012,
+black backpack,minimal,DB:Black backpack,
+i cant see without my clear glasses and i lost them somewhere,rambler,DB:Transparent Glasses,yes
+iphone,brand,DB:iPhone|DB:IPhone|DB:Phone,
+walet,typo,DB:Wallet,
+my charging thing,misremember,DB:Charger,
+calculator,minimal,DB:Graphing Calculator|9012,
+blu hydroflask straw lid,typo,9001,
+house and car keys,minimal,9017,
+my black hoodie,misremember,DB:Gray Hoodie,
+usb c charger,brand,9006,
+dark blu bottle bigfoot stikrs,typo,9003,
+i had my fancy black leather bag with me and now its not here,rambler,9005,
+keys,brand,9015,
+gray nike hoody,typo,9010,
+my samsung charger cube and cord,misremember,9007,
+i need my casio calculator the scientific one not the graphing one,rambler,9012,
+backpack,brand,DB:Black backpack,
+my debit card case,misremember,DB:Wallet,
+red stanley cup,absent,,
+i swear i had my green adidas backpack after practice and now its gone,absent,,
+samsung galaxy buds,absent,,
+pink nalgene botle,absent,,
+school id,absent,,
+i left my umbrella somewhere and its gonna rain again,absent,,
+lunchbox,absent,,
+math binder,absent,,
+my blue soccer cleats,absent,,
