@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:catalog": "node --env-file=.env.local scripts/build-catalog.mjs",
+    "validate:matching": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-matching.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.8",

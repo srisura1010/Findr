@@ -42,3 +42,6 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# raw Groq responses from scripts/validate-matching.mjs
+/test/validation/cache.json

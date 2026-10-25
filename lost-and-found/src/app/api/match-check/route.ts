@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { GROQ_TEXT_MODEL } from "@/lib/aiPrompts";
+import { GROQ_TEXT_MODEL, buildMatchCheckPrompt } from "@/lib/aiPrompts";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -43,33 +43,7 @@ export async function POST(req: NextRequest) {
 
   const dateField = mode === "found" ? "created_at" : "date_found";
 
-  const catalogue = allItems
-    .map((item) => {
-      const desc = (item.description ?? "").slice(0, 80);
-      const keywords = item.ai_keywords ?? "";
-      const cat = item.category ?? "";
-      return `${item.id}|${item.name}|${cat}|${keywords}|${desc}`;
-    })
-    .join("\n");
-
-  const prompt = `You are a semantic matching engine for a lost-and-found app.
-
-Someone just reported: "${query}"
-
-Below is a catalogue of ${mode === "found" ? "lost item reports" : "found items"} in the format:
-id|name|category|ai_keywords|description
-
-${catalogue}
-
-Instructions:
-- Match items SEMANTICALLY, not just by exact keywords.
-- "water bottle" matches "bottle", "hydro flask", "thermos", "container" etc.
-- "phone" matches "electronics", "device", "Samsung", "Apple", "mobile" etc.
-- "bag" matches "backpack", "purse", "tote", "satchel", "luggage" etc.
-- Return ONLY a raw JSON array of the top 3 best-matching item IDs, ordered best match first.
-- Only include items that are genuinely the same type of object.
-- If nothing is a reasonable match, return [].
-- No markdown, no explanation — just the raw JSON array of integer IDs.`;
+  const prompt = buildMatchCheckPrompt(query, mode, allItems);
 
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
