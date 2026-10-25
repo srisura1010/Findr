@@ -306,6 +306,14 @@ function writeOutputs() {
 
   const absent = results.filter((x) => x.type === "absent");
   const absentHits = absent.filter((x) => x.findr_returned_any).length;
+  //the keyword baseline "returns" an item whenever any word overlaps (score >= 1)
+  const absentBaseHits = absent.filter((x) => baselineRanking(x.query).length > 0).length;
+
+  //present queries where the expected item was not in Findr's top 3
+  const nameOf = (id) => `${id} ${idToItem.get(id)?.name ?? "?"}`;
+  const misses = present.filter((x) => !within(x.findr_rank, 3));
+  const misremember = present.filter((x) => x.type === "misremember");
+  const others = present.filter((x) => x.type !== "misremember");
 
   const mcRows = results.filter((x) => x.match_check);
   const mcPresent = mcRows.filter((x) => x.type !== "absent");
@@ -344,7 +352,11 @@ ${table(["Type", "Queries", "Findr top-1", "Findr top-3", "Keyword top-3"], type
 
 ## Absent items (nothing in the catalog should match)
 
-${absent.length ? `Findr returned at least one item for **${absentHits} of ${absent.length}** absent queries (${pct(absentHits, absent.length)}). Lower is better: these are false matches shown to a user whose item was never turned in.` : "No absent queries were run."}
+${absent.length ? `Findr returned at least one item for **${absentHits} of ${absent.length}** absent queries (${pct(absentHits, absent.length)}). The keyword baseline returned at least one item (any shared word) for **${absentBaseHits} of ${absent.length}** (${pct(absentBaseHits, absent.length)}). Lower is better: these are false matches shown to a user whose item was never turned in.` : "No absent queries were run."}
+
+## Misses (expected item not in Findr's top 3)
+
+${misses.length ? table(["Query", "Type", "Expected", "Findr returned (top 3)"], misses.map((x) => [x.query, x.type, x.expected_ids.map(nameOf).join(" / "), x.findr_ids.slice(0, 3).map(nameOf).join(", ") || "nothing"])) : "None."}
 
 ## Match check (lost report vs. found items)
 
@@ -363,6 +375,7 @@ ${mcRows.length
 - **One run per query.** Temperature is 0, but repeated runs are not guaranteed to return identical lists.
 - **The search route only looks at the newest 200 found items**, and the match-check route only at the newest 100 (it shows the top 3). Older items are never candidates in the live app.
 - **Dates and locations are not used in ranking.** The prompt contains only id, name, category, keywords and the first 80 characters of the description.
+- **Misremembered details are the weakest case.** Misremember queries reached the top 3 ${pct(misremember.filter((x) => within(x.findr_rank, 3)).length, misremember.length)} of the time, versus ${pct(others.filter((x) => within(x.findr_rank, 3)).length, others.length)} for the other types. When a query contradicts the listing (wrong color, brand or model), the model tends to return nothing or a different item rather than the closest match; the keyword baseline still matches on the shared noun. See Misses above.
 `;
 
   mkdirSync(path.dirname(DOC_PATH), { recursive: true });
@@ -370,7 +383,7 @@ ${mcRows.length
 
   console.log("\nResults by type (Findr top-1 / top-3 / keyword top-3):");
   for (const [t, n, a, b, c] of typeRows) console.log(`  ${String(t).replace(/\*/g, "").padEnd(22)} n=${String(n).padEnd(3)} ${a.padEnd(5)} ${b.padEnd(5)} ${c}`);
-  if (absent.length) console.log(`  absent: Findr returned a match for ${absentHits}/${absent.length} (${pct(absentHits, absent.length)})`);
+  if (absent.length) console.log(`  absent: Findr returned a match for ${absentHits}/${absent.length} (${pct(absentHits, absent.length)}); keyword baseline for ${absentBaseHits}/${absent.length} (${pct(absentBaseHits, absent.length)})`);
   if (mcRows.length) console.log(`  match check: ${mcPresent.filter((x) => within(x.match_rank, 3)).length}/${mcPresent.length} present rows in top 3`);
   console.log(`\nWrote ${path.relative(ROOT, RESULTS_PATH)} and ${path.relative(ROOT, DOC_PATH)}`);
 }
