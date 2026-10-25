@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { GROQ_TEXT_MODEL } from "@/lib/aiPrompts";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -60,9 +61,10 @@ Instructions:
         Authorization: `Bearer ${process.env.GROQ_API_KEY_3}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 200,
+        model: GROQ_TEXT_MODEL,
+        max_tokens: 1024, //gpt-oss reasons before answering, so leave room for the JSON answer
         temperature: 0,
+        reasoning_effort: "low",
         messages: [{ role: "user", content: prompt }],
       }),
     });

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GROQ_TEXT_MODEL } from "@/lib/aiPrompts";
 
 // POST /api/groq-chat
 // Body: { messages: Array<{ role: string, content: string }> }
@@ -18,9 +19,10 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 400,
+        model: GROQ_TEXT_MODEL,
+        max_tokens: 1024, // includes gpt-oss reasoning tokens, so higher than the old 400
         temperature: 0.7,
+        reasoning_effort: "low",
         messages
       })
     });

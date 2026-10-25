@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { GROQ_VISION_MODEL } from "@/lib/aiPrompts";
 
 // Groq client used for multimodal (image + text) inference.
 //
@@ -25,7 +26,9 @@ export async function POST(req: NextRequest) {
     // - `image_url`: the uploaded image as a data URL
     // - `text`: a strict prompt requesting a comma-separated keyword list
     const response = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      model: GROQ_VISION_MODEL,
+      // Qwen can reason before answering; turn it off so the 100-token keyword answer is never crowded out.
+      reasoning_effort: "none",
       messages: [
       {
         role: "user",
