@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { GROQ_TEXT_MODEL } from "@/lib/aiPrompts";
+import { GROQ_TEXT_MODEL, buildSimilarItemsPrompt } from "@/lib/aiPrompts";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,32 +26,7 @@ export async function POST(req: NextRequest) {
   if (error || !allItems || allItems.length === 0)
     return NextResponse.json({ items: [] });
 
-  //build a pipe-delimited catalogue string the LLM will rank
-  const catalogue = allItems
-    .map((item) => {
-      const desc = (item.description ?? "").slice(0, 80);
-      const keywords = item.ai_keywords ?? "";
-      const cat = item.category ?? "";
-      return `${item.id}|${item.name}|${cat}|${keywords}|${desc}`;
-    })
-    .join("\n");
-
-  const prompt = `You are a semantic search engine for a lost-and-found app.
-
-User is searching for: "${query}"
-
-Below is the catalogue of lost items in the format:
-id|name|category|ai_keywords|description
-
-${catalogue}
-
-Instructions:
-- Match items SEMANTICALLY, not just by exact keywords.
-- A search for "phone" should match items tagged "electronics", "device", "Samsung", "Apple", "mobile" etc even if the word "phone" never appears.
-- A search for "bag" should match "backpack", "purse", "tote", "satchel", "luggage" etc.
-- Return ONLY a raw JSON array of the top matching item IDs (up to 10), ordered best match first.
-- If nothing is a reasonable match, return an empty array [].
-- No markdown, no explanation, just the JSON array of integer IDs.`;
+  const prompt = buildSimilarItemsPrompt(query, allItems);
 
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {

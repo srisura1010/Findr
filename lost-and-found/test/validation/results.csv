@@ -1,0 +1,53 @@
+query,type,expected_id,expected_ids,findr_rank,baseline_rank,findr_ids,findr_parse_error,absent_findr_returned_any,match_check,match_check_rank,match_check_ids,search_key,match_check_key
+blue bottle,minimal,9001,9001,1,1,9001 9003 9002,,,yes,1,9001 9003 9002,GROQ_API_KEY_3,GROQ_API_KEY_2
+i had my iphone before lunch and now its gone,rambler,DB:iPhone|DB:IPhone|DB:Phone,159 156 154,1,6,159 156,,,,,,GROQ_API_KEY_4,
+jansport,brand,9004,9004,1,1,9004,,,yes,1,9004 147 9005,GROQ_API_KEY_3,GROQ_API_KEY_2
+boook,typo,DB:Book,157,1,not found,157 9014,,,,,,GROQ_API_KEY_4,
+my airpods max,misremember,9008,9008,1,1,9008,,,yes,not found,,GROQ_API_KEY_3,GROQ_API_KEY_2
+black wallet,minimal,DB:Black Wallet,144,1,1,144 155,,,,,,GROQ_API_KEY_4,
+im missing my keys its just my house key and car key,rambler,9017,9017,1,2,9017 9015 145,,,yes,1,9017 9015 145,GROQ_API_KEY_3,GROQ_API_KEY_2
+hoodie,brand,DB:Gray Hoodie,141,1,1,141 9010,,,,,,GROQ_API_KEY_4,
+owala botle,typo,9002,9002,1,1,9002,,,yes,1,9002 9001 9003,GROQ_API_KEY_3,GROQ_API_KEY_2
+my little calculator,misremember,DB:Graphing Calculator,143,1,1,143 9012,,,,,,GROQ_API_KEY_4,
+gold sunglasses,minimal,9016,9016,1,1,9016,,,,,,GROQ_API_KEY_3,
+i was reading my little brothers hamster book and cant find it now,rambler,9014,9014,1,3,9014,,,yes,1,9014,GROQ_API_KEY_4,GROQ_API_KEY_2
+car keys,brand,DB:Car Keys,145,1,1,145 9015 9017,,,,,,GROQ_API_KEY_3,
+whte usb c charger,typo,9006,9006,1,1,9006,,,yes,1,9006 9007 148,GROQ_API_KEY_4,GROQ_API_KEY_2
+my brown leather jacket,misremember,9011,9011,not found,1,,,,,,,GROQ_API_KEY_3,
+glasses,minimal,DB:Glasses,149,1,2,149 146 9016,,,,,,GROQ_API_KEY_4,
+i had this dark blue bottle with a bunch of stickers including bigfoot on it,rambler,9003,9003,1,1,9003,,,yes,1,9003 9001 9002,GROQ_API_KEY_3,GROQ_API_KEY_2
+chromebook,brand,9013,9013,1,2,9013,,,,,,GROQ_API_KEY_4,
+skullcandy earbud case,typo,9009,9009,1,1,9009,,,yes,1,9009 9008,GROQ_API_KEY_3,GROQ_API_KEY_2
+my pencil bag,misremember,DB:Pencil Pouch,142,1,1,142,,,,,,GROQ_API_KEY_4,
+black leather backpack,minimal,9005,9005,1,1,9005,,,yes,1,9005 147 9004,GROQ_API_KEY_3,GROQ_API_KEY_2
+i have like a ton of keys on one ring and i cant find them,rambler,9015,9015,1,1,9015,,,yes,1,9015,GROQ_API_KEY_4,GROQ_API_KEY_2
+nike hoodie,brand,9010,9010,1,1,9010,,,yes,1,9010 141,GROQ_API_KEY_3,GROQ_API_KEY_2
+iphone cube and cabel,typo,9007,9007,1,1,9007,,,yes,1,9007 148 9006,GROQ_API_KEY_4,GROQ_API_KEY_2
+my ti calculator,misremember,9012,9012,not found,2,143,,,,,,GROQ_API_KEY_3,
+black backpack,minimal,DB:Black backpack,147,1,1,147 9004 9005,,,,,,GROQ_API_KEY_4,
+i cant see without my clear glasses and i lost them somewhere,rambler,DB:Transparent Glasses,146,1,5,146 149,,,yes,2,149 146,GROQ_API_KEY_3,GROQ_API_KEY_2
+iphone,brand,DB:iPhone|DB:IPhone|DB:Phone,159 156 154,1,1,159 156,,,,,,GROQ_API_KEY_4,
+walet,typo,DB:Wallet,155,1,not found,155 144,,,,,,GROQ_API_KEY_3,
+my charging thing,misremember,DB:Charger,148,1,not found,148 9007 9006,,,,,,GROQ_API_KEY_4,
+calculator,minimal,DB:Graphing Calculator|9012,143 9012,1,1,143 9012,,,,,,GROQ_API_KEY_3,
+blu hydroflask straw lid,typo,9001,9001,1,1,9001,,,,,,GROQ_API_KEY_4,
+house and car keys,minimal,9017,9017,2,2,9015 9017 145,,,,,,GROQ_API_KEY_3,
+my black hoodie,misremember,DB:Gray Hoodie,141,not found,1,,,,,,,GROQ_API_KEY_4,
+usb c charger,brand,9006,9006,1,1,9006 148,,,,,,GROQ_API_KEY_3,
+dark blu bottle bigfoot stikrs,typo,9003,9003,1,1,9003,,,,,,GROQ_API_KEY_4,
+i had my fancy black leather bag with me and now its not here,rambler,9005,9005,1,1,9005,,,,,,GROQ_API_KEY_3,
+keys,brand,9015,9015,2,3,145 9015 9017,,,,,,GROQ_API_KEY_4,
+gray nike hoody,typo,9010,9010,1,1,9010,,,,,,GROQ_API_KEY_3,
+my samsung charger cube and cord,misremember,9007,9007,not found,1,148,,,,,,GROQ_API_KEY_4,
+i need my casio calculator the scientific one not the graphing one,rambler,9012,9012,1,1,9012,,,,,,GROQ_API_KEY_3,
+backpack,brand,DB:Black backpack,147,1,1,147 9004 9005,,,,,,GROQ_API_KEY_4,
+my debit card case,misremember,DB:Wallet,155,1,not found,155 144 156,,,,,,GROQ_API_KEY_3,
+red stanley cup,absent,,,,,,,no,,,,GROQ_API_KEY_4,
+i swear i had my green adidas backpack after practice and now its gone,absent,,,,,,,no,,,,GROQ_API_KEY_3,
+samsung galaxy buds,absent,,,,,,,no,,,,GROQ_API_KEY_4,
+pink nalgene botle,absent,,,,,,,no,,,,GROQ_API_KEY_3,
+school id,absent,,,,,,,no,,,,GROQ_API_KEY_4,
+i left my umbrella somewhere and its gonna rain again,absent,,,,,,,no,,,,GROQ_API_KEY_3,
+lunchbox,absent,,,,,,,no,,,,GROQ_API_KEY_4,
+math binder,absent,,,,,157,,yes,,,,GROQ_API_KEY_3,
+my blue soccer cleats,absent,,,,,,,no,,,,GROQ_API_KEY_4,

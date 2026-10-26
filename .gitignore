@@ -1,0 +1,3 @@
+# Claude Code settings are per-machine (permission rules reference local temp paths)
+.claude/settings.json
+.claude/settings.local.json

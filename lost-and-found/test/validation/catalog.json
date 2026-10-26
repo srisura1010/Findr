@@ -1,0 +1,250 @@
+[
+  {
+    "id": 159,
+    "name": "iPhone",
+    "category": "Phone",
+    "description": "Black case, worn out. Looks like iphone 13 or 14, found in Athletics building",
+    "ai_keywords": "iPhone, Apple, smartphone, gray, mobile phone, iOS device, MagSafe, cracked back., smartphone, black, iPhone, mobile phone, iOS device",
+    "tag_source": "groq"
+  },
+  {
+    "id": 157,
+    "name": "Book",
+    "category": "Books & Stationery",
+    "description": "Opera Wars book, good condition. Found on staircase between 3rd and 4th floors.",
+    "ai_keywords": "book, brown, Opera Wars, hardcover, plastic cover, rectangular, horse illustrations.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 156,
+    "name": "IPhone",
+    "category": "Phone",
+    "description": "flower pattern on phone case, blue, dirty with dog wallpaper. found in Room A232, in a plant pot.",
+    "ai_keywords": "smartphone, floral case, blue, iPhone, leather, large, card slot, triple camera., iPhone, Apple, smartphone, black, Verizon, cracked screen, notifications visible.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 155,
+    "name": "Wallet",
+    "category": "Wallet & Cards",
+    "description": "Black, worn out, has 20 dollars cash inside it. Found outside campus near soccer field.",
+    "ai_keywords": "wallet, black, Levi's, leather, small, trifold.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 154,
+    "name": "Phone",
+    "category": "Phone",
+    "description": "pink case, wallpaper of a dog. found in Room B102 in front of the music stands.",
+    "ai_keywords": "smartphone, white, pink, purple, floral, geometric pattern, marble, phone case, Samsung.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 149,
+    "name": "Glasses",
+    "category": "Glasses & Eyewear",
+    "description": "Slightly Transparent Glasses, thick lenses, thin frame. Found on chairs outside counselor's room.",
+    "ai_keywords": "glasses, eyeglasses, black, plastic, rectangular, reading glasses, transparent lenses, classic frame.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 148,
+    "name": "Charger",
+    "category": "Charger & Cables",
+    "description": "Black charger, QR code on it, chromebook charger, bit old. Found in tennis courts benches.",
+    "ai_keywords": "power adapter, black, no brand, rectangular, plastic, medium, corded, USB connector.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 147,
+    "name": "Black backpack",
+    "category": "Bags & Backpacks",
+    "description": "White stripes, OGIO brand with worn out zips and red laptop slip. Found in school's athletic area near soccer field.",
+    "ai_keywords": "backpack, black, Swiss, honeycomb pattern, nylon, medium size, mesh pockets.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 146,
+    "name": "Transparent Glasses",
+    "category": "Glasses & Eyewear",
+    "description": "Thin frame, bit of golden color, thick lenses, pattern on side frame, non-athletic. It was in Mr. Green's room in E Hall.",
+    "ai_keywords": "eyeglasses, silver, Versace, tortoiseshell, metal, acetate, large, designer logo, rhinestones.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 145,
+    "name": "Car Keys",
+    "category": "Keys",
+    "description": "Black Car Keys, Toyota, have some key attachments, found behind a bookshelf in Room S206",
+    "ai_keywords": "car keys, black, Toyota, metal, medium, key fob, remote, keychain.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 144,
+    "name": "Black Wallet",
+    "category": "Wallet & Cards",
+    "description": "Leather, Black, very smooth and has pockets. Holding some credit cards and $20 cash.  Found on library entrance table.",
+    "ai_keywords": "wallet, black, travelambo, leather, rectangular, cord.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 143,
+    "name": "Graphing Calculator",
+    "category": "Electronics",
+    "description": "Ti-84 Plus CE, keys worn out, found in Room 203 Honors Statistics",
+    "ai_keywords": "calculator, black, gold, Texas Instruments, TI-84 Plus CE, plastic, electronic device, graphing calculator.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 142,
+    "name": "Pencil Pouch",
+    "category": "Books & Stationery",
+    "description": "Black Pencil Pouch, has highlighters and pens, few pencils. Found on back table in library",
+    "ai_keywords": "pencil case, black, no brand, no model, fabric, rectangular, snap fasteners, zipped pocket, holds pens and pencils.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 141,
+    "name": "Gray Hoodie",
+    "category": "Clothing & Accessories",
+    "description": "Hoodie is very fuzzy, size L, has pockets and a hood.",
+    "ai_keywords": "Hoodie, grey, no brand, pullover, cotton-blend, unknown size, kangaroo pocket.",
+    "tag_source": "groq"
+  },
+  {
+    "id": 9001,
+    "name": "Blue Hydro Flask",
+    "category": "Water Bottle",
+    "description": "big blue hydro flask with a black straw lid, left by the sink",
+    "ai_keywords": "Hydro Flask, water bottle, navy blue, cobalt, stainless steel, insulated, wide mouth, black straw lid, handle, 32 oz",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9002,
+    "name": "Purple water bottle",
+    "category": "Water Bottle",
+    "description": "light purple owala bottle with a name sticker on it, found on the playground",
+    "ai_keywords": "Owala, FreeSip, water bottle, periwinkle blue, lavender, flip-top lid, carry loop, name sticker, Mael n, plastic",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9003,
+    "name": "Water bottle with stickers",
+    "category": "Water Bottle",
+    "description": "dark blue bottle covered in stickers, teal lid, has a hair tie around it",
+    "ai_keywords": "water bottle, navy blue, stainless steel, teal straw lid, stickers, Bigfoot, Sasquatch, Death Before Decaf, hair tie",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9004,
+    "name": "Black Jansport backpack",
+    "category": "Bags & Backpacks",
+    "description": "plain black jansport, kind of worn, front pocket was empty",
+    "ai_keywords": "JanSport, backpack, black, school bag, canvas, front zipper pocket, blue logo patch, worn",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9005,
+    "name": "Black leather backpack",
+    "category": "Bags & Backpacks",
+    "description": "fancy looking black leather backpack with a pattern on it",
+    "ai_keywords": "backpack, black, leather, embossed monogram pattern, designer style, silver zippers, top handle, front pocket",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9006,
+    "name": "White phone charger",
+    "category": "Charger & Cables",
+    "description": "white charger block with a usb c cable, found in the library",
+    "ai_keywords": "USB-C charger, wall adapter, white, Super Fast Charging, USB-C cable, power brick, fast charger",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9007,
+    "name": "iPhone charger",
+    "category": "Charger & Cables",
+    "description": "apple charger cube and cable, still wrapped up",
+    "ai_keywords": "Apple, charger, white, 5W USB power adapter, cube, Lightning cable, iPhone charger, USB-A, coiled cable",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9008,
+    "name": "AirPods",
+    "category": "Headphones & Earbuds",
+    "description": "airpods pro in the case, found under a desk",
+    "ai_keywords": "Apple, AirPods Pro, wireless earbuds, white, charging case, in-ear, Bluetooth",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9009,
+    "name": "Earbuds case",
+    "category": "Headphones & Earbuds",
+    "description": "white earbuds case with an orange logo, found on the bus",
+    "ai_keywords": "Skullcandy, wireless earbuds case, white, orange skull logo, USB-C port, compact, Bluetooth earbuds",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9010,
+    "name": "Gray Nike hoodie",
+    "category": "Clothing & Accessories",
+    "description": "gray hoodie with writing down the sleeve, left in the gym",
+    "ai_keywords": "Nike, hoodie, heather gray, pullover, sleeve logo print, kangaroo pocket, drawstrings, sweatshirt, cotton",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9011,
+    "name": "Black leather jacket",
+    "category": "Clothing & Accessories",
+    "description": "black leather jacket, was hanging on the fence outside",
+    "ai_keywords": "jacket, black, leather, zip-up, collar, motorcycle style, gray lining, outerwear",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9012,
+    "name": "Casio calculator",
+    "category": "Electronics",
+    "description": "black casio calculator found in math class",
+    "ai_keywords": "Casio, fx-991EX, ClassWiz, scientific calculator, black, solar panel, math, school",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9013,
+    "name": "Chromebook",
+    "category": "Electronics",
+    "description": "school chromebook left on a desk in the classroom",
+    "ai_keywords": "Dell, Chromebook, laptop, black, 2-in-1, touchscreen, school laptop, keyboard",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9014,
+    "name": "Hamster book",
+    "category": "Books & Stationery",
+    "description": "kids picture book about a hamster, found outside on the sidewalk",
+    "ai_keywords": "book, Memoirs of a Hamster, Devin Scillian, picture book, blue cover, hamster wheel, paperback, children's book",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9015,
+    "name": "Ring of keys",
+    "category": "Keys",
+    "description": "a bunch of keys on a ring, one car key and lots of house keys",
+    "ai_keywords": "keys, key ring, car key, black rubber head, house keys, silver, brass key, green key cap, Ace",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9016,
+    "name": "Sunglasses",
+    "category": "Glasses & Eyewear",
+    "description": "gold and black sunglasses left on a table by the pool",
+    "ai_keywords": "DITA, Mach Five, sunglasses, gold frame, black rims, gradient lenses, square aviator, metal, designer",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9017,
+    "name": "Two keys",
+    "category": "Keys",
+    "description": "house key and a car key on a small ring, found on the sidewalk",
+    "ai_keywords": "keys, Kwikset, house key, car key, black rubber head, silver, key ring, two keys",
+    "tag_source": "claude"
+  }
+]

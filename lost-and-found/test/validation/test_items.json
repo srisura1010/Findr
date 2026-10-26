@@ -1,0 +1,172 @@
+[
+  {
+    "id": 9001,
+    "image": "images/t01.jpg",
+    "name": "Blue Hydro Flask",
+    "category": "Water Bottle",
+    "description": "big blue hydro flask with a black straw lid, left by the sink",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Hydro Flask, water bottle, navy blue, cobalt, stainless steel, insulated, wide mouth, black straw lid, handle, 32 oz",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9002,
+    "image": "images/t02.jpg",
+    "name": "Purple water bottle",
+    "category": "Water Bottle",
+    "description": "light purple owala bottle with a name sticker on it, found on the playground",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Owala, FreeSip, water bottle, periwinkle blue, lavender, flip-top lid, carry loop, name sticker, Mael n, plastic",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9003,
+    "image": "images/t03.jpg",
+    "name": "Water bottle with stickers",
+    "category": "Water Bottle",
+    "description": "dark blue bottle covered in stickers, teal lid, has a hair tie around it",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "water bottle, navy blue, stainless steel, teal straw lid, stickers, Bigfoot, Sasquatch, Death Before Decaf, hair tie",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9004,
+    "image": "images/t04.jpg",
+    "name": "Black Jansport backpack",
+    "category": "Bags & Backpacks",
+    "description": "plain black jansport, kind of worn, front pocket was empty",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "JanSport, backpack, black, school bag, canvas, front zipper pocket, blue logo patch, worn",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9005,
+    "image": "images/t05.jpg",
+    "name": "Black leather backpack",
+    "category": "Bags & Backpacks",
+    "description": "fancy looking black leather backpack with a pattern on it",
+    "location": "12892 Golden Harvest Road, Draper, Utah, 84020",
+    "ai_keywords": "backpack, black, leather, embossed monogram pattern, designer style, silver zippers, top handle, front pocket",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9006,
+    "image": "images/t06.jpg",
+    "name": "White phone charger",
+    "category": "Charger & Cables",
+    "description": "white charger block with a usb c cable, found in the library",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "USB-C charger, wall adapter, white, Super Fast Charging, USB-C cable, power brick, fast charger",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9007,
+    "image": "images/t07.jpg",
+    "name": "iPhone charger",
+    "category": "Charger & Cables",
+    "description": "apple charger cube and cable, still wrapped up",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Apple, charger, white, 5W USB power adapter, cube, Lightning cable, iPhone charger, USB-A, coiled cable",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9008,
+    "image": "images/t08.jpg",
+    "name": "AirPods",
+    "category": "Headphones & Earbuds",
+    "description": "airpods pro in the case, found under a desk",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Apple, AirPods Pro, wireless earbuds, white, charging case, in-ear, Bluetooth",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9009,
+    "image": "images/t09.jpg",
+    "name": "Earbuds case",
+    "category": "Headphones & Earbuds",
+    "description": "white earbuds case with an orange logo, found on the bus",
+    "location": "10673 Beckstead Lane, South Jordan, Utah, 84095",
+    "ai_keywords": "Skullcandy, wireless earbuds case, white, orange skull logo, USB-C port, compact, Bluetooth earbuds",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9010,
+    "image": "images/t10.jpg",
+    "name": "Gray Nike hoodie",
+    "category": "Clothing & Accessories",
+    "description": "gray hoodie with writing down the sleeve, left in the gym",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Nike, hoodie, heather gray, pullover, sleeve logo print, kangaroo pocket, drawstrings, sweatshirt, cotton",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9011,
+    "image": "images/t11.jpg",
+    "name": "Black leather jacket",
+    "category": "Clothing & Accessories",
+    "description": "black leather jacket, was hanging on the fence outside",
+    "location": "650 1100 East, Salt Lake City, Utah, 84102",
+    "ai_keywords": "jacket, black, leather, zip-up, collar, motorcycle style, gray lining, outerwear",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9012,
+    "image": "images/t12.jpg",
+    "name": "Casio calculator",
+    "category": "Electronics",
+    "description": "black casio calculator found in math class",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Casio, fx-991EX, ClassWiz, scientific calculator, black, solar panel, math, school",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9013,
+    "image": "images/t13.jpg",
+    "name": "Chromebook",
+    "category": "Electronics",
+    "description": "school chromebook left on a desk in the classroom",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "Dell, Chromebook, laptop, black, 2-in-1, touchscreen, school laptop, keyboard",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9014,
+    "image": "images/t14.jpg",
+    "name": "Hamster book",
+    "category": "Books & Stationery",
+    "description": "kids picture book about a hamster, found outside on the sidewalk",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "book, Memoirs of a Hamster, Devin Scillian, picture book, blue cover, hamster wheel, paperback, children's book",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9015,
+    "image": "images/t15.jpg",
+    "name": "Ring of keys",
+    "category": "Keys",
+    "description": "a bunch of keys on a ring, one car key and lots of house keys",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "keys, key ring, car key, black rubber head, house keys, silver, brass key, green key cap, Ace",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9016,
+    "image": "images/t16.jpg",
+    "name": "Sunglasses",
+    "category": "Glasses & Eyewear",
+    "description": "gold and black sunglasses left on a table by the pool",
+    "location": "300 Kimballs Lane, Draper, Utah, 84020",
+    "ai_keywords": "DITA, Mach Five, sunglasses, gold frame, black rims, gradient lenses, square aviator, metal, designer",
+    "tag_source": "claude"
+  },
+  {
+    "id": 9017,
+    "image": "images/t17.jpg",
+    "name": "Two keys",
+    "category": "Keys",
+    "description": "house key and a car key on a small ring, found on the sidewalk",
+    "location": "7350 900 East, Midvale, Utah, 84047",
+    "ai_keywords": "keys, Kwikset, house key, car key, black rubber head, silver, key ring, two keys",
+    "tag_source": "claude"
+  }
+]
