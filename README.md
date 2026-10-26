@@ -137,4 +137,4 @@ Full technical documentation — including database schema, API route reference,
 
 Built by Srivatsav Sura and Srinath Ramakrishnan — Hillcrest High School, Midvale, Utah, USA.
 
-Questions, bugs, or interested in bringing Findr to your school? Reach us at fbla.finder.support@gmail.com.
+Questions, bugs, or interested in bringing Findr to your school? Create an issue and we will respond!
