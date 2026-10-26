@@ -2,7 +2,7 @@
 
 A school lost-and-found web platform that connects students with their missing items through a searchable catalog, direct messaging, AI-powered matching, and a multi-school system. This is our submission to the 2026 Congressional App Challenge for District UT-3.
 
-Live at [finderfbla.com](https://finderfbla.com)
+Live at [https://findr-silk.vercel.app/)
 
 ---
 
